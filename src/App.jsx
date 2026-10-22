@@ -5,7 +5,7 @@ import { AttuneMark } from "./attune-mark.jsx";
 import { buildWorkbookPayload } from "../api/_lib/workbook-payload.js";
 import React, { createContext, useCallback, useContext, useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, EX1_SCALE, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, EX1_SCALE, CHILDHOOD_STRUCTURES, CHILDHOOD_ROLES, CHILDHOOD_SOLO_LABELS, substName } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict, overallColor as conflictOverallColor, GLANCE_LABEL as CONFLICT_GLANCE_LABEL } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
@@ -1262,12 +1262,16 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
   const [phase, setPhase]                       = useState(saved?.phase || "intro");
   const [catIndex, setCatIndex]                 = useState(saved?.catIndex ?? 0);
   const [childhoodStructure, setChildhoodStructure] = useState(saved?.childhoodStructure ?? null);
+  /* Who the two adults were, in this reader's own words, and whether there
+     was only one. Replaces the eight fixed structures; see the setup
+     screen below. */
+  const [childhoodAdults, setChildhoodAdults] = useState(saved?.childhoodAdults || { a: '', b: '', solo: false });
   const [answers, setAnswers]                   = useState(saved?.answers || { responsibilities: {}, childhood: {}, bothDetail: {}, childhoodBothDetail: {}, life: {} });
   const [lifeQ, setLifeQ]                       = useState(saved?.lifeQ ?? 0);
 
   // Persist after every change. Cheap — state snapshot is <50KB.
   useEffect(() => {
-    const snapshot = { phase, catIndex, childhoodStructure, answers, lifeQ };
+    const snapshot = { phase, catIndex, childhoodStructure, childhoodAdults, answers, lifeQ };
     try {
       localStorage.setItem(progressKey, JSON.stringify(snapshot));
     } catch {}
@@ -1277,7 +1281,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
     if (!isAnniversary && !isRevisited && phase !== 'intro') {
       syncProgressCrossDevice(2, snapshot);
     }
-  }, [phase, catIndex, childhoodStructure, answers, lifeQ, progressKey, isAnniversary, isRevisited]);
+  }, [phase, catIndex, childhoodStructure, childhoodAdults, answers, lifeQ, progressKey, isAnniversary, isRevisited]);
 
   const setLife = (id, value) => setAnswers(a => ({ ...a, life: { ...a.life, [id]: value } }));
   const lifeAnswered = activeLifeQs.every(q => answers.life?.[q.id]);
@@ -1370,6 +1374,57 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
   }
 
   if (phase === "childhood-setup") {
+    /**
+     * ── TWO PICKERS, NOT EIGHT SHAPES ──────────────────────────────────
+     * Ellie: "add the picker and the one adult path, then store a slot."
+     *
+     * The eight structures could never be complete. An aunt and uncle
+     * answered as "Grandparents"; a mother and a stepfather had an unnamed
+     * "Other" column; "Another arrangement" put the words "Adult 1" and
+     * "Adult 2" into that person's results. Two pickers and a box for a word
+     * of their own cover every arrangement in the reader's own language.
+     *
+     * The one-adult path is the other half: with one adult, "who did this"
+     * has the same answer thirty times, so that reader is asked whether it
+     * happened in their home at all.
+     */
+    const roleChip = (which, role) => {
+      const chosen = childhoodAdults[which] === role;
+      return (
+        <button key={role} type="button"
+          onClick={() => setChildhoodAdults(a => ({ ...a, [which]: chosen ? "" : role }))}
+          style={{
+            border: `1.5px solid ${chosen ? C.clay : C.stone}`,
+            background: chosen ? "rgba(184,150,110,0.14)" : "white",
+            color: C.ink, borderRadius: 999, padding: "0.4rem 0.8rem",
+            fontSize: "0.78rem", fontFamily: font.body, cursor: "pointer",
+            fontWeight: chosen ? 600 : 400,
+          }}>
+          {role}
+        </button>
+      );
+    };
+    const picker = (which, label) => (
+      <div style={{ marginBottom: "1.25rem" }}>
+        <p style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted, fontFamily: font.body, fontWeight: 700, marginBottom: "0.5rem" }}>{label}</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginBottom: "0.5rem" }}>
+          {CHILDHOOD_ROLES.map(r => roleChip(which, r))}
+        </div>
+        <input
+          type="text"
+          value={CHILDHOOD_ROLES.includes(childhoodAdults[which]) ? "" : childhoodAdults[which]}
+          onChange={e => setChildhoodAdults(a => ({ ...a, [which]: e.target.value }))}
+          placeholder="Or type what you call them"
+          style={{
+            width: "100%", border: `1.5px solid ${C.stone}`, borderRadius: 10,
+            padding: "0.55rem 0.75rem", fontSize: "0.82rem", fontFamily: font.body, color: C.ink,
+          }}
+        />
+      </div>
+    );
+    const ready = childhoodAdults.solo
+      ? !!childhoodAdults.a.trim()
+      : !!(childhoodAdults.a.trim() && childhoodAdults.b.trim());
     return (
       <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 0 2rem", animation: "fadeIn 0.5s ease" }}>
         <link href={FONT_LINK} rel="stylesheet" />
@@ -1377,31 +1432,70 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
         <h2 style={{ fontFamily: font.display, fontSize: "clamp(1.5rem,4vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.85rem" }}>
           Who were the primary adults<br /><em style={{ fontStyle: "normal", color: "inherit" }}>in your home growing up?</em>
         </h2>
-        <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem" }}>
+        <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
           This shapes how you answer the next section, and helps us give you more personalized context in your results.
         </p>
         <button onClick={() => setPhase("part-two")}
-        style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", cursor: "pointer", fontFamily: font.body, padding: "0 0 1rem", textAlign: "left" }}>
-        ← Back to Part 1
-      </button>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {CHILDHOOD_STRUCTURES.map(s => (
-            <button key={s.id}
-              onClick={() => { setChildhoodStructure(s.id); setPhase("responsibilities"); try { window.scrollTo({ top: 0, behavior: "instant" }); } catch { window.scrollTo(0, 0); } }}
-              style={{ background: "white", border: ("1.5px solid " + C.stone), borderRadius: 12, padding: "0.85rem 1.25rem", textAlign: "left", cursor: "pointer", fontFamily: font.body, fontSize: "0.88rem", color: C.ink, transition: "all 0.15s" }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; e.currentTarget.style.background = "rgba(184,150,110,0.05)"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; e.currentTarget.style.background = "white"; }}>
-              {s.label}
-            </button>
-          ))}
-        </div>
+          style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", cursor: "pointer", fontFamily: font.body, padding: "0 0 1rem", textAlign: "left" }}>
+          &larr; Back to Part 1
+        </button>
+
+        {picker("a", childhoodAdults.solo ? "The adult who raised you" : "One of them")}
+        {childhoodAdults.solo ? null : picker("b", "And the other")}
+
+        <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1.75rem", cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={childhoodAdults.solo}
+            onChange={e => setChildhoodAdults(a => ({ ...a, solo: e.target.checked, b: e.target.checked ? "" : a.b }))}
+          />
+          <span style={{ fontSize: "0.82rem", color: C.ink, fontFamily: font.body }}>There was only one primary adult</span>
+        </label>
+
+        <button
+          disabled={!ready}
+          onClick={() => { setPhase("responsibilities"); try { window.scrollTo({ top: 0, behavior: "instant" }); } catch { window.scrollTo(0, 0); } }}
+          style={{
+            background: ready ? "#1B5FE8" : C.stone, color: "white", border: "none",
+            padding: "0.85rem 2rem", fontSize: "0.72rem", letterSpacing: "0.1em",
+            textTransform: "uppercase", cursor: ready ? "pointer" : "default",
+            fontFamily: font.body, borderRadius: 999, fontWeight: 700,
+          }}>
+          Continue &rarr;
+        </button>
       </div>
     );
   }
 
   if (phase === "responsibilities") {
-    const structure = CHILDHOOD_STRUCTURES.find(s => s.id === childhoodStructure) || CHILDHOOD_STRUCTURES[0];
-    const childCols = structure.cols || ["Mom", "Dad", "Both", "N/A"];
+    /* ── THE COLUMNS ARE SLOTS NOW ─────────────────────────────────────
+       The heading used to BE the stored answer, so two people with different
+       childhoods stored different strings for the same position and a rename
+       orphaned every answer under the old word. The slot is stored; the word
+       is this reader's own.
+
+       A resume from before this change has `childhoodStructure` and no
+       adults, so the old structure still supplies the words in that case and
+       the answers it already stored keep meaning what they meant. */
+    const legacy = CHILDHOOD_STRUCTURES.find(s => s.id === childhoodStructure);
+    const namedA = (childhoodAdults.a || '').trim();
+    const namedB = (childhoodAdults.b || '').trim();
+    const solo = !!childhoodAdults.solo;
+    const childCols = solo
+      ? [
+          { slot: 'yes', label: CHILDHOOD_SOLO_LABELS.yes },
+          { slot: 'sometimes', label: CHILDHOOD_SOLO_LABELS.sometimes },
+          { slot: 'no', label: CHILDHOOD_SOLO_LABELS.no },
+          { slot: 'na', label: 'N/A' },
+        ]
+      : [
+          { slot: 'a', label: namedA || legacy?.cols?.[0] || 'One of them' },
+          { slot: 'b', label: namedB || legacy?.cols?.[1] || 'The other' },
+          { slot: 'both', label: 'Both' },
+          { slot: 'na', label: 'N/A' },
+        ];
+    const structure = legacy || CHILDHOOD_STRUCTURES[0];
+
     const futureCols = [userName, partnerName, "Both of us", "Doesn't apply to us"];
     const futureColsDisplay = [userName, partnerName, "Both", "N/A"];
     const futureLabel = respFutureLabel({ anniversary: isAnniversary });
@@ -1419,7 +1513,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
     const getBothDetail = (catId, item) => answers.bothDetail?.[(catId + "__" + item)];
     const setChild = (catId, item, value) => {
       const key = catId + "__" + item;
-      setAnswers(a => ({ ...a, childhood: { ...a.childhood, [key]: value }, childhoodBothDetail: value !== "Both" ? { ...a.childhoodBothDetail, [key]: undefined } : a.childhoodBothDetail }));
+      setAnswers(a => ({ ...a, childhood: { ...a.childhood, [key]: value }, /* "both" is the slot, "Both" the legacy word. */ childhoodBothDetail: (value !== "both" && value !== "Both") ? { ...a.childhoodBothDetail, [key]: undefined } : a.childhoodBothDetail }));
     };
     const getChild = (catId, item) => answers.childhood?.[(catId + "__" + item)];
     const setChildBothDetail = (catId, item, value) => {
@@ -1528,7 +1622,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
             const futureVal = getResp(cat.id, item);
             const childBothDetail = getChildBothDetail(cat.id, item);
             const futureBothDetail = getBothDetail(cat.id, item);
-            const showChildExpand = !isExtFamCat && childVal === "Both";
+            const showChildExpand = !isExtFamCat && (childVal === "both" || childVal === "Both");
             const showFutureExpand = futureVal === "Both of us";
             const needsDetail = showFutureExpand && !futureBothDetail;
             const done = itemDone(cat, item);
@@ -1543,7 +1637,14 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
                   <div style={{ marginBottom: "0.65rem" }}>
                     <p style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#A0622A", fontFamily: font.body, fontWeight: 700, margin: "0 0 0.3rem" }}>{GROWING_UP_LABEL}</p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.35rem" }}>
-                      {childCols.map(col => optBtn(childVal === col, "#A0622A", col, col, () => setChild(cat.id, item, col)))}
+                      {/* The slot is what is stored; the label is what this
+                          reader sees. A resume from before this change stored
+                          the word, so an old answer still matches its own
+                          column by label. */}
+                      {childCols.map(col => optBtn(
+                        childVal === col.slot || childVal === col.label,
+                        "#A0622A", col.slot, col.label,
+                        () => setChild(cat.id, item, col.slot)))}
                     </div>
                     {showChildExpand && (
                       <div style={{ marginTop: "0.5rem", background: "#FBF8F3", borderRadius: 10, padding: "0.5rem 0.6rem" }}>
@@ -1625,7 +1726,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
                   return;
                 }
                 try { localStorage.removeItem(progressKey); } catch {}
-                onComplete({ ...answers, childhoodStructure });
+                onComplete({ ...answers, childhoodStructure, childhoodAdults });
               }}
               style={{ background: allAnswered ? "#4CAF50" : C.stone, color: "white", border: "none", padding: "0.75rem 2rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: allAnswered ? "pointer" : "default", fontFamily: font.body, borderRadius: 10, fontWeight: 600, transition: "background 0.2s", boxShadow: allAnswered ? "0 3px 16px rgba(76,175,80,0.45)" : "none" }}>
               {allAnswered ? "All done →" : ((totalItems - answeredItems) + " left to answer")}
@@ -1707,7 +1808,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
               if (!lqSel) return;
               if (isRevisited) {
                 try { localStorage.removeItem(progressKey); } catch {}
-                onComplete({ ...answers, childhoodStructure });
+                onComplete({ ...answers, childhoodStructure, childhoodAdults });
               } else {
                 setPhase("part-two");
               }

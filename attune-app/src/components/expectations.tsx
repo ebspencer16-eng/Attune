@@ -24,7 +24,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, TextInput, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -34,9 +34,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import {
   ExerciseComplete, ExerciseEyebrow, ExerciseNav, ExerciseOpening, exerciseColor,
 } from '@/components/exercise-chrome';
-import {
-  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
-} from '@/constants/attune-theme';
+import { BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, Fonts } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
@@ -51,6 +49,8 @@ type Answers = {
   childhoodBothDetail: Record<string, string>;
   life: Record<string, string>;
   childhoodStructure?: string;
+  /** The two adults this reader named, and whether there was only one. */
+  childhoodAdults?: { a: string; b: string; solo: boolean };
 };
 
 const EMPTY: Answers = {
@@ -185,12 +185,37 @@ export default function Expectations({
   // Two Dads gives Dad / Papa, grandparents gives Grandma / Grandpa. That is
   // the entire reason the first question is asked, and until now the answer was
   // collected and never used again.
+  /**
+   * ── SLOTS, WITH THIS READER'S OWN WORDS ON THEM ───────────────────────
+   * The eight structures could not be complete and the answer used to BE the
+   * column heading, so "Adult 1" was what someone read back in their results.
+   * Two pickers name the adults; 'a' | 'b' | 'both' | 'na' is what is stored.
+   *
+   * A resume begun before this change has a structure and no adults, so the
+   * structure still supplies the words in that case and its stored answers
+   * keep meaning what they meant.
+   */
   const structure = set?.childhoodStructures.find((st) => st.id === answers.childhoodStructure);
-  const childCols = structure?.cols ?? ['Adult 1', 'Adult 2', 'Both', 'N/A'];
+  const adults = answers.childhoodAdults || { a: '', b: '', solo: false };
+  const soloLabels = set?.childhoodSoloLabels
+    || { yes: 'Yes, that happened', sometimes: 'Sometimes', no: 'No, not really' };
+  const childCols: { slot: string; label: string }[] = adults.solo
+    ? [
+        { slot: 'yes', label: soloLabels.yes },
+        { slot: 'sometimes', label: soloLabels.sometimes },
+        { slot: 'no', label: soloLabels.no },
+        { slot: 'na', label: 'N/A' },
+      ]
+    : [
+        { slot: 'a', label: (adults.a || '').trim() || structure?.cols?.[0] || 'One of them' },
+        { slot: 'b', label: (adults.b || '').trim() || structure?.cols?.[1] || 'The other' },
+        { slot: 'both', label: 'Both' },
+        { slot: 'na', label: 'N/A' },
+      ];
   const childDetailOpts = [
     'Genuinely 50/50',
-    `Usually ${childCols[0]}, sometimes ${childCols[1]}`,
-    `Usually ${childCols[1]}, sometimes ${childCols[0]}`,
+    `Usually ${childCols[0].label}, sometimes ${childCols[1].label}`,
+    `Usually ${childCols[1].label}, sometimes ${childCols[0].label}`,
   ];
   const life = set?.lifeQuestions ?? [];
   const lifeQ = life[lifeIdx];
@@ -297,21 +322,92 @@ export default function Expectations({
             This shapes how you answer the next section, and helps us give you
             more personalized context in your results.
           </Text>
-          {set.childhoodStructures.map((st) => {
-            const on = answers.childhoodStructure === st.id;
-            return (
-              <Choice
-                key={st.id}
-                label={st.label}
-                selected={on}
-                onPress={() => setAnswers((a) => ({ ...a, childhoodStructure: st.id }))}
+          {/* ── TWO PICKERS, NOT EIGHT SHAPES ──────────────────────────
+              Ellie: "add the picker and the one adult path, then store a
+              slot." An aunt and uncle used to answer as "Grandparents", and
+              "Another arrangement" put the words "Adult 1" and "Adult 2" into
+              that person's results. These are the website's pickers, from the
+              same list on the server. */}
+          {([
+            ['a', (answers.childhoodAdults?.solo ? 'The adult who raised you' : 'One of them')],
+            ...(answers.childhoodAdults?.solo ? [] : [['b', 'And the other'] as const]),
+          ] as const).map(([which, heading]) => (
+            <View key={which} style={{ marginBottom: Spacing.lg }}>
+              <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.sm }}>{heading}</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
+                {(set.childhoodRoles || []).map((role) => {
+                  const on = answers.childhoodAdults?.[which] === role;
+                  return (
+                    <Pressable
+                      key={role}
+                      accessibilityRole="button"
+                      onPress={() => setAnswers((a) => ({
+                        ...a,
+                        childhoodAdults: {
+                          a: a.childhoodAdults?.a || '', b: a.childhoodAdults?.b || '',
+                          solo: !!a.childhoodAdults?.solo,
+                          [which]: on ? '' : role,
+                        },
+                      }))}
+                      style={{
+                        borderRadius: Radius.pill, borderWidth: 1.5,
+                        borderColor: on ? Palette.clay : c.border,
+                        backgroundColor: on ? Palette.clay + '22' : c.surface,
+                        paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md,
+                      }}>
+                      <Text style={{ ...Type.small, color: c.textStrong, fontFamily: on ? Fonts.bodyBold : Fonts.body }}>{role}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <TextInput
+                value={(set.childhoodRoles || []).includes(answers.childhoodAdults?.[which] || '')
+                  ? '' : (answers.childhoodAdults?.[which] || '')}
+                onChangeText={(t: string) => setAnswers((a) => ({
+                  ...a,
+                  childhoodAdults: {
+                    a: a.childhoodAdults?.a || '', b: a.childhoodAdults?.b || '',
+                    solo: !!a.childhoodAdults?.solo,
+                    [which]: t,
+                  },
+                }))}
+                placeholder="Or type what you call them"
+                placeholderTextColor={c.textMuted}
+                style={{
+                  marginTop: Spacing.sm, borderWidth: 1.5, borderColor: c.border,
+                  borderRadius: Radius.md, paddingVertical: Spacing.sm,
+                  paddingHorizontal: Spacing.md, color: c.textStrong, ...Type.body,
+                }}
               />
-            );
-          })}
+            </View>
+          ))}
+
+          <Pressable
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: !!answers.childhoodAdults?.solo }}
+            onPress={() => setAnswers((a) => ({
+              ...a,
+              childhoodAdults: {
+                a: a.childhoodAdults?.a || '',
+                b: a.childhoodAdults?.solo ? (a.childhoodAdults?.b || '') : '',
+                solo: !a.childhoodAdults?.solo,
+              },
+            }))}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.lg }}>
+            <View style={{
+              width: 20, height: 20, borderRadius: Radius.sm, borderWidth: 1.5,
+              borderColor: answers.childhoodAdults?.solo ? Palette.clay : c.border,
+              backgroundColor: answers.childhoodAdults?.solo ? Palette.clay : 'transparent',
+            }} />
+            <Text style={{ ...Type.body, color: c.textStrong }}>There was only one primary adult</Text>
+          </Pressable>
+
           <ExerciseNav
             onBack={() => setStage('part-two')}
             nextLabel="Continue"
-            disabled={!answers.childhoodStructure}
+            disabled={answers.childhoodAdults?.solo
+              ? !(answers.childhoodAdults?.a || '').trim()
+              : !((answers.childhoodAdults?.a || '').trim() && (answers.childhoodAdults?.b || '').trim())}
             color={exerciseColor('ex2')}
             onNext={() => setStage('responsibilities')}
           />
@@ -404,18 +500,28 @@ export default function Expectations({
                   <>
                     <RowLabel text={set.growingUpLabel} color={Palette.clay} />
                     <OptionRow
-                      options={childCols}
-                      value={answers.childhood[key]}
+                      options={childCols.map((cc) => cc.label)}
+                      /* The stored value is a slot; the row is drawn in words,
+                         so the selected one is matched either way. An answer
+                         stored before this change is the word itself. */
+                      value={(() => {
+                        const v = answers.childhood[key];
+                        const hit = childCols.find((cc) => cc.slot === v);
+                        return hit ? hit.label : v;
+                      })()}
                       color={Palette.clay}
-                      onPick={(col) => setAnswers((a) => ({
+                      onPick={(label) => setAnswers((a) => {
+                        const col = (childCols.find((cc) => cc.label === label) || {}).slot || label;
+                        return ({
                         ...a,
                         childhood: { ...a.childhood, [key]: col },
-                        childhoodBothDetail: col === 'Both'
+                        childhoodBothDetail: col === 'both'
                           ? a.childhoodBothDetail
                           : Object.fromEntries(Object.entries(a.childhoodBothDetail).filter(([k]) => k !== key)),
-                      }))}
+                      });
+                      })}
                     />
-                    {answers.childhood[key] === 'Both' ? (
+                    {(answers.childhood[key] === 'both' || answers.childhood[key] === 'Both') ? (
                       <DetailRow
                         label={set.bothDetailLabel}
                         options={childDetailOpts}

@@ -221,6 +221,48 @@ export const EX1_SCALE = [
  * different household shapes would store answers under labels that do not line
  * up when the two are compared.
  */
+/**
+ * ── WHO THE TWO ADULTS WERE, IN THE READER'S OWN WORDS ───────────────────
+ * Ellie, 23 October: "Agreed with your suggestions on ex2 pt 2 - add the
+ * picker and the one adult path, then store a slot."
+ *
+ * The eight structures below could never be complete. A reader raised by an
+ * aunt and uncle answered as "Grandparents"; one raised by their mother and a
+ * stepfather had an unnamed "Other" column; "Another arrangement" put the
+ * words "Adult 1" and "Adult 2" into their results, which is what they then
+ * read back a month later.
+ *
+ * Two pickers off this list, plus a free-text box, cover every arrangement
+ * including the ones a fixed list misses, in the words the person uses for
+ * their own family.
+ */
+export const CHILDHOOD_ROLES = [
+  'Mom', 'Dad', 'Stepmom', 'Stepdad',
+  'Grandma', 'Grandpa', 'Aunt', 'Uncle',
+  'Guardian', 'Foster parent', 'Older sibling',
+];
+
+/**
+ * The slots an answer is stored under.
+ *
+ * The answer used to be the COLUMN HEADING itself, so renaming a heading
+ * orphaned every answer already stored under the old word, and two people
+ * with different childhoods stored different strings for the same position.
+ * A slot is stable; the word it stands for is looked up per person from
+ * `childhoodAdults`.
+ *
+ * 'solo' is the one-adult path: there was only one adult, so "who did this"
+ * has the same answer thirty times and is not worth asking. That reader is
+ * asked whether it happened in their home at all.
+ */
+export const CHILDHOOD_SLOTS = ['a', 'b', 'both', 'na'];
+export const CHILDHOOD_SOLO_SLOTS = ['yes', 'sometimes', 'no'];
+export const CHILDHOOD_SOLO_LABELS = {
+  yes: 'Yes, that happened',
+  sometimes: 'Sometimes',
+  no: 'No, not really',
+};
+
 export const CHILDHOOD_STRUCTURES = [
   { id: "mom-dad",      label: "Mom and Dad (married or together)", cols: ["Mom", "Dad", "Both", "N/A"] },
   { id: "single-mom",  label: "Primarily raised by Mom",            cols: ["Mom", "Other", "Both", "N/A"] },

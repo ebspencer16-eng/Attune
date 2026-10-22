@@ -74,8 +74,37 @@ function sideOf(value) {
  */
 export function childhoodValue(value) {
   const v = String(value ?? '').trim();
-  if (!v || v === 'N/A' || v === "Didn't apply") return null;
+  if (!v || v === 'N/A' || v === "Didn't apply" || v === 'na') return null;
   return v;
+}
+
+/**
+ * ── A SLOT, TURNED BACK INTO THE READER'S OWN WORD ───────────────────────
+ * An answer used to BE the column heading, so a results page showed "Adult 1"
+ * to anyone whose childhood was not one of eight shapes, and renaming a
+ * heading orphaned every answer stored under the old word.
+ *
+ * It is a slot now, and the word is looked up per person from the two adults
+ * they named. Both shapes are read here, because every answer stored before
+ * this is a word: anything that is not a known slot is taken as the word
+ * itself, which is exactly what it used to mean.
+ *
+ * `adults` is `{ a, b, solo }` from that person's own answers.
+ */
+export function childhoodWord(value, adults) {
+  const v = String(value ?? '').trim();
+  if (!v) return null;
+  const who = adults || {};
+  if (v === 'a') return who.a || 'One of them';
+  if (v === 'b') return who.b || 'The other';
+  if (v === 'both') return 'Both';
+  if (v === 'na') return null;
+  /* The one-adult path answers whether it happened at all. */
+  if (v === 'yes') return 'Yes';
+  if (v === 'sometimes') return 'Sometimes';
+  if (v === 'no') return 'No';
+  /* Legacy: the word itself. */
+  return childhoodValue(v);
 }
 
 /**
@@ -103,8 +132,8 @@ export function childhoodValue(value) {
  * word is different and sharing the function would mean teaching it which
  * column it is in.
  */
-export function childhoodDisplay(value, detail) {
-  const v = childhoodValue(value);
+export function childhoodDisplay(value, detail, adults) {
+  const v = childhoodWord(value, adults);
   if (v == null) return null;
   const refined = String(detail ?? '').trim();
   if (refined) return refined;
@@ -251,10 +280,13 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
          * has to be flipped to compare; this is a claim about the house each
          * of them grew up in, which is theirs either way.
          */
+        /* Each person's slot is resolved with THEIR OWN two adults: the
+           same stored 'a' means a different word in each of the two houses,
+           which is the whole reason the answer stopped being the word. */
         youExperienced: childhoodDisplay(
-          mine?.childhood?.[key], mine?.childhoodBothDetail?.[key]),
+          mine?.childhood?.[key], mine?.childhoodBothDetail?.[key], mine?.childhoodAdults),
         themExperienced: childhoodDisplay(
-          theirs?.childhood?.[key], theirs?.childhoodBothDetail?.[key]),
+          theirs?.childhood?.[key], theirs?.childhoodBothDetail?.[key], theirs?.childhoodAdults),
         /** How close, 0 to 100, and which of the three things we say. Both
          *  from api/_lib/alignment.js, which is the only thing allowed to
          *  turn a distance into a judgement. */

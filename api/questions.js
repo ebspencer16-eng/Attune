@@ -33,7 +33,7 @@ export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import {
   twoPartEx1, EX1_SCALE, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS,
-  CHILDHOOD_STRUCTURES, substName, LIFE_CATEGORY_LABEL,
+  CHILDHOOD_STRUCTURES, CHILDHOOD_ROLES, CHILDHOOD_SOLO_LABELS, substName, LIFE_CATEGORY_LABEL,
 } from './_questions.js';
 import { EXERCISES } from './_exercises.js';
 import { exerciseIntro } from './_lib/exercise-intro.js';
@@ -228,7 +228,13 @@ export default async function handler(req) {
         names: { you, partner },
 
         // Who raised you decides what the "growing up" column is called.
+        // The structures are kept for a resume started before the pickers:
+        // an in-progress answer saved under the old shape still names its
+        // columns from here.
         childhoodStructures: CHILDHOOD_STRUCTURES,
+        /* The two pickers that replaced them, and the one-adult path. */
+        childhoodRoles: CHILDHOOD_ROLES,
+        childhoodSoloLabels: CHILDHOOD_SOLO_LABELS,
 
         /**
          * ── THE PAGE, NOT JUST THE QUESTIONS ────────────────────────────

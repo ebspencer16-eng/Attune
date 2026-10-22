@@ -2229,6 +2229,9 @@ export type ExpectationsSet = {
   complete?: { title: string; body: string[]; cta: string } | null;
   names: { you: string; partner: string };
   childhoodStructures: { id: string; label: string; cols: string[] }[];
+  /** The pickers that replaced the structures, and the one-adult path. */
+  childhoodRoles?: string[];
+  childhoodSoloLabels?: { yes: string; sometimes: string; no: string };
   /** `key` is the raw item text and is what the answer is stored under. `label`
    *  is the same text with names substituted, and is what a person reads. They
    *  differ because two partners substitute different names into one item. */
