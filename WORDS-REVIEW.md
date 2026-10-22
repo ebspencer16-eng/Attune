@@ -86,7 +86,7 @@ over breakfast is not the tone you want.
 | 47 | **Steadiness** | noun | Being predictable in the ways that your partner depends on. |
 | 48 | **Patience** | noun | Letting something take the time it takes. |
 | 49 | **Generosity** | noun | Giving someone the benefit of the doubt and showing it through your actions. |
-| 50 | **Admiration** | noun | Thinking well of someone where they can hear it. |
+| 50 | **Admiration** | noun | Thinking well of someone and acknowledging it. |
 | 51 | **Apology** | noun | Naming what you did, without the word but. |
 | 52 | **Attention** | noun | The thing everybody says they want more of and nobody can fake. |
 | 53 | **Avoidance** | noun | Choosing the easier hour and paying for it later. |

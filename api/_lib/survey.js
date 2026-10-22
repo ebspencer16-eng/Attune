@@ -118,13 +118,10 @@ export const SURVEY_QUESTIONS = [
     /* Built per person: see rankOptionsFor. */
     options: [],
   },
-  {
-    id: 'surprise',
-    kind: 'text',
-    label: 'What did you learn that surprised you?',
-    placeholder: 'One sentence is plenty.',
-  },
-  {
+  /* Ellie, 23 October: "Delete Q5 from the 'tell us about your experience'
+     survey." That was `surprise`, a free-text "What did you learn that
+     surprised you?". */
+{
     id: 'accuracy',
     kind: 'scale',
     label: 'How accurate did your results feel?',

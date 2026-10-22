@@ -329,6 +329,25 @@ const CREAM = '#FFFDF9';
 const lightenPair = (pair, t) => pair.map((h) => lighten(h, t));
 const BLUE_GROUND = ['#2A3A6E', '#4A6CD4'];
 
+/**
+ * The ground the insight of the day is drawn on as a card.
+ *
+ * The app's own blue at full strength, not the lightened Learn ground: Ellie,
+ * of the app, "The insight of the day storycard should be the blue gradient
+ * full page with the glow behind the quote like it used to be on the
+ * homepage." It is here rather than in either renderer because she has now
+ * asked for the same card on the website, and two surfaces drawing one card
+ * from two colour lists is how they drift.
+ *
+ * The app's copy is `BlueGround` in attune-theme.ts, which an Expo project
+ * cannot import from api/. They have to be kept the same by hand until that
+ * is closed.
+ */
+export const INSIGHT_CARD_GROUND = {
+  stops: ['#2A3A6E', '#4A6CD4', '#4A6CD4'],
+  angle: 160,
+};
+
 export const TAB_GROUNDS = {
   /**
    * Home. Paper at the top, colour at the foot.

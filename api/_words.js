@@ -358,7 +358,7 @@ export const WORDS = [
     id: 'admiration',
     word: 'Admiration',
     part: 'noun',
-    definition: 'Thinking well of someone where they can hear it.',
+    definition: 'Thinking well of someone and acknowledging it.',
   },
   {
     id: 'apology',

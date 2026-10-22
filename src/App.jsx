@@ -77,7 +77,7 @@ import { QUICK_INK, TILE_GREY } from "../attune-app/src/lib/shared-inks.js";
 import { PRONOUNS } from "../api/_lib/pronouns.js";
 import { alignedTone } from "../attune-app/src/lib/aligned-tone.js";
 /* The colour each of the app's tabs is painted in. */
-import { tabGradientCss, tabGroundTail, cardTint } from "../api/_lib/section-grounds.js";
+import { tabGradientCss, tabGroundTail, cardTint, INSIGHT_CARD_GROUND } from "../api/_lib/section-grounds.js";
 import { resultsNav, navPageIds, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
 import { webTargetFor } from "../api/_lib/next-action.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
@@ -3790,6 +3790,85 @@ export async function signOutEverywhere({ setAccount, to = '/app?signin=1' } = {
   if (to) window.location.href = to;
 }
 
+/**
+ * The insight of the day, full screen, as a card.
+ *
+ * Ellie: "Insight of the day should open as a storycard on the site too if
+ * someone clicks the quick access tile on their home page."
+ *
+ * The phone has had this since the storycards were built; the website's tile
+ * went to the Learn tab instead, which is where the insight is drawn as part
+ * of a page rather than as the thing you asked for. Same fields the app's
+ * `insightCard` carries: the ground, a glow behind the quotation, the eyebrow,
+ * the quotation, and its source. The ground comes from the shared module so
+ * the two surfaces cannot drift apart on the colour.
+ */
+function InsightCardOverlay({ insight, onClose }) {
+  if (!insight) return null;
+  const g = INSIGHT_CARD_GROUND;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={INSIGHT_EYEBROW}
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: `linear-gradient(${g.angle}deg, ${g.stops.join(", ")})`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "clamp(1.25rem, 5vw, 3rem)", cursor: "pointer",
+      }}>
+      {/* The glow behind the quotation, which is what makes it a card rather
+          than a blue page with words on it. */}
+      <div aria-hidden="true" style={{
+        position: "absolute", width: "min(72vw, 520px)", height: "min(72vw, 520px)",
+        borderRadius: "50%", pointerEvents: "none",
+        background: "radial-gradient(circle, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.07) 45%, transparent 70%)",
+      }} />
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        style={{
+          position: "absolute", top: "1rem", right: "1.1rem",
+          background: "rgba(255,255,255,0.14)", border: "none", borderRadius: 999,
+          width: 34, height: 34, color: "white", fontSize: "1rem", cursor: "pointer",
+          fontFamily: BFONT, lineHeight: 1,
+        }}>
+        &times;
+      </button>
+      <div style={{ position: "relative", maxWidth: 560, textAlign: "center" }}>
+        <p style={{
+          fontFamily: BFONT, fontSize: "0.62rem", letterSpacing: "0.22em",
+          textTransform: "uppercase", fontWeight: 700, margin: "0 0 1.25rem",
+          color: "rgba(255,255,255,0.72)",
+        }}>
+          {INSIGHT_EYEBROW}
+        </p>
+        <p style={{
+          fontFamily: HFONT, color: "white", margin: 0,
+          fontSize: "clamp(1.25rem, 4.4vw, 1.9rem)", lineHeight: 1.35, fontWeight: 400,
+        }}>
+          {insight.body}
+        </p>
+        <p style={{
+          fontFamily: BFONT, color: "rgba(255,255,255,0.72)",
+          fontStyle: "italic", fontSize: "0.82rem", margin: "1.4rem 0 0",
+        }}>
+          {insight.source}
+        </p>
+        <p style={{
+          fontFamily: BFONT, color: "rgba(255,255,255,0.5)",
+          fontSize: "0.68rem", letterSpacing: "0.14em", margin: "2.25rem 0 0",
+          textTransform: "uppercase",
+        }}>
+          attune-relationships.com
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function CoverCard({ accent, icon = "\u25C9", children, minHeight = "auto" }) {
   return (
     <div style={{ borderRadius: 26, padding: 1.5, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }}>
@@ -4547,9 +4626,25 @@ export function AppLearnReading({
    * it. Derived from shelfFor rather than from a label on the article, which is
    * the same call /api/posts makes for the app.
    */
+  /**
+   * ── THE PEEK IS FOR THE LANDING PAGE, NOT FOR A FILTERED ONE ──────────
+   * Ellie: "Tried to click into conflict and repair in practice page on the
+   * dashboard and it sent me back to learn."
+   *
+   * It did not navigate anywhere. The shelf heading filters this list to that
+   * shelf, and the four pieces at the top of the page are the peek, taken off
+   * the front with `shown.slice(4)`. Conflict and Repair has exactly four
+   * articles, so all four went into the peek and the shelf below it was empty:
+   * a page with a row of four tiles and nothing under them, which is what the
+   * unfiltered Learn page looks like at a glance.
+   *
+   * The peek only makes sense when you have not asked for anything. Once there
+   * is a query, every match is a card.
+   */
+  const peekCount = q ? 0 : 4;
   const shelves = (() => {
     const byShelf = new Map();
-    for (const a of shown.slice(4)) {
+    for (const a of shown.slice(peekCount)) {
       const shelf = shelfFor(a);
       if (!byShelf.has(shelf)) byShelf.set(shelf, []);
       byShelf.get(shelf).push(a);
@@ -4853,7 +4948,7 @@ export function AppLearnReading({
           flex: "1 1 0", display: "grid", gridTemplateColumns: "1fr 1fr",
           gap: "0.5rem", minWidth: 0,
         }}>
-          {shown.slice(0, 4).map((a) => featured(a))}
+          {shown.slice(0, peekCount).map((a) => featured(a))}
         </div>
       </div>
 
@@ -15098,6 +15193,8 @@ export default function App() {
   );
   /** The insight the Save dialog is open on, or null. */
   const [saveInsight, setSaveInsight] = useState(null);
+  /* The insight of the day, open as a card. Her quick-access tile. */
+  const [insightCardOpen, setInsightCardOpen] = useState(false);
   const [highlightsSeen, setHighlightsSeen] = useState(
     (initialView === 'results' && _deepSection) ? true
       : (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? true
@@ -17420,13 +17517,21 @@ export default function App() {
                     belongs to Home. */}
                 {dashTab === "home" && (
                   <>
+                  {insightCardOpen ? (
+                    <InsightCardOverlay insight={insightOfTheDay()} onClose={() => setInsightCardOpen(false)} />
+                  ) : null}
                   <AppHome
                     feed={homeFeed}
                     isMobile={isMobile}
                     userName={userName}
                     onQuick={(id) => {
                       if (id === "journal") { setDashTab("notes"); return; }
-                      if (id === "insight") { setDashTab("learn"); return; }
+                      /* Ellie: "Insight of the day should open as a
+                         storycard on the site too if someone clicks the
+                         quick access tile on their home page." It went
+                         to the Learn tab, where the insight is part of a
+                         page rather than the thing you asked for. */
+                      if (id === "insight") { setInsightCardOpen(true); return; }
                       /**
                        * ── AND PAST THE STORYCARDS, AGAIN ────────────────
                        * Ellie: "ON site, action plan quick access tile opens

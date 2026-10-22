@@ -26,6 +26,13 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
+| W131 | **Q5 comes out of the experience survey.** |
+| W132 | **Insight of the day opens as a storycard on the site**, from the quick access tile, the way it does on the phone. |
+| W133 | **Article titles get three lines** on the In Practice page. |
+| W134 | **The back arrow in an article is almost invisible.** |
+| W135 | **Conflict and Repair on the dashboard's In Practice page sends you to Learn.** A routing bug, so I will drive it rather than read it. |
+| W136 | **The word of the day definition becomes "Thinking well of someone and acknowledging it."** |
+| W137 | **Expectations part two, approved**: two pickers instead of eight structures, a one-adult path, and the answer stored as a slot rather than the column's word. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
