@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -255,12 +267,12 @@
     <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
     <a href="/practice">In Practice</a>
     <span class="breadcrumb-sep">›</span>
-    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Getting Started</span>
+    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">The Attune Experience</span>
   </div>
 
   <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
-    <span class="article-tag">Getting Started</span>
+    <span class="article-tag">The Attune Experience</span>
     <span class="article-meta-note">6 min read</span>
   </div>
   <h1 class="article-title">How to review your results<br><em>together</em></h1>
@@ -351,17 +363,20 @@
 
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
-      <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <span class="related-card-cat">Getting Started</span>
-        <span class="related-card-title">How to review your results together</span>
+      <a href="/practice/what-is-the-attune-experience" class="related-card">
+        <span class="related-card-cat">The Attune Experience</span>
+        <span class="related-card-title">What the Attune experience is for</span>
+        <span class="related-card-time">6 min read</span>
+      </a>
+      <a href="/practice/living-attuned" class="related-card">
+        <span class="related-card-cat">The Attune Experience</span>
+        <span class="related-card-title">Living attuned</span>
+        <span class="related-card-time">7 min read</span>
       </a>
       <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
         <span class="related-card-cat">Conflict and Repair</span>
         <span class="related-card-title">How to start a hard conversation</span>
-      </a>
-      <a href="/practice/conflict-vs-repair" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">The difference between conflict and repair</span>
+        <span class="related-card-time">7 min read</span>
       </a>
     </div>
   </div>

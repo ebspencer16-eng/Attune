@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conflict vs. Repair · In Practice, Attune</title>
+<title>The difference between conflict and repair &middot; In Practice, Attune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -261,56 +273,54 @@
   <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
     <span class="article-tag">Conflict and Repair</span>
-    <span class="article-meta-note">7 min read</span>
+    <span class="article-meta-note">6 min read</span>
   </div>
-  <h1 class="article-title">The difference between<br><em>conflict and repair</em></h1>
-  <p class="article-intro">Two people can have compatible conflict styles and completely incompatible repair needs. Most couples discover this after a disagreement that seemed to resolve, and then didn't. Understanding the difference is one of the more useful things you can do.</p>
+  <h1 class="article-title">The difference between conflict and repair</h1>
+  <p class="article-intro">Two people can handle conflict in almost exactly the same way and still need completely different things once it is over. Most couples discover this after a disagreement that seemed finished and turned out not to be, and the discovery usually arrives as confusion rather than insight.</p>
+  <p class="article-intro">Conflict and repair are two separate things. Knowing which one is giving you trouble changes what you should do about it.</p>
 
   <!-- ARTICLE BODY -->
   <div class="article-body">
-
     <div>
-      <h2>Conflict is what happens. Repair is what comes after.</h2>
-      <p>Conflict is any moment of friction, misalignment, or tension. It doesn't have to be a fight. It can be a tone, a misread moment, a recurring difference that surfaces again.</p>
-      <p>Repair is how you come back to each other afterward. And repair, how long it takes, what it looks like, what each person needs for it to feel complete, varies more between couples than almost anything else.</p>
+      <h2>Two different moments</h2>
+      <p>Conflict is any friction. It does not have to be a fight. A tone, a misread moment, a difference that has surfaced again.</p>
+      <p>Repair is how you come back to each other afterwards. How long it takes, what it looks like, and what each of you needs before it genuinely feels finished. That last part varies between couples more than almost anything else does, and it is almost never discussed.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>Why compatible conflict styles aren't enough</h2>
-      <p>You and your partner might both be the type to disengage during conflict, cool down, and come back later. That's a compatible conflict style.</p>
-      <p>But if one of you needs explicit acknowledgment before you feel repaired, and the other assumes that returning to normal conversation means it's over, you'll keep ending up in the same place. Not because of how you fight, but because of what each of you needs for it to actually be done.</p>
-      <blockquote class="article-quote"><p>The moment of rupture is usually visible. The moment of repair is often invisible, which is exactly why it keeps getting missed.</p></blockquote>
+      <h2>Matching conflict styles are not enough</h2>
+      <p>Say you both step back, cool down and return to it later. That is a matched conflict style, and it will serve you well.</p>
+      <p>If one of you needs it acknowledged out loud before it feels repaired, and the other takes ordinary conversation as the sign that it is over, you will keep landing in the same place. Not because of how you fight. Because of what each of you needs for it to be done.</p>
+      <p>&ldquo;The rupture is usually visible. The repair is often invisible. That is exactly why it gets missed.&rdquo;</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>What repair actually looks like</h2>
-      <p>Repair isn't necessarily a long conversation. Sometimes it's a specific acknowledgment. Sometimes it's physical closeness. Sometimes it's someone saying "I understand why that landed wrong", not "I'm sorry" generically, but something more specific.</p>
-      <p>The question to ask each other isn't "are we okay?" but "what does okay actually feel like for you?" The answers are often different, and knowing the difference changes everything.</p>
+      <h2>What repair actually is</h2>
+      <p>Repair is not always a long conversation. Sometimes it is one specific acknowledgment. Sometimes it is sitting close without saying anything. Sometimes it is naming the thing that landed wrong rather than apologising in general.</p>
+      <p>That finding is worth reading twice. What decides whether a repair works is not how well it is made. It is whether the other person is in a position to take it.</p>
+      <div class="callout"><p class="callout-label">A better question</p><p>The question to ask each other is not &ldquo;are we okay&rdquo;. It is &ldquo;what does okay feel like for you&rdquo;. Your answers will differ, and knowing how they differ is most of the value in this article.</p></div>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>How to use this from your Attune results</h2>
-      <p>Your Attune results include two separate dimensions relevant here: Conflict Style (how you each handle friction in the moment) and Repair (what it takes for things to feel genuinely resolved).</p>
-      <p>Look at both. Notice whether your repair needs match your conflict styles, or whether they're out of sync. That mismatch, if it exists, is worth a specific conversation, not a general one about "how we handle conflict," but a specific one about what done actually feels like.</p>
+      <h2>Repair does not erase</h2>
+      <p>A good repair does not make the thing unhappen, and it is not supposed to. What it does is change what the moment means in the story the two of you are telling about your relationship.</p>
+      <blockquote class="article-quote"><p>&ldquo;Injuries may be forgiven, but they never disappear. Instead, in the best outcome, they become integrated into couples&rsquo; attachment stories as demonstrations of renewal and connection.&rdquo;</p></blockquote>
+      <p>Dr. Sue Johnson, Hold Me Tight</p>
     </div>
-
+    <div class="article-divider"></div>
+    <div>
+      <h2>Where to look in your results</h2>
+      <p>Your results hold both separately. Conflict Style describes how each of you meets friction in the moment. Repair describes what it takes for things to feel settled afterwards.</p>
+      <p>Read them together and notice whether they line up or sit out of step. If they are out of step, that is the conversation to have, and it is a specific one: not how we handle conflict in general, but what finished feels like for each of us.</p>
+      <blockquote class="article-quote"><p>The point is that neuroses don&rsquo;t have to ruin a marriage. If you can accommodate each other&rsquo;s &ldquo;crazy&rdquo; side and handle it with caring, affection, and respect, your marriage can thrive.</p></blockquote>
+      <p>John Gottman and Nan Silver, The Seven Principles for Making Marriage Work</p>
+    </div>
   </div>
-
 
   <!-- RESEARCH CITATION -->
   <div style="background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:var(--s-xl) 1.75rem;margin:var(--s-3xl) 0 0;">
     <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;">Research context</p>
     <div style="display:flex;flex-direction:column;gap:.85rem;">
-            <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
-        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Gottman's longitudinal research found that 69% of relationship conflicts are "perpetual problems." These are recurring disagreements rooted in fundamental differences that never fully resolve. Couples who thrive aren't those who eliminate these conflicts; they're those who develop a working dialogue around them rather than trying to solve them permanently.</p>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Gottman, J.M. & Silver, N. — The Seven Principles for Making Marriage Work (1999)</p>
-      </div>
       <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
         <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Repair attempts (any action intended to reduce tension during or after conflict) are strongly associated with relationship health. What predicts whether repair succeeds isn't the elegance of the attempt, but whether the partner receives it. Couples who create conditions where repair attempts land tend to have substantially more resilient relationships.</p>
         <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Gottman, J.M. — The Marriage Clinic (1999)</p>
@@ -320,8 +330,8 @@
 
   <!-- CTA -->
   <div class="article-cta">
-    <p class="article-cta-title">See where you and your partner sit on Conflict and Repair</p>
-    <p class="article-cta-sub">These two dimensions are among the 10 Attune scores. Your results will show exactly where you each land and what the gap means.</p>
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
     <a href="/offerings" class="article-cta-btn">Get started →</a>
   </div>
 
@@ -358,17 +368,20 @@
 
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
-      <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <span class="related-card-cat">Getting Started</span>
-        <span class="related-card-title">How to review your results together</span>
+      <a href="/practice/conflict-is-inevitable" class="related-card">
+        <span class="related-card-cat">Conflict and Repair</span>
+        <span class="related-card-title">Conflict is not the problem</span>
+        <span class="related-card-time">6 min read</span>
       </a>
       <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
         <span class="related-card-cat">Conflict and Repair</span>
         <span class="related-card-title">How to start a hard conversation</span>
+        <span class="related-card-time">7 min read</span>
       </a>
-      <a href="/practice/conflict-vs-repair" class="related-card">
+      <a href="/practice/why-couples-fight-about-the-same-things" class="related-card">
         <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">The difference between conflict and repair</span>
+        <span class="related-card-title">Why couples fight about the same things</span>
+        <span class="related-card-time">6 min read</span>
       </a>
     </div>
   </div>

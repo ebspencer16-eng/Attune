@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Why Naming the Pattern Changes Everything · In Practice, Attune</title>
+<title>The Attune exercises, and what each one is for &middot; In Practice, Attune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -248,57 +260,96 @@
 </div>
 
 <div class="article-wrap fu1">
+
+  <!-- BREADCRUMB -->
   <div class="breadcrumb">
     <a href="/app" class="bc-dash" style="display:none">Dashboard</a>
     <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
     <a href="/practice">In Practice</a>
     <span class="breadcrumb-sep">›</span>
-    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Methodology</span>
+    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Attune Methodology</span>
   </div>
+
+  <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
-    <span class="article-tag">Methodology</span>
-    <span class="article-meta-note">4 min read</span>
+    <span class="article-tag">Attune Methodology</span>
+    <span class="article-meta-note">8 min read</span>
   </div>
-  <h1 class="article-title">Why naming the pattern<br><em>changes everything</em></h1>
-  <p class="article-intro">Most couples are living inside patterns they can describe from the outside, "we always fight about this," "they always do that", but have never named from the inside, as a shared understanding. That gap is doing a lot of work.</p>
+  <h1 class="article-title">The Attune exercises, and what each one is for</h1>
+  <p class="article-intro">Attune is made of five exercises. Two of them come with every package and three are available as additions, and each one exists because it answers a question the others cannot.</p>
+  <p class="article-intro">This is what each one asks, what it gives you back, and why we thought it was worth your time.</p>
+
+  <!-- ARTICLE BODY -->
   <div class="article-body">
     <div>
-      <h2>The difference naming makes</h2>
-      <p>When a pattern gets named, not blamed, just named, something changes in how both people relate to it. It goes from something happening to you to something you can see together.</p>
-      <p>"You always do this" is a very different kind of sentence than "we have a pattern where this tends to happen." One is an accusation. The other is a description of shared territory.</p>
+      <h2>Communication styles</h2>
+      <p>Twenty-five questions, asked twice. The first pass is about you. The second asks the same twenty-five about how you see your partner.</p>
+      <p>Your answers land on ten dimensions: Energy and Recharge, Emotional Expression, Reassurance, Emotional Intimacy, Communicating Needs, Bids for Connection, Listening, Conflict Style, Repairing and Feedback. Each runs between two ends on a five-point scale, and neither end is the better one.</p>
+      <p>Why it matters: this is the exercise that tells you where the misreads come from. A wide gap is not a warning, it is the place where each of you has been assuming the other means what you would mean. The second pass adds something most couples have never had, which is a comparison between how you see yourself and how your partner sees you.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>Why unnamed patterns compound</h2>
-      <p>An unnamed pattern doesn't stay neutral. It accumulates evidence. Each time it happens, it feels like further confirmation of something, about who your partner is, about what this relationship is, about whether it's going to get better.</p>
-      <p>The pattern might be completely benign in its origin. Two people with different repair styles, neither of whom knows the other has a different one. But every time it plays out, both people feel a little more justified in their interpretation of it.</p>
-      <div class="callout"><p class="callout-label">What naming requires</p><p>It requires both partners to be willing to describe the pattern as shared rather than caused by one person. That's often the hard part, not the naming, but the agreement that it's a we-thing rather than a you-thing.</p></div>
+      <h2>Expectations</h2>
+      <p>Twenty responsibilities across five areas, plus twelve life questions. Household is the largest at seven. Then Financial, Career and Work, Emotional Labor and Extended Family. The life questions cover children, faith, where you live, money and risk, and involvement with each other's families.</p>
+      <p>Why it matters: this is the ordinary machinery of a shared life, which is exactly the part couples assume is settled and have usually never said out loud. Most of what it surfaces is not disagreement. It is two people who each assumed the other saw it the same way and had no reason to check.</p>
+      <div class="callout"><p class="callout-label">One thing worth knowing</p><p>These questions are asked in the first person, so the comparison is mirrored before anything is scored. Two people who both answer &ldquo;primarily mine&rdquo; have each claimed the same job, which is a disagreement. Two who answer opposite ways have agreed.</p></div>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>How to name a pattern well</h2>
-      <p>The most useful naming is specific, descriptive, and non-causal. "When I bring something up urgently and you go quiet, I feel unheard, and I suspect you feel pressured" is a named pattern. "You shut down whenever I try to talk" is an accusation that happens to describe behavior.</p>
-      <p>Specific. Descriptive. Non-causal. Those three together are what make a named pattern workable rather than just weaponized.</p>
+      <h2>Relationship reflection</h2>
+      <p>Fourteen questions across five areas: Getting Started, Milestones, How We're Doing, Looking Forward and What Matters. Rather than mapping how you each operate, it asks how the relationship itself feels right now and where you each hope it is going.</p>
+      <p>Why it matters: the other exercises describe patterns. This one captures a moment. It is the exercise that is most worth repeating, because the comparison between two rounds a year apart says something neither round can say on its own.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>What your Attune results make possible</h2>
-      <p>Your couple type and your communication results are both descriptions of patterns, built from your actual answers, not from what one person observed about the other.</p>
-      <p>That's what makes them useful for naming. They give you a shared starting point that isn't one person's perception. The pattern isn't something they said about you. It's something you both contributed to, surfaced from the data.</p>
+      <h2>Physical intimacy expectations</h2>
+      <p>Sixteen questions across six aspects: Frequency, Initiating, Comfort and Safety, Communication, Adventurousness, and What It Is For.</p>
+      <p>Why it matters: this is the subject couples are least likely to have mapped and most likely to have assumed. Every question carries a prefer-not-to-say, and declining is treated as its own answer rather than as agreement, because choosing not to answer should not become a signal of its own.</p>
     </div>
-
+    <div class="article-divider"></div>
+    <div>
+      <h2>Conflict patterns</h2>
+      <p>Twelve questions, and the only exercise in Attune that is not a comparison. You rate four patterns in yourself on a four-point frequency scale, and the result is yours. It is never sent to your partner's device.</p>
+      <p>Why it matters: the four patterns it asks about are the ones most consistently associated with difficulty, and noticing one in yourself is a different kind of information from noticing it in somebody else.</p>
+      <blockquote class="article-quote"><p>Unhealthy conflict is characterized by the presence of criticism, defensiveness and a lack of understanding.</p></blockquote>
+      <p>The Gottman Institute</p>
+      <div class="callout"><p class="callout-label">Why that one is private</p><p>An honest self-assessment is only possible if it is genuinely private. A version of this exercise that your partner could read would produce a more flattering set of answers and a less useful result.</p></div>
+    </div>
+    <div class="article-divider"></div>
+    <div>
+      <h2>Together rather than separately</h2>
+      <p>Each exercise answers something the others cannot, and the results read differently when more than one is present. How you communicate explains a lot about why a particular expectation went unspoken. What you each need after conflict explains why a resolved disagreement did not feel resolved.</p>
+      <blockquote class="article-quote"><p>&ldquo;Love is a skill, not just an enthusiasm.&rdquo;</p></blockquote>
+      <p>Alain de Botton, The Course of Love</p>
+    </div>
   </div>
+
+  <!-- RESEARCH CITATION -->
+  <div style="background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:var(--s-xl) 1.75rem;margin:var(--s-3xl) 0 0;">
+    <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;">Research context</p>
+    <div style="display:flex;flex-direction:column;gap:.85rem;">
+      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
+        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Attachment theory research consistently finds that early relational patterns shape adult communication styles in predictable ways, particularly around emotional expression, bids for connection, and responses to conflict. Recognizing your own orientation is about having the self-awareness to act deliberately rather than reflexively.</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Hazan, C. &amp; Shaver, P. — Journal of Personality and Social Psychology (1987); Mikulincer, M. &amp; Shaver, P.R. — Attachment in Adulthood (2007)</p>
+      </div>
+      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
+        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Longitudinal relationship research consistently finds that unexamined assumptions about roles, finances, and shared expectations are among the leading causes of relationship dissatisfaction, not because the assumptions are wrong, but because they're never made explicit. Periodic structured check-ins are associated with higher satisfaction and fewer unresolvable conflicts.</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Stanley, S.M., Rhoades, G.K., &amp; Markman, H.J. — Family Process (2006)</p>
+      </div>
+      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
+        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">People change. Their values, preferences, and needs shift gradually over time, often without either partner consciously registering the shift. Couples who revisit their shared understanding periodically report stronger relationship quality than those who assume continuity.</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Karney, B.R. &amp; Bradbury, T.N. — Psychological Bulletin (1995)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
   <div class="article-cta">
-    <p class="article-cta-title">Name your pattern with Attune</p>
-    <p class="article-cta-sub">Your couple type and communication profile give the two of you a shared language, the thing that makes every conversation after it easier.</p>
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
     <a href="/offerings" class="article-cta-btn">Get started →</a>
   </div>
+
 <div class="related-section">
       <!-- Share bar -->
   <div style="max-width:680px;margin:0 auto var(--s-3xl);padding:0 var(--s-3xl)">
@@ -332,17 +383,20 @@
 
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
-      <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <span class="related-card-cat">Getting Started</span>
-        <span class="related-card-title">How to review your results together</span>
+      <a href="/practice/understanding-your-couple-type" class="related-card">
+        <span class="related-card-cat">Attune Methodology</span>
+        <span class="related-card-title">What your couple type changes</span>
+        <span class="related-card-time">6 min read</span>
       </a>
-      <a href="/practice/conflict-vs-repair" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">The difference between conflict and repair</span>
+      <a href="/practice/why-individual-exercises-work" class="related-card">
+        <span class="related-card-cat">Attune Methodology</span>
+        <span class="related-card-title">Why you answer separately</span>
+        <span class="related-card-time">6 min read</span>
       </a>
-      <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">How to start a hard conversation</span>
+      <a href="/practice/what-is-the-attune-experience" class="related-card">
+        <span class="related-card-cat">The Attune Experience</span>
+        <span class="related-card-title">What the Attune experience is for</span>
+        <span class="related-card-time">6 min read</span>
       </a>
     </div>
   </div>

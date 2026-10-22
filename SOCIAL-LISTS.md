@@ -45,16 +45,18 @@ Every article, under the section it belongs to.
 
 | Section | Title |
 |---|---|
-| Getting Started | How to review your results together |
-| Getting Started | Staying current with each other over time |
-| Getting Started | How to use your results |
-| Conflict and Repair | How to start a hard conversation |
+| The Attune Experience | What the Attune experience is for |
+| The Attune Experience | How to review your results together |
+| The Attune Experience | Living attuned |
+| Understanding Each Other | Understanding is something you do |
+| Understanding Each Other | Why understanding matters more than agreement |
+| Understanding Each Other | How to build a relationship where understanding is normal |
+| Conflict and Repair | Conflict is not the problem |
 | Conflict and Repair | The difference between conflict and repair |
-| Conflict and Repair | When a conversation turns heated |
+| Conflict and Repair | How to start a hard conversation |
 | Conflict and Repair | Why couples fight about the same things |
-| Understanding Each Other | Five books that change how couples think |
-| Understanding Each Other | What your communication style reveals |
-| Methodology | What your couple type tells you |
-| Methodology | Why naming the pattern changes everything |
+| Attune Methodology | The Attune exercises, and what each one is for |
+| Attune Methodology | What your couple type changes |
+| Attune Methodology | Why you answer separately |
 
-11 articles across 4 sections.
+13 articles across 4 sections.

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What Your Couple Type Tells You · In Practice, Attune</title>
+<title>Conflict is not the problem &middot; In Practice, Attune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -248,57 +260,97 @@
 </div>
 
 <div class="article-wrap fu1">
+
+  <!-- BREADCRUMB -->
   <div class="breadcrumb">
     <a href="/app" class="bc-dash" style="display:none">Dashboard</a>
     <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
     <a href="/practice">In Practice</a>
     <span class="breadcrumb-sep">›</span>
-    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Methodology</span>
+    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Conflict and Repair</span>
   </div>
+
+  <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
-    <span class="article-tag">Methodology</span>
+    <span class="article-tag">Conflict and Repair</span>
     <span class="article-meta-note">6 min read</span>
   </div>
-  <h1 class="article-title">What your couple type<br><em>actually tells you</em></h1>
-  <p class="article-intro">Your couple type is a description, not a verdict. It doesn't tell you who you are, it tells you the shape of how you two work, which is more useful and more interesting. Here's how to actually use it.</p>
+  <h1 class="article-title">Conflict is not the problem</h1>
+  <p class="article-intro">Plenty of couples arrive at a relationship tool quietly hoping it will help them argue less. It is a reasonable hope and it is aimed at the wrong target. Two people who share a life will disagree, and the number of times they do turns out to say very little about how the relationship goes.</p>
+  <p class="article-intro">What matters is what happens inside the disagreement, and that is a set of skills rather than a trait. Your own patterns are learnable, and so is what to do with them.</p>
+
+  <!-- ARTICLE BODY -->
   <div class="article-body">
     <div>
-      <h2>What the type is built from</h2>
-      <p>Your couple type emerges from the intersection of two things: how your individual communication orientations compare across 10 dimensions, and how you each described your relationship as a unit in Part 2 of the exercise.</p>
-      <p>It's not a personality test output. It's a derived description of your actual dynamic, the pattern that shows up when your two sets of answers sit next to each other.</p>
+      <h2>Why it is unavoidable</h2>
+      <p>Two people cannot share a life without wanting different things sometimes. That is not a sign of mismatch. It is a consequence of being two people.</p>
+      <blockquote class="article-quote"><p>No two people are identical in thought and belief patterns, regardless of how similar they might be.</p></blockquote>
+      <p>Gillian Florence Sanger, The Gottman Institute</p>
+      <blockquote class="article-quote"><p>Disagreements are an inevitable component of all relationships.</p></blockquote>
+      <p>Gillian Florence Sanger, The Gottman Institute</p>
+      <p>Which means a relationship with no visible conflict is not necessarily doing better. Sometimes it is a relationship where one person has stopped raising things.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>What it tells you</h2>
-      <p>Your type tells you something about your structural dynamic: how you tend to complement each other, where the predictable friction lives, and what the specific patterns are that show up under stress and under ease.</p>
-      <p>The most useful part isn't the name. It's the three specific things to know, the patterns that are most likely to either serve you or create problems if they go unnamed.</p>
-      <div class="callout"><p class="callout-label">Worth noting</p><p>Your type can shift over time as your circumstances change, as you grow, or as you do the exercises again after a meaningful period. It's a current description, not a permanent one.</p></div>
+      <h2>What actually predicts the outcome</h2>
+      <blockquote class="article-quote"><p>Fortunately, our research shows that it&rsquo;s not the appearance of conflict, but rather how it&rsquo;s managed that predicts the success or failure of a relationship.</p></blockquote>
+      <p>The Gottman Institute</p>
+      <blockquote class="article-quote"><p>Successful relationships aren&rsquo;t conflict-free; they&rsquo;re simply better at managing arguments and repairing when something has gone wrong.</p></blockquote>
+      <p>The Gottman Institute</p>
+      <p>So the useful goal is not fewer arguments. It is better ones, and a reliable way back to each other afterwards.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>What it doesn't tell you</h2>
-      <p>Your type doesn't tell you how compatible you are. There's no ranking of types from most to least suited for each other. Any type can build something excellent, and any type can drift, it depends almost entirely on whether the patterns get named and worked with.</p>
-      <p>It also doesn't tell you what's wrong. The things flagged as worth knowing are areas of attention, not diagnoses.</p>
+      <h2>Manage, rather than resolve</h2>
+      <p>A lot of relationship advice assumes every disagreement has a solution waiting to be found. Most of the recurring ones do not.</p>
+      <blockquote class="article-quote"><p>We say &ldquo;manage&rdquo; conflict rather than &ldquo;resolve,&rdquo; because relationship conflict is natural and has functional, positive aspects that provide opportunities for growth and understanding.</p></blockquote>
+      <p>The Gottman Institute</p>
+      <p>Accepting that a particular difference is permanent is not giving up. It is what makes it possible to stop treating every occurrence as a failure.</p>
+      <blockquote class="article-quote"><p>When you have irresolvable problems in your marriage (everyone does!), you can either hold that against your partner or accept what you cannot change.</p></blockquote>
+      <p>Maureen Werrbach, The Gottman Institute</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>How to use it</h2>
-      <p>Read the three things to know slowly. For each one: does it ring true? Does your partner recognize it? Is there something there you've felt but never named?</p>
-      <p>The most useful conversation to have after seeing your type is a simple one: "Of these three things, which one do you most want to pay attention to?" Let the answer be different for each of you. Then compare.</p>
+      <h2>The patterns that do real damage</h2>
+      <p>Conflict itself is neutral. Four specific habits inside it are not, and they are worth knowing by name because they are easier to catch than to describe afterwards.</p>
+      <blockquote class="article-quote"><p>A complaint focuses on a specific behavior, but criticism attacks a person&rsquo;s very character.</p></blockquote>
+      <p>The Gottman Institute</p>
+      <blockquote class="article-quote"><p>Defensiveness will only escalate the conflict if the critical spouse does not back down or apologize. This is because defensiveness is really a way of blaming your partner, and it won&rsquo;t allow for healthy conflict management.</p></blockquote>
+      <p>Dr. Ellie Wilde, The Gottman Institute</p>
+      <blockquote class="article-quote"><p>Stonewalling occurs when the listener withdraws from the interaction, shuts down, and simply stops responding to their partner.</p></blockquote>
+      <p>Dr. Ellie Wilde, The Gottman Institute</p>
+      <blockquote class="article-quote"><p>Contempt... is the number one predictor of divorce, but it can be defeated.</p></blockquote>
+      <p>Dr. Ellie Wilde, The Gottman Institute</p>
+      <div class="callout"><p class="callout-label">Worth saying plainly</p><p>Noticing one of these in yourself is not a diagnosis of your relationship. All four show up in couples who are doing well. What separates them is that somebody notices and does something about it rather than letting it become the default.</p></div>
     </div>
-
+    <div class="article-divider"></div>
+    <div>
+      <h2>Your own pattern is specific</h2>
+      <p>General advice about conflict is of limited use, because the thing that goes wrong is particular to the two of you. One of you may move toward resolution quickly while the other needs room first. One of you may need it said out loud before it feels finished while the other takes ordinary conversation as the sign.</p>
+      <p>Your Attune results describe your own version of that rather than the average one. That is the part worth reading slowly.</p>
+      <blockquote class="article-quote"><p>&ldquo;All couples fight, but not every couple knows how to do it in a healthy way.&rdquo;</p></blockquote>
+      <p>Jennifer Scott, The Gottman Institute</p>
+    </div>
   </div>
+
+  <!-- RESEARCH CITATION -->
+  <div style="background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:var(--s-xl) 1.75rem;margin:var(--s-3xl) 0 0;">
+    <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;">Research context</p>
+    <div style="display:flex;flex-direction:column;gap:.85rem;">
+      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
+        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Gottman's longitudinal research found that 69% of relationship conflicts are "perpetual problems." These are recurring disagreements rooted in fundamental differences that never fully resolve. Couples who thrive aren't those who eliminate these conflicts; they're those who develop a working dialogue around them rather than trying to solve them permanently.</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Gottman, J.M. &amp; Silver, N. — The Seven Principles for Making Marriage Work (1999)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
   <div class="article-cta">
-    <p class="article-cta-title">Find your couple type</p>
-    <p class="article-cta-sub">Ten pairings, each derived from your actual answers, not a quiz. The couple map shows exactly where each of you sits across the two axes that matter most.</p>
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
     <a href="/offerings" class="article-cta-btn">Get started →</a>
   </div>
+
 <div class="related-section">
       <!-- Share bar -->
   <div style="max-width:680px;margin:0 auto var(--s-3xl);padding:0 var(--s-3xl)">
@@ -332,17 +384,20 @@
 
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
-      <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <span class="related-card-cat">Getting Started</span>
-        <span class="related-card-title">How to review your results together</span>
-      </a>
       <a href="/practice/conflict-vs-repair" class="related-card">
         <span class="related-card-cat">Conflict and Repair</span>
         <span class="related-card-title">The difference between conflict and repair</span>
+        <span class="related-card-time">6 min read</span>
       </a>
       <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
         <span class="related-card-cat">Conflict and Repair</span>
         <span class="related-card-title">How to start a hard conversation</span>
+        <span class="related-card-time">7 min read</span>
+      </a>
+      <a href="/practice/why-couples-fight-about-the-same-things" class="related-card">
+        <span class="related-card-cat">Conflict and Repair</span>
+        <span class="related-card-title">Why couples fight about the same things</span>
+        <span class="related-card-time">6 min read</span>
       </a>
     </div>
   </div>

@@ -118,10 +118,6 @@
       "destination": "/practice.html"
     },
     {
-      "source": "/practice/how-to-use-your-results",
-      "destination": "/practice/how-to-use-your-results.html"
-    },
-    {
       "source": "/practice/how-to-review-your-results-together",
       "destination": "/practice/how-to-review-your-results-together.html"
     },
@@ -134,32 +130,44 @@
       "destination": "/practice/conflict-vs-repair.html"
     },
     {
-      "source": "/practice/when-a-conversation-turns-heated",
-      "destination": "/practice/when-a-conversation-turns-heated.html"
-    },
-    {
-      "source": "/practice/staying-current-with-each-other",
-      "destination": "/practice/staying-current-with-each-other.html"
-    },
-    {
-      "source": "/practice/five-books-that-change-how-couples-think",
-      "destination": "/practice/five-books-that-change-how-couples-think.html"
-    },
-    {
       "source": "/practice/why-couples-fight-about-the-same-things",
       "destination": "/practice/why-couples-fight-about-the-same-things.html"
     },
     {
-      "source": "/practice/what-your-communication-style-reveals",
-      "destination": "/practice/what-your-communication-style-reveals.html"
+      "source": "/practice/what-is-the-attune-experience",
+      "destination": "/practice/what-is-the-attune-experience.html"
     },
     {
-      "source": "/practice/what-your-couple-type-tells-you",
-      "destination": "/practice/what-your-couple-type-tells-you.html"
+      "source": "/practice/living-attuned",
+      "destination": "/practice/living-attuned.html"
     },
     {
-      "source": "/practice/why-naming-the-pattern-changes-everything",
-      "destination": "/practice/why-naming-the-pattern-changes-everything.html"
+      "source": "/practice/understanding-is-an-action",
+      "destination": "/practice/understanding-is-an-action.html"
+    },
+    {
+      "source": "/practice/the-importance-of-understanding",
+      "destination": "/practice/the-importance-of-understanding.html"
+    },
+    {
+      "source": "/practice/how-to-create-an-understanding-environment",
+      "destination": "/practice/how-to-create-an-understanding-environment.html"
+    },
+    {
+      "source": "/practice/conflict-is-inevitable",
+      "destination": "/practice/conflict-is-inevitable.html"
+    },
+    {
+      "source": "/practice/the-attune-exercises",
+      "destination": "/practice/the-attune-exercises.html"
+    },
+    {
+      "source": "/practice/understanding-your-couple-type",
+      "destination": "/practice/understanding-your-couple-type.html"
+    },
+    {
+      "source": "/practice/why-individual-exercises-work",
+      "destination": "/practice/why-individual-exercises-work.html"
     },
     {
       "source": "/practice/all",

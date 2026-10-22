@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>How to Start a Hard Conversation · In Practice, Attune</title>
+<title>How to start a hard conversation &middot; In Practice, Attune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -261,67 +273,75 @@
   <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
     <span class="article-tag">Conflict and Repair</span>
-    <span class="article-meta-note">5 min read</span>
+    <span class="article-meta-note">7 min read</span>
   </div>
-  <h1 class="article-title">How to start<br><em>a hard conversation</em></h1>
-  <p class="article-intro">When you find a gap in your results that feels significant, or when something from your daily life needs to be named, having a structure for starting the conversation makes it easier to actually start it. Here's one that works.</p>
+  <h1 class="article-title">How to start a hard conversation</h1>
+  <p class="article-intro">When you already know a conversation is going to be difficult, the hardest part is almost always the first sentence. Couples do not avoid these conversations because they want things left unresolved. They avoid them because they cannot find an opening that does not sound like an accusation.</p>
+  <p class="article-intro">There is a better way in, and the research on it is unusually specific about why it works.</p>
 
   <!-- ARTICLE BODY -->
   <div class="article-body">
-
     <div>
-      <h2>The problem with hard conversations</h2>
-      <p>Hard conversations don't usually stay hard forever. They feel impossible at the beginning and much more manageable once they've started. The difficulty is almost entirely in the entry.</p>
-      <p>Most couples avoid them not because they don't want resolution, but because they don't know how to begin without it feeling like an accusation, a criticism, or the start of a fight.</p>
+      <h2>The first three minutes decide it</h2>
+      <p>How a hard conversation opens is not a matter of manners. It is close to determinative.</p>
+      <blockquote class="article-quote"><p>Research revealed that discussions will end on the same note they begin.</p></blockquote>
+      <p>Dr. Ellie Wilde, The Gottman Institute</p>
+      <p>Which means the effort is best spent before you begin rather than on recovering once it has gone wrong.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>A structure that opens things up</h2>
-      <p>Start from your own experience, not from a description of what your partner does. "I notice I feel disconnected when we go long stretches without checking in" lands differently than "you never check in with me." Both may be equally true. Only one of them invites a conversation.</p>
-      <p>Then name what you want. Not what you want to stop, but what you actually want more of. "I'd love more evenings where we're both actually present" is a different kind of entry point than a complaint.</p>
-      <div class="callout"><p class="callout-label">A simple format</p><p>Start with what you've noticed in yourself. Add what you'd like. Then ask a genuine question, something you actually want to know the answer to. The question is what makes it a conversation instead of a speech.</p></div>
+      <h2>Start from your own experience</h2>
+      <p>Begin with what you have noticed in yourself rather than with a description of what your partner does. &ldquo;I notice I feel disconnected when we go a long stretch without checking in&rdquo; lands differently from &ldquo;you never check in with me&rdquo;. Both can be accurate. Only one of them invites an answer.</p>
+      <p>Then say what you want rather than what you want to stop. A request is a doorway. A complaint is a verdict with a question mark on the end.</p>
+      <div class="callout"><p class="callout-label">A format that works</p><p>Say what you have noticed in yourself. Add what you would like more of. Then ask a real question, one you genuinely want the answer to. The question is what makes it a conversation instead of a speech.</p></div>
+      <blockquote class="article-quote"><p>At the core of every successful conversation lies the free flow of relevant information.</p></blockquote>
+      <p>Kerry Patterson and others, Crucial Conversations</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>What to do when it starts going sideways</h2>
-      <p>When a conversation starts escalating, the most useful thing is often a deliberate pause, not a shutdown, but an agreed reset. Something like: "I want to keep talking about this, but I need five minutes first."</p>
-      <p>The couples who handle hard conversations well aren't the ones who never escalate. They're the ones who have agreed on what to do when they do.</p>
+      <h2>Acknowledge before you argue</h2>
+      <p>The instinct when you disagree is to explain why. The more useful move is to show that you have understood the other position first, even when you are about to differ with it.</p>
+      <blockquote class="article-quote"><p>Rather than trying to change how you think of or feel about your counterpart, our work suggests that you should focus on changing your own behavior.</p></blockquote>
+      <p>Julia Minson, Greater Good Magazine</p>
+      <p>This costs nothing and it is the step most often skipped, usually because it feels like conceding. It is not. It is the thing that makes the rest of the conversation possible.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>Using your Attune results as a starting point</h2>
-      <p>Your results include a section on conflict style and repair. If you and your partner have different orientations there, one of you moves toward resolution quickly, the other needs space first, naming that dynamic before a hard conversation can change how it goes.</p>
-      <p>"I know I tend to engage quickly. If you need more time before we talk, just say so" is a different kind of entry than diving straight in and then being confused when it doesn't land.</p>
+      <h2>Agree on the pause before you need it</h2>
+      <p>Couples who handle hard conversations well still escalate. What they have is an agreement about what happens when they do.</p>
+      <p>A named pause with a time on it is not the same as going quiet. &ldquo;I want to keep going with this, I need twenty minutes first&rdquo; says you are coming back. The specificity is what makes it a plan rather than a door closing.</p>
+      <div class="callout"><p class="callout-label">Decide this on a good day</p><p>The best time to agree what your pause looks like is when you are not in one. If you have never talked about it, raise it when things are calm: what should we do when one of us needs a break?</p></div>
     </div>
-
+    <div class="article-divider"></div>
+    <div>
+      <h2>Use what you already know about each other</h2>
+      <p>If one of you moves toward resolution quickly and the other needs space first, say so before the conversation starts rather than in the middle of it. Neither pace is the right one, and naming both in advance takes the sting out of what would otherwise look like avoidance on one side and pressure on the other.</p>
+    </div>
   </div>
-
 
   <!-- RESEARCH CITATION -->
   <div style="background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:var(--s-xl) 1.75rem;margin:var(--s-3xl) 0 0;">
     <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;">Research context</p>
     <div style="display:flex;flex-direction:column;gap:.85rem;">
-            <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
+      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
         <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">The "softened startup" (beginning a difficult conversation with curiosity rather than criticism) dramatically reduces physiological flooding in both partners. Gottman's research found that 96% of difficult conversations can be predicted to go well or poorly based on the first three minutes, and startup tone is the single strongest predictor.</p>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Gottman, J.M. & Silver, N. — The Seven Principles for Making Marriage Work (1999)</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Gottman, J.M. &amp; Silver, N. — The Seven Principles for Making Marriage Work (1999)</p>
       </div>
       <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
         <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Acknowledging a partner's perspective before sharing your own, even when you disagree, reduces defensiveness and increases the likelihood that both partners feel heard. Skipping this step is among the strongest predictors of escalation.</p>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Gable, S.L., Reis, H.T., Impett, E.A., & Asher, E.R. — Journal of Personality and Social Psychology (2004)</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Gable, S.L., Reis, H.T., Impett, E.A., &amp; Asher, E.R. — Journal of Personality and Social Psychology (2004)</p>
+      </div>
+      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
+        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Research on demand-withdraw patterns, where one partner presses for resolution while the other disengages, shows this is one of the strongest predictors of relationship dissatisfaction. The same partners often switch roles depending on who raises the topic, suggesting it's a structural dynamic rather than a personality flaw.</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Christensen, A. &amp; Heavey, C.L. — Journal of Personality and Social Psychology (1990)</p>
       </div>
     </div>
   </div>
 
   <!-- CTA -->
   <div class="article-cta">
-    <p class="article-cta-title">See how Attune maps your communication style</p>
-    <p class="article-cta-sub">Your Communication results cover 10 dimensions including how you each approach hard conversations. The gap between your scores is where the insight lives.</p>
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
     <a href="/offerings" class="article-cta-btn">Get started →</a>
   </div>
 
@@ -358,17 +378,20 @@
 
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
-      <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <span class="related-card-cat">Getting Started</span>
-        <span class="related-card-title">How to review your results together</span>
-      </a>
-      <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
+      <a href="/practice/conflict-is-inevitable" class="related-card">
         <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">How to start a hard conversation</span>
+        <span class="related-card-title">Conflict is not the problem</span>
+        <span class="related-card-time">6 min read</span>
       </a>
       <a href="/practice/conflict-vs-repair" class="related-card">
         <span class="related-card-cat">Conflict and Repair</span>
         <span class="related-card-title">The difference between conflict and repair</span>
+        <span class="related-card-time">6 min read</span>
+      </a>
+      <a href="/practice/why-couples-fight-about-the-same-things" class="related-card">
+        <span class="related-card-cat">Conflict and Repair</span>
+        <span class="related-card-title">Why couples fight about the same things</span>
+        <span class="related-card-time">6 min read</span>
       </a>
     </div>
   </div>

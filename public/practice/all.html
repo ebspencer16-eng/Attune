@@ -121,10 +121,10 @@
 <ddiv class="cat-bar">
   <div class="cat-bar-inner">
     <button class="cat-pill active" onclick="filter('all')">All</button>
-    <button class="cat-pill" onclick="filter('getting-started')">Getting Started</button>
-    <button class="cat-pill" onclick="filter('conflict')">Conflict and Repair</button>
+    <button class="cat-pill" onclick="filter('experience')">The Attune Experience</button>
     <button class="cat-pill" onclick="filter('understanding')">Understanding Each Other</button>
-    <button class="cat-pill" onclick="filter('couple-types')">Methodology</button>
+    <button class="cat-pill" onclick="filter('conflict')">Conflict and Repair</button>
+    <button class="cat-pill" onclick="filter('methodology')">Attune Methodology</button>
   </div>
 </div>
 
@@ -147,82 +147,96 @@
 <script>
 const ARTICLES = [
   {
-    slug:'how-to-use-your-results',
-    title:'How to use your results',
-    cat:'getting-started', catLabel:'Getting Started', catColor:'#E8673A',
-    time:8, pop:1, date:'2024-11-01',
-    content:'how to use your results attune guide start exercises communication expectations first steps navigate profile dashboard what to do next order review understand scores dimensions'
+    slug:'what-is-the-attune-experience',
+    title:'What the Attune experience is for',
+    cat:'experience', catLabel:'The Attune Experience', catColor:'#E8673A',
+    time:6, pop:1, date:'2026-10-22',
+    content:'most couples looking relationship tool because something wrong they matters would rather understand than assume wedding ahead them move first child quiet stretch where things fine neither asked loud while attune built that assess tell whether compatible exists give people accurate picture each actually their life together reason talk about places those pictures differ premise almost every couple carrying assumptions'
   },
   {
     slug:'how-to-review-your-results-together',
     title:'How to review your results together',
-    cat:'getting-started', catLabel:'Getting Started', catColor:'#E8673A',
-    time:6, pop:2, date:'2024-11-05',
-    content:'review results together partner joint couple share side by side open session conversation how to read results together alignment communication expectations discussing findings'
+    cat:'experience', catLabel:'The Attune Experience', catColor:'#E8673A',
+    time:6, pop:2, date:'2026-10-22',
+    content:'after completing their attune experience some couples dive into results right away while others wait quiet evening down together review individually click through quickly highlights explore depth later block time read thoughtfully first pass though there prescribed method best approach your insights compiled following outline guide anyone trying this bottom line that timing format length conversation will vary dramatically each'
   },
   {
-    slug:'staying-current-with-each-other',
-    title:'Staying current with each other over time',
-    cat:'getting-started', catLabel:'Getting Started', catColor:'#E8673A',
-    time:5, pop:5, date:'2024-11-10',
-    content:'check in routine current update relationship drift apart staying connected over time long term maintenance revisit retake exercises grow change evolve'
+    slug:'living-attuned',
+    title:'Living attuned',
+    cat:'experience', catLabel:'The Attune Experience', catColor:'#E8673A',
+    time:7, pop:3, date:'2026-10-22',
+    content:'finishing your attune experience anything insights accurate read them people they describe keep changing what need value picture ahead will move sometimes gradually single season living attuned means keeping with each other purpose rather than accident this that looks like ordinary weeks when nothing wrong forcing conversation assumption causes drift rarely begins conflict quiet already know therefore have left learn'
   },
   {
-    slug:'how-to-start-a-hard-conversation',
-    title:'How to start a hard conversation',
-    cat:'conflict', catLabel:"Conflict and Repair", catColor:'#DD1C5E',
-    time:7, pop:3, date:'2024-11-15',
-    content:'hard conversation difficult start approach how to bring something up timing sensitive topic broach conflict nervous scared afraid say something wrong tense awkward'
+    slug:'understanding-is-an-action',
+    title:'Understanding is something you do',
+    cat:'understanding', catLabel:'Understanding Each Other', catColor:'#5C6BC0',
+    time:6, pop:4, date:'2026-10-22',
+    content:'most people treat understanding their partner state they arrived some time dated learned each other know them reasonable think about quietly stops being true years action like happens does this week ordinary conversations were going have anyway knowing great deal someone understand very little recite schedule history preferences still guessing what actually need when something goes wrong difference that person'
   },
   {
-    slug:'when-a-conversation-turns-heated',
-    title:'When a conversation turns heated',
-    cat:'conflict', catLabel:"Conflict and Repair", catColor:'#DD1C5E',
-    time:5, pop:6, date:'2024-11-20',
-    content:'heated argument fight calm de-escalate cool down when things get bad escalate shouting emotional flood regulate dysregulation pause take a break'
+    slug:'the-importance-of-understanding',
+    title:'Why understanding matters more than agreement',
+    cat:'understanding', catLabel:'Understanding Each Other', catColor:'#5C6BC0',
+    time:7, pop:5, date:'2026-10-22',
+    content:'there finding relationship research that surprises almost everybody hears couples argue about hardest possible subjects money family raise children perfectly well over decades nothing come apart what separates them subject matter frequency whether each person comes argument feeling understood conflict variable intuitive theory good relationships have less does support even most successful ones fortunately shows appearance rather managed predicts success'
   },
   {
-    slug:'why-couples-fight-about-the-same-things',
-    title:'Why couples fight about the same things',
-    cat:'conflict', catLabel:"Conflict and Repair", catColor:'#DD1C5E',
-    time:6, pop:4, date:'2024-11-25',
-    content:'same fights repeat pattern loop conflict recurring argument keeps coming back same issue never resolved cycle perpetual problems gridlock why we argue same things over and over'
+    slug:'how-to-create-an-understanding-environment',
+    title:'How to build a relationship where understanding is normal',
+    cat:'understanding', catLabel:'Understanding Each Other', catColor:'#5C6BC0',
+    time:7, pop:6, date:'2026-10-22',
+    content:'understanding does happen because people intend happens conditions right those built small repeatable things rather than large intentions this what each actually week create them answer reaches most opportunity conversations ordinary moments where other something either attempt from partner another attention affirmation affection positive connection nonverbal bids still deserve recognition reading line loud hand shoulder asking want dinner when really'
+  },
+  {
+    slug:'conflict-is-inevitable',
+    title:'Conflict is not the problem',
+    cat:'conflict', catLabel:'Conflict and Repair', catColor:'#DD1C5E',
+    time:6, pop:7, date:'2026-10-22',
+    content:'plenty couples arrive relationship tool quietly hoping will help them argue less reasonable hope aimed wrong target people share life disagree number times they turns very little about goes what matters happens inside disagreement that skills rather than trait your patterns learnable with unavoidable cannot without wanting different things sometimes sign mismatch consequence being identical thought belief regardless similar might'
   },
   {
     slug:'conflict-vs-repair',
     title:'The difference between conflict and repair',
-    cat:'understanding', catLabel:'Understanding Each Other', catColor:'#5C6BC0',
-    time:5, pop:7, date:'2024-12-01',
-    content:'conflict repair difference rupture reconnect after fight how to repair make up apology accountability come back together reconcile heal disconnect'
+    cat:'conflict', catLabel:'Conflict and Repair', catColor:'#DD1C5E',
+    time:6, pop:8, date:'2026-10-22',
+    content:'people handle conflict almost exactly same still need completely different things once over most couples discover this after disagreement that seemed finished turned discovery usually arrives confusion rather than insight repair separate knowing which giving trouble changes what should about moments friction does have fight tone misread moment difference surfaced again come back each other afterwards long takes looks like'
   },
   {
-    slug:'what-your-communication-style-reveals',
-    title:'What your communication style reveals',
-    cat:'understanding', catLabel:'Understanding Each Other', catColor:'#5C6BC0',
-    time:7, pop:8, date:'2024-12-05',
-    content:'communication style personality express direct indirect internal external introvert extrovert emotional expressiveness how you communicate what your style means conflict needs bids closeness'
+    slug:'how-to-start-a-hard-conversation',
+    title:'How to start a hard conversation',
+    cat:'conflict', catLabel:'Conflict and Repair', catColor:'#DD1C5E',
+    time:7, pop:9, date:'2026-10-22',
+    content:'when already know conversation going difficult hardest part almost always first sentence couples avoid these conversations because they want things left unresolved them cannot find opening that does sound like accusation there better research unusually specific about works three minutes decide hard opens matter manners close determinative softened startup beginning with curiosity rather than criticism dramatically reduces physiological flooding both'
   },
   {
-    slug:'five-books-that-change-how-couples-think',
-    title:'Five books that change how couples think',
-    cat:'understanding', catLabel:'Understanding Each Other', catColor:'#5C6BC0',
-    time:4, pop:9, date:'2024-12-10',
-    content:'books reading relationship gottman attachment theory seven principles making marriage work hold me tight love languages wired for love esther perel reading list recommendations'
+    slug:'why-couples-fight-about-the-same-things',
+    title:'Why couples fight about the same things',
+    cat:'conflict', catLabel:'Conflict and Repair', catColor:'#DD1C5E',
+    time:6, pop:10, date:'2026-10-22',
+    content:'most couples have argument that keeps returning trigger same shape feels unheard other accused climbs always something like resolution arrives then weeks later happens again sign anything broken thoroughly documented facts about long relationships knowing changes what recurring arguments solvable assumption underneath frustration disagreement which coming back been solved properly them situation gottman longitudinal research found relationship conflicts perpetual problems'
   },
   {
-    slug:'what-your-couple-type-tells-you',
-    title:'What your couple type tells you',
-    cat:'couple-types', catLabel:'Methodology', catColor:'#008174',
-    time:6, pop:10, date:'2024-12-15',
-    content:'couple type dynamic personality pattern mirror complement translator steady pair spark ground quiet depth full room head heart analytical attuned fast slow repair bridge what type are we'
+    slug:'the-attune-exercises',
+    title:'The Attune exercises, and what each one is for',
+    cat:'methodology', catLabel:'Attune Methodology', catColor:'#A36333',
+    time:8, pop:11, date:'2026-10-22',
+    content:'attune made five exercises them come with every package three available additions each exists because answers question others cannot this what asks gives back thought worth your time communication styles twenty questions asked twice first pass about second same partner land dimensions energy recharge emotional expression reassurance intimacy communicating needs bids connection listening conflict style repairing feedback runs between ends'
   },
   {
-    slug:'why-naming-the-pattern-changes-everything',
-    title:'Why naming the pattern changes everything',
-    cat:'couple-types', catLabel:'Methodology', catColor:'#008174',
-    time:4, pop:12, date:'2024-12-25',
-    content:'name pattern dynamic recognition change seeing clearly awareness label identify what is happening between us naming the thing breaks the cycle insight understanding'
+    slug:'understanding-your-couple-type',
+    title:'What your couple type changes',
+    cat:'methodology', catLabel:'Attune Methodology', catColor:'#A36333',
+    time:6, pop:12, date:'2026-10-22',
+    content:'your couple type description dynamic make together label either individually compatibility rating fixed used well does specific useful thing gives recurring pattern name both without sounding like accusation what built from things individual communication orientations compare across dimensions each described relationship unit second part exercise personality test result nothing being inferred about appears when sets answers next other which change'
   },
+  {
+    slug:'why-individual-exercises-work',
+    title:'Why you answer separately',
+    cat:'methodology', catLabel:'Attune Methodology', catColor:'#A36333',
+    time:6, pop:13, date:'2026-10-22',
+    content:'every exercise attune completed alone your partner answers while giving yours they that single most important design decision product worth explaining because doing these together would more pleasant produce something less useful what happens when answer person says other adjusts slightly often without noticing comes negotiated version neither have written nice conversation information whole value comparing depends having been formed'
+  }
 ];
 
 let activeCat = 'all';

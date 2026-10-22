@@ -41,15 +41,10 @@ import { POST_CATEGORIES } from './_lib/post-categories.js';
  * again here, so renaming a shelf renames it everywhere.
  */
 const SHELF = {
-  'getting-started': POST_CATEGORIES[0],
-  conflict: POST_CATEGORIES[1],
-  understanding: POST_CATEGORIES[2],
+  experience: POST_CATEGORIES[0],
+  understanding: POST_CATEGORIES[1],
+  conflict: POST_CATEGORIES[2],
   methodology: POST_CATEGORIES[3],
-  // A fifth name on the website for the fourth shelf here. practice.html files
-  // /practice/couple-types under Methodology in its own nav, and three
-  // articles carry cat:'couple-types' in all.html. Without this they fall back
-  // to Getting Started, which is the wrong shelf and a silent one.
-  'couple-types': POST_CATEGORIES[3],
 };
 
 /** The canonical shelf for an article, for the app's filter row. */
@@ -92,26 +87,22 @@ export function shelfFor(a) {
 const labelFor = (category) => SHELF[category] || POST_CATEGORIES[0];
 
 const IN_PRACTICE_ROWS = [
-  {"slug": "how-to-review-your-results-together", "path": "/practice/how-to-review-your-results-together", "category": "getting-started", "title": "How to review your results together", "excerpt": "Though there is no prescribed method or \u2018best way\u2019 to approach your Attune insights, we compiled the following outline to guide anyone trying to thoughtfully approach this experience.", "readMinutes": 6},
-  {"slug": "how-to-start-a-hard-conversation", "path": "/practice/how-to-start-a-hard-conversation", "category": "conflict", "title": "How to start a hard conversation", "excerpt": "When you find a gap in your results that feels significant, here's a structure that opens things up rather than putting either person on the defensive.", "readMinutes": 7},
-  {"slug": "conflict-vs-repair", "path": "/practice/conflict-vs-repair", "category": "conflict", "title": "The difference between conflict and repair", "excerpt": "Two people can have compatible conflict styles and completely incompatible repair needs. Most couples have never distinguished these.", "readMinutes": 5},
-  {"slug": "when-a-conversation-turns-heated", "path": "/practice/when-a-conversation-turns-heated", "category": "conflict", "title": "When a conversation turns heated", "excerpt": "Understanding each other deeply doesn't mean you'll stop having hard moments. It means you have better tools when you do.", "readMinutes": 5},
-  {"slug": "staying-current-with-each-other", "path": "/practice/staying-current-with-each-other", "category": "getting-started", "title": "Staying current with each other over time", "excerpt": "People change. What you need, value, and envision shifts. The couples who stay genuinely close over decades check in.", "readMinutes": 5},
-  {"slug": "five-books-that-change-how-couples-think", "path": "/practice/five-books-that-change-how-couples-think", "category": "understanding", "title": "Five books that change how couples think", "excerpt": "Not a comprehensive bibliography. A short list of books that genuinely shift how people see each other, curated because they earn their place.", "readMinutes": 4},
-
-  // The six the website has and the app did not. Added without an excerpt:
-  // Ellie, 12 Sep, "we need the 12 articles written as placeholders ... but we
-  // don't need excerpts". The app renders the subtitle only when there is one.
-  //
-  // categoryLabel is what all.html says. category is what it files them
-  // under, and shelfFor uses that, so why-couples-fight lands on "When It's
-  // Difficult" rather than the "Getting Started" its label claims. That
-  // mismatch is on the website, not here, and is worth a look.
-  {"slug": "how-to-use-your-results", "path": "/practice/how-to-use-your-results", "category": "getting-started", "title": "How to use your results", "readMinutes": 8},
-  {"slug": "why-couples-fight-about-the-same-things", "path": "/practice/why-couples-fight-about-the-same-things", "category": "conflict", "title": "Why couples fight about the same things", "readMinutes": 6},
-  {"slug": "what-your-communication-style-reveals", "path": "/practice/what-your-communication-style-reveals", "category": "understanding", "title": "What your communication style reveals", "readMinutes": 7},
-  {"slug": "what-your-couple-type-tells-you", "path": "/practice/what-your-couple-type-tells-you", "category": "couple-types", "title": "What your couple type tells you", "readMinutes": 6},
-  {"slug": "why-naming-the-pattern-changes-everything", "path": "/practice/why-naming-the-pattern-changes-everything", "category": "couple-types", "title": "Why naming the pattern changes everything", "readMinutes": 4}
+  /* The thirteen Ellie approved on 22 October, in her four sections and her
+     order. Twelve are placeholders she rewrites as she has time; the second
+     one is hers already and its page is her words untouched. */
+  {"slug": "what-is-the-attune-experience", "path": "/practice/what-is-the-attune-experience", "category": "experience", "title": "What the Attune experience is for", "excerpt": "Most couples do not go looking for a relationship tool because something is wrong.", "readMinutes": 6},
+  {"slug": "how-to-review-your-results-together", "path": "/practice/how-to-review-your-results-together", "category": "experience", "title": "How to review your results together", "excerpt": "Though there is no prescribed method or ‘best way’ to approach your Attune insights, we compiled the following outline to guide anyone trying to thoughtfully approach this experience.", "readMinutes": 6},
+  {"slug": "living-attuned", "path": "/practice/living-attuned", "category": "experience", "title": "Living attuned", "excerpt": "Finishing your Attune experience is not the end of anything.", "readMinutes": 7},
+  {"slug": "understanding-is-an-action", "path": "/practice/understanding-is-an-action", "category": "understanding", "title": "Understanding is something you do", "excerpt": "Most people treat understanding their partner as a state they arrived at some time ago.", "readMinutes": 6},
+  {"slug": "the-importance-of-understanding", "path": "/practice/the-importance-of-understanding", "category": "understanding", "title": "Why understanding matters more than agreement", "excerpt": "There is a finding in relationship research that surprises almost everybody who hears it.", "readMinutes": 7},
+  {"slug": "how-to-create-an-understanding-environment", "path": "/practice/how-to-create-an-understanding-environment", "category": "understanding", "title": "How to build a relationship where understanding is normal", "excerpt": "Understanding does not happen because two people intend it.", "readMinutes": 7},
+  {"slug": "conflict-is-inevitable", "path": "/practice/conflict-is-inevitable", "category": "conflict", "title": "Conflict is not the problem", "excerpt": "Plenty of couples arrive at a relationship tool quietly hoping it will help them argue less.", "readMinutes": 6},
+  {"slug": "conflict-vs-repair", "path": "/practice/conflict-vs-repair", "category": "conflict", "title": "The difference between conflict and repair", "excerpt": "Two people can handle conflict in almost exactly the same way and still need completely different things once it is over.", "readMinutes": 6},
+  {"slug": "how-to-start-a-hard-conversation", "path": "/practice/how-to-start-a-hard-conversation", "category": "conflict", "title": "How to start a hard conversation", "excerpt": "When you already know a conversation is going to be difficult, the hardest part is almost always the first sentence.", "readMinutes": 7},
+  {"slug": "why-couples-fight-about-the-same-things", "path": "/practice/why-couples-fight-about-the-same-things", "category": "conflict", "title": "Why couples fight about the same things", "excerpt": "Most couples have one argument that keeps returning.", "readMinutes": 6},
+  {"slug": "the-attune-exercises", "path": "/practice/the-attune-exercises", "category": "methodology", "title": "The Attune exercises, and what each one is for", "excerpt": "Attune is made of five exercises.", "readMinutes": 8},
+  {"slug": "understanding-your-couple-type", "path": "/practice/understanding-your-couple-type", "category": "methodology", "title": "What your couple type changes", "excerpt": "Your couple type is a description of the dynamic the two of you make together.", "readMinutes": 6},
+  {"slug": "why-individual-exercises-work", "path": "/practice/why-individual-exercises-work", "category": "methodology", "title": "Why you answer separately", "excerpt": "Every exercise in Attune is completed alone.", "readMinutes": 6}
 ];
 
 /**

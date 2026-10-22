@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>How to use your results, In Practice, Attune</title>
+<title>Why you answer separately &middot; In Practice, Attune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -255,129 +267,67 @@
     <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
     <a href="/practice">In Practice</a>
     <span class="breadcrumb-sep">›</span>
-    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Getting Started</span>
+    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Attune Methodology</span>
   </div>
 
   <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
-    <span class="article-tag">Getting Started</span>
-    <span class="article-meta-note">8 min read</span>
+    <span class="article-tag">Attune Methodology</span>
+    <span class="article-meta-note">6 min read</span>
   </div>
-  <h1 class="article-title">How to use<br><em>your results</em></h1>
-  <p class="article-intro">Your results are a starting point, not a conclusion. What you've learned about each other is only as useful as the conversations it opens. Here's how to actually work through what you've found, together, in a way that feels more like discovery than debrief.</p>
+  <h1 class="article-title">Why you answer separately</h1>
+  <p class="article-intro">Every exercise in Attune is completed alone. You do not see your partner's answers while you are giving yours, and they do not see yours.</p>
+  <p class="article-intro">That is the single most important design decision in the product, and it is worth explaining, because doing these together would be more pleasant and would produce something far less useful.</p>
 
   <!-- ARTICLE BODY -->
   <div class="article-body">
-
-    <p>Most couples unlock their results, read them with genuine curiosity, and then... don't do much with them. Life continues. The insights sit there, accurate and untouched. This isn't a failure of motivation, it's a failure of format. Results without a structure for using them tend to stay theoretical.</p>
-
-    <p>This guide is the structure. It's built from what we've observed works, and what gets in the way.</p>
-
+    <div>
+      <h2>What happens when you answer together</h2>
+      <p>One person says something. The other adjusts, slightly, often without noticing. What comes out is a negotiated version that neither of you would have written alone.</p>
+      <p>It is a nice conversation and it is not information. The whole value of comparing two answers depends on the two answers having been formed independently.</p>
+      <blockquote class="article-quote"><p>Rather than trying to change how you think of or feel about your counterpart, our work suggests that you should focus on changing your own behavior.</p></blockquote>
+      <p>Julia Minson, Greater Good Magazine</p>
+    </div>
     <div class="article-divider"></div>
-
     <div>
-      <h2>Read separately first</h2>
-      <p>Before you look at your joint results together, spend 10–15 minutes reading them on your own. This lets you arrive at the conversation with your own perspective already formed, rather than forming it in reaction to your partner's response.</p>
-      <p style="margin-top:var(--s-md);">What you're looking for: What surprises you? What confirms something you already sensed? What do you want to understand better? Come with specific observations, not just a general impression.</p>
+      <h2>Honesty needs privacy</h2>
+      <p>Some of these questions are easier to answer truthfully when nobody is watching you answer them. That is not a character flaw, it is how people work, and designing around it is more honest than pretending otherwise.</p>
+      <blockquote class="article-quote"><p>&ldquo;In insecure relationships, we disguise our vulnerabilities so our partner never really sees us.&rdquo;</p></blockquote>
+      <p>Dr. Sue Johnson, Hold Me Tight</p>
+      <p>Answering alone also removes the social cost of a particular answer. You are not declining to do something in front of your partner. You are describing what is true, and the conversation about it happens afterwards, with both readings already on the table.</p>
+      <blockquote class="article-quote"><p>The more honest we are, the more we can discover that our partner really loves us for who we are, and not the idealized version of us that shows up when we first begin to date.</p></blockquote>
+      <p>John Gottman and others, Eight Dates</p>
     </div>
-
-    <div class="callout">
-      <p class="callout-label">Before you start</p>
-      <p>Pick a time when neither of you is distracted or tired. Your results deserve better than a Tuesday night when you're half-watching something. Even 30 uninterrupted minutes is more useful than two hours half-present.</p>
-    </div>
-
+    <div class="article-divider"></div>
     <div>
-      <h2>Start with what's working</h2>
-      <p>Before getting into the gaps, look at what's aligned. Your results show where you're already in sync, dimensions where your scores are close, expectations you share, assumptions that turned out to be compatible.</p>
-      <p style="margin-top:var(--s-md);">Name these explicitly. Not because they don't matter, but because they set a better tone for everything that comes after. It's easier to explore differences from a foundation of acknowledged strength than from a defensive crouch.</p>
+      <h2>What this makes possible</h2>
+      <p>Independent answers are what let us say something specific rather than something general. Two readings of the same question can be compared, and the distance between them means something, which is the whole basis of your results.</p>
+      <p>It is also what makes the partner-view half of the Communication exercise work. Asking how you see your partner only tells you something if your partner has separately said how they see themselves.</p>
+      <div class="callout"><p class="callout-label">And it is not all-or-nothing</p><p>Where two answers sit one step apart, your results say so, rather than calling it a disagreement. An item neither of you answered is left out of the average rather than counted as a difference, because a question nobody answered is not an argument.</p></div>
     </div>
-
+    <div class="article-divider"></div>
     <div>
-      <h2>Pick two or three things to actually explore</h2>
-      <p>Your results cover a lot of ground. Don't try to process all of it in one conversation. Depth matters far more than coverage.</p>
-      <p style="margin-top:var(--s-md);">Look for the gaps that feel significant, the places where your answers diverged in ways that explain something you've each noticed but maybe never named. Start there. One real conversation about one real difference is worth more than a surface-level tour of everything.</p>
+      <h2>The part that is not a questionnaire</h2>
+      <p>Collecting two sets of answers is the easy half. What happens next is a set of rules about what a difference means, applied the same way every time: which answers have to be mirrored before they can be compared, how far apart two answers have to be before it is worth saying anything, and what is worth saying when they are.</p>
+      <p>Those rules are written down and published. Our methodology page is generated from the code that does the scoring rather than written alongside it, so it cannot describe something the product does not do.</p>
     </div>
-
+    <div class="article-divider"></div>
     <div>
-      <h2>A structure for the hard conversations</h2>
-      <p>When you find a gap that feels significant, here's an approach that tends to work, one that opens things up rather than closing them down.</p>
-      <div class="step-group" style="margin-top:var(--s-lg);">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <p class="step-title">Start with curiosity, not conclusions</p>
-            <p class="step-body">"I noticed we answered differently on this, I'd love to understand more about how you think about it." That's a different opening than "So you don't think X matters?"</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <p class="step-title">Share your own perspective before asking for theirs</p>
-            <p class="step-body">It lowers the stakes. You're not interrogating, you're comparing notes. Modeling the openness you're asking for makes it much easier for your partner to match it.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <p class="step-title">Listen without planning your response</p>
-            <p class="step-body">Most conversations derail when both people are preparing to talk rather than actually listening. Let what your partner says land before you start forming a reply.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-content">
-            <p class="step-title">Acknowledge before you argue</p>
-            <p class="step-body">"That makes sense, given how you think about it", even if you see it differently, creates the foundation for a real exchange. Skipping this step is where most conversations go sideways.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">5</div>
-          <div class="step-content">
-            <p class="step-title">End with a question, not a position</p>
-            <p class="step-body">Leave room for it to be an ongoing conversation, not a debate to be resolved in one sitting. "I want to think about this more, can we come back to it?" is a completely legitimate ending.</p>
-          </div>
-        </div>
-      </div>
+      <h2>What we do not do with your answers</h2>
+      <p>Your Conflict Patterns answers are never sent to your partner's device. Neither are your Physical Intimacy answers in raw form. Those two are the most personal things we ask, and the results are built so that what reaches your partner is the comparison rather than your words.</p>
+      <blockquote class="article-quote"><p>Empathy is a respectful understanding of what others are experiencing.</p></blockquote>
+      <p>Marshall B. Rosenberg, Nonviolent Communication</p>
     </div>
-
-    <div>
-      <h2>When a conversation turns heated</h2>
-      <p>Understanding each other deeply doesn't mean you'll stop having hard moments. It means you have better tools when you do.</p>
-      <p style="margin-top:var(--s-md);"><strong>Name what's happening.</strong> "I can feel this getting tense" is more useful than pushing through as if it isn't. A brief pause with acknowledgment is almost always better than escalation.</p>
-      <p style="margin-top:var(--s-md);"><strong>Take a break if you need one.</strong> 20–30 minutes apart is usually enough for both nervous systems to settle. Come back to it intentionally, not by accident.</p>
-      <p style="margin-top:var(--s-md);"><strong>Go back to the results.</strong> If a conflict touches a pattern you saw in your results, reference it. It depersonalizes things slightly and reminds you both that it's a pattern, not an attack.</p>
-      <p style="margin-top:var(--s-md);"><strong>Repair before you resolve.</strong> Sometimes the most important thing isn't getting to an answer, it's reestablishing that you're still on the same team. That can come first.</p>
-    </div>
-
-    <div class="callout">
-      <p class="callout-label">Want structured guidance?</p>
-      <p>The <strong>Personalized Workbook</strong> goes further, built from your specific results, it includes guided exercises, conversation prompts, and reflection activities for each place you two see things differently. <a href="/offerings">Available to add from your portal</a> after you get your results.</p>
-    </div>
-
-    <div>
-      <h2>Take notes</h2>
-      <p>Write down the things you want to come back to. Your portal's Notes feature is built for exactly this. Not detailed minutes of your conversation, just the moments that felt significant, the things you want to revisit, the questions that opened something up.</p>
-      <p style="margin-top:var(--s-md);">The couples who get the most from Attune are the ones who treat it as an ongoing reference, not a one-time event. Your results don't expire.</p>
-    </div>
-
-    <div>
-      <h2>Staying current over time</h2>
-      <p>People change. What you need, value, and envision shifts, sometimes slowly, sometimes suddenly. The point of doing this isn't to arrive at a fixed understanding of each other. It's to build the habit of checking in.</p>
-      <p style="margin-top:var(--s-md);">Consider setting a recurring date for a relationship check-in, quarterly, semi-annual, or annual. Put it on the calendar like you would anything else that matters. Use your Attune results as a baseline. What's stayed consistent? What feels different now than when you first did this?</p>
-      <p style="margin-top:var(--s-md);">The conversations are easier when you have them regularly. The gaps that get addressed while they're small rarely become the patterns that are hard to break.</p>
-    </div>
-
-  </div><!-- .article-body -->
-
-  <!-- ARTICLE CTA -->
-  <div class="article-cta">
-    <p class="article-cta-title">Get your Attune results</p>
-    <p class="article-cta-sub">Complete both exercises independently and unlock your full communication profile, expectations map, and couple type.</p>
-    <a href="/start" class="article-cta-btn">Get started &rarr;</a>
   </div>
 
-  <!-- RELATED POSTS -->
-  <div class="related-section">
+  <!-- CTA -->
+  <div class="article-cta">
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
+    <a href="/offerings" class="article-cta-btn">Get started →</a>
+  </div>
+
+<div class="related-section">
       <!-- Share bar -->
   <div style="max-width:680px;margin:0 auto var(--s-3xl);padding:0 var(--s-3xl)">
     <div style="border-top:1px solid var(--stone);padding-top:var(--s-xl);display:flex;align-items:center;justify-content:space-between;gap:var(--s-md);flex-wrap:wrap">
@@ -410,27 +360,39 @@
 
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
-      <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <p class="related-card-tag">Getting Started</p>
-        <p class="related-card-title">How to review your results together</p>
-        <p class="related-card-time">6 min read</p>
+      <a href="/practice/the-attune-exercises" class="related-card">
+        <span class="related-card-cat">Attune Methodology</span>
+        <span class="related-card-title">The Attune exercises, and what each one is for</span>
+        <span class="related-card-time">8 min read</span>
       </a>
-      <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
-        <p class="related-card-tag">Conflict and Repair</p>
-        <p class="related-card-title">How to start a hard conversation</p>
-        <p class="related-card-time">7 min read</p>
+      <a href="/practice/understanding-your-couple-type" class="related-card">
+        <span class="related-card-cat">Attune Methodology</span>
+        <span class="related-card-title">What your couple type changes</span>
+        <span class="related-card-time">6 min read</span>
       </a>
-      <a href="/practice/staying-current-with-each-other" class="related-card">
-        <p class="related-card-tag">Getting Started</p>
-        <p class="related-card-title">Staying current with each other over time</p>
-        <p class="related-card-time">5 min read</p>
+      <a href="/practice/what-is-the-attune-experience" class="related-card">
+        <span class="related-card-cat">The Attune Experience</span>
+        <span class="related-card-title">What the Attune experience is for</span>
+        <span class="related-card-time">6 min read</span>
       </a>
     </div>
   </div>
-
-</div><!-- .article-wrap -->
-
-<!-- FOOTER -->
+<script src="/cart.js"></script>
+<script>
+  // When arriving from the in-app dashboard (?from=app), prepend a Dashboard
+  // crumb so the user can navigate back to /app. The links default to hidden
+  // and are revealed only for app referrals.
+  (function(){
+    try {
+      var p = new URLSearchParams(location.search);
+      if (p.get('from') === 'app') {
+        document.querySelectorAll('.bc-dash').forEach(function(el){ el.style.display = ''; });
+      }
+    } catch(e){}
+  })();
+</script>
+  <script src="/_flags.js"></script>
+  <script src="/_track.js"></script>
 <footer class="site-footer">
   <style>
     .site-footer{background:#1E1610!important;color:rgba(255,255,255,.75)!important;padding:1.98rem 0 1.5rem!important;width:100%!important;margin:0!important;max-width:none!important;display:block!important}
@@ -493,27 +455,20 @@
 </footer>
 
 <script>
-function toggleMenu(){document.getElementById('mobile-menu').classList.toggle('open')}
-document.addEventListener('click',function(e){
-  const menu=document.getElementById('mobile-menu');const btn=document.getElementById('hamburger');
-  if(menu.classList.contains('open')&&!menu.contains(e.target)&&!btn.contains(e.target))menu.classList.remove('open');
+/* The menu the hamburger opens. Copied from offerings.html, which is the page
+   check-chrome holds the others to: seventeen pages had the button and no way
+   to open it, and twelve of those had the menu markup sitting there unused. */
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function (e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target)
+      && burger && !burger.contains(e.target)) {
+    menu.classList.remove('open');
+  }
 });
 </script>
-  <script src="/cart.js"></script>
-<script>
-  // When arriving from the in-app dashboard (?from=app), prepend a Dashboard
-  // crumb so the user can navigate back to /app. The links default to hidden
-  // and are revealed only for app referrals.
-  (function(){
-    try {
-      var p = new URLSearchParams(location.search);
-      if (p.get('from') === 'app') {
-        document.querySelectorAll('.bc-dash').forEach(function(el){ el.style.display = ''; });
-      }
-    } catch(e){}
-  })();
-</script>
-  <script src="/_flags.js"></script>
-  <script src="/_track.js"></script>
 </body>
 </html>

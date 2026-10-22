@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Five Books That Change How Couples Think · In Practice, Attune</title>
+<title>Living attuned &middot; In Practice, Attune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -255,64 +267,87 @@
     <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
     <a href="/practice">In Practice</a>
     <span class="breadcrumb-sep">›</span>
-    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Understanding Each Other</span>
+    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">The Attune Experience</span>
   </div>
 
   <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
-    <span class="article-tag">Understanding Each Other</span>
-    <span class="article-meta-note">4 min read</span>
+    <span class="article-tag">The Attune Experience</span>
+    <span class="article-meta-note">7 min read</span>
   </div>
-  <h1 class="article-title">Five books that change<br><em>how couples think</em></h1>
-  <p class="article-intro">Not a comprehensive bibliography. A short list of books that genuinely shift how people see each other and themselves, chosen for depth over popularity.</p>
+  <h1 class="article-title">Living attuned</h1>
+  <p class="article-intro">Finishing your Attune experience is not the end of anything. The insights are accurate on the day you read them, and the two people they describe keep changing. What you need, what you value, and what you picture ahead of you will all move, sometimes gradually and sometimes in a single season.</p>
+  <p class="article-intro">Living attuned means keeping up with each other on purpose rather than by accident. This is what that looks like in ordinary weeks, when nothing is wrong and nothing is forcing the conversation.</p>
 
   <!-- ARTICLE BODY -->
   <div class="article-body">
-
     <div>
-      <h2>Hold Me Tight, Sue Johnson</h2>
-      <p>The book that introduced emotionally focused therapy to a general audience. Johnson's central argument is that most couples fight about the wrong things: the surface content of arguments is usually just a proxy for deeper questions about emotional availability and connection.</p>
-      <p>What makes it useful: it reframes conflict as attachment behavior, which changes how you interpret your own reactions and your partner's.</p>
+      <h2>The assumption that causes drift</h2>
+      <p>Drift rarely begins with conflict. It begins with the quiet assumption that you already know each other and therefore have nothing left to learn. That assumption comes from closeness, which is why it is so easy to make and so hard to notice.</p>
+      <p>It mistakes familiarity for currency. Knowing who someone was two years ago is a different thing from knowing who they are now, and the difference between those two is where most distance accumulates.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>The Seven Principles for Making Marriage Work, John Gottman</h2>
-      <p>Gottman's work is notable because it's empirical, decades of observational research on actual couples, not theory. The book is practical in a specific way: it's built around what couples who do well actually do, rather than what they avoid.</p>
-      <p>Worth reading even if you've encountered Gottman's ideas secondhand, because the details matter more than the summaries.</p>
+      <h2>What changes, and how you notice</h2>
+      <p>A new job. A health change. A child. A loss. Growth that nobody announced. Each of those moves what a person needs, what they value, how they carry stress and what they are looking forward to.</p>
+      <p>The shift rarely announces itself. It shows up as friction first: an argument about something that never used to matter, a sense of distance with no obvious cause, the feeling that you are having the same conversation again.</p>
+      <blockquote class="article-quote"><p>&ldquo;Life takes its toll on all relationships as careers, children, and crises can pull us away from each other.&rdquo;</p></blockquote>
+      <p>John Gottman and others, Eight Dates</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>Mating in Captivity, Esther Perel</h2>
-      <p>Perel's contribution is less a how-to and more a reframe. Her argument is that desire and security exist in productive tension, and that the efforts couples make to build security can inadvertently erode the conditions for desire.</p>
-      <p>It's a useful book for couples who feel like everything is working except for some harder-to-name quality that's gotten quieter.</p>
+      <h2>Small things, said out loud</h2>
+      <p>Most of staying current happens in ordinary moments rather than in scheduled conversations. A question asked while you are doing something else. Noticing that your partner is quieter than usual and saying so. Answering when they reach for you, even when you are tired.</p>
+      <blockquote class="article-quote"><p>A bid is any attempt from one partner to another for attention, affirmation, affection, or any other positive connection.</p></blockquote>
+      <p>Zach Brittle, The Gottman Institute</p>
+      <p>Those small reaches are easy to miss and easy to underrate. The research is unusually blunt about how much they matter, both when they land and when they do not.</p>
+      <blockquote class="article-quote"><p>Happy couples turn towards their partners approximately 20 times more than couples in distress during everyday, non-conflict discussions.</p></blockquote>
+      <p>Dr. Ellie Wilde, The Gottman Institute</p>
+      <blockquote class="article-quote"><p>The absence of bids [for connection] leads to emotional disengagement, loneliness, and in many cases either break-up or unhappiness.</p></blockquote>
+      <p>Satira Streeter, The Gottman Institute</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>Attached, Amir Levine & Rachel Heller</h2>
-      <p>Attachment theory applied directly to adult romantic relationships. The book makes a compelling case that most recurring relationship patterns can be traced to attachment style, and that understanding your own style (and your partner's) is more useful than most communication advice.</p>
-      <div class="callout"><p class="callout-label">A note on attachment typing</p><p>The attachment categories in this book are descriptive, not prescriptive. Knowing your style is useful; treating it as fixed is less useful.</p></div>
+      <h2>Saying what you need</h2>
+      <p>A need that has never been said is not a need your partner is failing to meet. It is a need they do not know about. Most of what couples describe as not being heard turns out, on inspection, to be something that was never put into words clearly enough to act on.</p>
+      <div class="callout"><p class="callout-label">A way to say it</p><p>Name what you have noticed in yourself rather than what your partner is doing. Add what you would like more of rather than what you want to stop. Then ask a real question, one you genuinely want the answer to. The question is what makes it a conversation instead of a statement.</p></div>
+      <blockquote class="article-quote"><p>Generally in love, sharing even negative emotions, provided they don't get out of hand, is more useful than emotional absence.</p></blockquote>
+      <p>Dr. Sue Johnson, Hold Me Tight</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>Crucial Conversations, Kerry Patterson et al.</h2>
-      <p>Not specifically a relationship book, but one of the more practically useful books for the mechanics of high-stakes conversations. It's detailed about what actually happens when conversations go wrong, and specific about what to do about it.</p>
-      <p>Best read as a manual, not a narrative, the value is in the frameworks, which are worth trying before dismissing.</p>
+      <h2>Coming back to your results</h2>
+      <p>The most useful thing you can do with your Attune results is not read them once. It is to take the exercises again after a real stretch of time and put the two sets side by side.</p>
+      <p>Not to see whether you improved, which is not a question these exercises ask. To see what moved, where your answers shifted and where they held. The distance between two rounds tells you something about the last year that a single round never can.</p>
     </div>
+    <div class="article-divider"></div>
+    <div>
+      <h2>The habit, not the event</h2>
+      <p>Couples who stay close over decades are not the ones who got something right at the start. They are the ones who kept checking, who treated understanding as something you do rather than something you have, and who were willing to be surprised by a person they already knew well.</p>
+      <blockquote class="article-quote"><p>&ldquo;Perfection is not the price of love. Practice is. We practice how to express our love and how to receive our partner&rsquo;s love. Love is an action even more than a feeling. It requires intention and attention, a practice we call attunement.&rdquo;</p></blockquote>
+      <p>John Gottman and others, Eight Dates</p>
+    </div>
+  </div>
 
+  <!-- RESEARCH CITATION -->
+  <div style="background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:var(--s-xl) 1.75rem;margin:var(--s-3xl) 0 0;">
+    <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;">Research context</p>
+    <div style="display:flex;flex-direction:column;gap:.85rem;">
+      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
+        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">People change. Their values, preferences, and needs shift gradually over time, often without either partner consciously registering the shift. Couples who revisit their shared understanding periodically report stronger relationship quality than those who assume continuity.</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Karney, B.R. &amp; Bradbury, T.N. — Psychological Bulletin (1995)</p>
+      </div>
+      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
+        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Longitudinal relationship research consistently finds that unexamined assumptions about roles, finances, and shared expectations are among the leading causes of relationship dissatisfaction, not because the assumptions are wrong, but because they're never made explicit. Periodic structured check-ins are associated with higher satisfaction and fewer unresolvable conflicts.</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Stanley, S.M., Rhoades, G.K., &amp; Markman, H.J. — Family Process (2006)</p>
+      </div>
+    </div>
   </div>
 
   <!-- CTA -->
   <div class="article-cta">
-    <p class="article-cta-title">Put this into practice with Attune</p>
-    <p class="article-cta-sub">The exercises behind Attune are informed by the same research these books draw on. Your results give you a framework built from your actual answers, not general principles.</p>
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
     <a href="/offerings" class="article-cta-btn">Get started →</a>
   </div>
 
@@ -349,17 +384,20 @@
 
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
+      <a href="/practice/what-is-the-attune-experience" class="related-card">
+        <span class="related-card-cat">The Attune Experience</span>
+        <span class="related-card-title">What the Attune experience is for</span>
+        <span class="related-card-time">6 min read</span>
+      </a>
       <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <span class="related-card-cat">Getting Started</span>
+        <span class="related-card-cat">The Attune Experience</span>
         <span class="related-card-title">How to review your results together</span>
+        <span class="related-card-time">6 min read</span>
       </a>
-      <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">How to start a hard conversation</span>
-      </a>
-      <a href="/practice/conflict-vs-repair" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">The difference between conflict and repair</span>
+      <a href="/practice/understanding-is-an-action" class="related-card">
+        <span class="related-card-cat">Understanding Each Other</span>
+        <span class="related-card-title">Understanding is something you do</span>
+        <span class="related-card-time">6 min read</span>
       </a>
     </div>
   </div>

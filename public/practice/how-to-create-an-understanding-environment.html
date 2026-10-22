@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Staying Current With Each Other · In Practice, Attune</title>
+<title>How to build a relationship where understanding is normal &middot; In Practice, Attune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -255,74 +267,78 @@
     <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
     <a href="/practice">In Practice</a>
     <span class="breadcrumb-sep">›</span>
-    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Getting Started</span>
+    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Understanding Each Other</span>
   </div>
 
   <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
-    <span class="article-tag">Getting Started</span>
-    <span class="article-meta-note">6 min read</span>
+    <span class="article-tag">Understanding Each Other</span>
+    <span class="article-meta-note">7 min read</span>
   </div>
-  <h1 class="article-title">Staying current with each<br><em>other over time</em></h1>
-  <p class="article-intro">People change. What you need, value, and envision shifts, sometimes gradually, sometimes suddenly. The couples who stay genuinely close over time are the ones who stay current with each other. Here's what that actually takes.</p>
+  <h1 class="article-title">How to build a relationship where understanding is normal</h1>
+  <p class="article-intro">Understanding does not happen because two people intend it. It happens because the conditions are right for it, and those conditions are built out of small, repeatable things rather than large intentions.</p>
+  <p class="article-intro">This is what those conditions are, and what each of you can actually do this week to create them.</p>
 
   <!-- ARTICLE BODY -->
   <div class="article-body">
-
     <div>
-      <h2>The assumption that causes drift</h2>
-      <p>The most common source of relational drift isn't conflict. It's the quiet assumption that you already know each other, and therefore don't need to keep learning.</p>
-      <p>This assumption is understandable. It emerges from closeness. And it's wrong in a specific way: it mistakes familiarity for currency. Knowing who someone was two years ago is different from knowing who they are now.</p>
+      <h2>Answer the small reaches</h2>
+      <p>Most of the opportunity is not in the big conversations. It is in the ordinary moments where one of you reaches for the other and something either happens or does not.</p>
+      <blockquote class="article-quote"><p>A bid is any attempt from one partner to another for attention, affirmation, affection, or any other positive connection.</p></blockquote>
+      <p>Zach Brittle, The Gottman Institute</p>
+      <blockquote class="article-quote"><p>Nonverbal bids [for connection] are still bids and deserve recognition.</p></blockquote>
+      <p>The Gottman Institute</p>
+      <p>Reading a line out loud. A hand on a shoulder. Asking what you want for dinner when what is really being asked is whether you are in the room. Answering those is cheap, and the cumulative effect of answering them is most of what people mean by feeling close.</p>
+      <blockquote class="article-quote"><p>Happy couples turn towards their partners approximately 20 times more than couples in distress during everyday, non-conflict discussions.</p></blockquote>
+      <p>Dr. Ellie Wilde, The Gottman Institute</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>What changes, and how it shows up</h2>
-      <p>Career transitions, health changes, the arrival of children, loss, personal growth, all of these shift what someone needs, what they value, how they manage stress, and what they're looking forward to.</p>
-      <p>These shifts don't always announce themselves. They often show up first as friction: a recurring argument about something that never used to matter, a growing sense of distance without a clear cause, the feeling that you're having the same conversation on repeat.</p>
-      <blockquote class="article-quote"><p>The couples who navigate change well aren't the ones who stay the same. They're the ones who keep telling each other who they're becoming.</p></blockquote>
+      <h2>Make it safe to be honest</h2>
+      <p>Nobody tells you the real version if the real version has cost them before. An environment where understanding is possible is one where being honest did not turn out badly the last few times.</p>
+      <blockquote class="article-quote"><p>&ldquo;In insecure relationships, we disguise our vulnerabilities so our partner never really sees us.&rdquo;</p></blockquote>
+      <p>Dr. Sue Johnson, Hold Me Tight</p>
+      <blockquote class="article-quote"><p>The more honest we are, the more we can discover that our partner really loves us for who we are, and not the idealized version of us that shows up when we first begin to date.</p></blockquote>
+      <p>John Gottman and others, Eight Dates</p>
+      <div class="callout"><p class="callout-label">What makes it unsafe</p><p>Not anger, usually. Being corrected. Having a feeling explained back to you as though it were a mistake. Hearing something you said in confidence come back during an argument. Those are the things that teach a person to give the shorter answer next time.</p></div>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>Small practices that make a real difference</h2>
-      <p>You don't need formal check-ins to stay current. What you need is a consistent habit of genuine curiosity about what's alive for your partner right now.</p>
-      <p>Some couples build this into weekly conversations. Others make a point of asking different questions, not "how was your day" but "what's been occupying your mind this week" or "is there anything you've been sitting with that we haven't talked about."</p>
-      <p>The specific format matters less than the consistency. And consistency matters less than the quality of attention when you do it.</p>
+      <h2>Listen in a way that shows</h2>
+      <p>Listening that cannot be observed does not do the work. Your partner cannot tell the difference between being heard and being waited out, so the demonstration is part of the act rather than a performance of it.</p>
+      <blockquote class="article-quote"><p>Rather than jumping in to your own argument, devote a few seconds to restating the other person&rsquo;s position to demonstrate that you did indeed hear and understand it.</p></blockquote>
+      <p>Julia Minson, Greater Good Magazine</p>
+      <blockquote class="article-quote"><p>Making someone you&rsquo;re arguing with feel that you&rsquo;re listening can calm the troubled waters, allowing both parties to get safely to the opposite shore.</p></blockquote>
+      <p>Julia Minson, Greater Good Magazine</p>
+      <p>And resist the urge to fix it immediately, which is almost always offered as care and almost always lands as dismissal.</p>
+      <blockquote class="article-quote"><p>Quick advice often backfires because it solves the problem before addressing the person.</p></blockquote>
+      <p>Guy Itzchakov, Psychology Today</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>Revisiting your Attune results over time</h2>
-      <p>One of the most useful things you can do with your Attune results isn't read them once, it's compare them to a second round done a year or two later.</p>
-      <p>Not to see if you've improved, but to see what's shifted. Where your answers have moved. Where they've stayed the same. The delta between two rounds tells you something about your relationship that a single snapshot never can.</p>
+      <h2>Describe rather than diagnose</h2>
+      <p>There is a large difference between telling someone what they did and telling them what they are. The first is a thing you can both look at. The second is a verdict, and verdicts end conversations.</p>
+      <blockquote class="article-quote"><p>A complaint focuses on a specific behavior, but criticism attacks a person&rsquo;s very character.</p></blockquote>
+      <p>The Gottman Institute</p>
+      <blockquote class="article-quote"><p>When we focus on clarifying what is being observed, felt, and needed rather than on diagnosing and judging, we discover the depth of our own compassion.</p></blockquote>
+      <p>Marshall B. Rosenberg, Nonviolent Communication</p>
     </div>
-
-  </div>
-
-
-  <!-- RESEARCH CITATION -->
-  <div style="background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:var(--s-xl) 1.75rem;margin:var(--s-3xl) 0 0;">
-    <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;">Research context</p>
-    <div style="display:flex;flex-direction:column;gap:.85rem;">
-            <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
-        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Longitudinal relationship research consistently finds that unexamined assumptions about roles, finances, and shared expectations are among the leading causes of relationship dissatisfaction, not because the assumptions are wrong, but because they're never made explicit. Periodic structured check-ins are associated with higher satisfaction and fewer unresolvable conflicts.</p>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Stanley, S.M., Rhoades, G.K., & Markman, H.J. — Family Process (2006)</p>
-      </div>
-      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
-        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">People change. Their values, preferences, and needs shift gradually over time, often without either partner consciously registering the shift. Couples who revisit their shared understanding periodically report stronger relationship quality than those who assume continuity.</p>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Karney, B.R. & Bradbury, T.N. — Psychological Bulletin (1995)</p>
-      </div>
+    <div class="article-divider"></div>
+    <div>
+      <h2>Keep a ratio in mind</h2>
+      <p>The balance between the good moments and the hard ones is not an abstraction. It is measurable, and couples who do well sit a long way from even.</p>
+      <blockquote class="article-quote"><p>For every negative interaction during conflict, a stable and happy marriage has five (or more) positive interactions.</p></blockquote>
+      <p>Kyle Benson, The Gottman Institute</p>
+      <p>That ratio is not built during conflict. It is built in all the ordinary hours around it, which is why the small things in this article are the ones that matter most.</p>
+      <blockquote class="article-quote"><p>&ldquo;Couples in long-term relationships must turn the seemingly small and mundane into opportunities to attune to one another.&rdquo;</p></blockquote>
+      <p>Liz Higgins, The Gottman Institute</p>
     </div>
   </div>
 
   <!-- CTA -->
   <div class="article-cta">
-    <p class="article-cta-title">Start with a shared baseline</p>
-    <p class="article-cta-sub">Attune gives you and your partner a common framework so you can keep building on the same map instead of talking past each other.</p>
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
     <a href="/offerings" class="article-cta-btn">Get started →</a>
   </div>
 
@@ -359,17 +375,20 @@
 
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
-      <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <span class="related-card-cat">Getting Started</span>
-        <span class="related-card-title">How to review your results together</span>
+      <a href="/practice/understanding-is-an-action" class="related-card">
+        <span class="related-card-cat">Understanding Each Other</span>
+        <span class="related-card-title">Understanding is something you do</span>
+        <span class="related-card-time">6 min read</span>
       </a>
-      <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">How to start a hard conversation</span>
+      <a href="/practice/the-importance-of-understanding" class="related-card">
+        <span class="related-card-cat">Understanding Each Other</span>
+        <span class="related-card-title">Why understanding matters more than agreement</span>
+        <span class="related-card-time">7 min read</span>
       </a>
-      <a href="/practice/conflict-vs-repair" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">The difference between conflict and repair</span>
+      <a href="/practice/what-is-the-attune-experience" class="related-card">
+        <span class="related-card-cat">The Attune Experience</span>
+        <span class="related-card-title">What the Attune experience is for</span>
+        <span class="related-card-time">6 min read</span>
       </a>
     </div>
   </div>

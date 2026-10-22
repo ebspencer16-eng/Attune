@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What Your Communication Style Reveals · In Practice, Attune</title>
+<title>What the Attune experience is for &middot; In Practice, Attune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
@@ -80,6 +80,18 @@
   .article-body{display:flex;flex-direction:column;gap:2.25rem}
   .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
   .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
   .article-body p strong{font-weight:600;color:var(--ink)}
 
   /* NUMBERED STEPS */
@@ -248,73 +260,72 @@
 </div>
 
 <div class="article-wrap fu1">
+
+  <!-- BREADCRUMB -->
   <div class="breadcrumb">
     <a href="/app" class="bc-dash" style="display:none">Dashboard</a>
     <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
     <a href="/practice">In Practice</a>
     <span class="breadcrumb-sep">›</span>
-    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Understanding Each Other</span>
+    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">The Attune Experience</span>
   </div>
+
+  <!-- ARTICLE HEADER -->
   <div class="article-tag-row">
-    <span class="article-tag">Understanding Each Other</span>
-    <span class="article-meta-note">7 min read</span>
+    <span class="article-tag">The Attune Experience</span>
+    <span class="article-meta-note">6 min read</span>
   </div>
-  <h1 class="article-title">What your communication<br><em>style actually reveals</em></h1>
-  <p class="article-intro">Most people think of communication style as a preference, the way you happen to do things. It's actually something more interesting: a map of what you need, what you're afraid of, and how you were shaped. Here's what your results are really showing you.</p>
+  <h1 class="article-title">What the Attune experience is for</h1>
+  <p class="article-intro">Most couples do not go looking for a relationship tool because something is wrong. They go looking because something matters, and they would rather understand it than assume it. A wedding ahead of them, a move, a first child, a quiet stretch where things are fine but neither of them has asked out loud in a while.</p>
+  <p class="article-intro">Attune is built for that. Not to assess you, and not to tell you whether you are compatible. It exists to give two people an accurate picture of how they each actually see their life together, and a reason to talk about the places where those pictures differ.</p>
+
+  <!-- ARTICLE BODY -->
   <div class="article-body">
     <div>
-      <h2>Style is not just preference</h2>
-      <p>When Attune maps how you communicate across 10 dimensions, it's not cataloguing habits. It's reflecting how you've learned to navigate closeness, conflict, and uncertainty with another person.</p>
-      <p>Someone who tends to withdraw during conflict isn't just "the avoidant one." They've often learned that engaging quickly tends to escalate, or that things usually resolve better after space. That's a strategy, not a flaw.</p>
+      <h2>The premise</h2>
+      <p>Almost every couple is carrying a set of assumptions about each other that neither of them has ever said out loud. Who handles what. How each of you wants to be approached when something is wrong. What you each pictured when you imagined the next ten years.</p>
+      <p>Those assumptions are usually close to right, which is exactly why they go unexamined. The gap between what you assume and what is true tends to stay invisible until something forces it into the open, and by then it has had years to accumulate meaning.</p>
+      <blockquote class="article-quote"><p>&ldquo;I promise you, there is, and always will be, more that you don&rsquo;t know about your partner than you do.&rdquo;</p></blockquote>
+      <p>Zach Brittle, LMHC, The Gottman Institute</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>The four things your style reveals</h2>
-      <p>Your communication orientation reflects: what you learned was safe to express (and what wasn't), how you manage the gap between what you feel and what you say, what you need from another person to feel like a full partner rather than a problem, and how you handle the moment when things get hard.</p>
-      <p>None of these are fixed. But they're also not arbitrary. Understanding where your style comes from, rather than just describing what it is, changes how you relate to it.</p>
+      <h2>Why you answer separately</h2>
+      <p>You each complete the exercises on your own, without seeing each other's answers. That is deliberate, and it is the part that makes the rest of it worth anything.</p>
+      <p>Answering together produces a conversation, which is valuable but is not data. One person says something, the other adjusts, and what comes out is a negotiated version that neither of you would have written alone. Answering separately gives you two honest readings, and the distance between them is the thing worth looking at.</p>
+      <div class="callout"><p class="callout-label">What we are not doing</p><p>There is no score, no ranking and no verdict. Nothing in your results says one of you is doing it better, and nothing says whether you should be together. Those are not questions a questionnaire can answer, and a product that pretends otherwise is selling something other than understanding.</p></div>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>What it means when styles differ</h2>
-      <p>Different communication styles aren't inherently incompatible. Two people can have opposite orientations on almost every dimension and build something genuinely good, if they understand what the other's style means and what it needs.</p>
-      <p>The problems come from misreading. When one person's withdrawal gets interpreted as not caring. When one person's directness gets read as aggression. When someone's need for resolution gets experienced as pressure.</p>
-      <blockquote class="article-quote"><p>The gap isn't the problem. The misread is.</p></blockquote>
+      <h2>What you get back</h2>
+      <p>Your results describe where each of you stands, where you already line up, and where you see something differently. Each difference comes with the context to make sense of it: what that orientation tends to mean for the person who holds it, and what they are likely to need because of it.</p>
+      <p>You also get your couple type, which is a description of the dynamic the two of you make together rather than a label for either of you. And you get a set of conversations worth having, drawn from your own answers rather than from a generic list.</p>
     </div>
-
     <div class="article-divider"></div>
-
     <div>
-      <h2>How to use your results here</h2>
-      <p>Look at the dimensions where you scored furthest from each other. For each one, ask not "which of us is right" but "what does this orientation mean for that person, and what do they need from me because of it?"</p>
-      <p>The answers tend to be generous ones. Most communication patterns, once understood from the inside, make complete sense.</p>
+      <h2>Understanding is the point</h2>
+      <p>The research on long relationships is consistent on one thing. What separates couples who do well is not how similar they are, how little they argue, or how well matched they look on paper. It is whether each person has an accurate and generous picture of the other, and keeps updating it.</p>
+      <blockquote class="article-quote"><p>Fortunately, our research shows that it&rsquo;s not the appearance of conflict, but rather how it&rsquo;s managed that predicts the success or failure of a relationship.</p></blockquote>
+      <p>The Gottman Institute</p>
+      <p>That is the whole design brief. Everything in Attune, every exercise, every page of results, every conversation prompt, exists to make that picture more accurate and more generous than it was before you started.</p>
     </div>
-
-  </div>
-
-  <!-- RESEARCH CITATION -->
-  <div style="background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:var(--s-xl) 1.75rem;margin:var(--s-3xl) 0 0;">
-    <p style="font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:.85rem;">Research context</p>
-    <div style="display:flex;flex-direction:column;gap:.85rem;">
-            <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
-        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Attachment theory research consistently finds that early relational patterns shape adult communication styles in predictable ways, particularly around emotional expression, bids for connection, and responses to conflict. Recognizing your own orientation is about having the self-awareness to act deliberately rather than reflexively.</p>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Hazan, C. & Shaver, P. — Journal of Personality and Social Psychology (1987); Mikulincer, M. & Shaver, P.R. — Attachment in Adulthood (2007)</p>
-      </div>
-      <div style="border-left:2.5px solid var(--stone);padding-left:var(--s-md);">
-        <p style="font-size:.78rem;color:var(--text);line-height:1.7;margin:0;">Self-disclosure, genuinely sharing one's inner world, is among the strongest predictors of relationship quality and satisfaction. Feeling understood, rather than just heard, is what drives the strongest relationship outcomes.</p>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:.4rem;font-style:italic;">Reis, H.T. & Shaver, P. — Intimacy as an Interpersonal Process (1988)</p>
-      </div>
+    <div class="article-divider"></div>
+    <div>
+      <h2>What it asks of you</h2>
+      <p>Honest answers, roughly an hour of attention between you, and a willingness to be curious about a difference rather than defensive about it.</p>
+      <p>That last one is the only part that is genuinely hard, and it is also the part that decides what you get out of this.</p>
+      <blockquote class="article-quote"><p>Because if you do not understand this person, you cannot love properly.</p></blockquote>
+      <p>Thich Nhat Hanh, True Love</p>
     </div>
   </div>
 
+  <!-- CTA -->
   <div class="article-cta">
-    <p class="article-cta-title">See your full communication profile</p>
-    <p class="article-cta-sub">Your Attune Communication results score you on 10 dimensions including Expression, Needs, Conflict, and Repair. The results show where you each land and what the gap means.</p>
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
     <a href="/offerings" class="article-cta-btn">Get started →</a>
   </div>
+
 <div class="related-section">
       <!-- Share bar -->
   <div style="max-width:680px;margin:0 auto var(--s-3xl);padding:0 var(--s-3xl)">
@@ -349,16 +360,19 @@
   <p class="related-label">More from In Practice</p>
     <div class="related-grid">
       <a href="/practice/how-to-review-your-results-together" class="related-card">
-        <span class="related-card-cat">Getting Started</span>
+        <span class="related-card-cat">The Attune Experience</span>
         <span class="related-card-title">How to review your results together</span>
+        <span class="related-card-time">6 min read</span>
       </a>
-      <a href="/practice/conflict-vs-repair" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">The difference between conflict and repair</span>
+      <a href="/practice/living-attuned" class="related-card">
+        <span class="related-card-cat">The Attune Experience</span>
+        <span class="related-card-title">Living attuned</span>
+        <span class="related-card-time">7 min read</span>
       </a>
-      <a href="/practice/how-to-start-a-hard-conversation" class="related-card">
-        <span class="related-card-cat">Conflict and Repair</span>
-        <span class="related-card-title">How to start a hard conversation</span>
+      <a href="/practice/understanding-is-an-action" class="related-card">
+        <span class="related-card-cat">Understanding Each Other</span>
+        <span class="related-card-title">Understanding is something you do</span>
+        <span class="related-card-time">6 min read</span>
       </a>
     </div>
   </div>

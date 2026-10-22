@@ -14,16 +14,11 @@
  * shelf name slightly differently is a worse failure than one filed oddly.
  */
 export const POST_CATEGORIES = [
-  'Getting Started',
-  // Ellie, choosing between the two names the product was using: "Conflict and
-  // Repair and Understanding Each Other". The page tagged cards "Conflict &
-  // Repair" and shelved them under "When It's Difficult", so a reader met two
-  // names for one shelf. This is the one she picked, spelled the way she wrote
-  // it: "and", not an ampersand.
-  'Conflict and Repair',
+  // Ellie's four, 22 October, replacing Getting Started and Methodology:
+  // "as mentioned above I want these to replace what's live". The order is
+  // hers and it is display order, so changing it changes both surfaces.
+  'The Attune Experience',
   'Understanding Each Other',
-  // Ellie: "I want methodology". This shelf had two names: the index pill said
-  // Methodology and its own page, its three cards and its address said Couple
-  // Types. One name now, hers, and every surface reads it from here.
-  'Methodology',
+  'Conflict and Repair',
+  'Attune Methodology',
 ];

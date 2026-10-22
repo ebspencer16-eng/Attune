@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What your couple type changes &middot; In Practice, Attune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tokens.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--cream:#FFFDF9;--warm:#FBF8F3;--stone:#E8DDD0;--clay:#A36333;--ink:#0E0B07;--text:#1E1610;--muted:#7A6753;--orange:#E8673A;--indigo:#1B5FE8;--hfont:'Playfair Display',Georgia,serif;--bfont:'DM Sans',sans-serif}
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--text);font-family:var(--bfont);-webkit-font-smoothing:antialiased}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(255,253,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);display:flex;align-items:center;padding:0 var(--s-3xl);justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+  .logo-text{font-family:var(--hfont);font-size:1.15rem;font-weight:700;color:var(--ink)}
+  .nav-center{display:flex;gap:var(--s-3xl);list-style:none;position:absolute;left:50%;transform:translateX(-50%);align-items:center}
+  .nav-center li{display:flex;align-items:center}
+  .nav-center a{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;transition:color .15s}
+  .nav-center a:hover,.nav-center a.active{color:var(--ink);font-weight:600}
+  .nav-dropdown{position:relative}
+  .nav-dropdown-toggle{text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:.28rem;background:none;border:none;padding:0;font-family:var(--bfont);transition:color .15s}
+  .nav-dropdown-toggle:hover,.nav-dropdown-toggle.active{color:var(--ink)}
+  .nav-dropdown-toggle svg{transition:transform .2s}
+  .nav-dropdown:hover .nav-dropdown-toggle svg{transform:rotate(180deg)}
+  .nav-dropdown-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border:1.5px solid var(--stone);border-radius:14px;padding:.6rem;min-width:190px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility .15s;box-shadow:0 12px 40px rgba(14,11,7,.12);z-index:200}
+  .nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-16px;left:-10px;right:-10px;height:16px;background:transparent}
+  .nav-dropdown-menu a{display:block;padding:.55rem .8rem;font-size:.78rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:all .15s;font-weight:500}
+  .nav-dropdown-menu a:hover{background:var(--warm);color:var(--ink)}
+  .nav-dropdown-menu a.active{color:var(--ink);font-weight:600}
+  .nav-dropdown-menu .dd-divider{height:1px;background:var(--stone);margin:.35rem var(--s-xs)}
+  .nav-right{display:flex;align-items:center;gap:var(--s-lg)}
+  .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
+  .nav-signin:hover{color:var(--ink)}
+  /* The one action the site is for. `.nav-right a` sets a muted colour and is
+     more specific than a bare `.btn-nav`, so on two pages this button was a
+     brown-on-orange 1.65 against the 4.5 it needs, and on five In Practice
+     index pages it had no orange at all and read as plain text. Measured on
+     every page, not reasoned about. */
+  .nav-right a.btn-nav{background:var(--orange,#E8673A);color:#fff;border-radius:10px;font-weight:600;text-decoration:none;display:inline-block}
+  .btn-nav{background:var(--orange);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
+  .btn-nav:hover{opacity:.82}
+  .hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;min-width:44px;min-height:44px}
+  .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
+  .mobile-menu{display:none;position:fixed;top:58px;left:0;right:0;background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);padding:var(--s-lg) var(--s-2xl) var(--s-xl);z-index:99;flex-direction:column;gap:.2rem}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.6rem 0;border-bottom:1px solid var(--stone);transition:color .15s}
+  .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
+  .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
+  .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem var(--s-sm)}
+  .mm-sub{padding-left:.75rem!important;font-size:.85rem!important;border-bottom:none!important}
+
+  /* ARTICLE LAYOUT */
+  .article-wrap{max-width:720px;margin:0 auto;padding:calc(58px + 3.5rem) 2.5rem 5rem}
+
+  /* BREADCRUMB */
+  .breadcrumb{display:flex;align-items:center;gap:var(--s-xs);margin-bottom:var(--s-2xl)}
+  .breadcrumb a{font-size:.72rem;color:var(--muted);text-decoration:none;transition:color .15s}
+  .breadcrumb a:hover{color:var(--ink)}
+  .breadcrumb-sep{font-size:.7rem;color:var(--stone)}
+
+  /* ARTICLE HEADER */
+  .article-tag-row{display:flex;align-items:center;gap:.65rem;margin-bottom:var(--s-lg)}
+  /* The brand orange on a ten per cent wash of itself is 2.93 against the 4.5
+   WCAG asks for at this size, measured on the painted colour rather than
+   read off the stylesheet. #8A4A22 is the same hue darkened until it
+   clears, at 6.11. The pill and its border are unchanged. */
+.article-tag{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:.3rem .8rem;border-radius:999px;background:rgba(232,103,58,.1);color:#8A4A22;border:1px solid rgba(232,103,58,.25)}
+  .article-meta-note{font-size:.72rem;color:var(--muted)}
+  .article-title{font-family:var(--hfont);font-size:clamp(2.2rem,4vw,3.2rem);font-weight:700;color:var(--ink);line-height:1.05;letter-spacing:-.025em;margin-bottom:var(--s-md)}
+  .article-title em{font-style:italic;color:var(--clay)}
+  .article-intro{font-size:1.05rem;color:var(--muted);line-height:1.85;font-weight:300;border-left:3px solid var(--orange);padding-left:var(--s-lg);margin-bottom:var(--s-3xl)}
+
+  /* ARTICLE BODY */
+  .article-body{display:flex;flex-direction:column;gap:2.25rem}
+  .article-body h2{font-family:var(--hfont);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.1rem;letter-spacing:-.015em}
+  .article-body p{font-size:.95rem;color:var(--text);line-height:1.85;font-weight:300}
+  /* Two paragraphs in one section ran straight into each other: the
+     2.25rem gap is between SECTIONS, and a section with three
+     paragraphs had no space anywhere inside it. Visible on the live
+     page before any of this, under "Before you discuss". */
+  .article-body > div > p + p{margin-top:1.1rem}
+  /* `.article-quote` was on every In Practice page and styled on none
+     of them, so a quotation rendered as ordinary body text with
+     quotation marks round it. These articles lean on quoted research,
+     so a quote has to look like one. */
+  .article-body blockquote.article-quote{border-left:3px solid var(--stone);padding:.1rem 0 .1rem var(--s-lg);margin:.4rem 0 0}
+  .article-body blockquote.article-quote p{font-size:1rem;line-height:1.75;color:var(--ink);font-weight:300}
+  .article-body blockquote + p{margin-top:.6rem;font-size:.78rem;color:var(--muted);font-style:italic}
+  .article-body p strong{font-weight:600;color:var(--ink)}
+
+  /* NUMBERED STEPS */
+  .step-group{display:flex;flex-direction:column;gap:var(--s-lg)}
+  .step{display:flex;gap:var(--s-lg);align-items:flex-start}
+  .step-num{width:32px;height:32px;border-radius:50%;background:var(--orange);color:white;font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.1rem}
+  .step-content{flex:1}
+  .step-title{font-size:.95rem;font-weight:600;color:var(--ink);margin-bottom:.3rem}
+  .step-body{font-size:.88rem;color:var(--muted);line-height:1.75;font-weight:300}
+
+  /* CALLOUT BOX */
+  .callout{background:linear-gradient(135deg,#FFF8F5,#F0F3FF);border:1.5px solid var(--stone);border-radius:16px;padding:var(--s-xl) 1.75rem;margin-top:var(--s-sm)}
+  .callout-label{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);margin-bottom:.65rem}
+  .callout p{font-size:.9rem;color:var(--text);line-height:1.78;font-weight:300}
+  .callout a{color:var(--orange);font-weight:600;text-decoration:none}
+  .callout a:hover{text-decoration:underline}
+
+  /* DIVIDER */
+  .article-divider{height:1px;background:var(--stone);margin:var(--s-xs) 0}
+
+  /* RELATED POSTS */
+  .related-section{margin-top:4rem;padding-top:var(--s-3xl);border-top:1px solid var(--stone)}
+  .related-label{font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:var(--s-lg);display:flex;align-items:center;gap:var(--s-xs)}
+  .related-label::before{content:'';width:20px;height:1.5px;background:var(--clay)}
+  .related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-md)}
+  .related-card{background:white;border:1.5px solid var(--stone);border-radius:14px;padding:var(--s-lg);text-decoration:none;display:flex;flex-direction:column;gap:var(--s-xs);transition:border-color .15s,transform .15s}
+  .related-card:hover{border-color:rgba(193,127,71,.5);transform:translateY(-2px)}
+  .related-card-tag{font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--clay)}
+  .related-card-title{font-family:var(--hfont);font-size:.95rem;font-weight:700;color:var(--ink);line-height:1.25}
+  .related-card-time{font-size:.68rem;color:var(--muted)}
+
+  /* CTA */
+  .article-cta{background:var(--warm);border:1px solid var(--stone);border-radius:20px;padding:2.75rem var(--s-3xl);text-align:center;margin-top:3rem}
+  .article-cta-title{font-family:var(--hfont);font-size:clamp(1.6rem,3vw,2rem);font-weight:700;color:var(--ink);line-height:1.12;letter-spacing:-.01em;margin-bottom:.85rem}
+  .article-cta-sub{font-size:.95rem;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:1.75rem;max-width:480px;margin-left:auto;margin-right:auto}
+  .article-cta-btn{background:linear-gradient(135deg,var(--orange),#d4592f);color:white;padding:.85rem var(--s-2xl);border-radius:12px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;box-shadow:0 6px 24px rgba(232,103,58,.3);transition:all .2s}
+  .article-cta-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,103,58,.4)}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),#d4592f);color:white;padding:.85rem var(--s-2xl);border-radius:12px;font-size:.82rem;font-weight:700;text-decoration:none;display:inline-block;letter-spacing:.04em;box-shadow:0 6px 24px rgba(232,103,58,.3);transition:all .2s}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,103,58,.4)}
+
+  /* FOOTER */
+  .site-footer{background:var(--ink);padding:3.5rem var(--s-3xl) var(--s-2xl)}
+  .sf-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1.8fr;gap:3rem;margin-bottom:var(--s-3xl)}
+  .sf-brand .logo-text{color:white}
+  .sf-tagline{font-size:.82rem;color:rgba(255,255,255,.35);line-height:1.7;margin-top:.85rem}
+  .sf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-xl)}
+  .sf-col{display:flex;flex-direction:column;gap:.6rem}
+  .sf-col-title{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:700;margin-bottom:.25rem}
+  .sf-col a{font-size:.8rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
+  .sf-col a:hover{color:rgba(255,255,255,.85)}
+  .sf-bottom{max-width:1100px;margin:0 auto;padding-top:var(--s-2xl);border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:var(--s-md);flex-wrap:wrap}
+  .sf-copy,.sf-email{font-size:.75rem;color:rgba(255,255,255,.25)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .fu1{animation:fadeUp .6s ease both}
+
+    @media(max-width:900px){nav{padding:0 var(--s-lg)}}
+  @media(max-width:640px){
+    .article-wrap{padding:5.5rem var(--s-xl) 4rem}
+    .related-grid{grid-template-columns:1fr}
+    .nav-center,.nav-signin{display:none}
+  
+    /* The way in, at the width the links go. Without this the menu
+       button only appeared below 361 points, so every phone wider
+       than that had no nav at all. */
+    .hamburger{display:flex}
+
+    /* The pill goes where the links go. Ellie, 2026-10-15: "Remove get started
+       orange pill from site's top toolbar on mobile, it's in the hamburger nav
+       and that's enough." That reverses D19 and D31, which put it in the bar on
+       a phone on purpose, so both readings are kept here: the earlier one was
+       that the one action the site is for should not sit behind a menu. Her
+       answer is that the menu is enough. One rule now, at the width the nav
+       collapses: if the hamburger is showing, the pill is not.
+
+       The selector outranks the pill's own rule rather than merely following
+       it. The base rule is `.nav-right a.btn-nav`, which names an element and
+       sets display:inline-block, so a bare `.nav-right .btn-nav{display:none}`
+       loses on specificity at every width and the pill stayed in the bar on
+       all 29 pages. Found by the check, not by reading. */
+    nav .nav-right a.btn-nav{display:none}
+}
+  @media(max-width:360px){
+    .hamburger{display:flex}
+    .sf-inner{grid-template-columns:1fr}
+    .sf-links{grid-template-columns:repeat(2,1fr)}
+  }
+
+  @media(max-width:640px){
+    .article-wrap{padding:calc(58px + 1.5rem) 1.25rem 3rem!important}
+    .article-title{font-size:clamp(1.8rem,7vw,2.4rem)!important}
+    .article-body{font-size:.92rem}
+    .article-body h2{font-size:1.2rem}
+    .callout{padding:1rem 1.1rem!important}
+    .related-grid{grid-template-columns:1fr!important}
+    .breadcrumb{padding-top:var(--s-xs)}
+  }
+</style>
+  <link rel="stylesheet" href="/cart.css">
+<!-- attune:press-feedback -->
+<style>
+  /* Ellie: "add on the site and the web some sense of a button push". One rule
+     rather than a list of controls: see index.html for the reasoning. */
+  button:not(:disabled):active, a[role="button"]:active, .btn:active, [data-pressable]:active {
+    transform: scale(0.985); filter: brightness(0.96);
+  }
+  button, a[role="button"], .btn, [data-pressable] {
+    transition: transform .08s ease, filter .08s ease, opacity .12s ease;
+  }
+  button:disabled { cursor: default; }
+  @media (prefers-reduced-motion: reduce) {
+    button, a[role="button"], .btn, [data-pressable] { transition: none; }
+    button:not(:disabled):active, a[role="button"]:active, .btn:active, [data-pressable]:active { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/home" class="logo">
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_0_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_0_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#spark_logo_0_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_0_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <span class="logo-text">Attune</span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/home" >Home</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle">Learn <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/purpose">Our Purpose</a>
+        <div class="dd-divider"></div>
+        <a href="/practice" class="active">In Practice</a>
+        <a href="/faq">FAQs</a>
+      </div>
+    </li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle">Browse <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-dropdown-menu">
+        <a href="/offerings">Browse Packages</a>
+        <a href="/wedding-registry">Wedding Registry</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <a href="/app?signin=1" class="nav-signin">Sign in</a>
+    <a href="/start" class="btn-nav">Get started</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+  <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub">Our Purpose</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+  </div>
+  <div class="mm-section">
+    <span class="mm-label">Browse</span>
+    <a href="/offerings" class="mm-sub">Browse Packages</a>
+    <a href="/wedding-registry" class="mm-sub">Wedding Registry</a>
+  </div>
+  <a href="/app?signin=1">Sign in</a>
+  <a href="/start" class="mm-cta">Get started →</a>
+</div>
+
+<div class="article-wrap fu1">
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <a href="/app" class="bc-dash" style="display:none">Dashboard</a>
+    <span class="breadcrumb-sep bc-dash" style="display:none">›</span>
+    <a href="/practice">In Practice</a>
+    <span class="breadcrumb-sep">›</span>
+    <span style="font-size:.72rem;color:var(--ink);font-weight:500;">Attune Methodology</span>
+  </div>
+
+  <!-- ARTICLE HEADER -->
+  <div class="article-tag-row">
+    <span class="article-tag">Attune Methodology</span>
+    <span class="article-meta-note">6 min read</span>
+  </div>
+  <h1 class="article-title">What your couple type changes</h1>
+  <p class="article-intro">Your couple type is a description of the dynamic the two of you make together. It is not a label for either of you individually, it is not a compatibility rating, and it is not fixed.</p>
+  <p class="article-intro">Used well, it does one specific and useful thing: it gives a recurring pattern a name you can both say without it sounding like an accusation.</p>
+
+  <!-- ARTICLE BODY -->
+  <div class="article-body">
+    <div>
+      <h2>What it is built from</h2>
+      <p>Two things. How your individual communication orientations compare across the ten dimensions, and how each of you described the relationship as a unit in the second part of the exercise.</p>
+      <p>It is not a personality test result. Nothing is being inferred about who either of you is. It is a description of what appears when your two sets of answers sit next to each other, which is why it can change when the answers do.</p>
+    </div>
+    <div class="article-divider"></div>
+    <div>
+      <h2>Why a name helps</h2>
+      <p>Most couples can describe their pattern from the outside. We always end up here. They always do that. Far fewer have named one from the inside, as something both people agree is there.</p>
+      <p>That difference does a great deal of work. &ldquo;You always do this&rdquo; and &ldquo;we have a pattern where this tends to happen&rdquo; are not the same sentence. One is an accusation. The other is a description of shared ground, and only one of them can be worked on together.</p>
+      <blockquote class="article-quote"><p>When we focus on clarifying what is being observed, felt, and needed rather than on diagnosing and judging, we discover the depth of our own compassion.</p></blockquote>
+      <p>Marshall B. Rosenberg, Nonviolent Communication</p>
+    </div>
+    <div class="article-divider"></div>
+    <div>
+      <h2>An unnamed pattern does not stay neutral</h2>
+      <p>It collects evidence. Each time it happens it confirms something: about who your partner is, about what this relationship is, about whether any of it improves.</p>
+      <p>The origin is often completely harmless. Two people with different repair needs, neither knowing the other has different ones. But every time it plays out, both of you feel a little more entitled to your reading of it.</p>
+      <blockquote class="article-quote"><p>Sometimes couples are in a state of negative sentiment override where they assume the worst about each other&rsquo;s intentions.</p></blockquote>
+      <p>Dana McNeil, The Gottman Institute</p>
+    </div>
+    <div class="article-divider"></div>
+    <div>
+      <h2>What it does not tell you</h2>
+      <p>It does not tell you how compatible you are. There is no ranking of types and no best one. Any type can build something excellent and any type can drift, and which happens turns almost entirely on whether the patterns get named and worked with.</p>
+      <p>It also does not tell you what is wrong. The things flagged as worth knowing are places to pay attention, not diagnoses.</p>
+      <blockquote class="article-quote"><p>The point is that neuroses don&rsquo;t have to ruin a marriage. If you can accommodate each other&rsquo;s &ldquo;crazy&rdquo; side and handle it with caring, affection, and respect, your marriage can thrive.</p></blockquote>
+      <p>John Gottman and Nan Silver, The Seven Principles for Making Marriage Work</p>
+      <div class="callout"><p class="callout-label">It describes now</p><p>Your type can change as circumstances move, as you each grow, or as you take the exercises again after a real stretch of time. It is a current description rather than a permanent one.</p></div>
+    </div>
+    <div class="article-divider"></div>
+    <div>
+      <h2>How to use it</h2>
+      <p>Read the three things to know slowly. For each: does it ring true, does your partner recognise it, and is there something there you have felt but never said?</p>
+      <p>Then ask each other one question. Of these three, which do you most want to pay attention to? Let your answers be different, and then compare them. The difference between what each of you picked is usually worth more than the type's name.</p>
+      <blockquote class="article-quote"><p>&ldquo;When you accept your partner, you also accept their influence when discussing problems.&rdquo;</p></blockquote>
+      <p>Maureen Werrbach, The Gottman Institute</p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="article-cta">
+    <p class="article-cta-title">Get your results first</p>
+    <p class="article-cta-sub">Complete both exercises independently. When your partner finishes, you unlock your couple type and a full communication profile to review together.</p>
+    <a href="/offerings" class="article-cta-btn">Get started →</a>
+  </div>
+
+<div class="related-section">
+      <!-- Share bar -->
+  <div style="max-width:680px;margin:0 auto var(--s-3xl);padding:0 var(--s-3xl)">
+    <div style="border-top:1px solid var(--stone);padding-top:var(--s-xl);display:flex;align-items:center;justify-content:space-between;gap:var(--s-md);flex-wrap:wrap">
+      <span style="font-size:.75rem;color:var(--muted);font-family:var(--bfont)">Found this useful? Share it.</span>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy link',2000)})" 
+          style="display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1.5px solid var(--stone);background:white;border-radius:8px;font-size:.72rem;color:var(--muted);cursor:pointer;font-family:var(--bfont);font-weight:500;transition:all .15s"
+          onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" 
+          onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Copy link
+        </button>
+        <button type="button" title="Instagram (copies link)" aria-label="Copy link to share on Instagram" onclick="shareIG()" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--stone);background:white;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></button>
+        <a id="share-li" href="" target="_blank" rel="noopener" title="LinkedIn" aria-label="Share on LinkedIn" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--stone);background:white;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.27-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.8V21H9z"/></svg></a>
+        <a id="share-x" href="" target="_blank" rel="noopener" title="X" aria-label="Share on X" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--stone);background:white;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a id="share-fb" href="" target="_blank" rel="noopener" title="Facebook" aria-label="Share on Facebook" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--stone);background:white;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--clay)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--stone)';this.style.color='var(--muted)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.563 9.876v-6.987H7.898V12h2.539V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.889h-2.33v6.987A10.002 10.002 0 0 0 22 12z"/></svg></a>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var u=encodeURIComponent(window.location.href), t=encodeURIComponent(document.title);
+      var li=document.getElementById('share-li'); if(li) li.href='https://www.linkedin.com/sharing/share-offsite/?url='+u;
+      var x=document.getElementById('share-x'); if(x) x.href='https://twitter.com/intent/tweet?url='+u+'&text='+t;
+      var fb=document.getElementById('share-fb'); if(fb) fb.href='https://www.facebook.com/sharer/sharer.php?u='+u;
+    })();
+    function attuneToast(msg){var d=document.createElement('div');d.textContent=msg;d.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1E1610;color:#fff;padding:.6rem 1.1rem;border-radius:9px;font-size:.78rem;font-family:var(--bfont);z-index:9999;box-shadow:0 8px 28px rgba(0,0,0,.28);opacity:0;transition:opacity .2s';document.body.appendChild(d);requestAnimationFrame(function(){d.style.opacity='1'});setTimeout(function(){d.style.opacity='0';setTimeout(function(){d.remove()},300)},2400);}
+    function shareIG(){navigator.clipboard.writeText(window.location.href).then(function(){attuneToast('Link copied \u2014 paste it into your Instagram story or bio')});}
+  </script>
+
+  <p class="related-label">More from In Practice</p>
+    <div class="related-grid">
+      <a href="/practice/the-attune-exercises" class="related-card">
+        <span class="related-card-cat">Attune Methodology</span>
+        <span class="related-card-title">The Attune exercises, and what each one is for</span>
+        <span class="related-card-time">8 min read</span>
+      </a>
+      <a href="/practice/why-individual-exercises-work" class="related-card">
+        <span class="related-card-cat">Attune Methodology</span>
+        <span class="related-card-title">Why you answer separately</span>
+        <span class="related-card-time">6 min read</span>
+      </a>
+      <a href="/practice/what-is-the-attune-experience" class="related-card">
+        <span class="related-card-cat">The Attune Experience</span>
+        <span class="related-card-title">What the Attune experience is for</span>
+        <span class="related-card-time">6 min read</span>
+      </a>
+    </div>
+  </div>
+<script src="/cart.js"></script>
+<script>
+  // When arriving from the in-app dashboard (?from=app), prepend a Dashboard
+  // crumb so the user can navigate back to /app. The links default to hidden
+  // and are revealed only for app referrals.
+  (function(){
+    try {
+      var p = new URLSearchParams(location.search);
+      if (p.get('from') === 'app') {
+        document.querySelectorAll('.bc-dash').forEach(function(el){ el.style.display = ''; });
+      }
+    } catch(e){}
+  })();
+</script>
+  <script src="/_flags.js"></script>
+  <script src="/_track.js"></script>
+<footer class="site-footer">
+  <style>
+    .site-footer{background:#1E1610!important;color:rgba(255,255,255,.75)!important;padding:1.98rem 0 1.5rem!important;width:100%!important;margin:0!important;max-width:none!important;display:block!important}
+    .site-footer .sf-inner{max-width:1120px!important;margin:0 auto!important;padding:0 2.5rem 2rem!important;display:grid!important;grid-template-columns:1fr 2fr!important;gap:3rem!important;border-bottom:1px solid rgba(255,255,255,.1)!important}
+    .site-footer .sf-brand{display:flex!important;flex-direction:column!important;gap:.75rem!important}
+    .site-footer .sf-brand .logo{display:flex!important;align-items:center!important;gap:.5rem!important;text-decoration:none!important}
+    .site-footer .sf-brand .logo-text{color:white!important;font-family:'Playfair Display',Georgia,serif!important;font-weight:700!important;font-size:1.05rem!important}
+    .site-footer .sf-tagline{font-size:.82rem!important;color:rgba(255,255,255,.5)!important;line-height:1.5!important;font-family:'DM Sans',sans-serif!important;font-weight:300!important;margin:0!important}
+    .site-footer .sf-links{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:1.5rem!important}
+    .site-footer .sf-col{display:flex!important;flex-direction:column!important;gap:.55rem!important}
+    .site-footer .sf-col-title{font-size:.6rem!important;letter-spacing:.2em!important;text-transform:uppercase!important;color:rgba(255,255,255,.5)!important;font-weight:700!important;margin:0 0 .35rem!important;font-family:'DM Sans',sans-serif!important}
+    .site-footer .sf-col a{font-size:.82rem!important;color:rgba(255,255,255,.75)!important;text-decoration:none!important;transition:color .15s!important;font-family:'DM Sans',sans-serif!important;font-weight:400!important;display:block!important;margin:0!important;padding:0!important;border:none!important}
+    .site-footer .sf-col a:hover{color:white!important}
+    .site-footer .sf-bottom{max-width:1120px!important;margin:0 auto!important;padding:1.25rem 2.5rem 0!important;display:flex!important;justify-content:space-between!important;align-items:center!important;gap:.75rem!important;flex-wrap:wrap!important}
+    .site-footer .sf-copy,.site-footer .sf-email{font-size:.72rem!important;color:rgba(255,255,255,.6)!important;margin:0!important;font-family:'DM Sans',sans-serif!important}
+    @media(max-width:640px){
+      .site-footer{padding:2rem 0 1rem!important}
+      .site-footer .sf-inner{grid-template-columns:1fr!important;gap:1.75rem!important;padding:0 1.25rem 1.5rem!important}
+      .site-footer .sf-links{grid-template-columns:1fr 1fr 1fr!important;gap:.75rem!important}
+      .site-footer .sf-col-title{font-size:.55rem!important}
+      .site-footer .sf-col a{font-size:.75rem!important}
+      .site-footer .sf-tagline{font-size:.78rem!important}
+      .site-footer .sf-bottom{padding:1rem 1.25rem 0!important;flex-direction:column!important;align-items:flex-start!important;gap:.3rem!important}
+      .site-footer .sf-copy,.site-footer .sf-email{font-size:.7rem!important}
+    }
+  </style>
+  <div class="sf-inner">
+    <div class="sf-brand">
+      <a href="/home" class="logo">
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sfLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sfLogoGrad)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#sfLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sfLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <span class="logo-text">Attune</span>
+      </a>
+      <p class="sf-tagline">Because understanding takes intention.</p>
+    </div>
+    <div class="sf-links">
+      <div class="sf-col">
+        <p class="sf-col-title">Product</p>
+        <a href="/offerings">Packages</a>
+        <a href="/start">Get started</a>
+        <a href="/wedding-registry">Wedding registry</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Learn</p>
+        <a href="/purpose">Our Purpose</a>
+        <a href="/practice">In Practice</a>
+        <a href="/faq">FAQs</a>
+      </div>
+      <div class="sf-col">
+        <p class="sf-col-title">Support</p>
+        <a href="/contact">Contact</a>
+        <a href="/legal">Privacy &amp; Terms</a>
+        <a href="/privacy-choices">Your privacy choices</a>
+      </div>
+    </div>
+  </div>
+  <div class="sf-bottom">
+    <p class="sf-copy">© 2026 Attune Relationships</p>
+    <p class="sf-email">hello@attune-relationships.com</p>
+  </div>
+</footer>
+
+<script>
+/* The menu the hamburger opens. Copied from offerings.html, which is the page
+   check-chrome holds the others to: seventeen pages had the button and no way
+   to open it, and twelve of those had the menu markup sitting there unused. */
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function (e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target)
+      && burger && !burger.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
