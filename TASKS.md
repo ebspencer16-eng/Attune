@@ -49,6 +49,10 @@ section 3 explaining things, just include the context I need in section 3."
 | W124 | **Confirmed: it reads correctly.** You each see your OWN name first. The comparison swaps the two ids before matching, so your answer about your family is read against his answer about your family, in all seven places they are compared. |
 | W125 | **The progress bar, the category and its sentence stay at the top** while you scroll Responsibilities. |
 | W126 | **The insights menu on the site**: the tile behind the rows is gone, the labels have a left buffer, the exercises tiles are capped and no longer flash. They were drawn from your package before it had loaded, when everything reads as unowned. |
+| W127 | **The topic label above the Expectations questions is gone.** |
+| W128 | **Q6 reads "How do you envision your joint social life?"** |
+| W129 | **Sign out answers the click now.** It waited on two network calls before anything moved on screen, and had no catch on two of its three copies, so a slow or refused call meant nothing happened at all. It clears this device first, asks the server to revoke in the background with a ceiling of a second and a half, then leaves. One function instead of three. |
+| W130 | **Part two when the answer is not Mom and Dad: my thinking is in the message, and it needs your call.** The short version is that the column headings are stored as the answer itself, so "Adult 1" is what a reader sees in their results a month later. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 

@@ -1668,7 +1668,9 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
           FAMILY should be removed". The TOPIC stays, small, above the
           question, because it is what names the subject now that the question
           is a sentence of its own. */}
-      <p style={{ fontSize: "0.6rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, marginBottom: "0.6rem", fontFamily: font.body, fontWeight: 600 }}>{subst(lq.topic || lq.text)}</p>
+      {/* No topic label. Ellie, 22 October: "I don't want the topic as a small
+          label above the expectations questions." Her questions name their own
+          subject now, so it was saying the same thing twice. */}
       <p style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 400, color: C.ink, lineHeight: 1.5, marginBottom: "1.75rem" }}>
         {/* ── THE TOPIC IS A LABEL, NOT THE START OF THE SENTENCE ────────
             This read "Children, when you think of your future, are children a
@@ -3735,6 +3737,59 @@ const COVER_FIT_CSS = `
    they were the two that scrolled worst. The other three covers already
    pass "auto"; this makes that the default, so a cover is as tall as what
    is in it and no taller. */
+/**
+ * Sign out, locally first and without waiting on the network.
+ *
+ * ── WHY THIS IS A FUNCTION ────────────────────────────────────────────────
+ * Ellie: "I signed out and it took like 5 clicks and didn't work, then worked
+ * like 20 seconds later."
+ *
+ * The handler did this:
+ *
+ *     const { supabase: sb } = await import('./supabase.js');   // a fetch
+ *     if (hasSupabase()) await sb.auth.signOut();               // a fetch
+ *     setAccount(null); ... window.location.href = ...          // the first
+ *                                                               // visible
+ *                                                               // change
+ *
+ * Nothing on screen moved until two network round trips had finished, so a
+ * click looked like it had done nothing and she clicked again, and again. The
+ * twenty seconds is the first one finally resolving.
+ *
+ * And `await sb.auth.signOut()` had no catch on two of the three copies, so a
+ * rejected call — offline, an expired token, a 403 — threw before the local
+ * state was cleared and before the redirect. Sign-out could fail outright
+ * while the person kept pressing the button.
+ *
+ * So: clear what is on this device first, which is what signing out means to
+ * the person pressing it; ask the server to revoke the session as a best
+ * effort bounded by a second and a half; then go. Three copies of this
+ * sequence existed and two of them differed; there is one now.
+ */
+export async function signOutEverywhere({ setAccount, to = '/app?signin=1' } = {}) {
+  /* Local state first and synchronously, so the screen answers the click. */
+  try { setAccount?.(null); } catch { /* caller may not have one */ }
+  try { localStorage.removeItem("attune_account"); } catch { /* private mode */ }
+  try { clearAllUserLocalStorage(); } catch { /* ditto */ }
+
+  /* Best effort, bounded. A revoke that hangs must not hold the person on a
+     page they have asked to leave. */
+  try {
+    const { supabase: sb, hasSupabase } = await Promise.race([
+      import('./supabase.js'),
+      new Promise((r) => setTimeout(() => r({}), 1500)),
+    ]);
+    if (hasSupabase?.() && sb) {
+      await Promise.race([
+        sb.auth.signOut().catch(() => {}),
+        new Promise((r) => setTimeout(r, 1500)),
+      ]);
+    }
+  } catch { /* the local half already happened, which is the half that matters */ }
+
+  if (to) window.location.href = to;
+}
+
 function CoverCard({ accent, icon = "\u25C9", children, minHeight = "auto" }) {
   return (
     <div style={{ borderRadius: 26, padding: 1.5, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }}>
@@ -17128,16 +17183,10 @@ export default function App() {
                       { label: "Get help", icon: "?", action: () => { window.location.href = "/feedback"; setShowNavDropdown(false); } },
                       null,
                       { label: "Sign out", icon: "→", action: async () => {
-                          const { supabase: sb, hasSupabase } = await import('./supabase.js');
-                          if (hasSupabase()) await sb.auth.signOut();
-                          setAccount(null);
-                          // Clear ALL user-bound state, not just attune_account.
-                          // Otherwise the next user on this browser inherits the
-                          // previous user's exercises, workbook flag, etc.
-                          try { localStorage.removeItem("attune_account"); } catch {}
-                          clearAllUserLocalStorage();
+                          // The dropdown closes on the click, not after the
+                          // network has answered.
                           setShowNavDropdown(false);
-                          window.location.href = '/app?signin=1';
+                          await signOutEverywhere({ setAccount });
                         }, danger: true },
                     ].map((item, i) => item === null
                       ? <div key={i} style={{ height: "1px", background: "#E8DDD0", margin: "0.3rem 0.4rem" }} />
@@ -18843,14 +18892,7 @@ export default function App() {
                     <div style={{ padding: "0.85rem 1.35rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <span style={{ fontSize: "0.82rem", color: "#7A6753", fontFamily: font.body }}>Signed in as {account?.email || userName}</span>
                       <button
-                        onClick={async () => {
-                          const { supabase: sb, hasSupabase } = await import('./supabase.js');
-                          if (hasSupabase()) await sb.auth.signOut();
-                          setAccount(null);
-                          try { localStorage.removeItem("attune_account"); } catch {}
-                          clearAllUserLocalStorage();
-                          window.location.href = '/app?signin=1';
-                        }}
+                        onClick={() => signOutEverywhere({ setAccount })}
                         style={{ fontSize: "0.75rem", fontWeight: 600, color: "#ef4444", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                         Sign out
                       </button>
@@ -18932,11 +18974,7 @@ export default function App() {
                                 if (res.status === 403) throw new Error('bad-password');
                                 if (res.status === 400 && /password/i.test(body.error || '')) throw new Error('need-password');
                                 if (!res.ok || !body.ok) throw new Error(body.error || 'failed');
-                                try { await sb.auth.signOut(); } catch {}
-                                setAccount(null);
-                                try { localStorage.removeItem("attune_account"); } catch {}
-                                clearAllUserLocalStorage();
-                                window.location.href = '/home?deleted=1';
+                                await signOutEverywhere({ setAccount, to: '/home?deleted=1' });
                               } catch (err) {
                                 setDeleteBusy(false);
                                 setDeleteErr(

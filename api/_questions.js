@@ -109,7 +109,7 @@ export const LIFE_QUESTIONS = [
     core: "What is your opinion regarding where you will live?", anniversary: "Are you where you want to be long-term?", revisiting: "Where do you want to be from here?",
     options: ["I am rooted where I am", "I have a preference but am open to discussion", "I'm fine moving if it makes sense for both of us", "I'm genuinely open to anywhere"] },
   { id: "lq_social", category: "Lifestyle", topic: "Social life and friendships", text: "Social life and friendships",
-    core: "How do you envision your social lives interacting?", anniversary: "What do you expect from your joint social world?", revisiting: "What do you want your social life to look like now?",
+    core: "How do you envision your joint social life?", anniversary: "What do you expect from your joint social world?", revisiting: "What do you want your social life to look like now?",
     options: ["I want it to be mostly just us", "I envision a pretty quiet social life", "I want a healthy balance", "I want to be pretty social", "I want us to be very social"] },
   { id: "lq_routine", category: "Lifestyle", topic: "Day-to-day rhythms and routines", text: "Day-to-day rhythms and routines",
     core: "Do you prefer rhythms and routines or a spontaneous day-to-day?", anniversary: "Does your daily rhythm work for both of you?", revisiting: "What rhythm do you want from here?",
