@@ -1,4 +1,4 @@
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, useWindowDimensions } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -43,6 +43,18 @@ import { withAlpha } from '@/components/page-wash';
  * rectangle with the page laid on top of it, inset by a point and a half. The
  * inner view has to carry the cream or the gradient shows through everything.
  */
+/**
+ * ── THE GLOW SIZES WITH THE SCREEN ───────────────────────────────────────
+ * Ellie: "Exercise cover pages should fit on one screen/window without having
+ * to scroll. Size should adapt based on device and viewing window size."
+ *
+ * 196 points of glow and 86 of symbol are a fifth of an iPhone SE before a
+ * word is drawn, and the Communication cover now carries two preview tiles as
+ * well. The website's covers were measured and four of five scrolled; this is
+ * the same furniture on the other surface, so it gets the same treatment: a
+ * share of the window's height, with a floor that keeps the mark legible and
+ * the full size on anything tall.
+ */
 const GLOW_SIZE = 196;
 const GLOW_RINGS = 52;
 const GLOW_PEAK = 0.34;
@@ -65,11 +77,27 @@ export function CoverPage({
   scroll?: boolean;
   children: React.ReactNode;
 }) {
+  /* The window, not the device: a phone in landscape and an iPad in split
+     view are both short, and neither is what a device check would call
+     small. */
+  const { height: winH } = useWindowDimensions();
+  /* Full size on anything tall, which is most phones and every tablet, so the
+     cover a reader already knows is unchanged. Below 800 points the glow is
+     the only furniture with room to give: measured on a 667 point screen, the
+     cover ran 36 points past the fold and the Start button was clipped. */
+  const glow = winH >= 800 ? GLOW_SIZE : Math.round(Math.max(96, winH * 0.19));
+  const symbol = Math.round(glow * 0.44);
+  const padV = winH >= 800 ? Spacing.xxl : winH >= 720 ? Spacing.lg : Spacing.sm;
+  /* The ScrollView stays. On a screen smaller than any phone this app
+     supports, or with the largest accessibility text, a cover can still be
+     taller than the glass, and a Start button nobody can reach is worse than
+     one you scroll two points to. */
+
   const inner = (
     <>
-      <View style={{ width: GLOW_SIZE, height: GLOW_SIZE, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: glow, height: glow, alignItems: 'center', justifyContent: 'center' }}>
         {Array.from({ length: GLOW_RINGS }, (_, i) => {
-          const size = GLOW_SIZE * (1 - i / GLOW_RINGS);
+          const size = glow * (1 - i / GLOW_RINGS);
           return (
             <View
               key={i}
@@ -87,11 +115,11 @@ export function CoverPage({
             lines heavier, which is the opposite of what she asked for. */}
         <SymbolView
           name={(icon || 'sparkles') as never}
-          size={78}
+          size={Math.round(symbol * 0.9)}
           weight="light"
           tintColor={accent}
-          fallback={<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: accent }} />}
-          style={{ width: 86, height: 86 }}
+          fallback={<View style={{ width: symbol * 0.65, height: symbol * 0.65, borderRadius: symbol * 0.33, backgroundColor: accent }} />}
+          style={{ width: symbol, height: symbol }}
         />
       </View>
       {children}
@@ -116,7 +144,7 @@ export function CoverPage({
             style={{ flex: 1, borderRadius: Radius.xl + 7, backgroundColor: Palette.cream }}
             contentContainerStyle={{
               flexGrow: 1, alignItems: 'center', justifyContent: 'center',
-              paddingHorizontal: Spacing.xxl, paddingVertical: Spacing.xxl,
+              paddingHorizontal: Spacing.xxl, paddingVertical: padV,
             }}>
             {inner}
           </ScrollView>

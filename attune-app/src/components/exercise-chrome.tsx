@@ -17,7 +17,7 @@ import { Pressable } from '@/components/pressable';
 
 import {
   AccentFallback, AccentFor, Colors, Palette, Radius, Spacing, Type,
-} from '@/constants/attune-theme';
+ Fonts } from '@/constants/attune-theme';
 import { CoverPage } from '@/components/cover-page';
 import { GROUP_ICON } from '@/components/results-menu';
 
@@ -111,6 +111,9 @@ export function ExerciseNav({
 export type ExerciseIntro = {
   title: string;
   body: string[];
+  /** The preview tiles. Only Communication has them, and until now only the
+   *  website drew them, because they were typed into src/App.jsx. */
+  parts?: { eyebrow: string; title: string }[] | null;
   note?: string | null;
   cta: string;
 };
@@ -166,6 +169,31 @@ export function ExerciseOpening({
           {para}
         </Text>
       ))}
+      {/* ── THE PREVIEW TILES ─────────────────────────────────────────────
+          The website has shown these on the Communication cover since it was
+          written and the app has shown none, because they were typed into the
+          website's renderer. They come from the server now and both surfaces
+          draw the same two. An eyebrow and a heading, which is what Ellie
+          asked for: "neither tile should have a description". */}
+      {intro.parts && intro.parts.length ? (
+        <View style={{ flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.xl, width: '100%' }}>
+          {intro.parts.map((part, i) => (
+            <View
+              key={part.eyebrow}
+              style={{
+                flex: 1, backgroundColor: c.surface, borderRadius: Radius.lg,
+                borderWidth: 1, borderColor: tint + '33', padding: Spacing.md,
+              }}>
+              <Text style={{ ...Type.eyebrow, color: i === 0 ? tint : c.textMuted }}>{part.eyebrow}</Text>
+              {/* 16pt broke "communicator" across two lines inside a tile half
+                  a phone wide. The tile holds a short heading, not a title. */}
+              <Text style={{ ...Type.small, fontFamily: Fonts.bodyBold, color: c.textStrong, marginTop: Spacing.xs, lineHeight: 18 }}>
+                {part.title}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
       {intro.note ? (
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl, textAlign: 'center' }}>{intro.note}</Text>
       ) : null}

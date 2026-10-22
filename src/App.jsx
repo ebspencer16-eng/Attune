@@ -1285,7 +1285,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
   // The opening page, from the module both surfaces read.
   const ex2Intro = exerciseIntro("ex2", { partner: partnerName });
   if (phase === "intro") return (
-    <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
+    <div style={{ maxWidth: 560, margin: "0 auto", padding: "clamp(0.4rem, 2vh, 1.5rem) 1rem clamp(0.6rem, 2.5vh, 2rem)", animation: "fadeIn 0.5s ease" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
       {/* The cover, with this page's contents inside it. The two package
@@ -3620,20 +3620,79 @@ function generatePersonalityFeedback(myS, partS, userName, partnerName, content)
  * Every word on it comes from a caller, and every caller takes its words from a
  * module both surfaces read. Nothing here is copy.
  */
-function CoverCard({ accent, icon = "\u25C9", children, minHeight = "min(72vh, 620px)" }) {
+/**
+ * ── THE COVER FITS THE WINDOW IT IS OPENED IN ────────────────────────────
+ * Ellie: "Exercise cover pages should fit on one screen/window without having
+ * to scroll. Size should adapt based on device and viewing window size."
+ *
+ * None of them did. Measured before touching anything: at 1280x620 the
+ * Communication cover needed 925 points in a 620 point window, and four of
+ * the five scrolled on a phone. The furniture was the cost. A fixed 132 point
+ * glow with a 28 point margin under it, and 48 points of card padding top and
+ * bottom, are 236 points of a 620 point window before a word is drawn.
+ *
+ * So every piece of furniture is now a clamp against the viewport's HEIGHT
+ * rather than a number: full size on a tall window, smaller on a short one,
+ * and never below the floor that keeps it legible. The words themselves are
+ * not scaled, because shrinking copy to fit is how a cover becomes unreadable
+ * instead of unscrollable.
+ *
+ * check-cover-fits.mjs measures all five at four window sizes.
+ */
+/**
+ * ── THE GAPS ARE THE COST, AND THEY ARE INLINE ───────────────────────────
+ * Four cover pages are written separately in this file and each sets its own
+ * margins inline. Measured on the Communication cover in a 620 point window:
+ * the words come to 219 points and the gaps between them to 152, on top of 96
+ * for the glow and 56 for the card's padding.
+ *
+ * Inline styles beat a stylesheet, so this is the one place a rule can reach
+ * all four without editing four renderers and without adding a fifth copy of
+ * the numbers. It only applies in a window short enough to need it: above
+ * 860 points nothing here changes anything.
+ *
+ * The TYPE is deliberately untouched. Shrinking the copy to fit is how a
+ * cover stops scrolling and starts being unreadable.
+ */
+const COVER_FIT_CSS = `
+@media (max-height: 860px) {
+  .cover-card > * { margin-top: clamp(0.2rem, 1.5vh, 2.2rem) !important; margin-bottom: clamp(0.2rem, 1.5vh, 1.75rem) !important; }
+  .cover-card > :first-child { margin-top: 0 !important; }
+  .cover-card > :last-child { margin-bottom: 0 !important; }
+}
+@media (max-height: 700px) {
+  .cover-card > * { margin-top: clamp(0.15rem, 1vh, 1.2rem) !important; margin-bottom: clamp(0.15rem, 1vh, 1.2rem) !important; }
+  /* A window this short is a laptop with a browser's chrome in it. The glow
+     and the card's own padding are the last furniture left to give, and the
+     copy is still at full size. */
+  .cover-card { padding-top: clamp(0.6rem, 1.8vh, 1rem) !important; padding-bottom: clamp(0.6rem, 1.8vh, 1rem) !important; }
+  .cover-card > :first-child { width: clamp(42px, 7.6vh, 72px) !important; height: clamp(42px, 7.6vh, 72px) !important; }
+  .cover-card > :first-child > span { font-size: clamp(1rem, 3.4vh, 1.8rem) !important; }
+}
+`;
+
+/* The default was `min(72vh, 620px)`, which FORCED the two covers that use
+   it to 576 points in an 800 point window whatever their contents, and
+   they were the two that scrolled worst. The other three covers already
+   pass "auto"; this makes that the default, so a cover is as tall as what
+   is in it and no taller. */
+function CoverCard({ accent, icon = "\u25C9", children, minHeight = "auto" }) {
   return (
     <div style={{ borderRadius: 26, padding: 1.5, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }}>
-      <div style={{
+      <style>{COVER_FIT_CSS}</style>
+      <div className="cover-card" style={{
         borderRadius: 25, background: C.cream, minHeight,
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        padding: "3rem 2rem", textAlign: "center",
+        padding: "clamp(0.9rem, 3.4vh, 3rem) clamp(1.1rem, 4vw, 2rem)", textAlign: "center",
       }}>
         <div style={{
-          width: 132, height: 132, borderRadius: "50%", display: "flex",
-          alignItems: "center", justifyContent: "center", marginBottom: "1.75rem", flexShrink: 0,
+          width: "clamp(54px, 10.5vh, 132px)", height: "clamp(54px, 10.5vh, 132px)",
+          borderRadius: "50%", display: "flex",
+          alignItems: "center", justifyContent: "center",
+          marginBottom: "clamp(0.5rem, 2.4vh, 1.75rem)", flexShrink: 0,
           background: `radial-gradient(circle, ${accent}22 0%, ${accent}14 35%, ${accent}08 55%, transparent 72%)`,
         }}>
-          <span style={{ fontSize: "3.2rem", color: accent, lineHeight: 1 }}>{icon}</span>
+          <span style={{ fontSize: "clamp(1.3rem, 4.6vh, 3.2rem)", color: accent, lineHeight: 1 }}>{icon}</span>
         </div>
         {children}
       </div>
@@ -3648,7 +3707,7 @@ function CoverCard({ accent, icon = "\u25C9", children, minHeight = "min(72vh, 6
  */
 function ExerciseCover({ accent, eyebrow, intro, onBegin }) {
   return (
-    <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem 2rem" }}>
+    <div style={{ maxWidth: 560, margin: "0 auto", padding: "clamp(0.4rem, 2vh, 1.5rem) 1rem clamp(0.6rem, 2.5vh, 2rem)" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <CoverCard accent={accent}>
         {eyebrow ? (
@@ -5378,7 +5437,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
   // ── Combined intro (Exercise 01 + 02 preview) — matches Partner B copy ─
   if (phase === 'intro') {
     return (
-      <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "clamp(0.4rem, 2vh, 1.5rem) 1rem clamp(0.6rem, 2.5vh, 2rem)", animation: "fadeIn 0.5s ease" }}>
         <link href={FONT_LINK} rel="stylesheet" />
         <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
         {/* The cover, with this page's own contents inside it. Ellie: "Mirror
@@ -5399,14 +5458,13 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
           </p>
         ))}
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
-          {[
-            { num: '01', title: 'Communication', color: '#E8673A', desc: PERSONALITY_QUESTIONS.length + ' questions, about you and your partner' },
-            { num: '02', title: 'Expectations',  color: '#1B5FE8', desc: 'Responsibilities & life' },
-          ].map(e => (
-            <div key={e.num} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${e.color}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
-              <div style={{ fontSize: "0.56rem", letterSpacing: "0.18em", color: e.color, fontWeight: 700, fontFamily: font.body, textTransform: "uppercase", marginBottom: "0.3rem" }}>Exercise {e.num}</div>
-              <div style={{ fontFamily: font.display, fontSize: "0.95rem", fontWeight: 700, color: C.ink, marginBottom: "0.2rem" }}>{e.title}</div>
-              <div style={{ fontSize: "0.7rem", color: C.muted, fontFamily: font.body }}>{e.desc}</div>
+          {/* The two tiles come from the server now. They were typed here,
+              which is why the app showed none of them: an Expo project cannot
+              import this file. Ellie's words, and no description line. */}
+          {(ex1Intro.parts || []).map((part, i) => (
+            <div key={part.eyebrow} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${(i === 0 ? '#E8673A' : '#1B5FE8')}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
+              <div style={{ fontSize: "0.56rem", letterSpacing: "0.18em", color: i === 0 ? '#E8673A' : '#1B5FE8', fontWeight: 700, fontFamily: font.body, textTransform: "uppercase", marginBottom: "0.3rem" }}>{part.eyebrow}</div>
+              <div style={{ fontFamily: font.display, fontSize: "0.95rem", fontWeight: 700, color: C.ink }}>{part.title}</div>
             </div>
           ))}
         </div>
@@ -6619,7 +6677,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
   // resumed sessions skip straight to questions.
   if (phase === 'intro') {
     return (
-      <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "clamp(0.4rem, 2vh, 1.5rem) 1rem clamp(0.6rem, 2.5vh, 2rem)", animation: "fadeIn 0.5s ease" }}>
         <link href={FONT_LINK} rel="stylesheet" />
         <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
         {/* The cover, keeping this page's timing line. */}

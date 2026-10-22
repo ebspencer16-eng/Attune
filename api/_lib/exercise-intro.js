@@ -37,7 +37,8 @@ import { CONFLICT_INTRO } from '../_conflict-questions.js';
 /**
  * @param {string} key      an exercise key from api/_exercises.js
  * @param {object} names    { you, partner } for the lines that name someone
- * @returns {{title: string, body: string[], note: string|null, cta: string}|null}
+ * @returns {{title: string, body: string[], parts?: {eyebrow: string, title: string}[],
+ *            note: string|null, cta: string}|null}
  */
 export function exerciseIntro(key, { partner = 'your partner' } = {}) {
   /**
@@ -51,9 +52,28 @@ export function exerciseIntro(key, { partner = 'your partner' } = {}) {
   switch (key) {
     case 'ex1':
       return {
-        title: 'First, how you communicate.',
+        /* Ellie, 22 October, six edits to this page in one message. Her words
+           for all of them: the title, the sentence with its opening clause
+           cut, and both tiles. */
+        title: 'Exercise 1: Communication Styles',
         body: [
-          'This is the communication styles exercise. It looks at how you each process internally, how you connect as a couple, and how you communicate when things get hard.',
+          'This exercise looks at how you each process internally, how you connect as a couple, and how you communicate when things get hard.',
+        ],
+        /**
+         * ── THE TWO TILES, WHICH THE APP NEVER HAD ────────────────────────
+         * These were typed into src/App.jsx, which the app cannot import, so
+         * the website showed two preview tiles and the app showed none. The
+         * same failure this codebase keeps hitting: copy in the renderer.
+         *
+         * Ellie: "should say parts one and two instead of exercises one and
+         * two, and the bold text should say 'How you process and communicate'
+         * and part two should say 'How you view your partner as a
+         * communicator' neither tile should have a description, just the
+         * eyebrow and hero". So there is no description field to fill in.
+         */
+        parts: [
+          { eyebrow: 'Part one', title: 'How you process and communicate' },
+          { eyebrow: 'Part two', title: 'How you view your partner as a communicator' },
         ],
         note: null,
         cta: 'Start',
