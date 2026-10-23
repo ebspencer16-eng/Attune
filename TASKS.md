@@ -10,6 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| S66 | **Anyone can do the exercises and see results without paying, and that is your call not mine.** A new account defaults to `core`, and nothing between there and the results page asks whether a real order exists. Two options under the table. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -19,29 +20,37 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### S61 — the corrected query, and what the second one found
+### S66 — what is open, and the two ways to close it
 
-**This goes in the Supabase SQL Editor, not Terminal.** My first one named a
-column that does not exist: it is `discount_mode`, not `mode`. This is the
-same question, spelled right. It only reads.
+Measured, not reasoned about. A visitor with no account, no code and no URL
+parameters can open `/app?view=exercise1` and answer it. Creating an account
+gives them `core`, because `create-profile` works the package out from their
+order rows and falls back to `core` when there are none. The account mints its
+own invite code, so a partner can join. `/api/results` then asks only what the
+package can see and whether both of them finished. It never asks whether
+anybody bought anything.
 
-```sql
-select code, package_key, discount_mode, discount_value, applies_to,
-       includes_workbook, active, max_uses, uses_count,
-       last_used_at, last_used_by, expires_at
-from beta_codes
-where upper(code) in ('ATTUNE-BETA-14', 'CONGRATSMYA')
-order by code;
-```
+So two people who sign up free can complete Communication and Expectations and
+read their full results.
 
-`uses_count` is the answer. If ATTUNE-BETA-14 reads 0, nobody has redeemed it
-at checkout and that is why there is no order: your beta tester signed up
-without going through it. If it reads 1, the redemption happened and the order
-row is the thing that went missing.
+Nobody has done it. Your ten orders are comps and the one account with no
+order is your own beta tester, who was given a code and did not use it. This
+is a launch problem rather than a live one.
 
-Both codes have migrations in the repo, 034 and 080, so if either comes back
-with no row at all then that migration was never run. The SQL for both is
-already in this repo and I can paste either one here for you to run.
+The reason it is built this way is visible in the code and it is a good
+reason: a buyer whose order row has not landed yet must not be locked out of
+the thing they just paid for. The fallback is what protects them.
+
+**Option 1, the small one.** Keep the fallback for someone whose account is
+minutes old, and require a real order after that. A buyer is never locked out;
+a free signup loses access the next day.
+
+**Option 2, the clean one.** Results require a real order, a comp flag, or a
+partner who has one. Exercises stay open, which is the taste of it people need
+before they buy, and the thing you sell stays sold.
+
+I would do 2, and I have not done either, because this is a decision about
+what you are giving away rather than a bug with one right answer.
 
 ---
 
@@ -59,10 +68,6 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
-| S62 | **The beta-code list was written out twice**, in the endpoint that charges the card and the one that computes the tax, same 1-to-12 loop in both. One module now. They agreed, which is why nobody had looked. |
-| S63 | **Segment by who raised someone.** Six new slicers under Growing up: each guardian, the pair, how many adults, had a mom, had a dad. The word they typed is kept and the grouping happens on the way out, so a better mapping later improves answers already given. |
-| S64 | **A free add-on was being taxed.** The tax endpoint read five of the nine columns on a promo code and the payment endpoint read all nine, so a code giving Reflection away charged nothing and taxed $40 of it. One reading now. I was wrong about the cause when I first described it; the correction is in the commit. |
-| S65 | **Why Rebecca has a package and no order.** `create-profile` works a package out from the person's order rows and falls back to `core` when there are none, so "core" on a profile does not mean anyone bought anything. Worth deciding what you want it to say instead. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -74,6 +79,10 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| S62 | **The beta-code list was written out twice**, in the endpoint that charges the card and the one that computes the tax, same 1-to-12 loop in both. One module now. They agreed, which is why nobody had looked. |
+| S63 | **Segment by who raised someone.** Six new slicers under Growing up: each guardian, the pair, how many adults, had a mom, had a dad. The word they typed is kept and the grouping happens on the way out, so a better mapping later improves answers already given. |
+| S64 | **A free add-on was being taxed.** The tax endpoint read five of the nine columns on a promo code and the payment endpoint read all nine, so a code giving Reflection away charged nothing and taxed $40 of it. One reading now. I was wrong about the cause when I first described it; the correction is in the commit. |
+| S65 | **Why Rebecca has a package and no order.** `create-profile` works a package out from the person's order rows and falls back to `core` when there are none, so "core" on a profile does not mean anyone bought anything. Worth deciding what you want it to say instead. |
 | C32 | **The thirteen are live, replacing the eleven that were there.** Your four section names with them. Twelve are my placeholders for you to rewrite; the thirteenth is your article, untouched. Seven old ones retired. |
 | W106 | **Life & Values is full width**, the same as the self versus partner gap. It was the right half of a two-column grid, 539 points against 1127. |
 | W107 | **Risk patterns rebuilt as a horizontal bar chart.** Four thin columns across eleven hundred points, with "50" on the bar and "50%" on the axis. The bar label now asks the axis how to format a number. |
