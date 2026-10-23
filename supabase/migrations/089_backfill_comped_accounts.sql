@@ -1,62 +1,55 @@
 -- ============================================================================
--- 089: an order row for the accounts that have none.
+-- 089: order rows for the accounts Ellie names, and nothing else.
 --
--- ── WHY ─────────────────────────────────────────────────────────────────────
+-- ── WHY THIS REPLACED ITSELF ────────────────────────────────────────────────
 -- Ellie: "Just update the two accounts that exist without the order, then
--- there's only two types."
+-- there's only two types." The first version of this file did it by rule:
+-- every profile with no order gets one carrying its own package.
 --
--- An account with no order row is a third kind of thing the product has to
--- reason about, and it is the kind that produced a beta tester working through
--- the exercises with nothing in the admin behind her. Results now require a
--- real order, a comp, or a partner who has one, so these accounts would be
--- refused their own results: this is what makes them customers.
+-- Then she ran the list and there were THIRTEEN, not two, and they are not
+-- one kind of thing:
+--
+--   two test accounts, tester-partner@ and tester-alone@, which 087 already
+--     marked is_demo so they are outside every figure;
+--   two rows with no email at all, which are not people and need looking at
+--     rather than an order;
+--   nine real addresses, five of them carrying `premium` on the profile.
+--
+-- That last group is why the rule had to go. `create-profile` used to accept
+-- the package from the request, so signing up at ?pkg=premium granted premium;
+-- the comment in that file says so. Four of those five profiles date from
+-- July, before it was closed. Backfilling `pkg_key = p.pkg` would have written
+-- a premium ORDER for an account whose premium may never have been bought, put
+-- it in the revenue figures, and made it permanent.
+--
+-- So this takes a list. Ellie says who is a real tester and what each should
+-- have; nothing is guessed from a column that may itself be the bug.
 --
 -- ── WHAT IT DOES ────────────────────────────────────────────────────────────
--- For every profile that has no order under it, by id or by email, it writes
--- one $0 order carrying the package that profile already has. Nothing is
--- invented: the package is the profile's own, and `promo_code` says plainly
--- that this row was written by a backfill rather than by a checkout, so the
--- admin's figures can tell the two apart.
+-- One $0 order per named email, carrying the package named beside it, marked
+-- so the admin can tell it from a checkout. Skips anybody who already has an
+-- order. Safe to run more than once.
 --
--- It is scoped to accounts that exist RIGHT NOW. Anybody who signs up after
--- this runs is not touched by it, which is the point: the gate is what stops
--- the next one, not this.
---
--- Safe to run more than once. The second run finds no profile without an
--- order and writes nothing.
---
--- ── WHAT IT DELIBERATELY DOES NOT DO ────────────────────────────────────────
--- It does not raise `uses_count` on any beta code. A code's count is the
--- record of a redemption that happened at checkout, and none of these went
--- through one. ATTUNE-BETA-14 stays unused and can still be given to somebody.
---
--- ── AND WHAT HAPPENS NEXT ───────────────────────────────────────────────────
--- `profiles.entitlements` is a computed summary of what an account owns, and
--- it is recomputed on sign-in rather than by this file. So the moment this
--- runs, /api/results lets these two through: it reads the orders themselves
--- before refusing anybody, which is exactly the case it was written for. The
--- home screen's "results are ready" card reads the summary instead, so it
--- catches up the next time they sign in. Nothing is stuck; one of the two
--- answers is simply a few minutes behind the other.
---
--- Writing the summary by hand here would be a second place that decides what
--- an account owns, which is the failure this codebase is most prone to.
+-- It does not raise uses_count on any beta code: a count records a redemption
+-- at checkout and none of these went through one.
 --
 -- Run in the Supabase SQL Editor and click Run.
 -- ============================================================================
 
--- What it is about to change, so the result is visible before and after.
-select p.email, p.pkg, p.created_at::date as joined
-from public.profiles p
-where not exists (
-  select 1 from public.orders o
-  where o.user_id = p.id
-     or (p.email is not null and lower(o.buyer_email) = lower(p.email))
-);
+-- ── THE LIST ────────────────────────────────────────────────────────────────
+-- One row per person: the email they signed up with, and the package they
+-- should own. Add a line per name Ellie confirms.
+--
+-- rebecca.russavage@gmail.com is here because she was issued ATTUNE-BETA-14,
+-- which is core plus a digital workbook, and is partway through the exercises.
+with named(email, pkg, workbook) as (
+  values
+    ('rebecca.russavage@gmail.com', 'core', 'digital')
+)
 
 insert into public.orders
   (order_num, user_id, buyer_name, buyer_email, partner1_name, partner2_name,
-   pkg_key, is_gift, is_physical, total, promo_code,
+   pkg_key, is_gift, is_physical, total, promo_code, addon_workbook,
    workbook_status, card_status, created_at)
 select
   'ATT-BACKFILL-' || upper(substr(replace(p.id::text, '-', ''), 1, 8)),
@@ -65,27 +58,31 @@ select
   p.email,
   nullif(p.name, ''),
   nullif(p.partner_name, ''),
-  coalesce(nullif(p.pkg, ''), 'core'),
+  n.pkg,
   false,
   false,
   0,
   'BACKFILL-COMPED',
+  nullif(n.workbook, ''),
   'pending',
   'pending',
   coalesce(p.created_at, now())
-from public.profiles p
-where not exists (
-  select 1 from public.orders o
-  where o.user_id = p.id
-     or (p.email is not null and lower(o.buyer_email) = lower(p.email))
-)
+from named n
+join public.profiles p on lower(p.email) = lower(n.email)
+where coalesce(p.is_demo, false) = false
+  and not exists (
+    select 1 from public.orders o
+    where o.user_id = p.id
+       or (p.email is not null and lower(o.buyer_email) = lower(p.email))
+  )
 on conflict (order_num) do nothing;
 
--- And the same list again. Every row above should now be gone.
-select p.email, p.pkg
+-- Who now has an order, of the people named above.
+select p.email, p.pkg, o.order_num, o.pkg_key, o.addon_workbook, o.promo_code
 from public.profiles p
-where not exists (
-  select 1 from public.orders o
-  where o.user_id = p.id
-     or (p.email is not null and lower(o.buyer_email) = lower(p.email))
-);
+left join public.orders o
+  on o.user_id = p.id or lower(o.buyer_email) = lower(p.email)
+where lower(p.email) in (select lower(email) from (values
+  ('rebecca.russavage@gmail.com')
+) as t(email))
+order by p.email;
