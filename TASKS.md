@@ -10,7 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| S66 | **Anyone can do the exercises and see results without paying, and that is your call not mine.** A new account defaults to `core`, and nothing between there and the results page asks whether a real order exists. Two options under the table. |
+| S66 |  **Anyone can do the exercises and see results without paying, and that is your call not mine.** A new account defaults to `core`, and nothing between there and the results page asks whether a real order exists. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -80,9 +80,9 @@ section 3 explaining things, just include the context I need in section 3."
 | Verified by you | What it was |
 |--|--|
 | S62 | **The beta-code list was written out twice**, in the endpoint that charges the card and the one that computes the tax, same 1-to-12 loop in both. One module now. They agreed, which is why nobody had looked. |
-| S63 | **Segment by who raised someone.** Six new slicers under Growing up: each guardian, the pair, how many adults, had a mom, had a dad. The word they typed is kept and the grouping happens on the way out, so a better mapping later improves answers already given. |
-| S64 | **A free add-on was being taxed.** The tax endpoint read five of the nine columns on a promo code and the payment endpoint read all nine, so a code giving Reflection away charged nothing and taxed $40 of it. One reading now. I was wrong about the cause when I first described it; the correction is in the commit. |
-| S65 | **Why Rebecca has a package and no order.** `create-profile` works a package out from the person's order rows and falls back to `core` when there are none, so "core" on a profile does not mean anyone bought anything. Worth deciding what you want it to say instead. |
+| S63 |  **Segment by who raised someone.** Six new slicers under Growing up: each guardian, the pair, how many adults, had a mom, had a dad. |
+| S64 |  **A free add-on was being taxed.** The tax endpoint read five of the nine columns on a promo code and the payment endpoint read all nine, so a code giving Reflection away charged nothing and taxed $40 of it. |
+| S65 |  **Why Rebecca has a package and no order.** `create-profile` works a package out from the person's order rows and falls back to `core` when there are none, so "core" on a profile does not mean anyone bought anything. |
 | C32 | **The thirteen are live, replacing the eleven that were there.** Your four section names with them. Twelve are my placeholders for you to rewrite; the thirteenth is your article, untouched. Seven old ones retired. |
 | W106 | **Life & Values is full width**, the same as the self versus partner gap. It was the right half of a two-column grid, 539 points against 1127. |
 | W107 | **Risk patterns rebuilt as a horizontal bar chart.** Four thin columns across eleven hundred points, with "50" on the bar and "50%" on the axis. The bar label now asks the axis how to format a number. |
