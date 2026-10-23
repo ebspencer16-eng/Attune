@@ -10,7 +10,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| S61 |  **Two queries for Supabase, under the table below.** They tell us whether ATTUNE-BETA-14 and CONGRATSMYA exist as codes at all, and whether anyone is partway through an exercise with no order row behind them. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -20,41 +19,29 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### S61 — the two queries
+### S61 — the corrected query, and what the second one found
 
-**Both of these go in the Supabase SQL Editor, not Terminal.** Open Supabase,
-choose SQL Editor, paste one, press Run. They only read.
-
-The first asks whether those two codes exist at all, and what they were last
-used for:
+**This goes in the Supabase SQL Editor, not Terminal.** My first one named a
+column that does not exist: it is `discount_mode`, not `mode`. This is the
+same question, spelled right. It only reads.
 
 ```sql
-select code, package_key, mode, amount, includes_workbook,
-       active, max_uses, uses_count, last_used_at, last_used_by, expires_at
+select code, package_key, discount_mode, discount_value, applies_to,
+       includes_workbook, active, max_uses, uses_count,
+       last_used_at, last_used_by, expires_at
 from beta_codes
 where upper(code) in ('ATTUNE-BETA-14', 'CONGRATSMYA')
 order by code;
 ```
 
-The second finds anyone who is using the product with no order row behind
-them, which is the shape this would take:
+`uses_count` is the answer. If ATTUNE-BETA-14 reads 0, nobody has redeemed it
+at checkout and that is why there is no order: your beta tester signed up
+without going through it. If it reads 1, the redemption happened and the order
+row is the thing that went missing.
 
-```sql
-select p.email,
-       p.pkg,
-       p.created_at::date as joined,
-       (p.ex1_answers is not null) as started_ex1,
-       (p.ex2_answers is not null) as started_ex2,
-       o.order_num,
-       o.promo_code
-from profiles p
-left join orders o on o.user_id = p.id or lower(o.buyer_email) = lower(p.email)
-where p.created_at > now() - interval '30 days'
-order by p.created_at desc;
-```
-
-A row with answers and a null order_num is a person using the product that the
-admin cannot see.
+Both codes have migrations in the repo, 034 and 080, so if either comes back
+with no row at all then that migration was never run. The SQL for both is
+already in this repo and I can paste either one here for you to run.
 
 ---
 
@@ -73,6 +60,9 @@ section 3 explaining things, just include the context I need in section 3."
 |--|--|
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | S62 | **The beta-code list was written out twice**, in the endpoint that charges the card and the one that computes the tax, same 1-to-12 loop in both. One module now. They agreed, which is why nobody had looked. |
+| S63 | **Segment by who raised someone.** Six new slicers under Growing up: each guardian, the pair, how many adults, had a mom, had a dad. The word they typed is kept and the grouping happens on the way out, so a better mapping later improves answers already given. |
+| S64 | **A free add-on was being taxed.** The tax endpoint read five of the nine columns on a promo code and the payment endpoint read all nine, so a code giving Reflection away charged nothing and taxed $40 of it. One reading now. I was wrong about the cause when I first described it; the correction is in the commit. |
+| S65 | **Why Rebecca has a package and no order.** `create-profile` works a package out from the person's order rows and falls back to `core` when there are none, so "core" on a profile does not mean anyone bought anything. Worth deciding what you want it to say instead. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
