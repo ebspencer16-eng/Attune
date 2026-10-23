@@ -23,6 +23,7 @@ import { jsonBody } from './_lib/http.js';
 import { ADDON_PRICES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, normalizeItem, workbookAmount } from './_lib/cart-pricing.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
+import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -46,16 +47,9 @@ const TAX_CODES = {
   workbookPrint:   'txcd_20030007',
   digitalAddon:    'txcd_10000000',
 };
-const BETA_CODES = {
-  'BETA-CORE': 'core', 'BETA-NEWLYWED': 'newlywed',
-  'BETA-ANNIVERSARY': 'anniversary', 'BETA-PREMIUM': 'premium',
-  'ATTUNE-BETA-FEEDBACK': '*',
-  'BETA-CORE-1': { pkg: 'core', mode: 'fixed', amount: 1 },
-};
-for (let i = 1; i <= 12; i++) {
-  BETA_CODES[`ATTUNE-BETA-${String(i).padStart(2,'0')}`] =
-    { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
-}
+/* One list, in api/_lib/beta-codes.js. It was written out here and in the
+   other endpoint, including the same 1..12 loop. */
+const BETA_CODES = COMPILED_BETA_CODES;
 
 function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includesWorkbook = false, workbookPercent = 0) {
   const lines = [];

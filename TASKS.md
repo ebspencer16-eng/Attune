@@ -26,6 +26,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
+| S61 | **Why ATTUNE-BETA-14 left no order row**, traced through the code that writes one, and whether CONGRATSMYA is missing too. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review

@@ -20,6 +20,7 @@ import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
 import { isStandaloneCart, ownsCoreFor } from './_lib/owns-core.js';
+import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 /* What each package already includes, so this file does not say it again. */
 
 /**
@@ -436,18 +437,9 @@ export default async function handler(req) {
   // Code value shapes:
   //   string          → covers full package (free), value is the package key
   //   { pkg, mode: 'fixed', amount: N } → package costs exactly $N, add-ons billed normally
-  const BETA_CODES = {
-    'BETA-CORE':            'core',
-    'BETA-NEWLYWED':        'newlywed',
-    'BETA-ANNIVERSARY':     'anniversary',
-    'BETA-PREMIUM':         'premium',
-    'ATTUNE-BETA-FEEDBACK': '*',
-    'BETA-CORE-1':          { pkg: 'core', mode: 'fixed', amount: 1 },
-  };
-  for (let i = 1; i <= 12; i++) {
-    BETA_CODES[`ATTUNE-BETA-${String(i).padStart(2,'0')}`] =
-      { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
-  }
+  /* One list, in api/_lib/beta-codes.js. It was written out here and in the
+     other endpoint, including the same 1..12 loop. */
+  const BETA_CODES = COMPILED_BETA_CODES;
 
   if (promoCode) {
     const normalizedCode = promoCode.toUpperCase().trim();
