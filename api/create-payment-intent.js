@@ -20,7 +20,7 @@ import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
 import { isStandaloneCart, ownsCoreFor } from './_lib/owns-core.js';
-import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
+import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
 /* What each package already includes, so this file does not say it again. */
 
 /**

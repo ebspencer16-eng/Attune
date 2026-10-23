@@ -408,3 +408,100 @@ export const EXPECTATIONS_CATEGORIES = [
     ...cat, kind: 'responsibility', color: EXPECTATION_CATEGORY_COLORS[cat.id],
   })),
 ].map((cat) => ({ ...cat, section: `exp-convo-${EXPECTATION_SECTION_NUMBERS[cat.id]}` }));
+
+/**
+ * ── GUARDIANS, FOR SEGMENTING ────────────────────────────────────────────
+ * Ellie: "I want to be able to segment in admin based on which guardians
+ * someone selected, or if they had a mom."
+ *
+ * The pickers let someone type their own word, which is what makes them work
+ * for every family and what makes them useless to a filter unless the words
+ * are grouped. "mom", "Mom" and "My mom" are one group.
+ *
+ * The RAW word is what is stored, deliberately. Canonicalising on the way in
+ * would throw away what the person actually wrote and freeze today's mapping
+ * into their data; doing it on the way out means a better mapping improves
+ * every answer already given, including the ones typed before it existed.
+ */
+const GUARDIAN_SYNONYMS = {
+  Mom: ['mom', 'mum', 'mother', 'mama', 'mommy', 'mummy', 'ma'],
+  Dad: ['dad', 'father', 'papa', 'daddy', 'pa', 'pop'],
+  Stepmom: ['stepmom', 'step mom', 'step-mom', 'stepmother', 'step mother'],
+  Stepdad: ['stepdad', 'step dad', 'step-dad', 'stepfather', 'step father'],
+  Grandma: ['grandma', 'grandmother', 'nana', 'granny', 'gran', 'nan', 'abuela'],
+  Grandpa: ['grandpa', 'grandfather', 'grandad', 'granddad', 'papa joe', 'abuelo'],
+  Aunt: ['aunt', 'auntie', 'aunty', 'tia'],
+  Uncle: ['uncle', 'tio'],
+  Guardian: ['guardian', 'legal guardian'],
+  'Foster parent': ['foster parent', 'foster mom', 'foster dad', 'foster mother', 'foster father'],
+  'Older sibling': ['older sibling', 'sister', 'brother', 'older sister', 'older brother'],
+};
+
+/**
+ * One of CHILDHOOD_ROLES, or null when the word is theirs alone.
+ *
+ * Null rather than a guess: a reader who typed something this list has never
+ * seen is better counted as "something else" than filed under the nearest
+ * word, which would be a category they never chose.
+ */
+export function canonicalGuardian(word) {
+  const w = String(word ?? '').toLowerCase().trim().replace(/^(my|our)\s+/, '');
+  if (!w) return null;
+  for (const [role, words] of Object.entries(GUARDIAN_SYNONYMS)) {
+    if (role.toLowerCase() === w || words.includes(w)) return role;
+    /* "my mom and her partner" contains a role; take the first one named. */
+    if (words.some((x) => new RegExp(`\\b${x}\\b`).test(w))) return role;
+  }
+  return null;
+}
+
+/** What the eight legacy structures said, in the same vocabulary. */
+const LEGACY_STRUCTURE_ROLES = {
+  'mom-dad': ['Mom', 'Dad'],
+  'single-mom': ['Mom', null],
+  'single-dad': ['Dad', null],
+  'two-moms': ['Mom', 'Mom'],
+  'two-dads': ['Dad', 'Dad'],
+  grandparents: ['Grandma', 'Grandpa'],
+  split: [null, null],
+  other: [null, null],
+};
+
+/**
+ * Who raised this person, from their Exercise 2 answers, in one shape.
+ *
+ * Reads both: the two adults they named, and the single structure answer that
+ * is all a couple who finished before the pickers existed has.
+ */
+export function guardiansOf(ex2) {
+  const a2 = (ex2 && ex2.childhoodAdults) || null;
+  let rawA = null; let rawB = null; let solo = false;
+  if (a2) {
+    rawA = (a2.a || '').trim() || null;
+    rawB = (a2.b || '').trim() || null;
+    solo = !!a2.solo;
+  } else if (ex2 && ex2.childhoodStructure) {
+    const pair = LEGACY_STRUCTURE_ROLES[ex2.childhoodStructure];
+    if (pair) {
+      rawA = pair[0]; rawB = pair[1];
+      solo = ex2.childhoodStructure === 'single-mom' || ex2.childhoodStructure === 'single-dad';
+    }
+  }
+  if (!rawA && !rawB) return null;
+
+  const a = canonicalGuardian(rawA);
+  const b = solo ? null : canonicalGuardian(rawB);
+  const named = [a, b].filter(Boolean);
+  /* Sorted, so Mom + Dad and Dad + Mom are one group rather than two. */
+  const pair = solo
+    ? (a || 'Something else')
+    : [a || 'Something else', b || 'Something else'].sort().join(' + ');
+  return {
+    a, b, solo,
+    rawA, rawB,
+    pair,
+    count: solo ? 'One adult' : 'Two adults',
+    hadMom: named.includes('Mom'),
+    hadDad: named.includes('Dad'),
+  };
+}

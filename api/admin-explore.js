@@ -30,7 +30,8 @@ function typeFromEx1(ans){
   const { withdrawScore, openScore } = axisScores(sc);
   return typeCodeFromAxes(withdrawScore, openScore);
 }
-import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
+import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES,
+  CHILDHOOD_ROLES, guardiansOf } from './_questions.js';
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS } from './_conflict-questions.js';
@@ -176,6 +177,21 @@ function ownFields(p) {
   // Ex2 life questions: stored flat under ex2_answers.life
   const life = (p.ex2_answers && p.ex2_answers.life) || {};
   for (const lq of LIFE_QUESTIONS) r[lq.id] = life[lq.id] != null && life[lq.id] !== '' ? life[lq.id] : null;
+  /* ── WHO RAISED THEM ──────────────────────────────────────────────────
+     Ellie: "I want to be able to segment in admin based on which guardians
+     someone selected, or if they had a mom."
+
+     From api/_questions.js, which also reads the eight legacy structures, so
+     a couple who answered before the pickers existed is segmentable too. The
+     raw word stays in their answers; these are the grouped version. */
+  const guardians = guardiansOf(p.ex2_answers);
+  r.guardian_a = guardians?.a || (guardians ? 'Something else' : null);
+  r.guardian_b = guardians ? (guardians.solo ? null : (guardians.b || 'Something else')) : null;
+  r.guardian_pair = guardians?.pair || null;
+  r.guardian_count = guardians?.count || null;
+  r.guardian_mom = guardians ? (guardians.hadMom ? 'Yes' : 'No') : null;
+  r.guardian_dad = guardians ? (guardians.hadDad ? 'Yes' : 'No') : null;
+
   // Ex2 responsibilities: stored flat under ex2_answers.responsibilities, keyed
   // `categoryId__item`. Values are names — normalize to Me/Partner/Both/N/A here.
   const resp = (p.ex2_answers && p.ex2_answers.responsibilities) || {};
@@ -257,6 +273,10 @@ function ownFields(p) {
 // Fields whose partner-equivalent (p_<key>) is meaningful to segment by.
 const PARTNERABLE = [
   'type', 'axisEngage', 'axisOpen', ...DEMO_KEYS,
+  /* Who raised each of them, which is the pair of questions you would
+     most want side by side: a mom-and-dad household beside a
+     grandparent one. */
+  'guardian_a', 'guardian_b', 'guardian_pair', 'guardian_count', 'guardian_mom', 'guardian_dad',
   ...Object.keys(DIM_KEYS).map((d) => 'dim_' + d),
   ...PERSONALITY_QUESTIONS.map((q) => 'q_' + q.id),
   ...LIFE_QUESTIONS.map((lq) => lq.id),
@@ -312,6 +332,25 @@ function buildCatalog(fbCatOptions) {
     options: [{ v: 'Engage', label: 'Engage' }, { v: 'Withdraw', label: 'Withdraw' }], partnerable: true });
   f.push({ key: 'axisOpen', label: 'Open / Guarded', group: 'Type & axes', kind: 'cat',
     options: [{ v: 'Open', label: 'Open' }, { v: 'Guarded', label: 'Guarded' }], partnerable: true });
+
+  /* ── GUARDIANS ─────────────────────────────────────────────────────────
+     Her ask, and the options are the role list the pickers offer plus the two
+     answers a free-typed word can produce, so a slicer can never show a value
+     the cube cannot hold. */
+  const ROLE_OPTS = [...CHILDHOOD_ROLES, 'Something else'].map((v) => ({ v, label: v }));
+  f.push({ key: 'guardian_a', label: 'Guardian 1', group: 'Growing up', kind: 'cat',
+    options: ROLE_OPTS, partnerable: true });
+  f.push({ key: 'guardian_b', label: 'Guardian 2', group: 'Growing up', kind: 'cat',
+    options: ROLE_OPTS, partnerable: true });
+  f.push({ key: 'guardian_pair', label: 'Guardians, as a pair', group: 'Growing up', kind: 'cat',
+    partnerable: true });
+  f.push({ key: 'guardian_count', label: 'How many adults', group: 'Growing up', kind: 'cat',
+    options: [{ v: 'One adult', label: 'One adult' }, { v: 'Two adults', label: 'Two adults' }],
+    partnerable: true });
+  f.push({ key: 'guardian_mom', label: 'Had a mom', group: 'Growing up', kind: 'cat',
+    options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true });
+  f.push({ key: 'guardian_dad', label: 'Had a dad', group: 'Growing up', kind: 'cat',
+    options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true });
   f.push({ key: 'couple_type', label: 'Couple type', group: 'Type & axes', kind: 'cat' });
   f.push({ key: 'pkg', label: 'Package', group: 'Package & cohort', kind: 'cat',
     options: [['core', 'Core'], ['newlywed', 'Newlywed'], ['anniversary', 'Anniversary'], ['premium', 'Premium']].map(([v, label]) => ({ v, label })) });
@@ -538,7 +577,7 @@ export default async function handler(req) {
     // Pass 2: pairing + partner denormalization.
     // Segment lookups so orders can be joined to a purchaser's demographics
     // server-side (by user_id or email) without ever exposing PII to the client.
-    const SEG_KEYS = ['pronouns','age_range','relationship_status','relationship_length','children','signup_source','type','axisEngage','axisOpen','couple_type','pkg'];
+    const SEG_KEYS = ['pronouns','age_range','relationship_status','relationship_length','children','signup_source','type','axisEngage','axisOpen','couple_type','pkg','guardian_pair','guardian_count','guardian_mom','guardian_dad'];
     const RETRO_COUPLE_TYPE = { 'ATTUNE-BETA-1':'WZ', 'ATTUNE-BETA-2':'WX', 'ATTUNE-BETA-5':'WY' };
     const segById = {}, segByEmail = {};
     const rows = [];

@@ -54,6 +54,7 @@ const { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS } = await import(`${ROOT}api/_conf
 const { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } = await import(`${ROOT}api/_type-engine.js`);
 const { PERSONALITY_QUESTIONS } = await import(`${ROOT}api/_questions.js`);
 const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
+const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
 const { INTIMACY_QUESTIONS } = await import(`${ROOT}api/_intimacy-questions.js`);
 
 const DIMS = ['energy', 'expression', 'reassurance', 'love', 'needs', 'bids', 'listening', 'conflict', 'repair', 'feedback'];
@@ -61,8 +62,16 @@ const TYPES = ['W', 'X', 'Y', 'Z'];
 const COUPLE_TYPES = ['WW', 'WX', 'WY', 'WZ', 'XX', 'XY', 'XZ', 'YY', 'YZ', 'ZZ'];
 const pick = (a, i) => a[i % a.length];
 
+const GUARDIAN_OPTS = [...CHILDHOOD_ROLES, 'Something else'].map((v) => ({ v, label: v }));
 const fields = [
   { key: 'type', label: 'Individual type', group: 'Type & axes', kind: 'cat', options: TYPES.map((v) => ({ v, label: v })), partnerable: true },
+  /* The Growing up slicers Ellie asked for. */
+  { key: 'guardian_a', label: 'Guardian 1', group: 'Growing up', kind: 'cat', options: GUARDIAN_OPTS, partnerable: true },
+  { key: 'guardian_b', label: 'Guardian 2', group: 'Growing up', kind: 'cat', options: GUARDIAN_OPTS, partnerable: true },
+  { key: 'guardian_pair', label: 'Guardians, as a pair', group: 'Growing up', kind: 'cat', partnerable: true },
+  { key: 'guardian_count', label: 'How many adults', group: 'Growing up', kind: 'cat', options: [{ v: 'One adult', label: 'One adult' }, { v: 'Two adults', label: 'Two adults' }], partnerable: true },
+  { key: 'guardian_mom', label: 'Had a mom', group: 'Growing up', kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true },
+  { key: 'guardian_dad', label: 'Had a dad', group: 'Growing up', kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true },
   { key: 'couple_type', label: 'Couple type', group: 'Type & axes', kind: 'cat' },
   ...DIMS.map((d) => ({ key: `dim_${d}`, label: d, group: 'Dimensions (score 1–5)', kind: 'scale', partnerable: true })),
   ...CONFLICT_QUESTIONS.flatMap((q) => {
@@ -111,6 +120,27 @@ for (let i = 0; i < 40; i++) {
     has_ex3: i % 4 === 0,
     has_intimacy: i % 5 === 0,
     pronouns: pronounLabel(pick(PRONOUNS, i)),
+    /* Who raised them, so the new Growing up slicers have something to
+       draw. Mixed on purpose: two-parent, single, grandparents and a
+       typed word that no role matches. */
+    ...(() => {
+      const sets = [
+        { a: 'Mom', b: 'Dad', solo: false },
+        { a: 'Mom', b: 'Stepdad', solo: false },
+        { a: 'Grandma', b: 'Grandpa', solo: false },
+        { a: 'Mom', b: '', solo: true },
+        { a: 'Mrs Patel', b: '', solo: true },
+      ];
+      const g = guardiansOf({ childhoodAdults: pick(sets, i) });
+      return {
+        guardian_a: g.a || 'Something else',
+        guardian_b: g.solo ? null : (g.b || 'Something else'),
+        guardian_pair: g.pair,
+        guardian_count: g.count,
+        guardian_mom: g.hadMom ? 'Yes' : 'No',
+        guardian_dad: g.hadDad ? 'Yes' : 'No',
+      };
+    })(),
     age_range: pick(AGES, i),
     relationship_status: pick(STATUS, i),
     relationship_length: pick(LENGTH, i),

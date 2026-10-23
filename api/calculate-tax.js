@@ -23,7 +23,7 @@ import { jsonBody } from './_lib/http.js';
 import { ADDON_PRICES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, normalizeItem, workbookAmount } from './_lib/cart-pricing.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
-import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
+import { COMPILED_BETA_CODES, codeMetaFromRow, bundledAddons } from './_lib/beta-codes.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ const TAX_CODES = {
    other endpoint, including the same 1..12 loop. */
 const BETA_CODES = COMPILED_BETA_CODES;
 
-function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includesWorkbook = false, workbookPercent = 0) {
+function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includesWorkbook = false, workbookPercent = 0, bundled = {}) {
   const lines = [];
   items.forEach((it, idx) => {
     const base = itemBasePrice(it);
@@ -78,15 +78,17 @@ function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includes
     const wb = includesWorkbook ? 0 : Math.round(workbookAmount(it) * 100 * (1 - workbookPercent / 100));
     if (wb > 0 && it.addonWorkbook === 'print') lines.push({ amount: wb, tax_code: TAX_CODES.workbookPrint, reference: `item-${idx}-wbprint`, quantity: 1 });
     if (wb > 0 && it.addonWorkbook === 'digital') lines.push({ amount: wb, tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
-    if (it.addonReflection) lines.push({ amount: ADDON_PRICES.reflection*100, tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-reflection`, quantity: 1 });
-    if (it.addonBudget)     lines.push({ amount: ADDON_PRICES.budget*100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-budget`,     quantity: 1 });
+    /* An add-on the code gives away is not taxed, the same way the
+       workbook above is not. */
+    if (it.addonReflection && !bundled.reflection) lines.push({ amount: ADDON_PRICES.reflection*100, tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-reflection`, quantity: 1 });
+    if (it.addonBudget && !bundled.budget)     lines.push({ amount: ADDON_PRICES.budget*100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-budget`,     quantity: 1 });
     /* These two had no quantity and a reference without the item index, which
        is what a line written and never executed looks like: the mapping below
        dropped both flags, so neither line had ever run. Two items with the
        same reference would also have collided in Stripe's payload. */
-    if (it.addonIntimacy)   lines.push({ amount: ADDON_PRICES.intimacy*100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-intimacy`,  quantity: 1 });
+    if (it.addonIntimacy && !bundled.intimacy)   lines.push({ amount: ADDON_PRICES.intimacy*100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-intimacy`,  quantity: 1 });
     if (it.addonConflict)   lines.push({ amount: ADDON_PRICES.conflict*100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-conflict`,  quantity: 1 });
-    if (it.addonChecklist)  lines.push({ amount: ADDON_PRICES.checklist*100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-checklist`,  quantity: 1 });
+    if (it.addonChecklist && !bundled.checklist)  lines.push({ amount: ADDON_PRICES.checklist*100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-checklist`,  quantity: 1 });
   });
   return lines;
 }
@@ -150,11 +152,11 @@ export default async function handler(req) {
           const rows = await r.json();
           if (Array.isArray(rows) && rows.length) {
             const row = rows[0];
-            codeMeta = {
-              pkg: row.package_key || '*', mode: row.discount_mode || 'free',
-              amount: Number(row.discount_value) || 0, appliesTo: row.applies_to || 'package',
-              includesWorkbook: !!row.includes_workbook,
-            };
+            /* One reading of the row, shared with the endpoint that
+               charges the card. This took five of the nine columns and left
+               the four bundled add-ons behind, so a code giving Reflection
+               away was taxed on forty dollars it never charged. */
+            codeMeta = codeMetaFromRow(row);
           }
         } catch (e) { /* preview is best-effort */ }
       }
@@ -204,7 +206,10 @@ export default async function handler(req) {
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const lineItems = buildTaxLines(items, promoCoversBase, promoFixedAmount, includesWorkbook, workbookPercent);
+    /* The add-ons this code gives away, so none of them is taxed. Only
+       when the code actually covers this cart's package. */
+    const bundled = promoCoversBase ? bundledAddons(codeMeta) : {};
+    const lineItems = buildTaxLines(items, promoCoversBase, promoFixedAmount, includesWorkbook, workbookPercent, bundled);
     if (lineItems.length === 0) {
       return new Response(JSON.stringify({ subtotalCents, taxCents: 0, totalCents: subtotalCents }), {
         status: 200, headers: { 'Content-Type': 'application/json' }
