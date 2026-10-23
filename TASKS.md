@@ -10,8 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| S61 | **Two queries for Supabase, under the table below.** They tell us whether ATTUNE-BETA-14 and CONGRATSMYA exist as codes at all, and whether anyone is partway through an exercise with no order row behind them. I cannot read your data from here. |
-| S58 | **Has anybody ever paid you by card?** Your ten rows are nine promo codes at $0.00 plus one test row. No order has ever been written by the payment path, so either nobody has paid or it has never worked, and only you know which. |
+| S61 |  **Two queries for Supabase, under the table below.** They tell us whether ATTUNE-BETA-14 and CONGRATSMYA exist as codes at all, and whether anyone is partway through an exercise with no order row behind them. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -72,31 +71,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| C32 | **The thirteen are live, replacing the eleven that were there.** Your four section names with them. Twelve are my placeholders for you to rewrite; the thirteenth is your article, untouched. Seven old ones retired. |
-| W106 | **Life & Values is full width**, the same as the self versus partner gap. It was the right half of a two-column grid, 539 points against 1127. |
-| W107 | **Risk patterns rebuilt as a horizontal bar chart.** Four thin columns across eleven hundred points, with "50" on the bar and "50%" on the axis. The bar label now asks the axis how to format a number. |
-| W108 | **The doughnuts fill their tiles.** They were pinned at 280 by 280 whatever the window, inside cards that grow past 570. Measured at three widths. |
-| W103 | **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. Tell me if you still see it and what size your window is. |
-| S60 | **The admin had a tile that was a heading over nothing**, and two that had never been drawn by my test at all. That was your "no data in some spots where we have data". |
-| W119 | **The Communication cover is your words.** Title, the first sentence cut, "This exercise looks", and two tiles reading Part one and Part two with no description. The tiles were typed into the website, so the app had never shown them; both surfaces draw them now. |
-| W120 | **Every cover fits its window.** At 1280x620 the Communication cover needed 925 points in a 620 point window. The glow, the paddings and the gaps scale with the window now; the type does not. Measured at four sizes on the site and three phone sizes in the app. |
-| W121 | **The Expectations cover matches Communication**: your names, "Exercise 2: Expectations", your description, and two tiles. Its title was two sizes bigger than Communication's; they match now. |
-| W122 | **The eyebrow tracks where you are.** "Exercise 2: Expectations · Life and Values", then "· Responsibilities · Household (1 of 5)". FAMILY is gone. |
-| W123 | **Your twelve rewrites are in.** One thing they exposed: the page glued the topic to the front of the question, so Q1 read "Children, when you think of your future, are children a priority?". The question stands alone now with the topic as a small label. |
-| W124 | **Confirmed: it reads correctly.** You each see your OWN name first. The comparison swaps the two ids before matching, so your answer about your family is read against his answer about your family, in all seven places they are compared. |
-| W125 | **The progress bar, the category and its sentence stay at the top** while you scroll Responsibilities. |
-| W126 | **The insights menu on the site**: the tile behind the rows is gone, the labels have a left buffer, the exercises tiles are capped and no longer flash. They were drawn from your package before it had loaded, when everything reads as unowned. |
-| W127 | **The topic label above the Expectations questions is gone.** |
-| W128 | **Q6 reads "How do you envision your joint social life?"** |
-| W129 | **Sign out answers the click now.** It waited on two network calls before anything moved on screen, and had no catch on two of its three copies, so a slow or refused call meant nothing happened at all. It clears this device first, asks the server to revoke in the background with a ceiling of a second and a half, then leaves. One function instead of three. |
-| W130 | **Part two when the answer is not Mom and Dad: my thinking is in the message, and it needs your call.** The short version is that the column headings are stored as the answer itself, so "Adult 1" is what a reader sees in their results a month later. |
-| W137 | **Expectations part two, all three.** Two pickers over eleven roles plus your own word, a one-adult path that asks whether it happened rather than who did it, and the answer stored as a slot so the same letter means Mom in one house and Grandma in the other. Nothing already answered breaks. Both surfaces, app update published. |
-| W135 | **Conflict and Repair on the dashboard was not navigating anywhere.** The shelf filters the list, and the four tiles across the top are a peek taken off the front: that shelf has exactly four articles, so the list below was empty and it read as a reset. |
-| W132 | **The insight of the day opens as a card on the site**, from the quick access tile. |
-| W131 | **Q5 is out of the experience survey.** Nine questions now. |
-| W133 | **In Practice cards are one height.** Three lines reserved for every title; they were 150, 192 and 213 points in one grid. |
-| W134 | **The back control in an article has an arrow and the accent colour.** It was the same size, weight and colour as the words beside it. |
-| W136 | **The word of the day definition is yours.** |
+| W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | S62 | **The beta-code list was written out twice**, in the endpoint that charges the card and the one that computes the tax, same 1-to-12 loop in both. One module now. They agreed, which is why nobody had looked. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
@@ -109,6 +84,30 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| C32 | **The thirteen are live, replacing the eleven that were there.** Your four section names with them. Twelve are my placeholders for you to rewrite; the thirteenth is your article, untouched. Seven old ones retired. |
+| W106 | **Life & Values is full width**, the same as the self versus partner gap. It was the right half of a two-column grid, 539 points against 1127. |
+| W107 | **Risk patterns rebuilt as a horizontal bar chart.** Four thin columns across eleven hundred points, with "50" on the bar and "50%" on the axis. The bar label now asks the axis how to format a number. |
+| W108 | **The doughnuts fill their tiles.** They were pinned at 280 by 280 whatever the window, inside cards that grow past 570. Measured at three widths. |
+| S60 | **The admin had a tile that was a heading over nothing**, and two that had never been drawn by my test at all. That was your "no data in some spots where we have data". |
+| W119 |  **The Communication cover is your words.** Title, the first sentence cut, "This exercise looks", and two tiles reading Part one and Part two with no description. |
+| W120 |  **Every cover fits its window.** At 1280x620 the Communication cover needed 925 points in a 620 point window. The glow, the paddings and the gaps scale with the window now; the type does not. |
+| W121 | **The Expectations cover matches Communication**: your names, "Exercise 2: Expectations", your description, and two tiles. Its title was two sizes bigger than Communication's; they match now. |
+| W122 | **The eyebrow tracks where you are.** "Exercise 2: Expectations · Life and Values", then "· Responsibilities · Household (1 of 5)". FAMILY is gone. |
+| W123 |  **Your twelve rewrites are in.** One thing they exposed: the page glued the topic to the front of the question, so Q1 read "Children, when you think of your future, are children a priority?". |
+| W124 |  **Confirmed: it reads correctly.** You each see your OWN name first. |
+| W125 | **The progress bar, the category and its sentence stay at the top** while you scroll Responsibilities. |
+| W126 |  **The insights menu on the site**: the tile behind the rows is gone, the labels have a left buffer, the exercises tiles are capped and no longer flash. |
+| W127 | **The topic label above the Expectations questions is gone.** |
+| W128 | **Q6 reads "How do you envision your joint social life?"** |
+| W129 |  **Sign out answers the click now.** It waited on two network calls before anything moved on screen, and had no catch on two of its three copies, so a slow or refused call meant nothing happened at all. |
+| W130 |  **Part two when the answer is not Mom and Dad: my thinking is in the message, and it needs your call. |
+| W137 |  **Expectations part two, all three.** Two pickers over eleven roles plus your own word, a one-adult path that asks whether it happened rather than who did it, and the answer stored as a slot so the same letter means |
+| W135 |  **Conflict and Repair on the dashboard was not navigating anywhere. |
+| W132 | **The insight of the day opens as a card on the site**, from the quick access tile. |
+| W131 | **Q5 is out of the experience survey.** Nine questions now. |
+| W133 | **In Practice cards are one height.** Three lines reserved for every title; they were 150, 192 and 213 points in one grid. |
+| W134 | **The back control in an article has an arrow and the accent colour.** It was the same size, weight and colour as the words beside it. |
+| W136 | **The word of the day definition is yours.** |
 | S52 | **All thirteen admin endpoints are alive and refusing properly.** No 500s. Asked from outside, which is the only way a broken endpoint and a locked one look different. |
 | S53 | **The Stripe webhook is configured and checking signatures**, proved by what it answers rather than by reading it. A missing secret answers differently. |
 | S57 | **A lost order used to be a log line and nothing else.** Every real sale's row is written by the webhook, and a failed write only printed to a log nobody reads. Now reported, and Stripe is told to retry. |
