@@ -11,6 +11,7 @@ Every code block says which window it goes in, above the block.
 | # | What I need from you |
 |--|--|
 | S67 | **One migration to run.** It gives the accounts that have no order one, so every account is one of two kinds. The SQL is below this table; it only touches accounts that exist today. |
+| S68 | **Pete, checked.** He has an order so the migration leaves him alone, and the new gate lets him through. What is odd is that he redeemed his code four weeks ago and has started nothing. One query below to see whether he has a partner to finish with. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -19,6 +20,31 @@ Every code block says which window it goes in, above the block.
 | O16 | Download numbers need an App Store Connect key. After launch. |
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
+
+### S68 — is Pete able to get anywhere
+
+**Supabase SQL Editor, not Terminal.** It only reads.
+
+```sql
+select p.email,
+       p.pkg,
+       p.invite_code,
+       p.partner_profile_id is not null as partner_linked,
+       p.joined_via_invite,
+       p.partner_email,
+       (p.entitlements ->> 'hasGrant')::boolean as grant_recorded,
+       o.order_num,
+       o.promo_code,
+       o.addon_workbook
+from profiles p
+left join orders o on o.user_id = p.id or lower(o.buyer_email) = lower(p.email)
+where lower(p.email) = 'peterharaguchi@gmail.com';
+```
+
+`partner_linked` false means nobody can finish with him, so results are
+unreachable however much he answers. `addon_workbook` should read `digital`:
+his code bundles one. `grant_recorded` false is harmless, it fills in on his
+next sign-in, and results read the order itself rather than that field.
 
 ### S67 — the migration
 
