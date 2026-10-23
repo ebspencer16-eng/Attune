@@ -10,6 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| S61 | **Two queries for Supabase, under the table below.** They tell us whether ATTUNE-BETA-14 and CONGRATSMYA exist as codes at all, and whether anyone is partway through an exercise with no order row behind them. I cannot read your data from here. |
 | S58 | **Has anybody ever paid you by card?** Your ten rows are nine promo codes at $0.00 plus one test row. No order has ever been written by the payment path, so either nobody has paid or it has never worked, and only you know which. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -20,13 +21,48 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
+### S61 — the two queries
+
+**Both of these go in the Supabase SQL Editor, not Terminal.** Open Supabase,
+choose SQL Editor, paste one, press Run. They only read.
+
+The first asks whether those two codes exist at all, and what they were last
+used for:
+
+```sql
+select code, package_key, mode, amount, includes_workbook,
+       active, max_uses, uses_count, last_used_at, last_used_by, expires_at
+from beta_codes
+where upper(code) in ('ATTUNE-BETA-14', 'CONGRATSMYA')
+order by code;
+```
+
+The second finds anyone who is using the product with no order row behind
+them, which is the shape this would take:
+
+```sql
+select p.email,
+       p.pkg,
+       p.created_at::date as joined,
+       (p.ex1_answers is not null) as started_ex1,
+       (p.ex2_answers is not null) as started_ex2,
+       o.order_num,
+       o.promo_code
+from profiles p
+left join orders o on o.user_id = p.id or lower(o.buyer_email) = lower(p.email)
+where p.created_at > now() - interval '30 days'
+order by p.created_at desc;
+```
+
+A row with answers and a null order_num is a person using the product that the
+admin cannot see.
+
 ---
 
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
-| S61 | **Why ATTUNE-BETA-14 left no order row**, traced through the code that writes one, and whether CONGRATSMYA is missing too. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -61,6 +97,7 @@ section 3 explaining things, just include the context I need in section 3."
 | W133 | **In Practice cards are one height.** Three lines reserved for every title; they were 150, 192 and 213 points in one grid. |
 | W134 | **The back control in an article has an arrow and the accent colour.** It was the same size, weight and colour as the words beside it. |
 | W136 | **The word of the day definition is yours.** |
+| S62 | **The beta-code list was written out twice**, in the endpoint that charges the card and the one that computes the tax, same 1-to-12 loop in both. One module now. They agreed, which is why nobody had looked. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
