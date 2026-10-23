@@ -25,9 +25,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| W138 | **The app opens on sign in**, with your line under it: "Haven't set up your Attune account yet? Get started", linking out to the site. |
-| W139 | **A login with no Attune account gets told so**, in your words, with your two links. Three states, not two: see the note. |
-| S66 | **Closing the free-results hole**, now that you have said the activation lag is not a concern. Results need a real order, a comp, or a partner who has one. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -38,6 +35,9 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
+| W138 | **Your line is on the sign-in screen, and Get started is a link now.** It was flat text, so the one thing a person without an account can do was a sentence rather than a control. |
+| W139 | **A login that is not ours says so, in your words**, with both your links. The server already answered this; the app was showing it as "Attune refused the session: profile not found". |
+| S66 | **Closed.** Results need a real order, a comp, or a partner who has one. Exercises stay open. Biased towards letting people in: a plain core order is checked against the orders themselves before anyone is refused, and a failed read says yes. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
