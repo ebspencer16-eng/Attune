@@ -13,17 +13,22 @@
 
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { OAUTH_PROVIDERS, isAuthConfigured, signIn, signInWithProvider } from '@/api/auth';
+import { SITE_URL } from '@/api/client';
 import type { OAuthProvider } from '@/api/auth';
 import BrandHeader from '@/components/brand-header';
 import { SignInGround, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 
 const c = Colors.light;
+
+/** What the server says when a session carries no Attune profile. */
+const NOT_REGISTERED = /profile not found|not registered/i;
 
 export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () => void; rejectedReason?: string }) {
   const router = useRouter();
@@ -168,7 +173,46 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
           {/* Signed in, but the next request was still refused. Naming the
               server's reason turns "it sent me back to sign-in" into something
               diagnosable without another round trip. */}
-          {rejectedReason && rejectedReason !== 'no token stored' ? (
+          {/* ── A LOGIN THAT IS NOT OURS ────────────────────────────────
+              Ellie: "If a user tries to sign in with google or apple or an
+              email and they don't have an account registered with Attune,
+              they should see a 'This login is not registered with Attune
+              Relationships' then a link to 'Choose a package and get started'
+              ... or 'Is this an error? Let us know'".
+
+              The server already says this: /api/home answers 404 with
+              `profile not found` for a session carrying no Attune profile,
+              and every tab already hands that string to this screen. It was
+              being shown as "Attune refused the session: profile not found",
+              which is true and tells nobody what to do. Her words, and her two
+              ways out.
+
+              Anything else keeps the plain report, because a reason we have
+              not seen before should not be dressed up as this one. */}
+          {rejectedReason && NOT_REGISTERED.test(rejectedReason) ? (
+            <View style={{ marginTop: Spacing.lg }}>
+              <Text style={{ ...Type.body, color: Palette.white, textAlign: 'center' }}>
+                This login is not registered with Attune Relationships
+              </Text>
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => { Linking.openURL(`${SITE_URL}/offerings`).catch(() => {}); }}
+                style={{ marginTop: Spacing.md, alignSelf: 'center' }}>
+                <Text style={{ ...Type.small, color: Palette.white, textDecorationLine: 'underline' }}>
+                  Choose a package and get started
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => { Linking.openURL('mailto:support@attune-relationships.com?subject=Sign%20in%20problem').catch(() => {}); }}
+                style={{ marginTop: Spacing.sm, alignSelf: 'center' }}>
+                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)' }}>
+                  Is this an error?{' '}
+                  <Text style={{ textDecorationLine: 'underline', color: Palette.white }}>Let us know</Text>
+                </Text>
+              </Pressable>
+            </View>
+          ) : rejectedReason && rejectedReason !== 'no token stored' ? (
             <Text style={{ ...Type.small, color: '#C2410C', marginTop: Spacing.md }}>
               Signed in, but Attune refused the session: {rejectedReason}
             </Text>
@@ -244,12 +288,19 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
           {/* No account creation here. Buying happens on the web, so an app
               sign-up form would be a dead end, and Apple treats an app that
               orchestrates external purchase as a storefront. */}
-          <Text
-            style={{
-              ...Type.small, color: c.textMuted, textAlign: 'center', marginTop: Spacing.xl,
-            }}>
-            New to Attune? Get started at attune-relationships.com
-          </Text>
+          {/* Ellie's line, with Get started as the link: "Haven't set up your
+              Attune account yet? Get started". It opens the site in the
+              system browser, which is what every other way out of this app
+              does: the app does not sell. */}
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => { Linking.openURL(`${SITE_URL}/offerings`).catch(() => {}); }}
+            style={{ marginTop: Spacing.xl }}>
+            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)', textAlign: 'center' }}>
+              Haven&apos;t set up your Attune account yet?{' '}
+              <Text style={{ color: Palette.white, textDecorationLine: 'underline' }}>Get started</Text>
+            </Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

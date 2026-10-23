@@ -349,6 +349,11 @@ export default async function handler(req) {
       mine: Object.fromEntries(Object.entries(exercises).map(([k, e]) => [k, e.mine])),
       theirs: Object.fromEntries(Object.entries(exercises).map(([k, e]) => [k, e.theirs])),
       partnerLinked: !!me.partner_profile_id,
+      /* The same question /api/results asks. This one decides a CARD, so the
+         profile's own answer is enough: a false here says "not ready yet"
+         rather than refusing anything, and results.js does the authoritative
+         read before it refuses. A partner's grant counts. */
+      purchased: !!(capabilitiesFor(me).purchased || capabilitiesFor(partner || {}).purchased),
     });
     const resultsReady = gate.ready;
 

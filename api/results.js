@@ -53,6 +53,7 @@ import { personalityFeedback, commsProtocols, commsActionPlan } from './_lib/com
 import { deriveAnniversaryInsights, reflectionActionTitle } from './_lib/reflection-insights.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
+import { entitlementsFor } from './_lib/entitlements.js';
 import { resultsGate, doneFromProfile } from './_lib/results-gate.js';
 import { DIM_META } from './_workbook-content.js';
 import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
@@ -593,12 +594,34 @@ export default async function handler(req) {
     //
     // ex1 is in every package, so a ready gate guarantees mine and theirs are
     // both populated for the scoring below.
-    const { caps } = capabilitiesFor(me);
+    const { caps, purchased: profileSaysPurchased } = capabilitiesFor(me);
+    /**
+     * ── ASK PROPERLY BEFORE REFUSING ───────────────────────────────────────
+     * `purchased` off the profile is biased towards yes, and a plain core
+     * order with no add-ons rests on the stored blob. If that blob is stale or
+     * was never written, saying no here would refuse somebody their own
+     * results, which is the expensive direction to be wrong in. So a no is
+     * checked against the orders themselves, and a partner's grant counts:
+     * the half of a couple who never bought anything is not turned away.
+     */
+    let purchased = profileSaysPurchased || !!capabilitiesFor(partner || {}).purchased;
+    if (!purchased) {
+      try {
+        const live = await entitlementsFor({
+          supabaseUrl, serviceKey, userId: me.id, email: me.email,
+        });
+        purchased = !!(live?.ok && (live.entitlements?.hasGrant || live.entitlements?.comp));
+      } catch {
+        /* A read that did not happen is not evidence that nobody paid. */
+        purchased = true;
+      }
+    }
     const gate = resultsGate({
       pkg: caps,
       mine: doneFromProfile(me),
       theirs: doneFromProfile(partner),
       partnerLinked: true,
+      purchased,
     });
     if (!gate.ready) {
       return json({

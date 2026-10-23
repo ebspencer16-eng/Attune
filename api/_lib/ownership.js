@@ -87,8 +87,31 @@ export function capabilitiesFor(profile) {
   const ownsChecklist = !!caps.hasChecklist || !!p.addon_checklist || !!ent.addonChecklist;
   const ownsWorkbook = !!caps.hasWorkbook || !!p.addon_workbook || !!ent.addonWorkbook;
 
+  /**
+   * ── DID ANYBODY PAY ────────────────────────────────────────────────────
+   * Separate from what the account can SEE, because a free signup can see
+   * core: `create-profile` works the package out from the person's orders and
+   * falls back to core when there are none.
+   *
+   * Best effort from the profile alone, and biased towards yes, because the
+   * expensive direction is refusing results to somebody who has paid:
+   *   the stored entitlements blob says so, or
+   *   it is a comp account, or
+   *   the package is above core, which only an order can set, or
+   *   any add-on is on the row, which the same is true of.
+   * A plain core order with no add-ons rests on the blob, so a caller about
+   * to REFUSE on this must ask entitlementsFor rather than take the no.
+   */
+  const purchased = !!(
+    ent.hasGrant || ent.comp || p.is_comp
+    || colCaps.rank > 0 || (blobCaps && blobCaps.rank > 0)
+    || p.addon_reflection || p.addon_intimacy || p.addon_conflict
+    || p.addon_budget || p.addon_checklist || p.addon_workbook
+  );
+
   return {
     pkg,
+    purchased,
     ownsReflection, ownsIntimacy, ownsConflict,
     ownsBudget, ownsChecklist, ownsWorkbook,
 

@@ -48,6 +48,12 @@ const PARTNER_ID = 'aaaaaaaa-0000-0000-0000-000000000002';
 
 const me = {
   id: ME_ID, name: 'Ellie', pronouns: 'she/her', partner_profile_id: PARTNER_ID,
+  /* Somebody paid. Every couple who reaches results has: results are what was
+     bought, and api/_lib/results-gate.js refuses them to an account with no
+     order, no comp and no partner who has one. Without this the fixture is
+     shaped like a free signup and the endpoint correctly answers
+     `not_purchased`, which is a true answer about a couple that cannot exist. */
+  entitlements: { hasGrant: true, pkg: 'core' },
   ex1_answers: answersFrom(0),
   ex2_answers: { responsibilities: {}, life: {} },
   ex3_answers: null, ex3_completed: false,

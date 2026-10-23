@@ -10,7 +10,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| S66 |  **Anyone can do the exercises and see results without paying, and that is your call not mine.** A new account defaults to `core`, and nothing between there and the results page asks whether a real order exists. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -20,44 +19,15 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### S66 — what is open, and the two ways to close it
-
-Measured, not reasoned about. A visitor with no account, no code and no URL
-parameters can open `/app?view=exercise1` and answer it. Creating an account
-gives them `core`, because `create-profile` works the package out from their
-order rows and falls back to `core` when there are none. The account mints its
-own invite code, so a partner can join. `/api/results` then asks only what the
-package can see and whether both of them finished. It never asks whether
-anybody bought anything.
-
-So two people who sign up free can complete Communication and Expectations and
-read their full results.
-
-Nobody has done it. Your ten orders are comps and the one account with no
-order is your own beta tester, who was given a code and did not use it. This
-is a launch problem rather than a live one.
-
-The reason it is built this way is visible in the code and it is a good
-reason: a buyer whose order row has not landed yet must not be locked out of
-the thing they just paid for. The fallback is what protects them.
-
-**Option 1, the small one.** Keep the fallback for someone whose account is
-minutes old, and require a real order after that. A buyer is never locked out;
-a free signup loses access the next day.
-
-**Option 2, the clean one.** Results require a real order, a comp flag, or a
-partner who has one. Exercises stay open, which is the taste of it people need
-before they buy, and the thing you sell stays sold.
-
-I would do 2, and I have not done either, because this is a decision about
-what you are giving away rather than a bug with one right answer.
-
 ---
 
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
+| W138 | **The app opens on sign in**, with your line under it: "Haven't set up your Attune account yet? Get started", linking out to the site. |
+| W139 | **A login with no Attune account gets told so**, in your words, with your two links. Three states, not two: see the note. |
+| S66 | **Closing the free-results hole**, now that you have said the activation lag is not a concern. Results need a real order, a comp, or a partner who has one. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review

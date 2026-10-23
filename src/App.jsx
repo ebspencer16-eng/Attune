@@ -17076,9 +17076,18 @@ export default function App() {
   };
   // Demo is a fixture couple, complete by construction, and that escape hatch
   // belongs to the caller rather than to the rule.
+  /* Did anybody pay. The website has the account's entitlements already;
+     `hasGrant` is set when a real order, a comp or a partner's grant sits
+     behind it. Biased towards yes for the same reason the server is. */
+  const _purchased = !!(
+    order?.orderNum || order?.comp || account?.isComp
+    || (_effectivePkgKey && _effectivePkgKey !== 'core')
+    || order?.addonIntimacy || order?.addonConflict || order?.addonReflection
+    || order?.addonBudget || order?.addonChecklist || order?.addonWorkbook
+  );
   const bothDone = isDemo
     ? !!(ex1Answers && ex2Answers)
-    : resultsGate({ pkg, mine: _doneMine, theirs: _doneTheirs, partnerLinked: hasRealPartner }).ready;
+    : resultsGate({ pkg, mine: _doneMine, theirs: _doneTheirs, partnerLinked: hasRealPartner, purchased: _purchased }).ready;
 
   // Couple type, derived once at the App level. Several App-scope consumers
   // reference `coupleType` — the results-viewed email effect, the feedback

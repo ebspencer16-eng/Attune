@@ -85,7 +85,29 @@ export function doneFromProfile(profile) {
  * @param {boolean} args.partnerLinked
  * @returns {{ ready: boolean, reason: string|null, waitingOn: Array<{key:string,label:string,who:'you'|'partner'|'both'}> }}
  */
-export function resultsGate({ pkg, mine, theirs, partnerLinked }) {
+export function resultsGate({ pkg, mine, theirs, partnerLinked, purchased = true }) {
+  /**
+   * ── SOMEBODY HAS TO HAVE BOUGHT IT ─────────────────────────────────────
+   * Ellie, on a free account reaching full results: she has asked for this
+   * closed, and settled the reason it was open: "There shouldn't be lag
+   * between an order processing and an account being activated... so I'm not
+   * worried about that lag."
+   *
+   * `purchased` is `hasGrant` from api/_lib/entitlements.js, which is this
+   * codebase's one answer to what an account owns: true for a real order
+   * under the account, for a comp, and for an invited partner whose
+   * entitlements come from the person who paid. The exercises stay open,
+   * because answering them is the taste of the thing; the results are what
+   * was bought.
+   *
+   * It defaults to true so that a caller which has not been taught to pass it
+   * behaves exactly as it did before, rather than silently locking somebody
+   * out of results they own. Every caller is passed it; the default is for
+   * the next one.
+   */
+  if (!purchased) {
+    return { ready: false, reason: 'not_purchased', waitingOn: [] };
+  }
   if (!partnerLinked) {
     return { ready: false, reason: 'no_partner_linked', waitingOn: [] };
   }
