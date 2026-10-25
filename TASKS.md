@@ -10,7 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| W141 | **Take "What it is for" off the overview as an alignment category.** That bar has four possible values and 54 per cent of couples score 0, because it compares two picks from a list of six and different picks are not a disagreement. The detail page already leads with the chips. A quadrant instead, if you want one, is below. |
+| W141 | **Take "What it is for" off the overview as an alignment category.** That bar has four possible values, and over half of all the ways two people can answer come out at 0, because it compares two picks from a list of six and different picks are not a disagreement. The detail page already leads with the chips. A quadrant instead, if you want one, is below. |
 | W142 | **The round quarters are built into the scale, not the maths.** Every option is worth 0, 0.25, 0.5, 0.75 or 1, so one step apart is always exactly 25 per cent. Communication has a one in three chance of landing on a quarter and Adventurousness one in two. Three ways out are below. Jitter is not one of them. |
 | S71 | **The first 089 ran before I replaced it, so all thirteen got an order, including five premium ones.** Rebecca's row has no workbook, which only the old one would write. 091 below lists exactly what it created so you can see it; nothing is deleted until you say. |
 | S72 | **091 is below: what the backfill actually wrote.** It lists every row with what that account has done and groups them by package. Deletes nothing. |
