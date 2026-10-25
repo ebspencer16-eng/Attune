@@ -241,16 +241,37 @@ Every question has a "prefer not to say". Both declining is its own state and
 is never read as agreement. One declining leaves the pair uncounted rather
 than scored, so choosing not to answer does not become a signal of its own.
 
-| Aspect | Questions |
-|--|--|
-| Frequency | 3 |
-| Initiating | 3 |
-| Comfort & Safety | 4 |
-| Communication | 3 |
-| Adventurousness | 2 |
-| What It Is For | 1 |
+| Aspect | Question | Weight | What it asks |
+|--|--|--|--|
+| Frequency | `iq_freq_want` | 50% | How often do you want physical intimacy? |
+|  | `iq_freq_meaning` | 30% | How much does frequency signal the health of your relationship to you? |
+|  | `iq_freq_relative` | 20% | Compared to your partner, you tend to |
+| Initiating | `iq_init_feel` | 40% | How do you feel about initiating? |
+|  | `iq_init_who` | 35% | Who usually initiates? |
+|  | `iq_init_turndown` | 25% | When you turn your partner down, you tend to: |
+| Comfort & Safety | `iq_comfort_ease` | 40% | How at ease do you feel being physically vulnerable? |
+|  | `iq_comfort_off` | 25% | When something feels off in the moment, you |
+|  | `iq_mean_disconnect` | 20% | When you're emotionally disconnected, physical intimacy tends to |
+|  | `iq_comfort_safe` | 15% | What might help you feel most comfortable? (select all that are true) |
+| Communication | `iq_comm_open` | 40% | How openly can you talk about intimacy? |
+|  | `iq_comm_moment` | 35% | Saying what you want in the moment |
+|  | `iq_comm_debrief` | 25% | Talking afterward about what worked |
+| Adventurousness | `iq_adv_appetite` | 60% | Your appetite for trying new things |
+|  | `iq_adv_suggest` | 40% | When your partner suggests something new, you |
+| What It Is For | `iq_mean_for` | 100% | What is physical intimacy primarily about for you? (select up to two) |
 
-An aspect is the mean of its questions, and lands in the bands in §2.1.
+An aspect is a weighted mean of its questions, and lands in the bands in
+§2.1. The weights are not equal, for the same two reasons as §1: one
+question asks the aspect directly while another asks about a particular
+moment or overlaps the aspect next door, and an equal mean of answers that
+all sit a quarter apart can only ever land on a quarter, which collapsed
+two couples who disagree about different things into one figure.
+
+A question nobody answered is left out and the remaining weights are
+scaled back up to one, so a skipped question cannot read as agreement.
+
+What It Is For has one question, so its weight is one and nothing can be
+done with it. Its figure has four possible values.
 
 ## 5. Conflict Patterns
 

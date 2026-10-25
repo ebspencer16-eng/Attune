@@ -50,7 +50,7 @@ import {
   RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PERSONALITY_QUESTIONS,
 } from '../api/_questions.js';
 import { LIFE_QUESTION_OPTIONS, EXP_DOMAINS } from '../api/_workbook-content.js';
-import { INTIMACY_DIMENSIONS, INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
+import { INTIMACY_DIMENSIONS, INTIMACY_QUESTIONS, INTIMACY_WEIGHTS } from '../api/_intimacy-questions.js';
 import { COMM_DOMAINS } from '../api/_lib/comm-domains.js';
 import { FREQUENCY_LABELS, PATTERN_COPY } from '../api/_conflict-results-prose.js';
 
@@ -292,13 +292,38 @@ export function build() {
     'is never read as agreement. One declining leaves the pair uncounted rather',
     'than scored, so choosing not to answer does not become a signal of its own.',
     '',
-    '| Aspect | Questions |',
-    '|--|--|');
+    '| Aspect | Question | Weight | What it asks |',
+    '|--|--|--|--|');
   for (const d of INTIMACY_DIMENSIONS) {
-    w(`| ${d.label} | ${INTIMACY_QUESTIONS.filter((q) => q.dimension === d.id).length} |`);
+    const qs = INTIMACY_QUESTIONS.filter((q) => q.dimension === d.id);
+    const table = INTIMACY_WEIGHTS[d.id] || null;
+    // Heaviest first, so the row that carries the aspect reads first.
+    const ordered = table
+      ? [...qs].sort((a, b) => (table[b.id] || 0) - (table[a.id] || 0))
+      : qs;
+    ordered.forEach((q, i) => {
+      // A single-question aspect carries all of it, which is truer than
+      // calling an unweighted table "equal" when there is nothing to be
+      // equal to.
+      const share = table ? `${Math.round(table[q.id] * 100)}%`
+        : qs.length === 1 ? '100%' : `${Math.round(100 / qs.length)}%, equal`;
+      const asks = (q.married || q.premarital || q.topic || '').replace(/\|/g, '/');
+      w(`| ${i === 0 ? d.label : ''} | \`${q.id}\` | ${share} | ${asks} |`);
+    });
   }
   w('',
-    'An aspect is the mean of its questions, and lands in the bands in §2.1.',
+    'An aspect is a weighted mean of its questions, and lands in the bands in',
+    '§2.1. The weights are not equal, for the same two reasons as §1: one',
+    'question asks the aspect directly while another asks about a particular',
+    'moment or overlaps the aspect next door, and an equal mean of answers that',
+    'all sit a quarter apart can only ever land on a quarter, which collapsed',
+    'two couples who disagree about different things into one figure.',
+    '',
+    'A question nobody answered is left out and the remaining weights are',
+    'scaled back up to one, so a skipped question cannot read as agreement.',
+    '',
+    'What It Is For has one question, so its weight is one and nothing can be',
+    'done with it. Its figure has four possible values.',
     '');
 
   // ── 5. CONFLICT ─────────────────────────────────────────────────────────

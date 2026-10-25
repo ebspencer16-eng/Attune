@@ -641,25 +641,163 @@ function gapState(gap) {
   return bandFor(gap);
 }
 
+/**
+ * Share of a dimension's gap carried by each of its questions.
+ *
+ * ── WHY ───────────────────────────────────────────────────────────────────
+ * Ellie: "Can we weight the intimacy questions the way we did for the comms
+ * exercise so that you don't come out on those even intervals?"
+ *
+ * Two reasons, and the second is hers.
+ *
+ * The first is the one QUESTION_WEIGHTS in api/_type-engine.js already states
+ * for Communication: questions inside a dimension are not equally diagnostic.
+ * One asks the dimension directly. Another asks about a specific moment, or
+ * overlaps the dimension next door. A plain mean says they are the same
+ * question asked twice.
+ *
+ * The second is that a plain mean throws information away. Every gap this
+ * exercise can measure on a scale is a multiple of a quarter, because every
+ * option is worth 1, 0.75, 0.5, 0.25 or 0. So a plain mean of them can only
+ * ever be a mean of quarters, and two couples who disagree by one step on
+ * DIFFERENT questions came out identical. Adventurousness had nine possible
+ * bars and a one in two chance of landing on a round quarter; Communication
+ * had thirteen and one in three. Both read 75 per cent for Ellie and Preston,
+ * which is what prompted this.
+ *
+ * Weighted, those become nineteen bars at one in five, and seventy-one at one
+ * in eighteen. The measured figures for all six are in check-intimacy-weights.
+ *
+ * ── WHAT THIS IS NOT ──────────────────────────────────────────────────────
+ * It is not extra precision. A dimension with two questions still rests on two
+ * questions, and no arithmetic changes that. What it adds is DIFFERENTIATION:
+ * two couples who disagree about different things now read differently, where
+ * before they were averaged into the same number. That is information the
+ * equal mean was discarding, not information being invented.
+ *
+ * Nothing here is noise added to make a figure look considered. Every couple is
+ * scored by the same table, and the table says in writing why each question
+ * carries what it carries.
+ *
+ * ── THE ONE DIMENSION THIS CANNOT HELP ────────────────────────────────────
+ * What It Is For has one question, so its weight is 1 whatever the table says
+ * and its bar still has four possible values. Weighting cannot reach it. That
+ * is W141 in TASKS.md, which is a separate decision about whether it belongs
+ * on the overview as an alignment category at all.
+ *
+ * Weights within a dimension must sum to 1.0 and must name exactly that
+ * dimension's questions, both enforced below. A dimension absent from this
+ * table falls back to an equal split, which is what every dimension had.
+ *
+ * Reviewed by: DRAFT, pending Ellie. The numbers are a methodology judgement,
+ * not copy, and they are hers to move.
+ */
+export const INTIMACY_WEIGHTS = {
+  // "How often do you want physical intimacy?" is the dimension. What
+  // frequency SIGNALS is a belief about frequency. The relative question is a
+  // comparison and overlaps Initiating.
+  frequency:     { iq_freq_want: 0.50, iq_freq_meaning: 0.30, iq_freq_relative: 0.20 },
+  // How you feel about initiating is the orientation; who actually does it is
+  // the plainest fact about it; turning someone down is one moment and leans
+  // on Comfort.
+  initiating:    { iq_init_feel: 0.40, iq_init_who: 0.35, iq_init_turndown: 0.25 },
+  // Being at ease is the dimension. The other three are a specific moment, a
+  // question moved here from What It Is For, and a list of what helps, which
+  // is an aid rather than a position.
+  comfort:       { iq_comfort_ease: 0.40, iq_comfort_off: 0.25, iq_mean_disconnect: 0.20, iq_comfort_safe: 0.15 },
+  // Talking openly at all is the dimension. Saying it in the moment is harder
+  // and separates people more. Afterwards is the easiest of the three.
+  communication: { iq_comm_open: 0.40, iq_comm_moment: 0.35, iq_comm_debrief: 0.25 },
+  // Appetite IS adventurousness. Answering a partner's suggestion also reads
+  // on Communication and Comfort.
+  adventure:     { iq_adv_appetite: 0.60, iq_adv_suggest: 0.40 },
+  // meaning is deliberately absent: one question, so a weight cannot do
+  // anything. Listing it at 1.0 would read as a decision that had been made.
+};
+
+// Fails at load rather than mis-scoring quietly: a hand edit that breaks a sum
+// or names a question the dimension does not have stops the module. The same
+// guard QUESTION_WEIGHTS has, for the same reason.
+for (const [dim, weights] of Object.entries(INTIMACY_WEIGHTS)) {
+  const sum = Object.values(weights).reduce((a, w) => a + w, 0);
+  if (Math.abs(sum - 1) > 1e-9) {
+    throw new Error(`INTIMACY_WEIGHTS.${dim} sums to ${sum.toFixed(3)}, must be 1.0`);
+  }
+  const listed = Object.keys(weights).sort().join(',');
+  const actual = INTIMACY_QUESTIONS.filter(q => q.dimension === dim).map(q => q.id).sort().join(',');
+  if (listed !== actual) {
+    throw new Error(`INTIMACY_WEIGHTS.${dim} lists [${listed}] but the dimension has [${actual}]`);
+  }
+}
+
+/**
+ * The weighted mean of the gaps that exist, renormalised over those gaps.
+ *
+ * The renormalising is the whole of the care here. A skipped question has no
+ * gap, and if its weight stayed in the denominator every skip would pull the
+ * dimension towards perfect agreement: a couple who answered one of three
+ * would read as more aligned than a couple who answered all three and agreed.
+ * So the divisor is the weight of what was actually answered, which is what
+ * the equal-split version did implicitly by averaging a shorter list.
+ *
+ * An empty list answers null, not nought. One is an unanswered dimension and
+ * the other is perfect agreement, and reading the first as the second is the
+ * mistake every caller of this file has made at least once.
+ */
+function weightedGap(dimensionId, scored) {
+  if (!scored.length) return null;
+  const table = INTIMACY_WEIGHTS[dimensionId];
+  if (!table) {
+    return scored.reduce((a, x) => a + x.gap, 0) / scored.length;
+  }
+  let num = 0, den = 0;
+  for (const { id, gap } of scored) {
+    const w = table[id];
+    // A question with no weight cannot be silently dropped, and it cannot be
+    // given a made-up one either. The load guard above means this is
+    // unreachable; it is here so that if it ever is reached, the dimension
+    // falls back to an honest equal split rather than to a partial weighting.
+    if (w == null) return scored.reduce((a, x) => a + x.gap, 0) / scored.length;
+    num += gap * w;
+    den += w;
+  }
+  return den > 0 ? num / den : null;
+}
+
 // Roll up per-dimension and overall alignment for a completed pair.
 export function summarizeIntimacy(mineAnswers, theirsAnswers) {
   const perDim = {};
-  for (const d of INTIMACY_DIMENSIONS) perDim[d.id] = { gaps: [], states: [] };
+  for (const d of INTIMACY_DIMENSIONS) perDim[d.id] = { scored: [], states: [] };
   const rows = [];
   for (const q of INTIMACY_QUESTIONS) {
     const r = scoreIntimacyPair(q, mineAnswers?.[q.id], theirsAnswers?.[q.id]);
     rows.push({ id: q.id, dimension: q.dimension, ...r });
     if (r.gap != null) {
-      perDim[q.dimension].gaps.push(r.gap);
+      // The id travels with the gap because the weight is looked up by it.
+      // It used to be a bare list of numbers, which is why this had to change
+      // rather than being wrapped.
+      perDim[q.dimension].scored.push({ id: q.id, gap: r.gap });
       perDim[q.dimension].states.push(r.state);
     }
   }
   const dimSummary = INTIMACY_DIMENSIONS.map(d => {
-    const g = perDim[d.id].gaps;
-    const avg = g.length ? g.reduce((a, b) => a + b, 0) / g.length : null;
+    const avg = weightedGap(d.id, perDim[d.id].scored);
     return { id: d.id, label: d.label, avgGap: avg, state: avg == null ? 'unspoken' : gapState(avg) };
   });
-  const allGaps = rows.filter(r => r.gap != null).map(r => r.gap);
-  const overall = allGaps.length ? allGaps.reduce((a, b) => a + b, 0) / allGaps.length : null;
+  /**
+   * The whole-exercise figure: the mean of the six dimension gaps.
+   *
+   * It used to pool all sixteen question gaps, which quietly made Comfort
+   * worth twice Adventurousness because it has twice the questions. The six
+   * dimensions are the things this exercise claims to measure, so they count
+   * once each, and the weights inside them are already applied by then.
+   *
+   * Nothing reads this. The headline percentage both surfaces draw is the mean
+   * of the per-dimension bars, built from dimSummary. It is computed
+   * consistently anyway, because an unweighted figure sitting beside a
+   * weighted one is how the wrong one gets picked up later.
+   */
+  const dimGaps = dimSummary.map(d => d.avgGap).filter(g => g != null);
+  const overall = dimGaps.length ? dimGaps.reduce((a, b) => a + b, 0) / dimGaps.length : null;
   return { rows, dimSummary, overall, overallState: overall == null ? 'unspoken' : gapState(overall) };
 }
