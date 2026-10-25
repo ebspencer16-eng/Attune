@@ -140,7 +140,7 @@ order by p.feedback_given_at desc;
 
 | # | What I am doing |
 |--|--|
-| W143 | **Your 1, 9 and 11**: centring the expectations answer columns, the highlights tap landing on couple type, and the cover titles that are left aligned. Driving the pages rather than grepping for them. |
+| W143 | **Your 9 and 11 still**: the highlights tap landing on couple type, and the cover titles that are left aligned. |
 | W141 | **A recommendation for "what it is for"** on Physical Intimacy: a quadrant, or take it out. |
 | W142 | **Why alignment keeps landing on a round three quarters**, and what to do about it. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
@@ -154,6 +154,7 @@ section 3 explaining things, just include the context I need in section 3."
 |--|--|
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | W140 | **Eight of your fourteen**: 2, 3, 4 on the sign-in screen, 5 the dropdowns, 6 the budget staying open, 7 and 8 the two stale prompts, 13 Phys. Intimacy, 14 the insight wraps. App update published. |
+| W144 | **Item 1, and it was not about that table.** Both cells already said centre. Prose turns alignment into a flex rule and put it on the wrong view, so every centred paragraph in the app has been left aligned since it was written. Driven to confirm. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
