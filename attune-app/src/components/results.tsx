@@ -250,8 +250,31 @@ let lastSection: string | null = null;
  * instant, so leaving a screen is not unmounting it and nothing resets by
  * itself.
  */
+/**
+ * The section the reader is on, so anything open can close when they leave it.
+ *
+ * ── WHY A CONTEXT ──────────────────────────────────────────────────────────
+ * Ellie: "Some of the side by side dropdowns remained open in insights when I
+ * went back into the pages. Those should all close automatically when you
+ * exit that page."
+ *
+ * They were closing on the TAB losing focus, which is a different event: the
+ * whole of results is one screen, so walking from Internal processing to
+ * Expression never blurs anything and every dropdown stayed as it was left.
+ * The page is the section, so the section is what a dropdown has to watch.
+ */
+const SectionContext = createContext<string>('');
+
 export function useClosesOnLeave(close: () => void) {
+  /* Leaving the tab. */
   useFocusEffect(useCallback(() => () => close(), [close]));
+  /* And leaving the page, which is the one she was reporting. */
+  const section = useContext(SectionContext);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    close();
+  }, [section]);  // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 export const MENU_SECTION = '__menu';
@@ -940,6 +963,9 @@ export default function Results({
        deliberately, so every page change remounts it; a provider in there
        would fetch the whole set again on every turn of the page and lose a
        tick made a moment earlier while the request was in flight. */
+    /* Every dropdown below reads this to know when the reader has left the
+       page it is on. See useClosesOnLeave. */
+    <SectionContext.Provider value={sectionId}>
     <ConvoTicksProvider>
     <View style={{ flex: 1 }}>
       {/* ── THE WAY OUT, AND NOTHING ELSE ────────────────────────────────
@@ -1282,6 +1308,7 @@ export default function Results({
       ) : null}
     </View>
     </ConvoTicksProvider>
+    </SectionContext.Provider>
   );
 }
 

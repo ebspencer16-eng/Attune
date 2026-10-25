@@ -91,6 +91,22 @@ const RESOURCE_TITLE = {
 };
 
 /**
+ * And what it says once they have been in it.
+ *
+ * Ellie: "I opened build a budget, my action prompt shouldn't say explore
+ * build a budget anymore, it could say complete your budget."
+ *
+ * "Explore" is an invitation and it is the wrong word the second time: a
+ * person who has opened the tool is being asked to go and discover something
+ * they have already found. The generic "Pick up Shared Budgeting" this fell
+ * through to was not hers either.
+ */
+const RESOURCE_STARTED_TITLE = {
+  budget: 'Complete your budget',
+  checklist: 'Complete your checklist',
+};
+
+/**
  * The website address for a deepLink.
  *
  * Two shapes reach here. `/?view=budget` is a view inside the portal and
@@ -393,7 +409,9 @@ export function nextActions(state = {}) {
     const r = res[key];
     if (r?.owned && !r.complete) {
       add({ id: `use-${key}`, kind: 'use_resource', priority: 7,
-        title: r.started ? `Pick up ${label}` : (RESOURCE_TITLE[key] || 'Start a new exercise'),
+        title: r.started
+          ? (RESOURCE_STARTED_TITLE[key] || `Pick up ${label}`)
+          : (RESOURCE_TITLE[key] || 'Start a new exercise'),
         // Ellie's words. The started line is the same for every tool; the
         // other one is per tool, and anything she has not written keeps the
         // general sentence rather than something invented for it.

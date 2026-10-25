@@ -18299,8 +18299,20 @@ export default function App() {
                           fontFamily: HFONT, fontSize: quoteSize,
                           lineHeight: `${Math.round(quoteSize * FIT_LEADING)}px`,
                           color: "white", fontWeight: 400, margin: 0, letterSpacing: "-0.01em",
-                          display: "-webkit-box", WebkitBoxOrient: "vertical",
-                          WebkitLineClamp: shown ? shown.lines : undefined, overflow: "hidden",
+                          /* ── IT WRAPS. IT DOES NOT TRUNCATE ─────────────
+                             Ellie: "The web insight of the day on learn tab is
+                             cutting off again with an ellipses, fix this, I
+                             always want that to wrap."
+
+                             The fit routine picks a size and a line count that
+                             fit the room the peek leaves, and the clamp was
+                             there to enforce the count. When the fit is a
+                             line out, the clamp is what turns that into a
+                             quotation with its end missing, which is worse
+                             than a quotation that takes one more line. The
+                             size still comes from the fit; the clamp is gone,
+                             so a long one overflows into the space below
+                             rather than losing its last words. */
                         }}>
                           {insight.body}
                         </p>

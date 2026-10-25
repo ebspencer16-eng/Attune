@@ -500,7 +500,8 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
 
   if (intimacyReady) {
     groups.push({
-      id: 'intimacy', shortLabel: 'Intimacy', ...fromExercise('intimacy', 'Physical Intimacy'),
+      /* Ellie: "On app insights top nav, I want 'Intimacy' to say 'Phys. Intimacy'". */
+      id: 'intimacy', shortLabel: 'Phys. Intimacy', ...fromExercise('intimacy', 'Physical Intimacy'),
       children: [
         cover('intimacy', fromExercise('intimacy', 'Physical Intimacy').label),
         glance('intimacy-overview'),

@@ -10,8 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| S69 | **Do not run 089 as it stood: thirteen accounts have no order, not two, and five of them say premium.** `create-profile` used to take the package from the URL, so some of those may never have been bought. 090 below says who each one is; tell me which are real and I will write the list. |
-| S70 | **Pete has nobody to finish with.** He has his order, his workbook and his invite code, and `partner_linked` is false with no partner email. That is the whole reason four weeks have produced nothing. |
+| S71 | **The first 089 ran before I replaced it, so all thirteen got an order, including five premium ones.** Rebecca's row has no workbook, which only the old one would write. 091 below lists exactly what it created so you can see it; nothing is deleted until you say. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -21,175 +20,15 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### S69 — run this one first
-
-**Supabase SQL Editor, not Terminal.** It only reads. It says what each of the
-thirteen has actually done, so you can tell me which are real testers.
-
-<!-- SQL 090_who_has_no_order.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 090: who the thirteen accounts without an order actually are. Reads only.
---
--- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie asked to fix "the two accounts that exist without the order" and the
--- list came back with thirteen. They are not one kind of thing, and the
--- difference matters before anybody is written an order: five of them carry
--- `premium` on the profile, and `create-profile` used to take the package
--- from the request, so signing up at ?pkg=premium granted premium. Four of
--- those five date from July, before that was closed.
---
--- So this asks what each of them has actually DONE. A real beta tester has
--- answers, a partner, or both. A self-granted premium with no answers and no
--- partner is a different decision.
---
--- Nothing here writes. Run it, read it, and tell me which names should become
--- customers and at what package; 089 takes a list.
---
--- Run in the Supabase SQL Editor and click Run.
--- ============================================================================
-
-select
-  coalesce(p.email, '(no email)')                       as email,
-  p.pkg                                                 as pkg_on_profile,
-  coalesce(p.is_demo, false)                            as is_demo,
-  p.created_at::date                                    as joined,
-  p.auth_provider,
-  (p.ex1_answers is not null)                           as started_comms,
-  (p.ex2_answers is not null)                           as started_expectations,
-  (p.ex3_answers is not null)                           as started_reflection,
-  (p.intimacy_data is not null)                         as started_intimacy,
-  (p.conflict_data is not null)                         as started_conflict,
-  (p.partner_profile_id is not null)                    as partner_linked,
-  p.joined_via_invite,
-  (p.entitlements ->> 'hasGrant')::boolean              as grant_recorded
-from public.profiles p
-where not exists (
-  select 1 from public.orders o
-  where o.user_id = p.id
-     or (p.email is not null and lower(o.buyer_email) = lower(p.email))
-)
-order by coalesce(p.is_demo, false), p.pkg desc, p.created_at;
-```
-<!-- /SQL -->
-
-Two of the thirteen are your own test accounts and 087 already marked them, so
-they sit outside every figure and need nothing. Two more have no email at all,
-which makes them partial sign-ups rather than people. That leaves nine real
-addresses, and the five carrying premium are the ones worth a second look.
-
-### S67 — the backfill, once you have named who
-
-**This goes in the Supabase SQL Editor, not Terminal.** Open Supabase, choose
-SQL Editor, paste the whole block, press Run.
-
-It takes a LIST now rather than a rule, because a rule would have written a
-premium order for an account whose premium may never have been bought. Rebecca
-is in it: she was issued ATTUNE-BETA-14 and is partway through. Tell me who
-else belongs and I will add them.
-
-It does not touch ATTUNE-BETA-14, which is still unused and can still be given
-to somebody.
-
-<!-- SQL 089_backfill_comped_accounts.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 089: order rows for the accounts Ellie names, and nothing else.
---
--- ── WHY THIS REPLACED ITSELF ────────────────────────────────────────────────
--- Ellie: "Just update the two accounts that exist without the order, then
--- there's only two types." The first version of this file did it by rule:
--- every profile with no order gets one carrying its own package.
---
--- Then she ran the list and there were THIRTEEN, not two, and they are not
--- one kind of thing:
---
---   two test accounts, tester-partner@ and tester-alone@, which 087 already
---     marked is_demo so they are outside every figure;
---   two rows with no email at all, which are not people and need looking at
---     rather than an order;
---   nine real addresses, five of them carrying `premium` on the profile.
---
--- That last group is why the rule had to go. `create-profile` used to accept
--- the package from the request, so signing up at ?pkg=premium granted premium;
--- the comment in that file says so. Four of those five profiles date from
--- July, before it was closed. Backfilling `pkg_key = p.pkg` would have written
--- a premium ORDER for an account whose premium may never have been bought, put
--- it in the revenue figures, and made it permanent.
---
--- So this takes a list. Ellie says who is a real tester and what each should
--- have; nothing is guessed from a column that may itself be the bug.
---
--- ── WHAT IT DOES ────────────────────────────────────────────────────────────
--- One $0 order per named email, carrying the package named beside it, marked
--- so the admin can tell it from a checkout. Skips anybody who already has an
--- order. Safe to run more than once.
---
--- It does not raise uses_count on any beta code: a count records a redemption
--- at checkout and none of these went through one.
---
--- Run in the Supabase SQL Editor and click Run.
--- ============================================================================
-
--- ── THE LIST ────────────────────────────────────────────────────────────────
--- One row per person: the email they signed up with, and the package they
--- should own. Add a line per name Ellie confirms.
---
--- rebecca.russavage@gmail.com is here because she was issued ATTUNE-BETA-14,
--- which is core plus a digital workbook, and is partway through the exercises.
-with named(email, pkg, workbook) as (
-  values
-    ('rebecca.russavage@gmail.com', 'core', 'digital')
-)
-
-insert into public.orders
-  (order_num, user_id, buyer_name, buyer_email, partner1_name, partner2_name,
-   pkg_key, is_gift, is_physical, total, promo_code, addon_workbook,
-   workbook_status, card_status, created_at)
-select
-  'ATT-BACKFILL-' || upper(substr(replace(p.id::text, '-', ''), 1, 8)),
-  p.id,
-  nullif(p.name, ''),
-  p.email,
-  nullif(p.name, ''),
-  nullif(p.partner_name, ''),
-  n.pkg,
-  false,
-  false,
-  0,
-  'BACKFILL-COMPED',
-  nullif(n.workbook, ''),
-  'pending',
-  'pending',
-  coalesce(p.created_at, now())
-from named n
-join public.profiles p on lower(p.email) = lower(n.email)
-where coalesce(p.is_demo, false) = false
-  and not exists (
-    select 1 from public.orders o
-    where o.user_id = p.id
-       or (p.email is not null and lower(o.buyer_email) = lower(p.email))
-  )
-on conflict (order_num) do nothing;
-
--- Who now has an order, of the people named above.
-select p.email, p.pkg, o.order_num, o.pkg_key, o.addon_workbook, o.promo_code
-from public.profiles p
-left join public.orders o
-  on o.user_id = p.id or lower(o.buyer_email) = lower(p.email)
-where lower(p.email) in (select lower(email) from (values
-  ('rebecca.russavage@gmail.com')
-) as t(email))
-order by p.email;
-```
-<!-- /SQL -->
-
 ---
 
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
+| W140 | **Your fourteen**, from the sign-in screen's unreadable red text to the insight that keeps truncating. |
+| W141 | **A recommendation for "what it is for"** on Physical Intimacy: a quadrant, or take it out. |
+| W142 | **Why alignment keeps landing on a round three quarters**, and what to do about it. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -200,9 +39,6 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
-| W138 | **Your line is on the sign-in screen, and Get started is a link now.** It was flat text, so the one thing a person without an account can do was a sentence rather than a control. |
-| W139 | **A login that is not ours says so, in your words**, with both your links. The server already answered this; the app was showing it as "Attune refused the session: profile not found". |
-| S66 | **Closed.** Results need a real order, a comp, or a partner who has one. Exercises stay open. Biased towards letting people in: a plain core order is checked against the orders themselves before anyone is refused, and a failed read says yes. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 

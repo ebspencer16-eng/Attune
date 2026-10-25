@@ -18,15 +18,15 @@ whether their results are ready, and what they have bought and not used.
 
 | # | Priority | Heading | Description | Button |
 |---|---|---|---|---|
-| 1 | undefined | Complete your checklist | Merge your lives seamlessly with a practical checklist | undefined |
-| 2 | undefined | Complete your exercises | Your results unlock once you and James complete your exercises | undefined |
-| 3 | undefined | Continue Communication | You've completed 12/30 questions | undefined |
-| 4 | undefined | Explore build-a-budget | Build your budget with a customizable tool | undefined |
-| 5 | undefined | Finish setting up your profile | We need info to properly set up your exercises | undefined |
-| 6 | undefined | Look back at your tags | What you marked is a record of what mattered to you. | undefined |
-| 7 | undefined | New publication to explore | View this and others in your Learn tab | undefined |
-| 8 | undefined | Pick one conversation to have this week | Every section ends with something to try. | undefined |
-| 9 | undefined | Pick up Shared Budgeting | This exercise is in progress and status has been saved | undefined |
+| 1 | undefined | Complete your budget | This exercise is in progress and status has been saved | undefined |
+| 2 | undefined | Complete your checklist | Merge your lives seamlessly with a practical checklist | undefined |
+| 3 | undefined | Complete your exercises | Your results unlock once you and James complete your exercises | undefined |
+| 4 | undefined | Continue Communication | You've completed 12/30 questions | undefined |
+| 5 | undefined | Explore build-a-budget | Build your budget with a customizable tool | undefined |
+| 6 | undefined | Finish setting up your profile | We need info to properly set up your exercises | undefined |
+| 7 | undefined | Look back at your tags | What you marked is a record of what mattered to you. | undefined |
+| 8 | undefined | New publication to explore | View this and others in your Learn tab | undefined |
+| 9 | undefined | Pick one conversation to have this week | Every section ends with something to try. | undefined |
 | 10 | undefined | Read something from In Practice | Short pieces on the things that impact relationships. | undefined |
 | 11 | undefined | Reread what you each wrote | Written answers are worth revisiting and discussing. | undefined |
 | 12 | undefined | Revisit Conflict Style | Your widest difference. Worth rereading together. | undefined |

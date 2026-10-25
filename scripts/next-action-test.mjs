@@ -84,8 +84,13 @@ ok('results ready and never opened',
 ok('a paid resource sitting unused',
   primary({ resources: { budget: { owned: true, started: false, complete: false }, checklist: { owned: false } } }).kind === 'use_resource');
 
-ok('a started resource says pick up, not start',
-  primary({ resources: { budget: { owned: true, started: true, complete: false }, checklist: { owned: false } } }).title.startsWith('Pick up'));
+ok('a started resource says what to do with it, not to go and find it',
+  /* Ellie: "I opened build a budget, my action prompt shouldn't say explore
+     build a budget anymore, it could say complete your budget." The generic
+     "Pick up Shared Budgeting" was not her words either; RESOURCE_STARTED_TITLE
+     is. What the test is really about is that a started resource does not read
+     like an invitation to discover it. */
+  primary({ resources: { budget: { owned: true, started: true, complete: false }, checklist: { owned: false } } }).title === 'Complete your budget');
 
 ok('a completed resource does not prompt',
   primary({ resources: { budget: { owned: true, started: true, complete: true }, checklist: { owned: false } } }).kind !== 'use_resource');

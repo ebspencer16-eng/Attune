@@ -566,6 +566,27 @@ export default function ResourcesScreen() {
    * Tapping Resources while already on Resources closes whatever is open and
    * leaves you on the tab's own page: an article, the budget, the checklist.
    */
+  /**
+   * ── AND LEAVING THE TAB CLOSES IT TOO ──────────────────────────────────
+   * Ellie: "I opened build a budget then navigated away then when I went back
+   * to learn, build a budget was still open. That should go back to learn
+   * homepage when I leave - same with other resources."
+   *
+   * Tapping Learn while already on Learn has closed these since useTabReset
+   * existed. Walking to another tab and back did not, because nothing was
+   * watching for that: every tab in this app mounts at launch and stays
+   * mounted, which is what makes switching instant and what leaves a screen
+   * holding whatever it held.
+   *
+   * The same shape as the tags that were read once on mount and never again.
+   */
+  useFocusEffect(useCallback(() => () => {
+    setOpenPost(null);
+    setOpenTool(null);
+    setOpenShelf(null);
+    setCategory(ALL);
+  }, []));
+
   useTabReset(useCallback(() => {
     setOpenPost(null);
     setOpenTool(null);

@@ -98,6 +98,26 @@ export default function Budget({ onClose }: { onClose: () => void }) {
    */
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
+  /**
+   * ── OPENING IT COUNTS AS STARTING IT ───────────────────────────────────
+   * Ellie: "I opened build a budget, my action prompt shouldn't say explore
+   * build a budget anymore."
+   *
+   * `started` on the home card is whether `budget_data` holds anything, and
+   * the tool only writes when a figure changes, so opening it and looking
+   * around left no trace and the card went on inviting her to discover it.
+   * One write, only when there is nothing stored yet.
+   */
+  const marked = useRef(false);
+  useEffect(() => {
+    if (marked.current) return;
+    if (savedRef.current && savedRef.current !== '{}') return;
+    marked.current = true;
+    saveToolData('budget', { ...state, openedAt: new Date().toISOString() })
+      .then((r) => { if (r.ok) savedRef.current = JSON.stringify({ ...state, openedAt: undefined }); })
+      .catch(() => {});
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+
   const save = useCallback(async (next: BudgetState) => {
     const body = JSON.stringify(next);
     if (body === savedRef.current) return;

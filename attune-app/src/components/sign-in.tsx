@@ -29,6 +29,8 @@ const c = Colors.light;
 
 /** What the server says when a session carries no Attune profile. */
 const NOT_REGISTERED = /profile not found|not registered/i;
+/** A session that has simply aged out, which is most of what lands here. */
+const EXPIRED = /token|session|expired|unauthori[sz]ed|jwt/i;
 
 export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () => void; rejectedReason?: string }) {
   const router = useRouter();
@@ -127,13 +129,8 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
           <Text style={{ ...Type.hero, color: Palette.white, textAlign: 'center' }}>
             Sign in to Attune
           </Text>
-          <Text
-            style={{
-              ...Type.small, color: 'rgba(255,255,255,0.75)', textAlign: 'center',
-              marginTop: Spacing.sm, marginBottom: Spacing.xl,
-            }}>
-            Use the email you bought with.
-          </Text>
+          {/* "Use the email you bought with." is gone at her word. */}
+          <View style={{ height: Spacing.xl }} />
 
           <TextInput
             style={field}
@@ -166,8 +163,9 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
             onSubmitEditing={submit}
           />
 
+          {/* Orange on a blue ground read at about two to one. */}
           {error ? (
-            <Text style={{ ...Type.small, color: '#C2410C', marginTop: Spacing.md }}>{error}</Text>
+            <Text style={{ ...Type.small, color: '#FFD9C7', marginTop: Spacing.md }}>{error}</Text>
           ) : null}
 
           {/* Signed in, but the next request was still refused. Naming the
@@ -213,21 +211,39 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
               </Pressable>
             </View>
           ) : rejectedReason && rejectedReason !== 'no token stored' ? (
-            <Text style={{ ...Type.small, color: '#C2410C', marginTop: Spacing.md }}>
-              Signed in, but Attune refused the session: {rejectedReason}
-            </Text>
+            /* ── IN WORDS, AND VISIBLE ───────────────────────────────────
+               Ellie: "'Signed in, but Attune refused the session: invalid
+               auth token' text is hard to see on the sign in page", and
+               "Change the text ... to something that makes sense to the user.
+               Maybe 'You've been logged out, sign back in to continue'".
+
+               Both halves were one mistake. #C2410C is a warm orange chosen
+               against cream, and this screen is a blue ground: it came out at
+               barely two to one. And the message was the server's own words
+               about a token, which tell a person nothing they can act on.
+               Hers, on a panel, in white. */
+            <View style={{
+              marginTop: Spacing.md, borderRadius: Radius.md,
+              backgroundColor: 'rgba(0,0,0,0.22)', padding: Spacing.md,
+            }}>
+              <Text style={{ ...Type.body, color: Palette.white, textAlign: 'center' }}>
+                {EXPIRED.test(rejectedReason)
+                  ? "You've been logged out. Sign back in to continue."
+                  : 'Something went wrong signing you in. Try again.'}
+              </Text>
+            </View>
           ) : null}
 
           {!isAuthConfigured() ? (
-            <Text style={{ ...Type.small, color: '#C2410C', marginTop: Spacing.md }}>
+            <Text style={{ ...Type.small, color: '#FFD9C7', marginTop: Spacing.md }}>
               This build has no Supabase config. Check attune-app/.env, then restart
               with: npx expo start --ios --clear
             </Text>
-          ) : (
-            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)', marginTop: Spacing.md }}>
-              Connected to Attune.
-            </Text>
-          )}
+          ) : null}
+          {/* "Connected to Attune." is gone at her word: it reported a thing
+              that is true on every normal launch, which is nothing to say. The
+              line above it stays, because a build with no config is a build
+              that cannot sign anybody in. */}
 
           <Pressable
       accessibilityRole="button"

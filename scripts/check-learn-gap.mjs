@@ -99,7 +99,27 @@ const MARGIN = fromPage(
   /data-block="app-learn\/insight" style=\{\{ marginTop: isMobile \? "([\d.]+)rem" : "([\d.]+)rem" \}\}/,
   (m) => ({ mobile: Number(m[1]) * 16, desktop: Number(m[2]) * 16 }),
 );
-fromPage('the quote clamp', /WebkitLineClamp: shown \? shown\.lines : undefined/, (m) => m[0]);
+/**
+ * ── AND THE CLAMP IS GONE, DELIBERATELY ─────────────────────────────────
+ * This used to pin `WebkitLineClamp: shown ? shown.lines : undefined`, which
+ * enforced the line count the fit had chosen. Ellie: "The web insight of the
+ * day on learn tab is cutting off again with an ellipses, fix this, I always
+ * want that to wrap."
+ *
+ * When the fit is a line out, a clamp turns that into a quotation with its
+ * end missing, which is worse than a quotation one line taller. The size
+ * still comes from the fit; nothing truncates.
+ *
+ * So the pin is inverted: the gate now fails if a clamp comes BACK, which is
+ * the regression worth catching. The budget arithmetic below is unchanged,
+ * because the fit still decides the size.
+ */
+if (/WebkitLineClamp: shown/.test(src)) {
+  console.error('[check-learn-gap] the insight quote has a line clamp again.');
+  console.error('Ellie asked for it to wrap: a clamp here cuts the end off a quotation');
+  console.error('whenever the fit is one line out. Let it overflow instead.');
+  process.exit(1);
+}
 
 /**
  * ── THE THREE THINGS THE FIX IS MADE OF ───────────────────────────────────
