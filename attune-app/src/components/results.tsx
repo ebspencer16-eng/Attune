@@ -218,6 +218,15 @@ function interp(text: string | null | undefined, you: string, them: string): str
 let lastSection: string | null = null;
 
 /**
+ * When the reader last moved to another page.
+ *
+ * A tap that opens a row ends on the page it opened, and the page gesture
+ * lives on the container, which does not remount. Without this the release is
+ * read as an edge tap on the new page and turns it again.
+ */
+let sectionChangedAt = 0;
+
+/**
  * The landing menu, as a section id.
  *
  * ── WHY A SECTION AND NOT A FLAG ──────────────────────────────────────────
@@ -451,7 +460,11 @@ export default function Results({
   // Engagement page can draw one against the other. useScreenTime owns the
   // clock, including stopping it when the app goes to the background.
   useScreenTime(sectionId ? `results:${sectionId}` : null);
-  const rememberSection = useCallback((id: string) => { lastSection = id; setSectionId(id); }, []);
+  const rememberSection = useCallback((id: string) => {
+    lastSection = id;
+    sectionChangedAt = Date.now();
+    setSectionId(id);
+  }, []);
   /** Whether the hamburger's dropdown is showing. */
   const [navOpen, setNavOpen] = useState(false);
   /**
@@ -837,6 +850,25 @@ export default function Results({
    */
   const maybePage = useCallback((x: number) => {
     if (aRowTookThePress()) return;
+    /**
+     * ── AND NOT ONTO A PAGE THAT JUST APPEARED ──────────────────────────
+     * Ellie: "When I click highlights from the insights menu, I tapped to open
+     * and it clicked me forward to couple type... it's happened a few times
+     * that I don't click into the highlights storycards when I expect to."
+     *
+     * The margin was not the problem. The gesture lives on the container,
+     * which survives a section change, so one touch can open a row and then
+     * END on the page that opened: by the time this runs, `next` is the page
+     * after the new one and the tap turns it. Highlights is first in the
+     * order, so the page after it is Couple Type, which is exactly what she
+     * saw.
+     *
+     * A row claiming the press covers the rows that do it; the menu's rows are
+     * plain Pressables in another file and do not. This covers all of them,
+     * including anything added later, because it asks the question that
+     * actually matters: did this page exist when the finger went down.
+     */
+    if (Date.now() - sectionChangedAt < 400) return;
     const edge = screenW / 6;
     if (x < edge && prev) rememberSection(prev);
     else if (x > screenW - edge && next) rememberSection(next);

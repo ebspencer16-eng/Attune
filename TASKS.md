@@ -10,6 +10,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| W141 | **Take "What it is for" off the overview as an alignment category.** That bar has four possible values and 54 per cent of couples score 0, because it compares two picks from a list of six and different picks are not a disagreement. The detail page already leads with the chips. A quadrant instead, if you want one, is below. |
+| W142 | **The round quarters are built into the scale, not the maths.** Every option is worth 0, 0.25, 0.5, 0.75 or 1, so one step apart is always exactly 25 per cent. Communication has a one in three chance of landing on a quarter and Adventurousness one in two. Three ways out are below. Jitter is not one of them. |
 | S71 | **The first 089 ran before I replaced it, so all thirteen got an order, including five premium ones.** Rebecca's row has no workbook, which only the old one would write. 091 below lists exactly what it created so you can see it; nothing is deleted until you say. |
 | S72 | **091 is below: what the backfill actually wrote.** It lists every row with what that account has done and groups them by package. Deletes nothing. |
 | S73 | **092 stops the feedback card asking people who have already answered.** It sets the flag from their completed survey row. |
@@ -136,13 +138,56 @@ order by p.feedback_given_at desc;
 
 ---
 
+### W141 and W142 — two decisions
+
+**W141, "What it is for".** Six options, you pick up to two, and the bar is how
+much your two picks overlap. That gives it four possible values: 0, 33, 50 and
+100 per cent. Over half of all possible pairs come out at 0, which the overview
+draws as complete misalignment. It is not one. Two people can each name a true
+thing and name different ones.
+
+My recommendation is to take it off the overview as a category and show the two
+sets of chips side by side, which is what its own detail page already does.
+
+If you want the quadrant instead, it works like this. Two axes, emotional to
+physical and steady to spark, and each of the six options gets a coordinate.
+Closeness and Reassurance sit emotional and steady, Ritual between them,
+Physical release sits physical, and Play and Feeling desired sit on the spark
+side. Then the bar becomes the distance between where your picks land and where
+theirs do, which has far more than four values. The catch is that placing the
+six is an editorial judgement and it is yours, not mine. Tell me to build it and
+the coordinates go in one small file with your words beside them.
+
+**W142, the round quarters.** Not a rounding artefact. Each option carries a
+number and those numbers are an even ladder: 1, 0.75, 0.5, 0.25, 0. One step
+apart is a quarter of the scale every time, in every question, so a dimension's
+bar can only ever be a mean of quarters. Adventurousness has two questions, so
+nine possible bars and a one in two chance of a round quarter. Communication has
+three, so thirteen and one in three. You landed on 75 twice because 75 is one of
+the few places the instrument can land.
+
+Three honest ways to add resolution:
+
+1. **Space the options by what they mean rather than evenly.** The number on
+   each option is already a field somebody chose, and it was chosen as a ladder.
+   "I want a lot of novelty" to "I lean adventurous" is a smaller real step than
+   "Somewhere in the middle" to "I prefer what I know works". Writing the spacing
+   to match makes the distances more accurate and breaks the quarters at the same
+   time. This is the one I recommend. It needs no new questions and the spacing is
+   yours to write.
+2. **More questions where the dimension is thin.** Adventurousness has two.
+   Four would roughly halve the chance of a quarter. Costs a longer exercise.
+3. **Say a band instead of a number** where there are only two questions behind
+   it. Honest, and weaker than the other two.
+
+What I would not do is nudge the number off 75 to make it look considered. A
+figure moved to look more precise is a figure that is not true, which is the
+opposite of what you are asking for.
+
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
-| W143 | **Your 9 and 11 still**: the highlights tap landing on couple type, and the cover titles that are left aligned. |
-| W141 | **A recommendation for "what it is for"** on Physical Intimacy: a quadrant, or take it out. |
-| W142 | **Why alignment keeps landing on a round three quarters**, and what to do about it. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -152,6 +197,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| W143 | **Your 9 and 11.** 9: the tap that opens Highlights ended on the page it opened, and the page gesture does not remount, so the release was read as an edge tap and turned on to Couple Type. A page change now blocks a turn for 400ms. 11: both cover titles already asked for centre, and the Prose fix in W144 is what let them have it. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | W140 | **Eight of your fourteen**: 2, 3, 4 on the sign-in screen, 5 the dropdowns, 6 the budget staying open, 7 and 8 the two stale prompts, 13 Phys. Intimacy, 14 the insight wraps. App update published. |
 | W144 | **Item 1, and it was not about that table.** Both cells already said centre. Prose turns alignment into a flex rule and put it on the wrong view, so every centred paragraph in the app has been left aligned since it was written. Driven to confirm. |
