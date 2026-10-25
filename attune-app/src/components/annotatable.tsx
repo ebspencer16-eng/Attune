@@ -145,7 +145,7 @@ const TEXT_KEYS = new Set([
   'textShadowColor', 'textShadowOffset', 'textShadowRadius', 'writingDirection',
 ]);
 
-export function splitStyle(style: StyleProp<TextStyle>): { text: TextStyle; box: ViewStyle } {
+export function splitStyle(style: StyleProp<TextStyle>): { text: TextStyle; box: ViewStyle; row: ViewStyle } {
   const flat = (StyleSheet.flatten(style) || {}) as Record<string, unknown>;
   const text: Record<string, unknown> = {};
   const box: Record<string, unknown> = {};
@@ -155,10 +155,31 @@ export function splitStyle(style: StyleProp<TextStyle>): { text: TextStyle; box:
     // row's own main axis. Without this a centred paragraph silently goes
     // left, which is a quieter version of the same bug.
     else if (k === 'textAlign') {
+      /* ── IT HAS TO REACH THE ROW OF WORDS ────────────────────────────
+         Ellie, of the Expectations table: "I want the far left Column to stay
+         left aligned, but the Ellie and Preston columns' content should all be
+         centered."
+
+         They were set to `textAlign: 'center'` and were not centred. This line
+         was right and the place it landed was not: `justifyContent` went on the
+         paragraph's OUTER view, which is a column, so it centred the single row
+         inside it vertically and the words kept the row's own default of
+         flex-start. Every centred Prose in the app has been quietly left
+         aligned since this function was written, which is the same shape as
+         the comment two lines down warns about.
+
+         It is returned separately now and put on the row of words, where it
+         means what it says. */
       box.justifyContent = v === 'center' ? 'center' : v === 'right' ? 'flex-end' : 'flex-start';
     } else box[k] = v;
   }
-  return { text: text as TextStyle, box: box as ViewStyle };
+  /* The alignment belongs to the row of words, not to the box around it. The
+     box keeps a copy so the gate and any other reader can still see it. */
+  /* No type annotation inside this body on purpose: check-selection-gesture
+     lifts it out and runs it as plain JavaScript, so a `: ViewStyle` here is
+     a syntax error in the gate rather than in the app. */
+  const row = box.justifyContent ? { justifyContent: box.justifyContent } : {};
+  return { text: text as TextStyle, box: box as ViewStyle, row: row as ViewStyle };
 }
 
 /** The toolbar's height, for placing it above the selection. */
@@ -291,7 +312,7 @@ export default function Annotatable({
   /** Take a mark off these words. Absent means the toolbar's bin stays grey. */
   onRemove?: (mark: Mark) => void;
 }) {
-  const { text: textStyle, box: boxStyle } = useMemo(() => splitStyle(style), [style]);
+  const { text: textStyle, box: boxStyle, row: rowStyle } = useMemo(() => splitStyle(style), [style]);
 
   /**
    * The top of each mark's first word, reported once the words have settled.
@@ -572,7 +593,7 @@ export default function Annotatable({
           on each word. Putting the whole style on every word gave every one
           of them the paragraph's top margin, which is the spacing bug. */}
       <GestureDetector gesture={pan}>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', ...rowStyle }}>
           {tokens.map((tok, i) => {
             const inSelection = lo != null && i >= lo && i <= (hi as number);
             return (

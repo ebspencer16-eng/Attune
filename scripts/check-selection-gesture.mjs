@@ -151,6 +151,21 @@ for (const k of ['fontSize', 'lineHeight', 'color', 'fontFamily']) {
 if (split.box?.justifyContent !== 'center') {
   fails.push('a centred paragraph is not centred, because textAlign does not survive the split');
 }
+/* ── AND IT HAS TO REACH THE ROW ────────────────────────────────────────
+   The split carried the alignment and the renderer put it on the paragraph's
+   outer view, which is a column: it centred the row vertically and the words
+   kept the row's own flex-start. Every centred Prose in the app was quietly
+   left aligned, and this gate passed the whole time, because it checked that
+   the alignment SURVIVED and never that it arrived anywhere useful.
+
+   Ellie found it in the Expectations table: "the Ellie and Preston columns'
+   content should all be centered." */
+if (split.row?.justifyContent !== 'center') {
+  fails.push('the alignment never reaches the row of words: splitStyle returns no `row`');
+}
+if (!/flexWrap: 'wrap'[^}]*\.\.\.rowStyle/.test(src)) {
+  fails.push('the row of words does not spread the alignment the split returns for it');
+}
 
 if (fails.length) {
   console.error('[check-selection-gesture] marking a fragment will not work the way it was asked for:');
