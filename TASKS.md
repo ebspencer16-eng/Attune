@@ -11,6 +11,8 @@ Every code block says which window it goes in, above the block.
 | # | What I need from you |
 |--|--|
 | S71 | **The first 089 ran before I replaced it, so all thirteen got an order, including five premium ones.** Rebecca's row has no workbook, which only the old one would write. 091 below lists exactly what it created so you can see it; nothing is deleted until you say. |
+| S72 | **091 is below: what the backfill actually wrote.** It lists every row with what that account has done and groups them by package. Deletes nothing. |
+| S73 | **092 stops the feedback card asking people who have already answered.** It sets the flag from their completed survey row. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -20,13 +22,125 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
+### S72 and S73 — two to run
+
+**Both go in the Supabase SQL Editor, not Terminal.**
+
+091 reads only. It shows every order the backfill wrote, what each account has
+actually done, and a count by package. The undo sits at the foot, commented
+out; tell me which should go and I will uncomment the list.
+
+<!-- SQL 091_review_backfilled_orders.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 091: what the backfill actually created. Reads only. Deletes nothing.
+--
+-- ── WHY ─────────────────────────────────────────────────────────────────────
+-- The first version of 089 wrote an order for EVERY profile that had none,
+-- carrying whatever package the profile said. It ran before it was replaced.
+-- 090 then came back with no rows, which is how we know: there is nobody left
+-- without an order, so all thirteen got one.
+--
+-- Five of those thirteen carried `premium` on the profile, and
+-- `create-profile` used to take the package from the request, so signing up at
+-- ?pkg=premium granted premium. Four of the five date from July, before that
+-- was closed. Those five now have a premium ORDER behind them, which is in the
+-- revenue figures and reads exactly like a sale.
+--
+-- Nothing here changes any of that. It shows what exists so Ellie can say
+-- which should stay. The undo is at the foot, commented out, and takes a list
+-- the same way 089 does.
+--
+-- Run in the Supabase SQL Editor and click Run.
+-- ============================================================================
+
+-- Every row the backfill wrote, with what that account has actually done.
+select
+  o.order_num,
+  coalesce(p.email, '(no email)')        as email,
+  o.pkg_key                              as granted,
+  p.pkg                                  as pkg_on_profile,
+  coalesce(p.is_demo, false)             as is_demo,
+  p.created_at::date                     as joined,
+  (p.ex1_answers is not null)            as started_comms,
+  (p.ex2_answers is not null)            as started_expectations,
+  (p.partner_profile_id is not null)     as partner_linked
+from public.orders o
+left join public.profiles p on p.id = o.user_id
+where o.promo_code = 'BACKFILL-COMPED'
+order by o.pkg_key desc, p.created_at;
+
+-- And the shape of it in one line.
+select o.pkg_key as granted, count(*) as rows_written
+from public.orders o
+where o.promo_code = 'BACKFILL-COMPED'
+group by o.pkg_key
+order by o.pkg_key;
+
+-- ── THE UNDO, WHEN SHE HAS SAID WHO ─────────────────────────────────────────
+-- Commented out on purpose. Every row it would remove was written by the
+-- backfill and by nothing else, so this cannot touch a real sale: the filter
+-- is the promo_code the backfill stamped and the email list she names.
+--
+-- delete from public.orders
+--  where promo_code = 'BACKFILL-COMPED'
+--    and lower(buyer_email) in (
+--      'someone@example.com',
+--      'someone-else@example.com'
+--    );
+```
+<!-- /SQL -->
+
+092 stops the feedback card asking anybody who has already finished the
+survey, by setting the flag from their completed row.
+
+<!-- SQL2 092_feedback_given_backfill.sql -->
+```sql
+-- ============================================================================
+-- 092: anybody who has finished the survey stops being asked for feedback.
+--
+-- ── WHY ─────────────────────────────────────────────────────────────────────
+-- Ellie: "I filled out the survey, I shouldn't still see the tell us what you
+-- think action prompt."
+--
+-- The home card is gated on `profiles.feedback_given_at`, and that column sat
+-- unwritten for months: CLAUDE.md records it as "a flag nothing writes is a
+-- prompt that never stops". api/survey.js writes it now, on the request that
+-- finishes the survey. What it cannot do is reach back to a survey finished
+-- before it learned to.
+--
+-- So this sets the flag from the thing that actually records the answer: a
+-- completed row in survey_responses. The record is the evidence; the flag is
+-- a copy of it kept for the home screen to read cheaply.
+--
+-- Safe to run more than once. It only fills a flag that is null, so a date
+-- already recorded is left alone.
+--
+-- Run in the Supabase SQL Editor and click Run.
+-- ============================================================================
+
+update public.profiles p
+   set feedback_given_at = s.completed_at
+  from public.survey_responses s
+ where s.respondent_id = p.id
+   and s.completed_at is not null
+   and p.feedback_given_at is null;
+
+-- Who is now recorded as having given feedback.
+select p.email, p.feedback_given_at
+from public.profiles p
+where p.feedback_given_at is not null
+order by p.feedback_given_at desc;
+```
+<!-- /SQL2 -->
+
 ---
 
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
-| W140 | **Your fourteen**, from the sign-in screen's unreadable red text to the insight that keeps truncating. |
+| W143 | **Your 1, 9 and 11**: centring the expectations answer columns, the highlights tap landing on couple type, and the cover titles that are left aligned. Driving the pages rather than grepping for them. |
 | W141 | **A recommendation for "what it is for"** on Physical Intimacy: a quadrant, or take it out. |
 | W142 | **Why alignment keeps landing on a round three quarters**, and what to do about it. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
@@ -39,6 +153,7 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
+| W140 | **Eight of your fourteen**: 2, 3, 4 on the sign-in screen, 5 the dropdowns, 6 the budget staying open, 7 and 8 the two stale prompts, 13 Phys. Intimacy, 14 the insight wraps. App update published. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
