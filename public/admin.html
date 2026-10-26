@@ -1133,7 +1133,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       <div class="tab" onclick="setTab(this,'resp-conflict')">Conflict Patterns</div>
     </div>
 
-    <div id="resp-comm">
+    <div id="resp-comm" class="tab-panel">
       <!-- Ellie: "Start with overview tile at the top with 4 tiles: Avg
            communication alignment, Avg understanding of partner, Where are
            people worst at self-evaluation, where are partners worst at
@@ -1209,7 +1209,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       <div class="qx-section" id="qx-comm" style="margin-top:1.25rem"></div>
     </div>
 
-    <div id="resp-exp" style="display:none">
+    <div id="resp-exp" class="tab-panel" style="display:none">
       <!-- Ellie: "Start with overview tile with 4 tiles: Avg life and values
            alignment, Avg responsibilities alignment, Avg degree of
            misalignment for misaligned couples, Avg degree of misalignment for
@@ -1242,22 +1242,30 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
            grid, 539 points wide against that chart's 1127. Both cards are
            full width and stacked now, which is also what makes the five
            column names readable. -->
-      <div>
+      <!-- Ellie: "Responsibilities tile should be 1/2 width, and there should
+           be another to the right called life and values that shows the same
+           style chart but for the life and values questions."
+
+           That reverses her earlier ask, which the comment above records: "I
+           want this to be a full-width chart like self v partner gap." Both
+           are kept because the round trip is the instruction. What made the
+           first one right was that Life & Values was a stack of HTML rows in
+           a narrow column; it is a column chart now, like the one beside it,
+           so the two sit as a pair at half width each. -->
+      <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment" aria-label="Slz rexp"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-exp-align"></canvas></div>
         </div>
-        <div class="chart-card" style="margin-top:1.25rem">
+        <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment" aria-label="Slz rgap"><option value="">Everyone</option></select></div>
-          <div class="chart-body">
-            <div class="insight-list" id="exp-gap-bars" style="margin-top:.5rem;"></div>
-          </div>
+          <div class="chart-body"><div id="exp-gap-bars"></div></div>
         </div>
       </div>
       <div class="chart-card" style="margin-top:1.25rem"><div class="chart-head"><div><div class="chart-title">Who-does-what agreement by question</div><div class="chart-subtitle">% of couples who name the same person (one “Me” + one “Partner” = agreement) · directional items</div></div><select class="tile-slicer" id="slz-ragree" title="Cut this tile by a couple-level segment" aria-label="Slz ragree"><option value="">Everyone</option></select></div><div class="chart-body"><div class="insight-list" id="resp-agree-bars" style="margin-top:.5rem;"></div></div></div><div class="qx-section" id="qx-exp" style="margin-top:1.25rem"></div>
     </div>
 
-    <div id="resp-story" style="display:none">
+    <div id="resp-story" class="tab-panel" style="display:none">
       <!-- Ellie: "I want that done to every page that has the boxes at the top,
            I want those to be in a only slightly shaded tile that has the 2 slicers."
            The period here is when the account was made, not when an order was
@@ -1301,7 +1309,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       <div class="qx-section" id="qx-story" style="margin-top:1.25rem"></div>
     </div>
 
-    <div id="resp-intimacy" style="display:none">
+    <div id="resp-intimacy" class="tab-panel" style="display:none">
       <div class="chart-grid full">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Alignment by intimacy dimension</div><div class="chart-subtitle">Average alignment across dimensions</div></div><select class="tile-slicer" id="slz-intim" title="Cut this tile by a segment" aria-label="Slz intim"><option value="">Everyone</option></select></div>
@@ -1322,7 +1330,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
 
          The tile is the four risk patterns, because those are the four the
          exercise is built around and the only ones scored the same way. -->
-    <div id="resp-conflict" style="display:none">
+    <div id="resp-conflict" class="tab-panel" style="display:none">
       <div class="chart-grid full">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Risk patterns</div><div class="chart-subtitle">How often each one shows up &middot; share of people answering Often or Sometimes</div></div><select class="tile-slicer" id="slz-conf" title="Cut this tile by a segment" aria-label="Slz conf"><option value="">Everyone</option></select></div>
@@ -4326,12 +4334,34 @@ function renderQuoteCard(text, name, score, color='') {
   </div>`;
 }
 
+/**
+ * Switch tabs by hiding the panels, not by hiding everything named like one.
+ *
+ * ── THE BUG THIS FIXES ────────────────────────────────────────────────────
+ * Ellie: "Who does what agreement by question chart is empty so I don't know
+ * if I have changes."
+ *
+ * It was not empty. It had five rows of real content in it and
+ * `display: none`, because this function selected `[id^="resp-"]` to find the
+ * five tab panels and the chart's own container is called `resp-agree-bars`.
+ * So every tab switch hid it and nothing ever showed it again: only the panel
+ * whose id was asked for gets turned back on.
+ *
+ * It is the oldest mistake in this codebase wearing markup: matching a NAME
+ * instead of the thing the name is for. `resp-agree-bars` is not a tab panel
+ * and never was; it simply starts with the same five letters.
+ *
+ * The panels say what they are now. A new chart on this page can be called
+ * anything without disappearing, and a sixth tab works by carrying the class
+ * rather than by being named correctly.
+ */
 function setTab(el, targetId) {
   el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   const parent = el.closest('.page');
-  parent.querySelectorAll('[id^="resp-"]').forEach(d=>d.style.display='none');
-  document.getElementById(targetId).style.display='block';
+  parent.querySelectorAll('.tab-panel').forEach(d=>d.style.display='none');
+  const target = document.getElementById(targetId);
+  if (target) target.style.display='block';
 }
 
 // ── Export orders CSV ─────────────────────────────────
@@ -4786,7 +4816,27 @@ async function renderResponseTile(opts){
        hover carry it, which is what she asked for on the type charts too. */
     mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#5C6DDA',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#5C6DDA'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},pointLabels:{font:{size:10}}}}}});
   } else if(opts.kind==='expalign'){
-    mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#C55329',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#C55329'}]},options:{scales:{r:{beginAtZero:true,max:100,grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},pointLabels:{font:{size:10}}}},plugins:{legend:{display:false}}}});
+    /* ── A COLUMN CHART, TO MATCH THE ONE BESIDE IT ───────────────────
+       Ellie: "Responsibilities tile should be 1/2 width, and there should be
+       another to the right called life and values that shows the same style
+       chart but for the life and values questions."
+
+       They are a pair now and they were not the same chart: this was a radar
+       over five categories and Life & Values is a column chart over its
+       questions. Both are columns, which is also the general preference she
+       has stated: "You flipped x and y axis for a few views, I don't want
+       that. Wrap labels, I want column charts."
+
+       The radar was not wrong, and five points is the one case a radar reads
+       well. It is the pairing that decided this: two tiles side by side
+       showing the same kind of measurement in two different shapes is the
+       thing she asked not to have. Say the word and it goes back. */
+    mkChart(el,{type:'bar',
+      data:{labels:a.expAlign.labels,datasets:[{data:a.expAlign.data,backgroundColor:'#C55329',borderRadius:4,maxBarThickness:46}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.y+'% aligned'}}},
+        scales:{y:{beginAtZero:true,max:100,ticks:{stepSize:50,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
+                x:{ticks:{font:{size:9}},grid:{display:false}}}}});
   } else if(opts.kind==='relfeel'){
     mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){

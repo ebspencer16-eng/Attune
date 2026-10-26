@@ -696,6 +696,35 @@ if (process.env.SET) {
   await new Promise((r) => setTimeout(r, 1200));
 }
 
+/**
+ * READ=resp-agree-bars — print what an element actually contains.
+ *
+ * A tile that draws nothing looks the same in a screenshot whether it rendered
+ * an empty string, rendered white text, or never ran at all. Three different
+ * bugs, one picture. This prints the markup so the three can be told apart.
+ */
+if (process.env.READ) {
+  for (const id of process.env.READ.split(',').map((x) => x.trim()).filter(Boolean)) {
+    const out = await page.evaluate((i) => {
+      const el = document.getElementById(i);
+      if (!el) return 'NO SUCH ELEMENT';
+      const html = (el.innerHTML || '').trim();
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      /* The box and how it is laid out, because an element can hold markup and
+         still show nothing: zero height, display:none, or a parent clipping
+         it. A screenshot cannot tell those apart. */
+      const box = ' [box ' + Math.round(r.width) + 'x' + Math.round(r.height) + ' @' + Math.round(r.top)
+        + ' display:' + cs.display + ' overflow:' + cs.overflow + ' children:' + el.children.length + ']';
+      const par = el.parentElement ? (() => { const p = el.parentElement.getBoundingClientRect();
+        return ' [parent .' + (el.parentElement.className || '?') + ' ' + Math.round(p.width) + 'x' + Math.round(p.height)
+          + ' overflow:' + getComputedStyle(el.parentElement).overflow + ']'; })() : '';
+      return (html ? html.slice(0, 120) : '(empty)') + box + par;
+    }, id);
+    console.log('  read #' + id + ': ' + out);
+  }
+}
+
 const shot = await page.screenshot({ fullPage: process.env.FULL_PAGE === '1' });
 writeFileSync(OUT, Buffer.from(shot, 'base64'));
 console.log('picture: ' + OUT);
