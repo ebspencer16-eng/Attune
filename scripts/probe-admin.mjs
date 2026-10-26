@@ -56,6 +56,7 @@ const { COMPILED_BETA_CODES: COMPILED_CODES } = await import(`${ROOT}api/_lib/be
 const { PERSONALITY_QUESTIONS } = await import(`${ROOT}api/_questions.js`);
 const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
+const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_questions.js`);
 const { INTIMACY_QUESTIONS } = await import(`${ROOT}api/_intimacy-questions.js`);
 
 const DIMS = ['energy', 'expression', 'reassurance', 'love', 'needs', 'bids', 'listening', 'conflict', 'repair', 'feedback'];
@@ -84,6 +85,30 @@ const fields = [
     if (!options) return [];
     return [{ key: `cq_${q.id}`, label: (q.riskLabel ? `${q.riskLabel} · ` : '') + q.text, group: 'Conflict Patterns', kind: 'cat', options, partnerable: true, section: q.section }];
   }),
+  /* ── THE EXPECTATIONS QUESTIONS ────────────────────────────────────────
+     The stub had neither the life questions nor the responsibilities, so the
+     whole All questions block on the Expectations tab drew nothing and the
+     probe said no errors about it. The responsibilities carry the positions
+     and poles the server now sends, because the thing being looked at is
+     whether they draw as a Myself-to-My-partner axis rather than four bars. */
+  ...LIFE_QUESTIONS.slice(0, 5).map((q) => {
+    const opts = q.options || [];
+    const ordered = opts.length >= 3;
+    return {
+      key: q.id, label: (q.category ? q.category + ' · ' : '') + String(q.text || q.id).replace(/\{[a-zA-Z]+\}/g, 'you'),
+      group: 'Ex2 · Life & values', kind: 'cat',
+      ...(ordered ? { ordinal: true, poleLow: opts[0], poleHigh: opts[opts.length - 1] } : {}),
+      options: opts.map((v) => ({ v, label: v })), partnerable: true,
+    };
+  }),
+  ...RESPONSIBILITY_CATEGORIES.flatMap((cat) => (cat.items || []).slice(0, 2).map((item, i) => ({
+    key: 'resp_' + cat.id + '_' + i,
+    label: cat.label + ' · ' + String(item).replace(/\{[a-zA-Z]+\}/g, 'you'),
+    group: 'Ex2 · Who does what', kind: 'cat', ordinal: true,
+    poleLow: 'Myself', poleHigh: 'My partner',
+    options: [['Me', 0], ['Both', 0.5], ['Partner', 1], ['N/A', null]].map(([v, val]) => ({ v, label: v, val })),
+    partnerable: true,
+  }))),
   ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').slice(0, 6).map((q) => ({
     key: `iq_${q.id}`, label: q.premarital || q.id, group: 'Physical Intimacy', kind: 'cat',
     options: (q.options || []).map((o) => ({ v: o.label, label: o.label })), partnerable: true,
@@ -172,7 +197,7 @@ for (let i = 0; i < 40; i++) {
   r.read_error_mean = Number((DIMS.reduce((a, d) => a + (r['readerr_' + d] || 0), 0) / DIMS.length).toFixed(3));
   for (const f of fields) {
     if (!f.options || !f.options.length) continue;
-    if (f.key.startsWith('cq_') || f.key.startsWith('iq_')) {
+    if (f.key.startsWith('cq_') || f.key.startsWith('iq_') || f.key.startsWith('resp_') || f.key.startsWith('lq_')) {
       r[f.key] = pick(f.options, i + f.key.length).v;
       r['p_' + f.key] = pick(f.options, i + 1 + f.key.length).v;
     }

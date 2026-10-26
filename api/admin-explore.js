@@ -102,6 +102,15 @@ const DEMO_KEYS = Object.keys(DEMO_LABELS);
    story of why. This file used to carry its own copy of it, identical to the
    one in admin-typing.js. */
 const RESP_OPTS = ['Me', 'Both', 'Partner', 'N/A'];
+/**
+ * Where each answer sits on the one-person-to-the-other axis.
+ *
+ * `N/A` is deliberately null: "doesn't apply to us" is a real answer and not a
+ * point on this line, so it is left out of the mean rather than placed at one
+ * end of it. Counting it as "my partner" is how a couple who simply do not own
+ * a car would read as expecting their partner to service it.
+ */
+const RESP_POSITION = { Me: 0, Both: 0.5, Partner: 1, 'N/A': null };
 const IDIM_LABEL = Object.fromEntries((INTIMACY_DIMENSIONS || []).map((d) => [d.id, d.label]));
 
 // First sentence / clause, trimmed — used to label the two poles of a scale question.
@@ -371,10 +380,56 @@ function buildCatalog(fbCatOptions) {
     const pvt = PARTNER_VIEW_TEXT[q.id] || {};
     f.push({ key: 'pv_' + q.id, label: pvt.text || q.text, group: 'Ex1 · Partner-view (1–5)', kind: 'scale', poleLow: shortPole(pvt.a || q.a), poleHigh: shortPole(pvt.b || q.b), partnerable: true });
   }
-  for (const lq of LIFE_QUESTIONS) f.push({ key: lq.id, label: (lq.category ? lq.category + ' · ' : '') + genericLabel(lq.text), group: 'Ex2 · Life & values', kind: 'cat', options: (lq.options || []).map((v) => ({ v, label: v })), partnerable: true });
+  /**
+   * ── A LIFE QUESTION IS AN ORDERED SCALE ─────────────────────────────────
+   * Ellie: "All questions should have pole labels with avg placement marked. I
+   * want it just like comms with the slicer that defaults to mean but can show
+   * the breakdown."
+   *
+   * These were plain categories, so the admin drew five coloured segments and
+   * no mean. Their options are written in order, from one end of a position to
+   * the other, which is what makes a mean meaningful at all: "Not part of my
+   * future" through to "Central to my future" is an axis, and the ends of it
+   * are the poles.
+   *
+   * Taken from the question's own option list rather than written here, so a
+   * reworded end moves the label with it. A question with fewer than three
+   * options is left as a category: two answers are a split, not a position,
+   * and a dot halfway along a two-point line says nothing a pair of bars does
+   * not say better.
+   */
+  for (const lq of LIFE_QUESTIONS) {
+    const opts = lq.options || [];
+    const ordered = opts.length >= 3;
+    f.push({ key: lq.id, label: (lq.category ? lq.category + ' · ' : '') + genericLabel(lq.text),
+      group: 'Ex2 · Life & values', kind: 'cat',
+      ...(ordered ? { ordinal: true, poleLow: opts[0], poleHigh: opts[opts.length - 1] } : {}),
+      options: opts.map((v) => ({ v, label: v })), partnerable: true });
+  }
   for (const cat of RESPONSIBILITY_CATEGORIES) {
     cat.items.forEach((item, i) => {
-      f.push({ key: 'resp_' + cat.id + '_' + i, label: cat.label + ' · ' + genericLabel(item), group: 'Ex2 · Who does what', kind: 'cat', options: RESP_OPTS.map((v) => ({ v, label: v })), partnerable: true });
+      /**
+       * ── A RESPONSIBILITY IS A POSITION, NOT A CATEGORY ─────────────────
+       * Ellie: "Pole labels for responsibility should show 'Myself' and 'My
+       * partner' and should populate accordingly so that we can see how many
+       * people assume responsibility vs assume the other person will be
+       * responsible."
+       *
+       * These were plain categories, so the admin drew a distribution of four
+       * bars and no mean. They are an axis: one person, both, the other
+       * person. Marked ordinal with a position per option, which is what makes
+       * the slider and its mean dot available.
+       *
+       * The positions are given rather than taken from the option's index,
+       * because by index "N/A" would sit at the far end of the axis and read
+       * as the strongest possible "my partner". It is not on the axis at all:
+       * a null position leaves it out of the mean, the same way a question
+       * nobody answered is left out.
+       */
+      f.push({ key: 'resp_' + cat.id + '_' + i, label: cat.label + ' · ' + genericLabel(item),
+        group: 'Ex2 · Who does what', kind: 'cat', ordinal: true,
+        poleLow: 'Myself', poleHigh: 'My partner',
+        options: RESP_OPTS.map((v) => ({ v, label: v, val: RESP_POSITION[v] })), partnerable: true });
     });
   }
   for (const q of REFLECTION_QUESTIONS) {

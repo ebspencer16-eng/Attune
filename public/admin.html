@@ -6629,7 +6629,16 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     let omean = null, on = 0;
     if (sliced) { const ov = posVals(rows); on = ov.length; omean = on ? ov.reduce((a, b) => a + b, 0) / on : null; }
     const pct = v => v == null ? 0 : Math.max(2, Math.min(98, v * 100));
-    const score = v => v == null ? '\u2013' : (1 + v * 4).toFixed(1);
+    /* ── WHAT THE HOVER SAYS THE MEAN IS ──────────────────────────────
+       A one-to-five score for a scale question, because that is the scale the
+       person answered on. For an ordinal question that is not a scale, a
+       "3.0" would be a number from a scale nobody was shown: the
+       responsibility axis runs from Myself to My partner and has no fives in
+       it. Those read as a share of the way across, which is what the dot's
+       position actually means. */
+    const score = v => v == null ? '\u2013'
+      : (f.kind === 'scale' ? (1 + v * 4).toFixed(1)
+         : Math.round(v * 100) + '% toward ' + (f.poleHigh || 'the far end'));
     const isScale = f.kind === 'scale';
     const loFull = f.poleLow || 'low', hiFull = f.poleHigh || 'high';
     /* ── THE WHOLE LABEL, ON AS MANY LINES AS IT NEEDS ──────────────────
@@ -6702,7 +6711,10 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
          section head repeating its own tile's title is a line that says
          nothing. It is still drawn when the high-level block is in here with
          it, because then the two halves need telling apart. */
-      (highBox ? '' : sectionHead('All questions')) + detailFields.map(f => measureBar(f, drows, sliced)).join('');
+      /* The inner head only when both halves share this container. The tile is
+         called All questions now, so on a page with no high-level block it was
+         drawing that title twice, once as a tile and once as a section. */
+      (highBox || !highFields.length ? '' : sectionHead('All questions')) + detailFields.map(f => measureBar(f, drows, sliced)).join('');
   };
   QX_REPAINT[containerId] = () => renderDist(curSlice, curSliced);
   renderDist(rows, false);
