@@ -58,6 +58,8 @@ const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
 const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_questions.js`);
 const { REFLECTION_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
+const { ANNIVERSARY_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
+const { REFLECTION_CODES, tallyCodes } = await import(`${ROOT}api/_lib/reflection-codes.js`);
 const { INTIMACY_QUESTIONS } = await import(`${ROOT}api/_intimacy-questions.js`);
 
 const DIMS = ['energy', 'expression', 'reassurance', 'love', 'needs', 'bids', 'listening', 'conflict', 'repair', 'feedback'];
@@ -371,6 +373,33 @@ const server = createServer((req, res) => {
       shape: { same: 61, sharedToOne: 28, oneToShared: 44, other: 12, unknown: 35 },
       gendered: { keepsSameGenderRole: 39, handsOffSameGenderRole: 11, takesOnOtherGenderRole: 22, handsOffOtherGenderRole: 9, unknown: 99 },
     };
+    /* The coded written answers. Real sentences through the real frame, so
+       the picture shows what the matching actually does rather than numbers I
+       chose: an uncoded share that is invented tells you nothing about whether
+       the frame works. */
+    const SAMPLE_WRITING = [
+      'We got through my mum being ill and actually talked about it properly',
+      'He brings me coffee every morning without being asked',
+      'Moving house while I was pregnant was the hardest year',
+      'Saving for the deposit and not arguing about money once',
+      'I want us to laugh more and go on more dates',
+      'I wish we had been more patient with each other',
+      'When he supported me through losing my job',
+      'Nothing much really',
+      'The way we always talk things through before bed',
+      'Having the kids close together and surviving it',
+      'Learning to apologise properly instead of going quiet',
+      'More weekends away, just the two of us',
+    ];
+    const reflectionCodes = {
+      frame: REFLECTION_CODES.map((c) => ({ id: c.id, label: c.label })),
+      questions: ANNIVERSARY_QUESTIONS.filter((q) => q.type === 'text').map((q, qi) => {
+        /* A different slice per question so the chart changes when the picker
+           does, which is the thing being looked at. */
+        const answers = SAMPLE_WRITING.slice(qi % 4).concat(SAMPLE_WRITING.slice(0, qi % 4));
+        return { id: q.id, label: q.text, category: q.category || null, ...tallyCodes(answers) };
+      }),
+    };
     const beta_codes = [
       ...Object.entries(COMPILED_CODES).map(([code, meta]) => {
         const m = (typeof meta === 'string') ? { pkg: meta, mode: 'free', amount: 0 } : (meta || {});
@@ -381,7 +410,7 @@ const server = createServer((req, res) => {
       { code: 'SPRING25', package_key: 'core', discount_mode: 'percent', discount_value: 25, active: true, uses_count: 3, max_uses: 50, source: 'issued' },
       { code: 'FRIENDS10', package_key: '*', discount_mode: 'fixed', discount_value: 10, active: false, uses_count: 0, max_uses: null, source: 'issued' },
     ];
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, responses: payload }));
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, reflectionCodes, responses: payload }));
     return;
   }
   if (url.pathname.startsWith('/api/admin-typing')) {

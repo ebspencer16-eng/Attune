@@ -10,7 +10,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A43 | **The two postcoded charts need a code frame, and that is yours.** There are 8 free-text reflection questions and nothing that turns an answer into a category. My proposal is under this table. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -78,35 +77,6 @@ build it.
 ---
 
 
-### A43 — the postcoded charts
-
-You asked for a postcoded column chart of "moments that matter" and another for
-the text-entry questions, to show what evokes pride.
-
-The data is there: eight free-text questions, including "The moment I felt most
-proud of us as a couple" and "A challenge we faced together that made our
-relationship stronger". What does not exist is a **code frame**: the list of
-categories an answer gets sorted into. Postcoding is that list plus a way to
-apply it, and the list is an editorial decision, which makes it yours rather
-than mine.
-
-Two things make me want your word before building rather than after.
-
-The admin promises it holds no names, emails or individual responses, and these
-answers are the most personal thing in the product. A chart of codes is safe
-because a code is a category. Anything that shows a phrase is not, and the line
-between them is exactly where a code frame is too specific.
-
-And a category nobody chose shapes what you conclude. "Proud of how we handled
-money" and "proud of how we handled a hard year" are the same answer under one
-frame and different answers under another.
-
-What I need from you is six to ten categories for "what people are proud of",
-and the same for whichever other questions you want charted. Give me those and
-I will build the coding and the charts. If you would rather see the material
-first, I can give you the answers for one question as a list, in the admin,
-with nothing identifying attached, and you can write the frame from reading
-them. Say which.
 
 ---
 
@@ -142,10 +112,10 @@ section 3 explaining things, just include the context I need in section 3."
 | A33 | **Bottom sections are called All questions**, and the comparison mark is in: small grey for everyone, large coloured for your cut, on every slider in admin. |
 | A34 | **Communication at a glance**: alignment, understanding, and the two you agreed to. On the stub they name different dimensions, conflict and love, which is the whole argument that they are not inverses. |
 | A38 | **Expectations at a glance**: life & values, responsibilities, and the gap among misaligned couples against the gap among aligned ones. If the aligned group sits just under the line and the misaligned just over it, the label is doing more work than the distance. |
-| A35 | **Responsibilities and Life & Values are a matched pair at half width each**, both column charts. Responsibilities was a radar; five points is the one case a radar reads well, so say the word and it goes back. |
 | A37 | **Responsibilities read Myself to My partner with a mean dot**, and the life questions are sliders with their own first and last options as poles. "N/A" is off the axis rather than parked at the far end, where it would have read as the strongest possible "my partner". Order already matched the exercise. |
 | A40 | **Qualities most admired is a column chart above All questions**, and reflection rows no longer carry the section name: four of the five said "How We're Doing", so the useful half of each row started a third of the way in. |
 | A42 | **Expected against experienced, both halves, on the Expectations tab.** The shape reading needs no inference. The gendered one reads pronouns and role names and says so on the tile. Everything it cannot place is a grey bar, not a dropped row. Deleting api/_lib/inherited-roles.js and two callers undoes it. |
+| A43 | **Ten themes, one frame across all eight written questions, with a picker.** Yours to move: `api/_lib/reflection-codes.js`, one file. Every chart shows how many answers matched no theme, in grey, because that share is the measure of whether the frame is any good. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
@@ -158,6 +128,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A35 | **Responsibilities and Life & Values are a matched pair at half width**, both column charts. Responsibilities had been a radar. |
 | S75 | **094 ran: everybody who can invite a partner now has a code.** The server mints one for any surface now, so a profile can no longer be saved without one. |
 | S77 | **You were right, this was already done.** It was the same fix as S75, listed twice by me. |
 | S73 | **092 ran: anybody who had already finished the survey stops being asked for feedback.** Its last statement read a column that does not exist and was fixed before you ran it. |

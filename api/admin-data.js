@@ -50,6 +50,8 @@ import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
+import { REFLECTION_CODES, tallyCodes } from './_lib/reflection-codes.js';
+import { ANNIVERSARY_QUESTIONS } from './_anniversary-questions.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -292,6 +294,41 @@ function buildResponseAggregates(profiles, sessions) {
     }
   }
 
+  /**
+   * The written reflection answers, coded.
+   *
+   * Ellie asked for "a postcoded column chart showing moments that matter" and
+   * one "for all text-entry questions to show what evokes pride", then handed
+   * me the frame: "You build the code frame, I will adjust if needed." It is
+   * api/_lib/reflection-codes.js, one file so that moving it is one edit.
+   *
+   * ── COUNTS, NEVER WORDS ───────────────────────────────────────────────
+   * Nothing anybody wrote leaves this function. The answer goes in, a list of
+   * theme ids comes back, and only the tally is sent. The admin's banner says
+   * it holds no individual responses, and these are the most personal answers
+   * in the product: "the moment I felt most proud of us".
+   *
+   * `uncoded` is sent with every tally and is not a failure. An answer the
+   * frame has no theme for is how the frame gets better, and a chart that
+   * shows percentages of only the coded half is a chart about its own
+   * vocabulary.
+   */
+  const reflectionCodes = { questions: [], frame: REFLECTION_CODES.map((c) => ({ id: c.id, label: c.label })) };
+  {
+    const textQuestions = ANNIVERSARY_QUESTIONS.filter((q) => q.type === 'text');
+    for (const q of textQuestions) {
+      const answers = (profiles || []).map((p) => p.ex3_answers?.[q.id]).filter((v) => typeof v === 'string' && v.trim());
+      const tally = tallyCodes(answers);
+      reflectionCodes.questions.push({
+        id: q.id,
+        /* The question as asked, which is copy and not an answer. */
+        label: q.text,
+        category: q.category || null,
+        ...tally,
+      });
+    }
+  }
+
   const respPairs = pairs.filter(([a, b]) =>
     a.ex2_answers?.responsibilities && b.ex2_answers?.responsibilities).length;
   const respAgreement = [];
@@ -428,6 +465,7 @@ function buildResponseAggregates(profiles, sessions) {
     respPairs,
     expCoupleDistances,
     inheritance,
+    reflectionCodes,
     /* The line between aligned and not, from api/_lib/alignment.js, which is
        the only thing allowed to turn a distance into a judgement. Sent rather
        than typed into the admin, because a threshold written in two places is

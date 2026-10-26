@@ -1321,11 +1321,21 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
           <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple</div></div><select class="tile-slicer" id="slz-rfeel" title="Cut this tile by a couple-level segment" aria-label="Slz rfeel"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-story-feel"></canvas></div>
         </div>
+        <!-- Ellie: "Replace scale question gap rates with postcoded column
+             chart showing 'moments that matter'." And: "Add postcoded chart
+             for all text-entry questions to show what evokes pride, etc."
+
+             One tile with a question picker rather than eight tiles: the eight
+             share a code frame on purpose, and the thing worth seeing is how
+             the same themes rise and fall between them. "Getting through
+             something hard" topping both pride and regret is a sentence two
+             separate charts cannot say. -->
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Scale question gap rates</div><div class="chart-subtitle">% of couples with ≥2 step gap per question</div></div></div>
-          <div class="chart-body">
-            <div class="insight-list" id="story-gap-bars" style="margin-top:.5rem;"></div>
+          <div class="chart-head">
+            <div><div class="chart-title">What people wrote about</div><div class="chart-subtitle" id="refcode-sub">Themes across the written answers</div></div>
+            <select class="tile-slicer" id="refcode-q" title="Which written question" aria-label="Written question"></select>
           </div>
+          <div class="chart-body"><canvas id="chart-refcodes"></canvas></div>
         </div>
       </div>
       <!-- Ellie: "Qualitities most admired in partner should be a column chart
@@ -5473,6 +5483,67 @@ function filterOrders(sel) { applyOrderFilters(); }
  * least safe to lose. So "not classified" is a bar like any other, drawn in
  * grey so it does not read as a finding.
  */
+/**
+ * Themes across the written reflection answers.
+ *
+ * ── THE UNCODED BAR ───────────────────────────────────────────────────────
+ * Drawn, in grey, every time. The frame is word matching and it is shallow on
+ * purpose; the share it cannot place is the measure of how good the frame is,
+ * and hiding it would turn a chart about what people wrote into a chart about
+ * which words I happened to think of.
+ *
+ * ── AND THE DENOMINATOR IS IN THE SUBTITLE ────────────────────────────────
+ * An answer can carry more than one theme, so the bars do not sum to the
+ * number of answers and must not look as though they should. The subtitle
+ * says how many answers there were and how many were coded, which is the one
+ * place the reader can anchor the bars to something real.
+ */
+async function renderReflectionCodes() {
+  const el = document.getElementById('chart-refcodes');
+  const sel = document.getElementById('refcode-q');
+  const sub = document.getElementById('refcode-sub');
+  if (!el || !sel) return;
+  const data = await fetchAdminData();
+  const rc = data && data.reflectionCodes;
+  if (!rc || !rc.questions || !rc.questions.length) {
+    if (el.parentElement) el.parentElement.innerHTML =
+      '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">No written answers have been coded yet.</div>';
+    return;
+  }
+
+  if (!sel.dataset.filled) {
+    sel.dataset.filled = '1';
+    /* Shortened for the control, which is one line: the full question is the
+       tile's subtitle once something is chosen. */
+    sel.innerHTML = rc.questions.map((q, i) =>
+      '<option value="' + i + '">' + QX_ESC(String(q.label || q.id).replace(/:$/, '').slice(0, 54)) + '</option>').join('');
+    sel.onchange = () => renderReflectionCodes();
+  }
+  const q = rc.questions[Number(sel.value) || 0];
+  if (!q) return;
+
+  const byId = Object.fromEntries((rc.frame || []).map((c) => [c.id, c.label]));
+  const rows = (rc.frame || [])
+    .map((c) => ({ label: byId[c.id] || c.id, v: (q.counts || {})[c.id] || 0 }))
+    .sort((a, b) => b.v - a.v);
+  rows.push({ label: 'No theme matched', v: q.uncoded || 0, grey: true });
+
+  if (sub) {
+    sub.textContent = q.label + '  ·  ' + (q.total || 0) + ' answer' + ((q.total === 1) ? '' : 's')
+      + ', ' + (q.coded || 0) + ' with a theme';
+  }
+  mkChart(el, {
+    type: 'bar',
+    data: { labels: rows.map(r => r.label), datasets: [{ data: rows.map(r => r.v),
+      backgroundColor: rows.map(r => r.grey ? '#9AA3B2' : '#E5578C'), borderRadius: 4, maxBarThickness: 44 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => ' ' + c.parsed.y + ' answer' + (c.parsed.y === 1 ? '' : 's') } } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } },
+                x: { ticks: { font: { size: 9 }, maxRotation: 40, minRotation: 40 }, grid: { display: false } } } },
+  });
+}
+
 async function renderInheritance() {
   const shapeEl = document.getElementById('chart-inherit-shape');
   const genEl = document.getElementById('chart-inherit-gender');
@@ -7509,6 +7580,7 @@ function initCharts(page) {
     wireResponseTile({target:'resp-agree-bars',kind:'respagree',selId:'slz-ragree'});
     wireResponseTile({target:'chart-story-feel',kind:'relfeel',selId:'slz-rfeel'});
     renderRelReflTiles();
+    renderReflectionCodes();
     renderIntimacyResponses();
     renderSelfPartnerGap('svp-gap');
     renderCommsSummary();
