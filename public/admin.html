@@ -418,7 +418,17 @@
    slicers." Slightly: the shell is the page ground rather than card white, so
    the four cards inside it still read as cards. A heavier fill makes the cards
    float and the group read as a chart with no chart in it. */
-.kpi-shell{background:var(--bg);}
+/* ── THE SHELL HAS TO BE VISIBLE ───────────────────────────────────────────
+   Ellie: "Orders at a glance ghost tile should be a slightly different color
+   than the bg so that it is differentiated, and should have a buffer between
+   it and the next tiles. Apply throughout."
+
+   It was `var(--bg)`, the page ground exactly, so the tile had no edges and
+   the four cards looked like they were floating on the page rather than
+   grouped. "Slightly" is the whole instruction: a shade off the ground, a
+   hairline border and the page's own shadow, which is enough to read as one
+   object without competing with the cards inside it. */
+.kpi-shell{background:var(--surface);border:1px solid var(--border);margin-bottom:1.5rem;}
 .kpi-shell .chart-head{border-bottom:1px solid var(--border);}
 .kpi-shell .kpi-card{box-shadow:none;}
 .tile-slicers{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}

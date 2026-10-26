@@ -10,6 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A60 | **Likely cause: the admin excludes demo accounts, and your own may be one.** 095 below tells the three possibilities apart in one table and names any demo account that has a survey row. Read only. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -80,10 +81,105 @@ build it.
 
 ---
 
+### One to run
+
+**This goes in the Supabase SQL Editor, not Terminal.** Open Supabase, click SQL
+Editor, paste the block, click Run.
+
+**A60.** It writes nothing. It answers whether the survey row is missing,
+unjoinable, or being excluded because the person is marked as a demo account,
+and it names any demo account that has one.
+
+<!-- SQL 095_survey_visibility.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 095: why the admin shows no survey responses. READ ONLY. Writes nothing.
+--
+-- Ellie: "There should be some survey responses, I know I completed it at
+-- least."
+--
+-- There are three ways a completed survey can be invisible in the admin, and
+-- they want different fixes, so this tells them apart rather than guessing.
+--
+--   1. The row is not there. The survey did not save.
+--   2. The row is there and has no respondent_id, so nothing can join it to a
+--      person and every chart about it is empty.
+--   3. The row is there, joins fine, and the person is a demo account. Every
+--      admin figure excludes demo accounts on purpose, so this would be the
+--      admin working correctly and surprising her. If it is her own account
+--      that is marked as a demo, that is the whole answer.
+--
+-- Run in the Supabase SQL Editor and click Run. One table comes back.
+-- ============================================================================
+
+select 'total survey rows'                        as question,
+       count(*)::text                             as answer
+  from public.survey_responses
+union all
+select 'finished (completed_at set)',
+       count(*) filter (where completed_at is not null)::text
+  from public.survey_responses
+union all
+select 'rows with no respondent_id, so unjoinable',
+       count(*) filter (where respondent_id is null)::text
+  from public.survey_responses
+union all
+select 'rows whose respondent has no profile row',
+       count(*)::text
+  from public.survey_responses s
+  left join public.profiles p on p.id = s.respondent_id
+ where s.respondent_id is not null and p.id is null
+union all
+select 'rows EXCLUDED because the person is a demo account',
+       count(*)::text
+  from public.survey_responses s
+  join public.profiles p on p.id = s.respondent_id
+ where coalesce(p.is_demo, false) = true
+union all
+select 'rows the admin should therefore be showing',
+       count(*)::text
+  from public.survey_responses s
+  join public.profiles p on p.id = s.respondent_id
+ where coalesce(p.is_demo, false) = false
+union all
+-- Who they are, so she can see whether her own account is one of the demos.
+select 'demo accounts with a survey row: ' || coalesce(u.email, '(no email)'),
+       'is_demo = true'
+  from public.survey_responses s
+  join public.profiles p on p.id = s.respondent_id
+  join auth.users u on u.id = p.id
+ where coalesce(p.is_demo, false) = true;
+```
+<!-- /SQL -->
+
+---
+
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
+| A66 | **The ghost tile needs its own colour and a gap under it.** The shell is the page ground, so it reads as nothing. A shade off the background and a buffer before the next tile, everywhere a shell is used: Dashboard, Order Details, Package Mix, Comms, Expectations, Rel Reflection. |
+| A65 | **2000 seconds on app highlights looks wrong and I am treating it as a bug until proven otherwise.** Checking what the clock actually measures, whether it stops on background, and whether two surfaces write the same key. |
+| A44 | **Phys. Int. overview tile**: avg alignment across all aspects, most-picked "what it is for" option, % who expect their partner to initiate, avg gap on appetite for novelty. |
+| A45 | **Phys. Int. bottom section renamed All questions**, same as every other page. |
+| A46 | **Column chart of "what it is for" picks**, above All questions. It is a multi-select, so the bars count picks and the subtitle carries how many people. |
+| A47 | **All questions uses the married wording**, not the premarital wording. Every question stores both and the admin was drawing one of them without saying which. |
+| A48 | **Chart comparing pre-intimate and intimate couples' average placement per aspect.** Needs a way to tell the two groups apart; checking what the exercise stores before building. |
+| A49 | **Conflict overview tile**: avg self assessment out of 5, % who speak up right away, most common horseman, most common reset method. |
+| A50 | **Column chart of how often each horseman shows up**, one column each, counting people who said sometimes or often. |
+| A51 | **Pie chart of "when you notice something frustrating"**, beside it. |
+| A52 | **Two side by side**: "when you're in an argument" and "when the scope of the argument changes". |
+| A53 | **Two column charts**: what people want from their partner, and reset methods. |
+| A54 | **Eight new slicer rows**: exhibits each of the four horsemen, and partner exhibits each. |
+| A55 | **Two postcoded charts** on conflict: what makes disagreements go better than expected, and what people appreciate about how conflict is handled. Checking first whether those are free-text questions. |
+| A56 | **Conflict All questions** matching the other pages, with pole labels. |
+| A57 | **Type Analytics overview tile**: E:W ratio, O:G ratio, top individual type, top couple type. |
+| A58 | **Swap the individual and couple distribution charts.** |
+| A59 | **Those two tiles stop being squares**: smaller pie, tile height follows. |
+| A61 | **Explore resets when you leave the page.** |
+| A62 | **A chart above the count on Explore**, type chosen from the shape of the cut, with a dropdown to override. |
+| A63 | **Explore rows and columns reorganised** into seven coloured sections: Demographic, Communication Styles, Expectations, Relationship Reflection, Physical Intimacy, Conflict Patterns, Engagement. Each exercise gets a high-level block then one row per question. The slicers use the same sections but only the high-level block, with one row per option. |
+| A64 | **Engagement rebuilt.** Reading the whole page first and telling you what I think is wrong with it before I change it. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
