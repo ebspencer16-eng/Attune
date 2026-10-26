@@ -4700,6 +4700,7 @@ function shapeResponses(r){
     relFeel:(r&&r.relationshipFeel)||[0,0,0,0,0],
     expGaps:(r&&Array.isArray(r.lifeGaps))? r.lifeGaps.map(g=>({l:g.label,v:g.pct})) : [],
     respAgreement:(r&&Array.isArray(r.respAgreement))? r.respAgreement.map(a=>({l:a.label,v:a.pct,cat:a.category,n:a.n})) : [],
+    respPairs:(r&&typeof r.respPairs==='number')? r.respPairs : null,
     pairs:(r&&r.pairs)||0,
   };
 }
@@ -4751,7 +4752,26 @@ async function renderResponseTile(opts){
     }
   } else if(opts.kind==='respagree'){
     const items=(a.respAgreement||[]).slice().sort((x,y)=>x.v-y.v);
-    renderBars(opts.target, items.length?items:[{l:'No paired answers yet',v:0}], '#34D399');
+    if(items.length){ renderBars(opts.target, items, '#34D399'); return; }
+    /* ── EMPTY, AND WHY ───────────────────────────────────────────────
+       Ellie: "Who does what agreement by question chart is empty so I don't
+       know if I have changes."
+
+       It drew a single bar reading "No paired answers yet" at nought, which
+       looks like a broken chart rather than a true statement. The server sends
+       the denominator now, so this says which of the two it is: nobody has
+       both halves yet, or they do and the measure found nothing, and those
+       want different things from her. */
+    const host=document.getElementById(opts.target);
+    if(!host) return;
+    const n=a.respPairs;
+    host.innerHTML='<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0;line-height:1.6">'
+      + (n === 0
+          ? 'No couple has both partners through the responsibilities yet, so there is nothing to agree or disagree about.'
+          : n == null
+            ? 'This measure could not be read.'
+            : QX_ESC(String(n)) + ' couple' + (n===1?' has':'s have') + ' both halves, and none of their answers could be paired to a question. That is a bug rather than an empty room.')
+      + '</div>';
   }
 }
 function wireResponseTile(opts){

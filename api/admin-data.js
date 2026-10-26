@@ -47,6 +47,7 @@ import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understandingBandFor } from './_lib/results.js';
 import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
+import { mirrorRespKey, mirrorLifeId } from './_lib/expectations.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -96,9 +97,13 @@ function buildResponseAggregates(profiles, sessions) {
   // Extended-family items and the two involvement life questions are person-
   // relative: a partner's answer about "my family" is stored under their
   // {partnerName} key, so mirror the placeholders when reading partner b.
-  const mirrorRespKey = (key) => (!key || (key.indexOf('{userName}') < 0 && key.indexOf('{partnerName}') < 0)) ? key
-    : String(key).replace(/\{userName\}/g, '\u0001').replace(/\{partnerName\}/g, '{userName}').replace(/\u0001/g, '{partnerName}');
-  const mirrorLifeId = (id) => id === 'lq_involve_user' ? 'lq_involve_partner' : id === 'lq_involve_partner' ? 'lq_involve_user' : id;
+  /* ── MIRRORING LIVES IN ONE PLACE ──────────────────────────────────────
+     These were local copies of `mirrorRespKey` and `mirrorLifeId` from
+     api/_lib/expectations.js, which every other caller imports. Checked over
+     all twenty responsibility keys before removing them: the two agreed, so
+     this is not the cause of anything, and that is exactly when a second copy
+     is worth deleting. Waiting until they disagree means finding out from a
+     chart. */
   const famLabel = (t) => String(t || '')
     .replace(/\{userName\}'s family/g, "one's own family")
     .replace(/\{partnerName\}'s family/g, "other partner's family")
@@ -191,6 +196,19 @@ function buildResponseAggregates(profiles, sessions) {
       if (ares === bres) raCount[key]++;
     }));
   });
+  /**
+   * How many couples could be counted at all.
+   *
+   * Ellie: "Who does what agreement by question chart is empty so I don't know
+   * if I have changes."
+   *
+   * An empty chart cannot say whether the measure is broken or whether nobody
+   * has finished the exercise, and those need different responses from her.
+   * This is the denominator: couples where BOTH partners answered at least one
+   * responsibility. Sent so the tile can say which of the two it is.
+   */
+  const respPairs = pairs.filter(([a, b]) =>
+    a.ex2_answers?.responsibilities && b.ex2_answers?.responsibilities).length;
   const respAgreement = [];
   RESPONSIBILITY_CATEGORIES.forEach(c => c.items.forEach(item => {
     const key = c.id + '__' + item;
@@ -322,6 +340,7 @@ function buildResponseAggregates(profiles, sessions) {
     relationshipFeel: feel,
     lifeGaps,
     respAgreement,
+    respPairs,
     pairs: pairs.length,
   };
 }

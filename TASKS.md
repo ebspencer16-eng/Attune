@@ -85,7 +85,7 @@ build it.
 | A33 | **All questions: a comparison mark.** Every 'all questions' section in admin shows the overall average as a smaller mark when a slicer is set. Rename every bottom section to All questions. |
 | A34 | **Comms overview tile**: Avg communication alignment, Avg understanding of partner, and two more. My answer to your question about the last two is below. |
 | A35 | **Expectations: Responsibilities at half width, Life & Values beside it**, same chart style. |
-| A36 | **Expectations: Who does what agreement by question draws nothing.** Finding out why before changing it. |
+| A36 | **The who-does-what chart is empty because no couple has both halves of Expectations yet.** Not a bug: it says so now, with the count, instead of drawing one bar at zero. If a couple ever has both halves and it still finds nothing, it says THAT instead. |
 | A37 | **Expectations: question order follows the exercise**, and responsibility poles read Myself and My partner so you can see who assumes it. |
 | A38 | **Expectations overview tile**: Avg life and values alignment, Avg responsibilities alignment, avg degree of misalignment for misaligned couples and for aligned ones. |
 | A40 | **Rel Reflection: postcoded column charts** for moments that matter and for the text-entry questions, qualities most admired as a column chart, and All questions without the section name on every row. |
