@@ -66,6 +66,16 @@ import { shareFooter } from './_lib/share-footer.js';
 import { userForRequest } from './_lib/verify-token.js';
 import { phases, withTiming } from './_lib/server-timing.js';
 
+/**
+ * The five questions the setup form asks about a person.
+ *
+ * Named here rather than written into the condition below, because the same
+ * five are read by api/create-profile.js and drawn by ABOUT_YOU in
+ * api/_lib/profile-setup-copy.js, and a sixth added there has to be required
+ * here too or the form grows a question nothing checks.
+ */
+const DEMOGRAPHIC_COLUMNS = ['age_range', 'relationship_status', 'relationship_length', 'children', 'signup_source'];
+
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 
 /**
@@ -150,6 +160,12 @@ export default async function handler(req) {
       // while the rule needed it: a column that is not selected reads as
       // undefined, and undefined reads as "does not own it".
       ...OWNERSHIP_COLUMNS,
+      /* The five setup questions, from the same list the completeness rule
+         reads. Added with that rule and not before: a column that is not
+         selected arrives undefined, and undefined would have read as "not
+         answered" for everybody, which is the comment three lines above this
+         one describing the bug it was written about. */
+      ...DEMOGRAPHIC_COLUMNS,
       'email',
       'budget_data', 'checklist_data', 'profile_setup_complete',
       'results_last_opened_at', 'partner_nudged_at', 'feedback_given_at',
@@ -513,15 +529,38 @@ export default async function handler(req) {
        * Derived from the profile now, with the flag kept as an OR so nothing
        * that already passes starts failing. Names are what results prose
        * cannot do without: it addresses both people by name throughout.
-       * Pronouns are deliberately not required, because the setup form lets
-       * someone leave them blank on purpose and a card they can never dismiss
-       * is worse than copy that says "they".
+       *
+       * ── AND THE DEMOGRAPHICS, AT HER ASK ────────────────────────────────
+       * Ellie, of Rebecca: "Prompt rebecca to do her profile setup, this was a
+       * miss to allow her to take a backdoor into attune, we need to ensure
+       * that users always have to complete their demos."
+       *
+       * This used to say, in these words: "Pronouns are deliberately not
+       * required, because the setup form lets someone leave them blank on
+       * purpose and a card they can never dismiss is worse than copy that says
+       * they." Both halves of that round trip are kept, because the second one
+       * is why this is safe to change now and was not before.
+       *
+       * What made the old objection right was that declining had no value of
+       * its own: the only way to say "I would rather not" was to leave it
+       * blank, so requiring an answer WOULD have been a card nobody could
+       * dismiss. "Prefer not to say" is a real stored answer now, so a person
+       * can finish this form in one click without telling us anything, and the
+       * product can still tell them apart from somebody who never looked.
+       *
+       * `profile_setup_complete` stays as an OR so nobody who already passed
+       * starts failing. It is written by one website modal and false for most
+       * accounts, which is why it cannot be the test on its own.
        */
       profileComplete: !!me.profile_setup_complete
-        || (!!(me.name || '').trim() && !!(me.partner_name || '').trim()),
+        || (!!(me.name || '').trim() && !!(me.partner_name || '').trim()
+            && !!(me.pronouns || '').trim()
+            && DEMOGRAPHIC_COLUMNS.every((c) => !!(me[c] || '').trim())),
       profileMissing: [
         !(me.name || '').trim() && 'your name',
         !(me.partner_name || '').trim() && "your partner's name",
+        !(me.pronouns || '').trim() && 'your pronouns',
+        DEMOGRAPHIC_COLUMNS.some((c) => !(me[c] || '').trim()) && 'a few questions about you',
       ].filter(Boolean),
       exercises,
       resultsReady,

@@ -48,29 +48,54 @@ export const PROFILE_SETUP_COPY = {
  * The keys are the body fields api/create-profile.js already accepts. It has
  * accepted all five since it was written; nothing was sending them.
  */
+/**
+ * The value stored when somebody chooses not to answer.
+ *
+ * ── WHY IT IS NOT AN EMPTY STRING ─────────────────────────────────────────
+ * Ellie, of Rebecca: "this was a miss to allow her to take a backdoor into
+ * attune, we need to ensure that users always have to complete their demos."
+ *
+ * There was no back door to close in the usual sense. "Prefer not to say" was
+ * the FIRST option on all five questions and its value was '', which
+ * api/create-profile.js stores as null. That is the same thing it stores for
+ * somebody who never saw the form. So the default answer was "declined", the
+ * product could not tell declining from skipping, and anybody who clicked
+ * through was recorded as having answered nothing.
+ *
+ * Declining is a real answer and it stays available: this is not about making
+ * people disclose anything. It is about the product knowing the difference,
+ * and about the form not answering on their behalf. So the option keeps its
+ * place and gets a value of its own, nothing is selected to begin with, and a
+ * choice has to be made before setup is finished.
+ *
+ * Rows written before today keep null and read as "not answered", which is
+ * true of them: nobody can say now whether those people declined or skipped.
+ */
+export const PREFER_NOT_TO_SAY = 'prefer_not_to_say';
+
 export const ABOUT_YOU = {
   title: 'Tell us about yourselves',
   why: 'Helps us understand who Attune serves. Responses are kept separately from names and emails, and only ever used in aggregate.',
   fields: [
     { key: 'ageRange', label: 'Your age range', options: [
-      ['', 'Prefer not to say'], ['18-24', '18\u201324'], ['25-34', '25\u201334'],
+      ['', 'Select one\u2026'], [PREFER_NOT_TO_SAY, 'Prefer not to say'], ['18-24', '18\u201324'], ['25-34', '25\u201334'],
       ['35-44', '35\u201344'], ['45-54', '45\u201354'], ['55+', '55 or older'],
     ] },
     { key: 'relationshipStatus', label: 'Relationship status', options: [
-      ['', 'Prefer not to say'], ['dating', 'Dating / together'], ['engaged', 'Engaged'],
+      ['', 'Select one\u2026'], [PREFER_NOT_TO_SAY, 'Prefer not to say'], ['dating', 'Dating / together'], ['engaged', 'Engaged'],
       ['married', 'Married'], ['remarried', 'Remarried'], ['partnership', 'Domestic partnership'],
     ] },
     { key: 'relationshipLength', label: 'How long together', options: [
-      ['', 'Prefer not to say'], ['<1', 'Less than 1 year'], ['1-2', '1\u20132 years'],
+      ['', 'Select one\u2026'], [PREFER_NOT_TO_SAY, 'Prefer not to say'], ['<1', 'Less than 1 year'], ['1-2', '1\u20132 years'],
       ['3-5', '3\u20135 years'], ['6-10', '6\u201310 years'], ['11-20', '11\u201320 years'],
       ['20+', '20+ years'],
     ] },
     { key: 'children', label: 'Children', options: [
-      ['', 'Prefer not to say'], ['none', 'None'], ['1', '1'], ['2', '2'],
+      ['', 'Select one\u2026'], [PREFER_NOT_TO_SAY, 'Prefer not to say'], ['none', 'None'], ['1', '1'], ['2', '2'],
       ['3+', '3 or more'], ['expecting', 'Expecting'],
     ] },
     { key: 'signupSource', label: 'How did you hear about Attune?', options: [
-      ['', 'Prefer not to say'], ['friend', 'Friend or family'], ['social', 'Social media'],
+      ['', 'Select one\u2026'], [PREFER_NOT_TO_SAY, 'Prefer not to say'], ['friend', 'Friend or family'], ['social', 'Social media'],
       ['search', 'Search'], ['gift', 'Received as a gift'],
       ['therapist', 'Therapist or counselor'], ['other', 'Other'],
     ] },

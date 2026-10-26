@@ -111,6 +111,8 @@ section 3 explaining things, just include the context I need in section 3."
 | A31 | **Avg individual dimension results** replaces couple type distribution: ten sliders, pole labels, mean placement, same tile height. The ten are the block that was at the foot of that page, moved rather than rebuilt. |
 | A32 | **Pole labels wrap in full** instead of stopping at sixteen characters, and the comparison dot is the right way round everywhere: small grey for everyone, large coloured for your cut. |
 | A39 | **Every overview tile shows the uncut figure** under the stat when a slicer is on. Dashboard, Order Details and Package Mix, driven and photographed with a period selected. |
+| S79 | **The back door was that "Prefer not to say" was stored as empty, and was the default.** Identical to never answering, and pre-selected on all five questions. It has a value of its own now, nothing is pre-selected, and declining is still one click. |
+| S80 | **Rebecca will be prompted, and so will anyone else who skipped.** Profile complete now means both names, pronouns and the five questions. The columns were not even being selected, so adding the rule without that would have told every account its profile was unfinished. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
