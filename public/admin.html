@@ -1132,10 +1132,30 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
           <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment" aria-label="Slz rdim"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-dim-scores"></canvas></div>
         </div>
+        <!-- Ellie: "Replace couple type distribution chart with 'Avg
+             individual dimension results' and show the 10 slider bars with
+             pole labels and mean placement. Please keep the height of the tile
+             the same."
+
+             The bars are drawn by renderQuestionExplorer, which already builds
+             exactly these ten for the section at the foot of this page. This
+             box has the id it looks for, so the block renders here instead of
+             there. The slicer is that section's own, which is why there is not
+             a second one in this head: two slicers over one set of bars is two
+             answers to one question.
+
+             The height matches the tile beside it and the bars scroll inside
+             it, because ten sliders do not fit in the height of a radar and
+             making the tile taller would break the row she asked to keep. -->
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Couple type distribution</div><div class="chart-subtitle">Across all typed couples</div></div><select class="tile-slicer" id="slz-rcouple" title="Cut this tile by a segment" aria-label="Slz rcouple"><option value="">Everyone</option></select></div>
-          <div class="chart-body">
-            <canvas id="comm-type-bars"></canvas>
+          <div class="chart-head"><div><div class="chart-title">Avg individual dimension results</div><div class="chart-subtitle">Where people place themselves, across all ten</div></div></div>
+          <!-- Ellie: "Please keep the height of the tile the same." Ten
+               sliders are about twice the height of the radar beside them, so
+               the body is capped at the radar's and scrolls. Growing the tile
+               instead would have made the row twice as tall, which is the
+               thing she asked not to happen. -->
+          <div class="chart-body" style="height:255px;overflow-y:auto;">
+            <div id="qx-comm-high" style="padding:.2rem .25rem 0;"></div>
           </div>
         </div>
       </div>
@@ -6277,33 +6297,73 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     const score = v => v == null ? '\u2013' : (1 + v * 4).toFixed(1);
     const isScale = f.kind === 'scale';
     const loFull = f.poleLow || 'low', hiFull = f.poleHigh || 'high';
-    const lo = QX_ESC(isScale ? loFull : TRUNC(loFull, 16)), hi = QX_ESC(isScale ? hiFull : TRUNC(hiFull, 16));
+    /* ── THE WHOLE LABEL, ON AS MANY LINES AS IT NEEDS ──────────────────
+       Ellie: "Wrap all pole labels, they can include as many lines as needed
+       to fit the full label."
+
+       A non-scale pole was cut to sixteen characters with an ellipsis, so the
+       end of most of them was only in the tooltip. Nothing is truncated now;
+       the column has a fixed width and the text wraps inside it. */
+    const lo = QX_ESC(loFull), hi = QX_ESC(hiFull);
     const loPre = isScale ? '1 \u00b7 ' : '', hiPre = isScale ? '5 \u00b7 ' : '';
     const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + '</div>';
-    const dot = (v, color, z, tip) => v == null ? '' : '<div data-tip="' + QX_ESC(tip) + '" style="position:absolute;top:50%;left:' + pct(v) + '%;transform:translate(-50%,-50%);width:13px;height:13px;border-radius:50%;background:' + color + ';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25);cursor:default;z-index:' + z + ';"></div>';
+    /* ── WHICH DOT IS WHICH ────────────────────────────────────────────
+       Ellie: "when the user selects a different demo from the slicer, include
+       a small grey dot indicating the mean and then the larger, colored dot
+       that indicates that demo's placement."
+
+       It was the other way round: the overall mean was drawn in the theme
+       colour and the selected cut in grey, both the same size. So the eye went
+       to the figure she was comparing AGAINST rather than the one she had just
+       asked for. The reference is small and grey, the answer is large and
+       coloured, and with nothing selected there is one dot and it is the
+       coloured one. */
+    const dot = (v, color, z, tip, size) => v == null ? '' : '<div data-tip="' + QX_ESC(tip) + '" style="position:absolute;top:50%;left:' + pct(v) + '%;transform:translate(-50%,-50%);width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:' + color + ';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25);cursor:default;z-index:' + z + ';"></div>';
     const track = '<div style="position:relative;flex:1 1 auto;min-width:0;height:6px;background:var(--surface);border-radius:999px;">' +
-      dot(sliced ? omean : mean, theme, 1, (sliced ? 'Mean (everyone): ' : 'Mean: ') + score(sliced ? omean : mean) + ' (n=' + (sliced ? on : n) + ')') +
-      (sliced ? dot(mean, '#626975', 2, 'Selected view: ' + score(mean) + ' (n=' + n + ')') : '') + '</div>';
+      (sliced ? dot(omean, '#9AA3B2', 1, 'Mean (everyone): ' + score(omean) + ' (n=' + on + ')', 9) : '') +
+      dot(mean, theme, 2, (sliced ? 'Selected view: ' : 'Mean: ') + score(mean) + ' (n=' + n + ')', 14) + '</div>';
     // Score readout removed from the row; the dot's hover shows the exact mean.
     return '<div style="margin-bottom:.95rem;">' + header +
       '<div style="display:flex;align-items:center;gap:.5rem;">' +
-        '<span title="' + QX_ESC(loFull) + '" style="flex:0 0 96px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;">' + loPre + lo + '</span>' +
+        '<span style="flex:0 0 112px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.3;overflow-wrap:anywhere;">' + loPre + lo + '</span>' +
         track +
-        '<span title="' + QX_ESC(hiFull) + '" style="flex:0 0 96px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.2;">' + hiPre + hi + '</span>' +
+        '<span style="flex:0 0 112px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.3;overflow-wrap:anywhere;">' + hiPre + hi + '</span>' +
       '</div></div>';
   };
   const measureBar = (f, drows, sliced) => (QX_MODE[containerId] === 'mean' && (f.kind === 'scale' || f.ordinal)) ? meanBar(f, drows, sliced) : barFor(f, drows);
   const renderDist = (drows, sliced) => {
     const meanKey = (QX_MODE[containerId] === 'mean' && sliced)
       ? '<div style="display:flex;gap:1.1rem;align-items:center;margin:0 0 .8rem;font-size:.62rem;color:var(--muted);">' +
-          '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:11px;height:11px;border-radius:50%;background:' + theme + ';border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Mean (everyone)</span>' +
-          '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:11px;height:11px;border-radius:50%;background:#626975;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Selected view</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:9px;height:9px;border-radius:50%;background:#9AA3B2;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Mean (everyone)</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:13px;height:13px;border-radius:50%;background:' + theme + ';border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Selected view</span>' +
         '</div>'
       : '';
+    /* ── ONE RENDERER, SOMETIMES TWO DESTINATIONS ─────────────────────
+       Ellie: "Replace couple type distribution chart with 'Avg individual
+       dimension results' and show the 10 slider bars with pole labels and mean
+       placement." And: "Remove distribution for every measure from the bottom
+       section since we are including the new chart."
+
+       The ten sliders she wants in that tile are the High-level views block
+       that was already at the foot of this page. So the block moves rather
+       than being built a second time: a page that provides a box with the
+       matching id gets the high-level bars drawn into it, and the section
+       below then carries All questions and nothing else.
+
+       Written this way rather than as a second function because a second copy
+       of meanBar is a second answer to "where is the mean", and the two would
+       disagree the first time one of them was touched. A page with no such box
+       is unchanged. */
+    const highBox = document.getElementById(containerId + '-high');
+    const highHtml = highFields.length
+      ? meanKey + highFields.map(f => measureBar(f, drows, sliced)).join('')
+      : '';
+    if (highBox) highBox.innerHTML = highHtml;
+
     distEl.innerHTML =
-      (QX_MODE[containerId] === 'mean' ? '' : scaleLegend) + meanKey +
-      (highFields.length ? sectionHead('High-level views') + highFields.map(f => measureBar(f, drows, sliced)).join('') + '<div style="height:1.1rem;"></div>' : '') +
-      (highFields.length ? sectionHead('All questions') : '') + detailFields.map(f => measureBar(f, drows, sliced)).join('');
+      (QX_MODE[containerId] === 'mean' ? '' : scaleLegend) + (highBox ? '' : meanKey) +
+      (highFields.length && !highBox ? sectionHead('High-level views') + highFields.map(f => measureBar(f, drows, sliced)).join('') + '<div style="height:1.1rem;"></div>' : '') +
+      sectionHead('All questions') + detailFields.map(f => measureBar(f, drows, sliced)).join('');
   };
   QX_REPAINT[containerId] = () => renderDist(curSlice, curSliced);
   renderDist(rows, false);
@@ -7000,9 +7060,10 @@ function initCharts(page) {
        second caller of renderTypeCouple, which is how deleting that function
        nearly took this page's couple-type chart with it. Two tiles showing one
        distribution should not be two drawings of it. */
-    wireCubeTile({ target: 'comm-type-bars', field: 'couple_type', mode: 'doughnut',
-      selId: 'slz-rcouple', unique: 'couple_id',
-      label: (id) => ((typeof CT_NAMES !== 'undefined' && CT_NAMES[id]) || id) + ' (' + id + ')' });
+    /* The couple type doughnut that was here is gone: Ellie asked for that
+       tile to be the ten dimension sliders instead, and those are drawn by
+       renderQuestionExplorer into #qx-comm-high. The same doughnut is still on
+       Type Analytics, which is the page about couple types. */
     wireResponseTile({target:'chart-exp-align',kind:'expalign',selId:'slz-rexp'});
     wireResponseTile({target:'exp-gap-bars',kind:'expgaps',selId:'slz-rgap'});
     wireResponseTile({target:'resp-agree-bars',kind:'respagree',selId:'slz-ragree'});

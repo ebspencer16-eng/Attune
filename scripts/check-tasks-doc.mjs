@@ -261,7 +261,15 @@ for (const sec of sections) {
    */
   if (!name) {
     const sec1 = doc.slice(doc.indexOf('## 1.'), doc.indexOf('## 2.'));
-    const asks = /migration|SQL editor|run this SQL|paste it into Supabase/i.test(sec1);
+    /* ── ASKING HER TO RUN IT, NOT MENTIONING THAT ONE EXISTS ───────────
+       This matched the bare word "migration" anywhere in section 1, so a row
+       saying a future change "needs a stored row and a migration" failed the
+       build for describing work that has not started. A gate that matches too
+       much is not the safe direction: it gets loosened until it matches
+       nothing. What it is about is an ASK, so it looks for one. */
+    const asks = /\b(run|paste|open)\b[^.|]{0,40}\b(migration|sql|supabase)\b/i.test(sec1)
+      || /\bSQL Editor\b/i.test(sec1)
+      || /\bblock below\b/i.test(sec1);
     /* A read-only query is not a migration and does not need the generator;
        what it does need is to BE there. The rule is that she is never asked to
        paste something the document does not give her. */
