@@ -29,11 +29,53 @@
  * Matching the bare phrase would have flagged a dozen correct lines about the
  * package, which is a gate that matches too much, and this repo has already
  * had one of those this week.
+ *
+ * ── AND IT DOES NOT READ COMMENTS ─────────────────────────────────────────
+ * The rule is about what a CUSTOMER reads. A comment is not that, and quoting
+ * Ellie is how this codebase records why a thing was done: she wrote "Add
+ * conflict and starting out checklist to add on attachment by package", that
+ * sentence went into public/admin.html above the chart it explains, and this
+ * gate failed the build for it.
+ *
+ * CLAUDE.md already states the rule and names a gate that was deleted along
+ * with the thing it checked: a gate that reads a comment as code punishes a
+ * file for saying what went wrong, so the cost of writing down what happened
+ * becomes a failing build. Comments are blanked rather than removed, so line
+ * numbers in a finding still point at the right line.
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { CHECKLIST_COPY } from '../api/_checklist.js';
+
+/**
+ * Comments replaced by spaces of the same length.
+ *
+ * Same length and same line count on purpose: a finding reports a line number
+ * and a column, and both have to still point at the file on disk.
+ *
+ * Covers the three forms these files use: a block comment, a line comment, and
+ * an HTML comment. It is deliberately not a parser. A `//` inside a string
+ * ("https://...") would be blanked by a naive line rule, so a line comment is
+ * only honoured when the `//` is not inside quotes on that line.
+ */
+function blankComments(src) {
+  const keep = (m) => m.replace(/[^\n]/g, ' ');
+  let out = src
+    .replace(/\/\*[\s\S]*?\*\//g, keep)
+    .replace(/<!--[\s\S]*?-->/g, keep);
+  out = out.split('\n').map((line) => {
+    let q = null;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (q) { if (c === '\\') i++; else if (c === q) q = null; continue; }
+      if (c === '"' || c === "'" || c === '`') { q = c; continue; }
+      if (c === '/' && line[i + 1] === '/') return line.slice(0, i) + ' '.repeat(line.length - i);
+    }
+    return line;
+  }).join('\n');
+  return out;
+}
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const DIRS = ['api', 'src', 'public', 'attune-app/src'];
@@ -78,7 +120,7 @@ const fails = [];
 for (const f of files) {
   const rel = f.slice(ROOT.length);
   if (rel === 'scripts/check-checklist-name.mjs') continue;
-  const src = readFileSync(f, 'utf8');
+  const src = blankComments(readFileSync(f, 'utf8'));
   src.split('\n').forEach((line, i) => {
     if (!OLD.test(line)) return;
     fails.push(`${rel}:${i + 1} still calls it the Starting Out checklist.`

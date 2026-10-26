@@ -161,7 +161,52 @@ for (let i = 0; i < 40; i++) {
   }
   rows.push(r);
 }
-const CUBE = { ok: true, fields, rows, orders: [], demoFilterApplied: true };
+/* ── ORDERS ────────────────────────────────────────────────────────────────
+   The cube's orders were an empty array, so every tile on the Package Mix page
+   drew nothing and the probe said nothing about them. That is the same hole
+   the header above describes: a harness that is silent about a third of the
+   page.
+
+   Spread across the four packages and twelve months so the stacked column and
+   the period slicer both have something to cut. Half of them carry a promo
+   code, because that is what the system actually holds today and because the
+   add-on chart is specifically about orders whose add-ons came from a code
+   rather than from a line item.
+
+   `addons` is computed by the module the server uses, not typed out. That is
+   deliberate and it is also the limit of what this proves: it shows the chart
+   DRAWS what it is given. Whether the rule is right is check's job, not a
+   picture's. */
+const { addonsOnOrder } = await import(`${ROOT}api/_lib/order-addons.js`);
+const PKGS = ['core', 'newlywed', 'anniversary', 'premium'];
+const STUB_CODE = { includesIntimacy: true, includesBudget: true };
+const orders = [];
+for (let i = 0; i < 48; i++) {
+  const d = new Date();
+  d.setMonth(d.getMonth() - (i % 12));
+  const pkg = PKGS[i % PKGS.length];
+  const promo = i % 2 === 0 ? 'BETA' + (i % 12) : null;
+  const row = {
+    pkg_key: pkg,
+    addon_workbook: i % 7 === 0,
+    addon_reflection: i % 5 === 0,
+    addon_budget: false,
+    addon_intimacy: false,
+    addon_checklist: i % 6 === 0,
+    addon_conflict: i % 4 === 0,
+  };
+  orders.push({
+    month: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
+    ts: d.toISOString(),
+    amount: promo ? 0 : [99, 149, 199, 295][i % 4],
+    order_pkg: pkg,
+    is_physical: i % 9 === 0,
+    promo_code: promo,
+    ...row,
+    addons: addonsOnOrder(row, promo ? STUB_CODE : null),
+  });
+}
+const CUBE = { ok: true, fields, rows, orders, demoFilterApplied: true };
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 const server = createServer((req, res) => {

@@ -90,7 +90,7 @@ over breakfast is not the tone you want.
 | 51 | **Apology** | noun | Naming what you did, without the word but. |
 | 52 | **Attention** | noun | The thing everybody says they want more of and nobody can fake. |
 | 53 | **Avoidance** | noun | Choosing the easier hour and paying for it later. |
-| 54 | **Belonging** | noun | Knowing you do not have to earn your place this week. |
+| 54 | **Belonging** | noun | Knowing you do not have to earn your place with someone. |
 | 55 | **Blame** | noun | Deciding who is at fault instead of deciding what to do. |
 | 56 | **Candor** | noun | Saying the true thing kindly, while it is still useful. |
 | 57 | **Capacity** | noun | How much you have left, which is not how much you care. |

@@ -491,9 +491,11 @@
           </div>
           <select class="tile-slicer" id="slz-ovrellen" title="Cut this tile by a segment" aria-label="Slz ovrellen"><option value="">Everyone</option></select>
         </div>
-        <div class="chart-body">
-          <div class="insight-list" id="rellength-bars" style="margin-top:.5rem;"></div>
-        </div>
+        <!-- Ellie: "Relationship length distribution should be a column chart."
+             It was a list of HTML bars, which is why it needed a div; a chart
+             needs a canvas, and mkChart says so out loud rather than silently
+             leaving a tile on "Loading". -->
+        <div class="chart-body"><canvas id="chart-rellength"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-head">
@@ -668,11 +670,41 @@
         <div class="topbar-sub">How customers choose packages over time</div>
       </div>
     </div>
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
-      <div class="kpi-card orange"><div class="kpi-label">Assessment</div><div class="kpi-val" id="pkgkpi-core">—</div><div class="kpi-sub" id="pkgkpi-core-sub">Share of orders</div></div>
-      <div class="kpi-card orange"><div class="kpi-label">Starting Out</div><div class="kpi-val" id="pkgkpi-newlywed">—</div><div class="kpi-sub" id="pkgkpi-newlywed-sub">Share of orders</div></div>
-      <div class="kpi-card indigo"><div class="kpi-label">Anniversary</div><div class="kpi-val" id="pkgkpi-anniversary">—</div><div class="kpi-sub" id="pkgkpi-anniversary-sub">Share of orders</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Premium</div><div class="kpi-val" id="pkgkpi-premium">—</div><div class="kpi-sub" id="pkgkpi-premium-sub">Share of orders</div></div>
+    <!-- Ellie: "Put the 4 top tiles inside of a tile that's called historical
+         package mix. That tile should show the 4, and should have 2 slicers.
+         One to select time period (default is 'all orders' but also includes
+         past 12mo, past 6mo, past 90days, past month, past week), and the
+         other slicer should be the demo slicer that every other chart has."
+
+         The period select is first because it is the one that is specific to
+         this tile; the segment select is the same control, with the same id
+         shape, that every other tile on the page carries. -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Historical package mix</div>
+          <div class="chart-subtitle">Share of orders by package</div>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          <select class="tile-slicer" id="slz-pkghist-period" title="Limit this tile to a period" aria-label="Period">
+            <option value="">All orders</option>
+            <option value="365">Past 12 months</option>
+            <option value="182">Past 6 months</option>
+            <option value="90">Past 90 days</option>
+            <option value="30">Past month</option>
+            <option value="7">Past week</option>
+          </select>
+          <select class="tile-slicer" id="slz-pkghist" title="Cut this tile by a segment" aria-label="Slz pkghist"><option value="">Everyone</option></select>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div class="kpi-grid" id="pkg-hist-tiles" style="grid-template-columns:repeat(4,1fr);margin:0;">
+          <div class="kpi-card orange"><div class="kpi-label">Assessment</div><div class="kpi-val" id="pkgkpi-core">—</div><div class="kpi-sub" id="pkgkpi-core-sub">Share of orders</div></div>
+          <div class="kpi-card orange"><div class="kpi-label">Starting Out</div><div class="kpi-val" id="pkgkpi-newlywed">—</div><div class="kpi-sub" id="pkgkpi-newlywed-sub">Share of orders</div></div>
+          <div class="kpi-card indigo"><div class="kpi-label">Anniversary</div><div class="kpi-val" id="pkgkpi-anniversary">—</div><div class="kpi-sub" id="pkgkpi-anniversary-sub">Share of orders</div></div>
+          <div class="kpi-card green"><div class="kpi-label">Premium</div><div class="kpi-val" id="pkgkpi-premium">—</div><div class="kpi-sub" id="pkgkpi-premium-sub">Share of orders</div></div>
+        </div>
+      </div>
     </div>
     <div class="chart-card">
       <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div><select class="tile-slicer" id="slz-pkgtrend" title="Cut this tile by a segment" aria-label="Slz pkgtrend"><option value="">Everyone</option></select></div>
@@ -4161,8 +4193,8 @@ async function loadRealDemographics() {
     // that relLengths/sourceData are populated. Targeted (not gated on the page
     // being active) since renderBars/mkChart work on off-screen elements too.
     // Cube-backed + sliceable — keep consistent with initCharts('overview').
-    wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#5C6DDA'});
-    wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:DEMO_HUE});
+    wireCubeTile({target:'chart-rellength',field:'relationship_length',selId:'slz-ovrellen',color:'#5C6DDA'});
+    wireCubeTile({target:'chart-source',field:'signup_source',mode:'pie',selId:'slz-source',color:DEMO_HUE});
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
   } catch (e) {
@@ -4424,9 +4456,17 @@ async function loadRealPackageTrend(orders) {
 
   // Fill Package Mix KPI cards with real share-of-orders
   (function(){
-    const totalMix = pkgMix.reduce((a,b)=>a+b,0);
-    const set = (id, n) => { const el = document.getElementById('pkgkpi-'+id); if (el) el.textContent = totalMix ? Math.round(100*n/totalMix)+'%' : '—'; const sub = document.getElementById('pkgkpi-'+id+'-sub'); if (sub) sub.textContent = n + (n===1?' order':' orders'); };
-    set('core', mixCounts.core); set('newlywed', mixCounts.newlywed); set('anniversary', mixCounts.anniversary); set('premium', mixCounts.premium);
+    /* ── THE FOUR TILES ARE DRAWN BY THEIR OWN TILE NOW ────────────────
+       They were filled here, from the raw orders array, which is why they had
+       no slicer: there was nothing to slice. They live inside Historical
+       package mix and are drawn by renderOrderChart's `pkgkpis` kind, which
+       reads the cube and so can honour both the period select and the segment
+       select Ellie asked for.
+
+       Nothing is set here on purpose. Two writers on one element is how the
+       two come to disagree and neither looks wrong on its own, which is this
+       codebase's oldest bug. pkgMix above is still computed and is still read
+       by the overview doughnut. */
   })();
 
   // Force re-render if the packages page is currently open
@@ -5006,6 +5046,20 @@ async function renderCubeDist(opts){
        gridlines, axes labels, or a legend, just the hover over to see the
        detail." A doughnut has no axes; the legend is the part it had. */
     mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},cutout:'60%'}});
+  } else if(opts.mode==='pie'){
+    /* ── A PIE, AND IT KEEPS ITS LEGEND ───────────────────────────────────
+       Ellie: "How couples found Attune should be a pie chart."
+
+       A pie rather than the doughnut above it, which is the same chart with a
+       hole: `cutout: 0` is the whole difference.
+
+       It keeps a legend, where the two couple-type doughnuts deliberately have
+       none. That is not an inconsistency. Her instruction there was "Neither of
+       those should have gridlines, axes labels, or a legend, just the hover
+       over to see the detail", and those two tiles draw four named types a
+       reader already knows. This one draws signup sources, where the only way
+       to know which colour is Instagram is to be told. */
+    mkChart(el,{type:'pie',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:12,font:{size:10}}},tooltip:{callbacks:{label:tipLabel}}},cutout:0}});
   } else if(opts.mode==='hbar'){
     /* Columns, like everything else. Ellie: "I want column charts." This one
        drew its bars sideways, which is the only tile on the page that did. */
@@ -5032,6 +5086,33 @@ async function renderOrderChart(opts){
   if(sel){ populateSlicer(sel, null, cube.rows||[]); sel.classList.toggle('on', !!sel.value); }
   const orders=sliceFilter(cube.orders||[], sel?sel.value:'');
   setTileN(el, orders.length);
+  if(opts.kind==='pkgkpis'){
+    /* ── THE FOUR TILES, CUT TWO WAYS ──────────────────────────────────
+       They used to be filled once from the raw orders array on the main data
+       load, which is why they had no slicer: there was nothing to slice. They
+       read the cube now, like every other tile on the page, so the segment
+       select works the same way here as it does everywhere else.
+
+       One writer. The old fill was removed rather than left as a first draw,
+       because two things writing one element is how they come to disagree and
+       neither is obviously wrong. */
+    const PK=[['core','Assessment'],['newlywed','Starting Out'],['anniversary','Anniversary'],['premium','Premium']];
+    const per=opts.periodId?document.getElementById(opts.periodId):null;
+    const within=periodFilter(orders, per?per.value:'');
+    setTileN(el, within.length);
+    const cnt={}; within.forEach(o=>{ const k=o.order_pkg; if(k) cnt[k]=(cnt[k]||0)+1; });
+    const tot=PK.reduce((a,p)=>a+(cnt[p[0]]||0),0);
+    PK.forEach(p=>{
+      const n=cnt[p[0]]||0;
+      const val=document.getElementById('pkgkpi-'+p[0]);
+      const sub=document.getElementById('pkgkpi-'+p[0]+'-sub');
+      /* An em dash when there are no orders at all, not 0%. Nought per cent of
+         nothing is a figure about a denominator that does not exist. */
+      if(val) val.textContent = tot ? Math.round(100*n/tot)+'%' : '\u2014';
+      if(sub) sub.textContent = n + (n===1?' order':' orders');
+    });
+    return;
+  }
   if(opts.kind==='revenue'){
     const months=_last12Months(); const sum={};
     orders.forEach(o=>{ if(o.month) sum[o.month]=(sum[o.month]||0)+(Number(o.amount)||0); });
@@ -5049,13 +5130,58 @@ async function renderOrderChart(opts){
     const rev=opts.kind==='revpkg';
     const ds=PK.map(p=>{ const acc={}; orders.forEach(o=>{ if(o.order_pkg===p[0]&&o.month) acc[o.month]=(acc[o.month]||0)+(rev?(Number(o.amount)||0):1); });
       return {label:p[1],data:months.map(m=>Math.round(acc[m.key]||0)),backgroundColor:rev?p[2]+'AA':p[2],borderRadius:4}; });
-    mkChart(el,{type:'bar',data:{labels:months.map(m=>m.label),datasets:ds},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:rev?{callback:v=>'$'+Math.round(v/1000)+'k'}:{precision:0}}}}});
+    /* ── NO NUMBERS INSIDE THESE COLUMNS ──────────────────────────────
+       Ellie: "I don't want labels inside of the columns on package split over
+       time, just have the hover ability so if I hover it shows the count for
+       whichever color I'm over."
+
+       This narrows her earlier instruction rather than contradicting it: "I
+       want all of the columns to be labeled in the self vs partner view gap on
+       responses page - on all columns throughout admin I want that." That is
+       why mkChart labels every bar by default and why the opt-out exists. A
+       stacked column is the case it does not suit: four numbers inside four
+       segments of one column, at ten point, is unreadable and the segments are
+       often too short to hold one.
+
+       The hover is the replacement, and it has to name one colour rather than
+       the whole column, so the interaction is per segment: `mode: 'nearest'`
+       with `intersect: true` answers for the band the pointer is actually
+       over. The file's default is `mode: 'index'`, which lists all four. */
+    mkChart(el,{type:'bar',data:{labels:months.map(m=>m.label),datasets:ds},options:{
+      /* valueLabels is off by default now; left explicit because this tile is
+         the one she named, and because a stacked column must never carry them
+         however the default moves. */
+      plugins:{legend:{position:'bottom'},valueLabels:false,
+        tooltip:{callbacks:{label:(ctx)=>ctx.dataset.label+': '+(rev?('$'+Number(ctx.parsed.y).toLocaleString()):(ctx.parsed.y+' order'+(ctx.parsed.y===1?'':'s')))}}},
+      interaction:{mode:'nearest',intersect:true},
+      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:rev?{callback:v=>'$'+Math.round(v/1000)+'k'}:{precision:0}}}}});
   } else if(opts.kind==='addons'){
+    /* ── WHAT COUNTS AS HAVING AN ADD-ON ──────────────────────────────────
+       Ellie: "Add conflict and starting out checklist to add on attachment by
+       package." And: "Add-on attachment by package isn't correct, I and a few
+       other beta users have access to add-ons and should see that."
+
+       Two faults, one cause. The list was four of the six add-ons, and the
+       count read the order's own `addon_*` columns, which record what somebody
+       paid for as a line item. That is one of three ways to have an add-on,
+       and it is the rarest one here: every order on the system today is a
+       promo order at zero dollars, so the chart drew zero of everything.
+
+       The other two ways are the package already including it and a promo code
+       bundling it. The server works all three out per order now and sends the
+       answer as `o.addons`, from api/_lib/order-addons.js, which reads PKG_CAPS
+       and the same `bundledAddons` the checkout uses. This draws what it is
+       given rather than deciding again, because deciding again here is how the
+       two answers drift. */
     const PK=[['core','Assessment'],['newlywed','Starting Out'],['anniversary','Anniversary'],['premium','Premium']];
-    const ADD=[['addon_workbook','Workbook','#5C6DDA'],['addon_reflection','Reflection','#F4B860'],['addon_budget','Budget','#E36BAE'],['addon_intimacy','Intimacy','#B5546E']];
+    const ADD=[['workbook','Workbook','#5C6DDA'],['reflection','Reflection','#F4B860'],['budget','Budget','#E36BAE'],['checklist','Checklist','#34D399'],['intimacy','Intimacy','#B5546E'],['conflict','Conflict','#C55329']];
     const byPkg={}; PK.forEach(p=>byPkg[p[0]]=orders.filter(o=>o.order_pkg===p[0]));
     const present=PK.filter(p=>byPkg[p[0]].length);
-    mkChart(el,{type:'bar',data:{labels:present.length?present.map(p=>p[1]):['No orders yet'],datasets:ADD.map(a=>({label:a[1],backgroundColor:a[2],borderRadius:4,data:present.length?present.map(p=>Math.round(byPkg[p[0]].filter(o=>o[a[0]]).length/byPkg[p[0]].length*100)):[0]}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:10,font:{size:10}}}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},max:100},x:{grid:{display:false}}}}});
+    /* An older cube has no `addons` on its rows. Falling back to the columns
+       is the old answer, which is wrong but is not nothing; drawing zero
+       silently would be. */
+    const has=(o,name)=>Array.isArray(o.addons)?o.addons.includes(name):!!o['addon_'+name];
+    mkChart(el,{type:'bar',data:{labels:present.length?present.map(p=>p[1]):['No orders yet'],datasets:ADD.map(a=>({label:a[1],backgroundColor:a[2],borderRadius:4,data:present.length?present.map(p=>Math.round(byPkg[p[0]].filter(o=>has(o,a[0])).length/byPkg[p[0]].length*100)):[0]}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:10,font:{size:10}}}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},max:100},x:{grid:{display:false}}}}});
   } else if(opts.kind==='geo'){
     const stateCounts={}; let outsideUS=0, unknown=0;
     orders.forEach(o=>{ const st=normStateCode(o.state)||''; const country=(o.country||'').toString().trim().toUpperCase();
@@ -5070,6 +5196,43 @@ async function renderOrderChart(opts){
     el.innerHTML=h;
   }
 }
+/**
+ * Orders inside a period, for a tile that carries its own period select.
+ *
+ * The value is a number of days as a string, and empty means every order,
+ * which is the default Ellie asked for. Counted back from now rather than
+ * from the newest order: "past week" means the last seven days, and a shop
+ * that sold nothing this week should say nothing this week rather than
+ * quietly showing the last week it had.
+ *
+ * An order with no timestamp is kept under "all orders" and dropped by every
+ * narrower period, because a row that cannot say when it happened cannot be
+ * claimed to have happened inside a window.
+ */
+function periodFilter(orders, value){
+  const days = Number(value);
+  if (!value || !Number.isFinite(days) || days <= 0) return orders;
+  const cutoff = Date.now() - days * 86400000;
+  return (orders || []).filter(o => {
+    const t = o.ts ? new Date(o.ts).getTime() : NaN;
+    return Number.isFinite(t) && t >= cutoff;
+  });
+}
+
+/**
+ * A tile with two selects, wired so either one redraws it.
+ *
+ * wireOrderChart knows about one. Rather than widening it and making every
+ * other caller carry an unused field, this wires the extra select and then
+ * hands off, so there is still one renderer and one place the drawing is
+ * decided.
+ */
+function wireOrderChartWithPeriod(opts){
+  const per = document.getElementById(opts.periodId);
+  if (per && !per.dataset.wired) { per.dataset.wired = '1'; per.onchange = () => { per.classList.toggle('on', !!per.value); renderOrderChart(opts); }; }
+  return wireOrderChart(opts);
+}
+
 function wireOrderChart(opts){
   const sel=document.getElementById(opts.selId);
   if(sel&&!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderOrderChart(opts); }
@@ -5812,6 +5975,39 @@ function exportFulfillmentCSV() {
 // Killing the tooltip animation and switching to index mode makes it appear
 // the instant the cursor is over that column, which is what "hover to see
 // details" is expected to do.
+/**
+ * Every live chart follows the window.
+ *
+ * Ellie: "Revenue over time chart didn't automatically drag out when I made
+ * the window wider. It took a minute then refreshed."
+ *
+ * Chart.js watches a canvas's container with a ResizeObserver, and that is
+ * supposed to be enough. It is not reliable here: these tiles are inside a CSS
+ * grid whose columns are fractions of the page, and a grid track resizing does
+ * not always produce an observation the chart sees straight away. The "minute
+ * then refreshed" is the observer eventually firing, or another render
+ * rebuilding the tile.
+ *
+ * So the window itself is the signal, which is the thing that actually
+ * changed. Debounced, because a drag fires this continuously and a resize on
+ * thirty charts per frame is how a page becomes unusable while being dragged.
+ *
+ * Deliberately NOT a change to `maintainAspectRatio`. Setting that globally
+ * would be the obvious fix and would re-lay-out thirty charts that are sized
+ * by aspect today. This changes when charts resize, not how big they are.
+ */
+let _resizeTimer = null;
+window.addEventListener('resize', () => {
+  if (_resizeTimer) clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    _resizeTimer = null;
+    /* Chart.js 4 keeps every live instance here, keyed by id. A chart that was
+       destroyed is already out of it, so this cannot resize a dead canvas. */
+    const live = Chart.instances ? Object.values(Chart.instances) : [];
+    for (const c of live) { try { c.resize(); } catch (e) {} }
+  }, 120);
+});
+
 function mkChart(el, cfg) {
   if (!el) return null;
   /* ── IT HAS TO BE A CANVAS ──────────────────────────────────────────────
@@ -5836,19 +6032,30 @@ function mkChart(el, cfg) {
   o.plugins = o.plugins || {};
   o.plugins.tooltip = Object.assign({ animation: false, position: 'nearest' }, o.plugins.tooltip);
   flatTicks(cfg);
-  /* ── EVERY COLUMN SAYS ITS OWN NUMBER ────────────────────────────────────
-     Ellie: "I want all of the columns to be labeled in the self vs partner
-     view gap on responses page - on all columns throughout admin I want that."
+  /* ── NO COLUMN SAYS ITS OWN NUMBER ANY MORE ─────────────────────────────
+     Ellie, 26 October: "remove data labels anywhere they exist in admin, I
+     want hover instead on everything."
 
-     Here rather than on each chart, because "throughout admin" is thirty-odd
-     charts and a per-chart option is thirty chances to miss one. Every chart
-     in this file is built through mkChart, so this is the one place that can
-     promise it.
+     That reverses her earlier ask, which is why both are kept:
 
-     Bars only: a line or a radar with a number at every point is unreadable,
-     and she asked about columns. A chart can opt out with
-     `options.plugins.valueLabels = false`, which nothing does today. */
-  if (cfg.type === 'bar' && o.plugins.valueLabels !== false) {
+       "I want all of the columns to be labeled in the self vs partner view gap
+        on responses page - on all columns throughout admin I want that."
+
+     The round trip is the instruction. What the first version produced was a
+     number above every bar at ten point, which on a tall tile is fine and on a
+     short one sits in the chart's top padding and gets clipped: the
+     relationship-length tile drew "25%" with its top third cut off, in the same
+     round she asked for this.
+
+     The plugin is kept rather than deleted, off by default and reachable with
+     `options.plugins.valueLabels = true`. Deleting it would be the tidier
+     change and would throw away the thing to switch back on if she asks for
+     labels on one particular tile, which has now happened once in each
+     direction.
+
+     The hover is the replacement everywhere, and mkChart already gives every
+     chart a tooltip. */
+  if (cfg.type === 'bar' && o.plugins.valueLabels === true) {
     cfg.plugins = (cfg.plugins || []).concat([{
       id: 'valueLabels',
       afterDatasetsDraw(c) {
@@ -6115,8 +6322,8 @@ function initCharts(page) {
     renderRegrouped();
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
-    wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#5C6DDA'});
-    wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:DEMO_HUE});
+    wireCubeTile({target:'chart-rellength',field:'relationship_length',selId:'slz-ovrellen',color:'#5C6DDA'});
+    wireCubeTile({target:'chart-source',field:'signup_source',mode:'pie',selId:'slz-source',color:DEMO_HUE});
   }
   else if (page==='orders') { applyOrderFilters(); renderSatFunnel('slz-sfunnel'); if (typeof renderGeography === 'function') renderGeography(); }
   else if (page==='fulfillment') {
@@ -6149,6 +6356,7 @@ function initCharts(page) {
       {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#5C6DDA'},
       {label:'Premium',data:Array(12).fill(0),backgroundColor:'#34D399'},
     ]};
+    wireOrderChartWithPeriod({target:'pkg-hist-tiles',kind:'pkgkpis',selId:'slz-pkghist',periodId:'slz-pkghist-period'});
     wireOrderChart({target:'chart-pkg-stacked',kind:'pkgtrend',selId:'slz-pkgtrend'});
     wireOrderChart({target:'chart-rev-pkg',kind:'revpkg',selId:'slz-revpkg'});
     wireOrderChart({target:'chart-pkg-addons',kind:'addons',selId:'slz-addons'});

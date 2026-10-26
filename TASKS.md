@@ -10,9 +10,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| S75 | **Abram was never invited, and it is not just Rebecca.** An invite code is minted only by the website. Anyone who set their profile up in the app gets none, so the partner email is collected and nothing can ever be sent. 094 below mints one for everybody missing it and tells you how many. |
-| S76 | **The app has no way to invite a partner at all.** No screen, no card, no prompt. Even with a code Rebecca could not send it from her phone. Building it is a decision: say go and I will, or she does it from the website in the meantime. |
-| S74 | **Rebecca: I still need the other two tables from 093.** You sent the partner one. The account setup and exercises tables were above it in the same run. |
+| S78 | **Abram still has not been invited, and nothing in the app can send one.** The invite email is sent from six places in the website and from nowhere else. Rebecca now has a code. Say the word and I will have the server send the invite whenever a profile is saved with a partner email, which fixes her and everyone after her without an app screen. |
+| S74 | **The 093 paste lost two of its three tables.** Only the partner one arrived. Run this in Terminal after re-running 093 and copying the result, then tell me the line count: `pbpaste > /Users/Ellie/Projects/unison/ellie-paste.txt && wc -l /Users/Ellie/Projects/unison/ellie-paste.txt` |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -132,7 +131,13 @@ order by p.created_at;
 
 | # | What I am doing |
 |--|--|
-| S77 | **Minting the invite code on the server**, so the app path stops creating partners nobody can invite. |
+| C33 | **Today's word, Belonging**, rewritten to your line and the words doc regenerated from the module. |
+| A21 | **Dashboard**: revenue chart that does not widen with the window, relationship length as a column chart, how couples found Attune as a pie. |
+| A22 | **Package mix**: labels off the stacked columns and hover only, conflict and the checklist added to add-on attachment, the attachment figures corrected, and the four tiles wrapped in Historical package mix with a period slicer and the demo slicer. |
+| A24 | **Promo Analytics**: the four top tiles into a shaded tile with both slicers, data labels off everywhere in admin, the discount chart showing one bucket rather than splitting 18 orders into 9 and 9, and sort carats on the code usage table. |
+| A25 | **Orders becomes Order Details**, above Package Mix, with Promo Analytics folded into it: three tiles, the orders table at 8 rows with a show-all, discount distribution, then the promo code table. |
+| A26 | **A + button that builds a promo code from the admin**, with a form for name, discount, what it applies to and max uses, plus an active/off toggle per code. |
+| A27 | **The funnel's Ordered column counts people where the rest count couples.** Checking which it is and making the whole row one unit. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -154,6 +159,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| S75 | **094 ran: everybody who can invite a partner now has a code.** The server mints one for any surface now, so a profile can no longer be saved without one. |
+| S77 | **You were right, this was already done.** It was the same fix as S75, listed twice by me. |
 | S73 | **092 ran: anybody who had already finished the survey stops being asked for feedback.** Its last statement read a column that does not exist and was fixed before you ran it. |
 | W144 | **Centred the Ellie and Preston columns and the cover titles.** Prose put the alignment on the wrong view. Your simulator was also showing a stale bundle, which is why the first fix looked like nothing. |
 | W146 | **Intimacy figures stay live for now, frozen at launch.** Your call: we are all beta users. The launch reminder is W147. |

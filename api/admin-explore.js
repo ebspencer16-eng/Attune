@@ -53,6 +53,8 @@ export const config = { runtime: 'edge', regions: ['iad1'] };
 import { corsHeaders, safeError } from './_lib/http.js';
 import { SURVEY_QUESTIONS } from './_lib/survey.js';
 import { demoOwners, ownedBy, selectProfiles, withoutDemoOrders } from './_lib/demo-accounts.js';
+import { addonsOnOrder, ORDER_ADDONS } from './_lib/order-addons.js';
+import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -695,6 +697,38 @@ export default async function handler(req) {
          a shop that has sold nothing are the same empty cube. */
       if (oErr) throw oErr;
       const ords = withoutDemoOrders(_ords, await demoOwners(admin));
+
+      /**
+       * ── WHAT EACH PROMO CODE BUNDLES ────────────────────────────────────
+       * Ellie: "Add-on attachment by package isn't correct, I and a few other
+       * beta users have access to add-ons and should see that."
+       *
+       * Every order on the system today is a promo order, and a code that
+       * bundles an add-on leaves nothing in the order's own addon columns. So
+       * the chart counted zero of everything.
+       *
+       * Two sources, the same two the checkout and the tax endpoint read: the
+       * twelve compiled codes, and the beta_codes table where per-couple codes
+       * are issued. Read once for the whole cube rather than per order.
+       *
+       * A failed read is not fatal here and must not be silent either. The
+       * compiled codes still resolve, the table-issued ones come back with no
+       * bundle, and the figure would be low rather than wrong in a way nobody
+       * could see. It joins `couldNotRead`, which this
+       * endpoint already returns and the page already shows: a measure that is
+       * incomplete says so rather than drawing a confident zero.
+       */
+      const codeMeta = {};
+      for (const [code, meta] of Object.entries(COMPILED_BETA_CODES || {})) {
+        codeMeta[String(code).toUpperCase()] = meta;
+      }
+      {
+        const { data: betaRows, error: bErr } = await admin.from('beta_codes').select('*').limit(1000);
+        if (bErr) couldNotRead.push('the issued promo codes, so add-on attachment counts only what was bought outright');
+        else for (const row of betaRows || []) {
+          if (row?.code) codeMeta[String(row.code).toUpperCase()] = codeMetaFromRow(row);
+        }
+      }
       const monthOf = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
       orderRows = (ords || []).map((o) => {
         const email = o.buyer_email ? String(o.buyer_email).toLowerCase() : null;
@@ -716,6 +750,15 @@ export default async function handler(req) {
           addon_reflection: !!o.addon_reflection,
           addon_budget: !!o.addon_budget,
           addon_intimacy: !!o.addon_intimacy,
+          addon_checklist: !!o.addon_checklist,
+          addon_conflict: !!o.addon_conflict,
+          /**
+           * Every add-on this order includes, however it got there: bought as
+           * a line item, carried by the package, or bundled by a promo code.
+           * Computed here so the chart cannot restate the rule, which is what
+           * it was doing when it reported nobody had any.
+           */
+          addons: addonsOnOrder(o, codeMeta[String(o.promo_code || '').toUpperCase()] || null),
           state: o.shipping_state || o.billing_state || null,
           country: o.shipping_country || o.billing_country || null,
           matched: !!(seg && Object.keys(seg).length),

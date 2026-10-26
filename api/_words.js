@@ -382,7 +382,7 @@ export const WORDS = [
     id: 'belonging',
     word: 'Belonging',
     part: 'noun',
-    definition: 'Knowing you do not have to earn your place this week.',
+    definition: 'Knowing you do not have to earn your place with someone.',
   },
   {
     id: 'blame',
