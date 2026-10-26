@@ -11,6 +11,7 @@ Every code block says which window it goes in, above the block.
 | # | What I need from you |
 |--|--|
 | S74 | **093 rewritten to return ONE table.** The Supabase editor only shows the last statement's result, which is why you got the partner row twice and never the other two. Re-run the block below and it all comes back in one go. |
+| A41 | **Two design questions you asked me.** Self-evaluation vs reading your partner are NOT inverses, and I have a recommendation for the fourth comms tile and for the expected-vs-experienced visual. Both are written under this table. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -20,6 +21,53 @@ Every code block says which window it goes in, above the block.
 | O16 | Download numbers need an App Store Connect key. After launch. |
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
+
+### A41 — your two design questions
+
+**"Where are people worst at self-evaluation" and "where are partners worst at
+evaluating the other's placement": yes, those are the same number.**
+
+For one dimension and one couple there is one distance: how you rated yourself
+against how your partner rated you. Calling that "you misjudge yourself" or
+"they misread you" is an attribution the data cannot settle, because nobody
+here is objectively right. Two tiles would show one figure twice with two
+captions, and one of the captions would be telling a customer they are wrong
+about themselves.
+
+What is genuinely two different things, and worth both tiles:
+
+- **Where couples differ most.** Your answer against their answer, averaged per
+  dimension. A real difference.
+- **Where couples misread each other most.** Your answer against their reading
+  of you. A difference in perception.
+
+Those come apart, and the gap between them is the interesting part. A dimension
+can carry a big real difference that both people see clearly, which is fine. Or
+a small one that neither sees, which is not. So the fourth tile I would build
+is **the share of couples whose widest gap is one neither of them has noticed**:
+large real difference and large misread at the same time. That is the number
+that tells you something to act on rather than something to look at.
+
+**Expected versus experienced: you were right that it needs care, and it does
+not need pronouns.**
+
+The two answers are stored on different axes. What you experienced is which of
+*your own two childhood adults* did a thing. What you expect is whether *you or
+your partner* will. "Mum did it" cannot be turned into "me" or "my partner"
+without deciding who somebody identifies with, which is exactly the inference
+this product should not make.
+
+What compares cleanly is the **shape** of the arrangement, which both answers
+carry: shared between two people, done by one, or nobody. So the visual is, per
+responsibility, how many people grew up with one person doing it and expect to
+share it, how many grew up with it shared and expect one person to own it, and
+how many expect what they saw.
+
+That answers your question, "instances of expecting something different than
+you experienced", with no guessing about anybody's gender. Say go and I will
+build it.
+
+---
 
 ### One to run
 
@@ -134,6 +182,17 @@ order by ord, item;
 | # | What I am doing |
 |--|--|
 | C33 | **Today's word, Belonging**, rewritten to your line and the words doc regenerated from the module. |
+| A30 | **Data labels: there were two label renderers and I turned off one.** svBarChart draws its own, which is why you still see them. Removing them leaves those tiles with no axis and no number, so hover becomes the only readout, which is what you asked for. |
+| A31 | **Comms: Avg individual dimension results** replaces couple type distribution. Ten slider bars, pole labels, mean placement, same tile height, and a small grey mean dot behind the selected demo's dot. |
+| A32 | **Comms: remove Distribution for every measure**, wrap pole labels onto as many lines as needed. |
+| A33 | **All questions: a comparison mark.** Every 'all questions' section in admin shows the overall average as a smaller mark when a slicer is set. Rename every bottom section to All questions. |
+| A34 | **Comms overview tile**: Avg communication alignment, Avg understanding of partner, and two more. My answer to your question about the last two is below. |
+| A35 | **Expectations: Responsibilities at half width, Life & Values beside it**, same chart style. |
+| A36 | **Expectations: Who does what agreement by question draws nothing.** Finding out why before changing it. |
+| A37 | **Expectations: question order follows the exercise**, and responsibility poles read Myself and My partner so you can see who assumes it. |
+| A38 | **Expectations overview tile**: Avg life and values alignment, Avg responsibilities alignment, avg degree of misalignment for misaligned couples and for aligned ones. |
+| A39 | **Every overview tile shows the uncut figure for comparison** under the stat when a timeframe or demo is selected. |
+| A40 | **Rel Reflection: postcoded column charts** for moments that matter and for the text-entry questions, qualities most admired as a column chart, and All questions without the section name on every row. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review

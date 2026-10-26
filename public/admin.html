@@ -3843,36 +3843,41 @@ function svBarChart(labels, values, color, el, display) {
   const body = el && el.parentElement;
   if (body) body.style.height = SV_TILE_BODY;
 
-  /* No y axis. Ellie: "We don't need a y axis if that saves some space." The
-     scale was five numbers down the side of every tile; the value goes on top
-     of its own bar instead, which is the number somebody actually wants. */
-  const onTop = {
-    id: 'svValueOnTop',
-    afterDatasetsDraw(chart) {
-      const { ctx } = chart;
-      ctx.save();
-      ctx.font = '600 11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
-      ctx.fillStyle = '#3B4559';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      for (const meta of chart.getSortedVisibleDatasetMetas()) {
-        meta.data.forEach((bar, i) => {
-          const v = chart.data.datasets[meta.index].data[i];
-          if (v == null || v === 0) return;
-          /* What the bar is worth, which is not always its height: a ranking
-             is drawn flipped so that taller is better, and the number anybody
-             would quote is the average place. */
-          const shown = display && display[i] != null && display[i] !== '' ? display[i] : v;
-          ctx.fillText(String(shown), bar.x, bar.y - 3);
-        });
-      }
-      ctx.restore();
+  /* ── NO NUMBERS ON THE BARS, AND NO AXIS EITHER ─────────────────────────
+     Ellie, three times now, most recently: "No data labels above the columns
+     on self v partner view gap. I mentioned earlier but please remove those
+     anywhere they exist in admin."
+
+     She had mentioned it earlier, and I removed one of two implementations.
+     mkChart carries a `valueLabels` plugin for every bar chart in the file and
+     that one is off. This function had its own, `svValueOnTop`, written for a
+     different reason, so these tiles went on drawing numbers while I reported
+     the labels as gone. Two copies of a rule, and I turned off the one that
+     was in front of me.
+
+     Removing it collides with the reason it existed:
+
+       "We don't need a y axis if that saves some space."
+
+     The scale came off BECAUSE the number sat on the bar. With both gone a bar
+     is only its height. That is not an oversight, it is what she asked for the
+     third time: "I want hover instead on everything." Relative height is the
+     comparison and the hover is the readout, so the tooltip carries the
+     meaningful number rather than the plotted one, which for a ranking is not
+     the same thing. If the tiles read as too bare, the axis comes back; that
+     is a smaller change than this one and it is hers to call. */
+  const tip = {
+    callbacks: {
+      label: (ctx) => {
+        const i = ctx.dataIndex;
+        const shown = display && display[i] != null && display[i] !== '' ? display[i] : ctx.parsed.y;
+        return ' ' + shown;
+      },
     },
   };
 
   return {
     type: 'bar',
-    plugins: [onTop],
     data: {
       labels,
       datasets: [{
@@ -3884,9 +3889,10 @@ function svBarChart(labels, values, color, el, display) {
     },
     options: {
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      /* Room above the tallest bar for its number. */
-      layout: { padding: { top: 14 } },
+      plugins: { legend: { display: false }, tooltip: tip },
+      /* A little room at the top so the tallest bar does not touch the tile's
+         edge. It used to be room for the number that is no longer drawn. */
+      layout: { padding: { top: 6 } },
       scales: {
         x: { grid: { display: false }, border: { display: false } },
         y: { display: false, beginAtZero: true, grace: '12%' },
