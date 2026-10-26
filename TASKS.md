@@ -114,7 +114,6 @@ them. Say which.
 
 | # | What I am doing |
 |--|--|
-| A42 | **Expected vs experienced, both halves.** Shared-versus-not against what people now expect, and the gendered read you asked for. Pronouns are what we collect and Rebecca's are blank, so the chart will count and show the ones it cannot place rather than quietly dropping them. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -146,6 +145,7 @@ section 3 explaining things, just include the context I need in section 3."
 | A35 | **Responsibilities and Life & Values are a matched pair at half width each**, both column charts. Responsibilities was a radar; five points is the one case a radar reads well, so say the word and it goes back. |
 | A37 | **Responsibilities read Myself to My partner with a mean dot**, and the life questions are sliders with their own first and last options as poles. "N/A" is off the axis rather than parked at the far end, where it would have read as the strongest possible "my partner". Order already matched the exercise. |
 | A40 | **Qualities most admired is a column chart above All questions**, and reflection rows no longer carry the section name: four of the five said "How We're Doing", so the useful half of each row started a third of the way in. |
+| A42 | **Expected against experienced, both halves, on the Expectations tab.** The shape reading needs no inference. The gendered one reads pronouns and role names and says so on the tile. Everything it cannot place is a grey bar, not a dropped row. Deleting api/_lib/inherited-roles.js and two callers undoes it. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

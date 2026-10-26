@@ -361,6 +361,16 @@ const server = createServer((req, res) => {
       life: Number((((k * 7) % 11) / 20).toFixed(4)),
       resp: Number((((k * 5) % 9) / 20).toFixed(4)),
     }));
+    /* The two inheritance charts. Deliberately with a large "not classified"
+       group, because that is what the real data will look like: the gendered
+       read needs one adult, a gendered role name, a gendered pronoun and an
+       expectation naming a person, and a stub where everything classifies
+       would hide how much of the answer is "we cannot say". */
+    const inheritance = {
+      people: 24,
+      shape: { same: 61, sharedToOne: 28, oneToShared: 44, other: 12, unknown: 35 },
+      gendered: { keepsSameGenderRole: 39, handsOffSameGenderRole: 11, takesOnOtherGenderRole: 22, handsOffOtherGenderRole: 9, unknown: 99 },
+    };
     const beta_codes = [
       ...Object.entries(COMPILED_CODES).map(([code, meta]) => {
         const m = (typeof meta === 'string') ? { pkg: meta, mode: 'free', amount: 0 } : (meta || {});
@@ -371,7 +381,7 @@ const server = createServer((req, res) => {
       { code: 'SPRING25', package_key: 'core', discount_mode: 'percent', discount_value: 25, active: true, uses_count: 3, max_uses: 50, source: 'issued' },
       { code: 'FRIENDS10', package_key: '*', discount_mode: 'fixed', discount_value: 10, active: false, uses_count: 0, max_uses: null, source: 'issued' },
     ];
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, responses: payload }));
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, responses: payload }));
     return;
   }
   if (url.pathname.startsWith('/api/admin-typing')) {

@@ -1262,7 +1262,29 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
           <div class="chart-body"><div id="exp-gap-bars"></div></div>
         </div>
       </div>
-      <div class="chart-card" style="margin-top:1.25rem"><div class="chart-head"><div><div class="chart-title">Who-does-what agreement by question</div><div class="chart-subtitle">% of couples who name the same person (one “Me” + one “Partner” = agreement) · directional items</div></div><select class="tile-slicer" id="slz-ragree" title="Cut this tile by a couple-level segment" aria-label="Slz ragree"><option value="">Everyone</option></select></div><div class="chart-body"><div class="insight-list" id="resp-agree-bars" style="margin-top:.5rem;"></div></div></div><div class="qx-section" id="qx-exp" style="margin-top:1.25rem"></div>
+      <div class="chart-card" style="margin-top:1.25rem"><div class="chart-head"><div><div class="chart-title">Who-does-what agreement by question</div><div class="chart-subtitle">% of couples who name the same person (one “Me” + one “Partner” = agreement) · directional items</div></div><select class="tile-slicer" id="slz-ragree" title="Cut this tile by a couple-level segment" aria-label="Slz ragree"><option value="">Everyone</option></select></div><div class="chart-body"><div class="insight-list" id="resp-agree-bars" style="margin-top:.5rem;"></div></div></div>
+      <!-- Ellie: "I want to find a way to visualize the difference between
+           experienced and expected... I want to highlight both of these. What
+           was shared v not shared that you now expect to be different, and I
+           do want to infer who you identify with based on gender."
+
+           Two charts because they are two questions. The left needs no
+           inference: both answers carry the SHAPE of the arrangement, shared
+           or one person or nobody, and that compares cleanly. The right is the
+           gendered read she asked for by name, and it says on its face that it
+           is a reading of pronouns and role names rather than anything anybody
+           told us. -->
+      <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.25rem">
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">What people expect, against what they saw</div><div class="chart-subtitle">Did the arrangement change shape: shared, one person, or nobody</div></div></div>
+          <div class="chart-body"><canvas id="chart-inherit-shape"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">Inherited roles, by gender</div><div class="chart-subtitle">Gender is read from pronouns, and a childhood role from its name. Both are inferences, not answers.</div></div></div>
+          <div class="chart-body"><canvas id="chart-inherit-gender"></canvas></div>
+        </div>
+      </div>
+      <div class="qx-section" id="qx-exp" style="margin-top:1.25rem"></div>
     </div>
 
     <div id="resp-story" class="tab-panel" style="display:none">
@@ -5439,6 +5461,63 @@ function filterOrders(sel) { applyOrderFilters(); }
  * into a judgement, and it reaches the page through the payload rather than
  * being typed into this function.
  */
+/**
+ * Expected against experienced, drawn twice.
+ *
+ * ── WHY THE UNKNOWNS ARE A BAR ────────────────────────────────────────────
+ * Both readings skip a lot. The first needs both answers present; the second
+ * needs one adult to have done it, a role name that implies a gender, a
+ * pronoun that implies one, and an expectation naming a person rather than
+ * "both". Dropping those would report a total that is not the total, on
+ * exactly the question where the people hardest to classify are the ones it is
+ * least safe to lose. So "not classified" is a bar like any other, drawn in
+ * grey so it does not read as a finding.
+ */
+async function renderInheritance() {
+  const shapeEl = document.getElementById('chart-inherit-shape');
+  const genEl = document.getElementById('chart-inherit-gender');
+  if (!shapeEl && !genEl) return;
+  const data = await fetchAdminData();
+  const inh = data && data.inheritance;
+  if (!inh) {
+    for (const el of [shapeEl, genEl]) {
+      if (el && el.parentElement) el.parentElement.innerHTML =
+        '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">This measure was not sent.</div>';
+    }
+    return;
+  }
+  if (shapeEl) setTileN(shapeEl, inh.people || 0);
+  if (genEl) setTileN(genEl, inh.people || 0);
+
+  const GREY = '#9AA3B2';
+  const bar = (el, rows) => { if (!el) return; mkChart(el, {
+    type: 'bar',
+    data: { labels: rows.map(r => r[0]), datasets: [{ data: rows.map(r => r[1]), backgroundColor: rows.map(r => r[2]), borderRadius: 4, maxBarThickness: 46 }] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + c.parsed.y + ' answer' + (c.parsed.y === 1 ? '' : 's') } } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } },
+                x: { ticks: { font: { size: 9 } }, grid: { display: false } } } },
+  }); };
+
+  const sh = inh.shape || {};
+  bar(shapeEl, [
+    ['Same as they saw', sh.same || 0, '#5C6DDA'],
+    ['Shared, now one', sh.sharedToOne || 0, '#C55329'],
+    ['One, now shared', sh.oneToShared || 0, '#34D399'],
+    ['Other change', sh.other || 0, '#FBBF24'],
+    ['Not classified', sh.unknown || 0, GREY],
+  ]);
+
+  const g = inh.gendered || {};
+  bar(genEl, [
+    ['Keeps their own gender\u2019s role', g.keepsSameGenderRole || 0, '#5C6DDA'],
+    ['Hands that role over', g.handsOffSameGenderRole || 0, '#C55329'],
+    ['Takes on the other gender\u2019s role', g.takesOnOtherGenderRole || 0, '#34D399'],
+    ['Leaves that one to their partner', g.handsOffOtherGenderRole || 0, '#FBBF24'],
+    ['Not classified', g.unknown || 0, GREY],
+  ]);
+}
+
 async function renderExpSummary() {
   const host = document.getElementById('expsum-tiles');
   if (!host) return;
@@ -7435,6 +7514,7 @@ function initCharts(page) {
     renderCommsSummary();
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score'], true);
     renderExpSummary();
+    renderInheritance();
     renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what'], undefined, true);
     wireCubeTile({target:'chart-admired',field:'ref_a8',selId:'slz-admired',color:'#E5578C'});
     renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection'], undefined, true);

@@ -43,12 +43,13 @@ import { demoOwners, ownedBy, selectProfiles, withoutDemoOrders } from './_lib/d
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { pronounLabel } from './_lib/pronouns.js';
-import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
+import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, guardiansOf } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understandingBandFor } from './_lib/results.js';
 import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
+import { readInheritance } from './_lib/inherited-roles.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -265,6 +266,32 @@ function buildResponseAggregates(profiles, sessions) {
     });
   });
 
+  /**
+   * Expected against experienced, read two ways, over individuals.
+   *
+   * Per person rather than per couple: it is about what one person saw growing
+   * up and what they now expect, and their partner's childhood is a different
+   * question with a different answer.
+   *
+   * Counts only. Nothing here identifies anybody, and no gender is stored: the
+   * inference happens at read time for a tally and is thrown away.
+   */
+  const inheritance = { shape: { same: 0, sharedToOne: 0, oneToShared: 0, other: 0, unknown: 0 },
+    gendered: { keepsSameGenderRole: 0, handsOffSameGenderRole: 0, takesOnOtherGenderRole: 0, handsOffOtherGenderRole: 0, unknown: 0 },
+    people: 0 };
+  {
+    const items = RESPONSIBILITY_CATEGORIES.flatMap((c) => (c.items || []).map((item) => ({ key: c.id + '__' + item })));
+    for (const p of profiles || []) {
+      const ans = p.ex2_answers;
+      if (!ans || !ans.responsibilities) continue;
+      const adults = guardiansOf(ans);
+      const r = readInheritance(ans, p, items, adults);
+      inheritance.people++;
+      for (const k of Object.keys(inheritance.shape)) inheritance.shape[k] += r.shape[k];
+      for (const k of Object.keys(inheritance.gendered)) inheritance.gendered[k] += r.gendered[k];
+    }
+  }
+
   const respPairs = pairs.filter(([a, b]) =>
     a.ex2_answers?.responsibilities && b.ex2_answers?.responsibilities).length;
   const respAgreement = [];
@@ -400,6 +427,7 @@ function buildResponseAggregates(profiles, sessions) {
     respAgreement,
     respPairs,
     expCoupleDistances,
+    inheritance,
     /* The line between aligned and not, from api/_lib/alignment.js, which is
        the only thing allowed to turn a distance into a judgement. Sent rather
        than typed into the admin, because a threshold written in two places is
