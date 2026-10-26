@@ -642,6 +642,38 @@ function gapState(gap) {
 }
 
 /**
+ * Whether a dimension belongs on the overview as an alignment category.
+ *
+ * ── WHY IT IS A QUESTION AT ALL ───────────────────────────────────────────
+ * Ellie: "Take it off the overview as a catagory."
+ *
+ * What It Is For asks which two of six things physical intimacy is mostly
+ * about, and the gap between two answers is how much the two sets overlap. So
+ * its bar has exactly four reachable values, and over half of all the ways two
+ * people can answer come out at nought: two people each naming a true thing
+ * and naming different ones was being drawn as complete misalignment.
+ *
+ * Picking different things off a list is not a disagreement. It is not an
+ * alignment score at all, and the page that leads with the two sets of chips
+ * is the honest way to show it, which is what its own detail page already did.
+ *
+ * ── DERIVED, NOT NAMED ────────────────────────────────────────────────────
+ * The test is whether the dimension has any question with a position on a
+ * scale. A multi-select answer has no position, so a dimension holding only
+ * multi-select questions has nothing to place and nothing to compare as a
+ * distance along anything.
+ *
+ * Written this way rather than as a list of ids, because a list of ids is a
+ * second copy of the instrument and goes stale the first time a question
+ * moves. It is also already true of exactly one dimension today and would be
+ * true of the next one like it without anybody remembering this rule.
+ */
+export function isAlignmentCategory(dimensionId) {
+  const qs = INTIMACY_QUESTIONS.filter((q) => q.dimension === dimensionId);
+  return qs.length > 0 && qs.some((q) => q.kind !== 'multi');
+}
+
+/**
  * Share of a dimension's gap carried by each of its questions.
  *
  * ── WHY ───────────────────────────────────────────────────────────────────
@@ -797,7 +829,12 @@ export function summarizeIntimacy(mineAnswers, theirsAnswers) {
    * consistently anyway, because an unweighted figure sitting beside a
    * weighted one is how the wrong one gets picked up later.
    */
-  const dimGaps = dimSummary.map(d => d.avgGap).filter(g => g != null);
+  const dimGaps = dimSummary
+    /* Only the aspects that are alignment categories. What It Is For compares
+       two picks from a list of six, so folding it into a whole-exercise figure
+       would put set-overlap into an average of distances. */
+    .filter(d => isAlignmentCategory(d.id))
+    .map(d => d.avgGap).filter(g => g != null);
   const overall = dimGaps.length ? dimGaps.reduce((a, b) => a + b, 0) / dimGaps.length : null;
   return { rows, dimSummary, overall, overallState: overall == null ? 'unspoken' : gapState(overall) };
 }

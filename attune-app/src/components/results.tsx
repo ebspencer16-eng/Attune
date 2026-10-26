@@ -2549,7 +2549,12 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
                 An aspect one of them skipped has no percentage and says so,
                 because unanswered is not nought per cent aligned. */}
             <View style={{ gap: Spacing.sm }}>
-              {data.dimensions.map((d) => (
+              {/* Ellie: "Take it off the overview as a catagory." The server
+                  says which aspects are alignment categories, so this list and
+                  the website's cannot disagree about it. What It Is For
+                  compares two picks from a list of six and has no position on
+                  a scale; its own page leads with the chips instead. */}
+              {data.dimensions.filter((d) => d.alignmentCategory !== false).map((d) => (
                 <View key={d.section} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
                   <Prose style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 100, lineHeight: 15 }}>
                     {d.label}

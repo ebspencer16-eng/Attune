@@ -108,7 +108,7 @@ function useContent() {
   const version = React.useContext(ContentContext);
   return React.useMemo(() => contentFor(version), [version]);
 }
-import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, INTIMACY_DOMAINS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips, intimacyOption, optionText } from "../api/_intimacy-questions.js";
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, INTIMACY_DOMAINS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips, intimacyOption, optionText, isAlignmentCategory } from "../api/_intimacy-questions.js";
 
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
 // Flip to true only after the full partner-view flow is verified end-to-end.
@@ -10494,7 +10494,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     An aspect one of them skipped has no percentage and says
                     so, because unanswered is not nought per cent aligned. */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-                  {INTIMACY_DIMENSIONS.map(d => {
+                  {/* Ellie: "Take it off the overview as a catagory." What It Is
+                      For compares two picks from a list of six, so it has no
+                      position on a scale and four reachable values, most of
+                      them nought. Derived in api/_intimacy-questions.js and
+                      asked here, so the app's copy of this list and this one
+                      cannot disagree about which aspects are categories. */}
+                  {INTIMACY_DIMENSIONS.filter(d => isAlignmentCategory(d.id)).map(d => {
                     const found = (intimacySummary?.dimSummary || []).find(x => x.id === d.id);
                     /* closenessPct, not the inversion written out again. The
                        server sends this same figure as `alignedPct` and it was
@@ -11794,8 +11800,13 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
      and this was discarding it to count states. */
   const lifeAlignPct = meanPct(lifeRows.map(r => r.closeness)) ?? 0;
   const respAlignPct = meanPct(allRows.map(r => r.closeness)) ?? 0;
-  const intimacyAlignPct = (intimacySum && intimacySum.dimSummary && intimacySum.dimSummary.length)
-    ? meanPct(intimacySum.dimSummary.map(d => closenessPct(d.avgGap))) : null;
+  /* Only the alignment categories. Folding What It Is For in put set-overlap
+     into an average of distances, and since over half of all the ways two
+     people can answer it come out at nought, it dragged the headline figure
+     down for most couples. */
+  const intimacyAlignRows = (intimacySum?.dimSummary || []).filter(d => isAlignmentCategory(d.id));
+  const intimacyAlignPct = intimacyAlignRows.length
+    ? meanPct(intimacyAlignRows.map(d => closenessPct(d.avgGap))) : null;
   // A five-dimension spread for the comms peek (most aligned -> most divergent).
   const commPeekDims = (() => { const n = sortedFeedback.length; if (n <= 5) return sortedFeedback; return [0, Math.round(n*0.25), Math.round(n*0.5), Math.round(n*0.72), n-1].map(i => sortedFeedback[i]); })();
   const Donut = ({ pct, color, label }) => {

@@ -40,6 +40,7 @@ import {
   INTIMACY_DIMENSIONS, INTIMACY_DOMAINS,
   INTIMACY_QUESTIONS,
   summarizeIntimacy,
+  isAlignmentCategory,
   intimacyDimensionSkips, intimacyOption, optionText } from '../_intimacy-questions.js';
 import {
   INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT, INTIMACY_LEAD, INTIMACY_ALL_ALIGNED,
@@ -97,6 +98,13 @@ const DIM_TINT = {
 export function intimacyActionPlan(rows) {
   const distance = (d) => d.distancePct ?? d.avgGap ?? null;
   const all = (rows || [])
+    /* An aspect that is not an alignment category cannot be ranked by how far
+       apart the two of them are, because its distance is set-overlap rather
+       than a distance along anything. It was coming top of this list for every
+       couple who picked differently, which is most of them. Rows from a stored
+       payload carry the flag; a row built straight from dimSummary does not,
+       and `!== false` keeps those in rather than silently emptying the plan. */
+    .filter((d) => d.alignmentCategory !== false)
     .filter((d) => d.state !== 'unspoken' && d.state !== 'aligned' && distance(d) != null);
   const ranked = [...all].sort((a, b) => distance(b) - distance(a));
 
@@ -390,6 +398,16 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
        * line above.
        */
       alignedPct: closenessPct(found?.avgGap),
+      /**
+       * Whether this aspect belongs on the overview's alignment list.
+       *
+       * Ellie: "Take it off the overview as a catagory." False for What It Is
+       * For, which compares two picks from a list of six rather than two
+       * positions on a scale. Sent rather than decided on each surface,
+       * because both of them draw that list and they were about to decide it
+       * twice. Its own page is unaffected: it leads with the chips.
+       */
+      alignmentCategory: isAlignmentCategory(d.id),
       body: prose.body,
       reason: prose.reason,
       // The question to take away. This is the actual product of the section:

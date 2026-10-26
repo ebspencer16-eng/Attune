@@ -130,7 +130,11 @@ if (!both) {
    * finished, and the comparison still goes only to the two of them.
    */
   const ALLOWED_DIM = ['section', 'id', 'label', 'standalone', 'intro', 'poles', 'state', 'distancePct', 'alignedPct',
-    'positions', 'ground', 'body', 'reason', 'prompt', 'questions', 'picks'];
+    'positions', 'ground', 'body', 'reason', 'prompt', 'questions', 'picks',
+    /* Whether this aspect goes on the overview's alignment list. A fact about
+       the instrument, identical for every couple, carrying nothing either of
+       them answered. See isAlignmentCategory in api/_intimacy-questions.js. */
+    'alignmentCategory'];
   const ALLOWED_PICK = ['id', 'text', 'topic', 'you', 'them'];
   const ALLOWED_ROW = ['id', 'text', 'low', 'high', 'you', 'them'];
 

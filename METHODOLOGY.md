@@ -270,8 +270,14 @@ two couples who disagree about different things into one figure.
 A question nobody answered is left out and the remaining weights are
 scaled back up to one, so a skipped question cannot read as agreement.
 
-What It Is For has one question, so its weight is one and nothing can be
-done with it. Its figure has four possible values.
+What It Is For is not one of these. It asks which two of six things
+physical intimacy is mostly about, so two answers are compared by how much
+the two sets overlap rather than by a distance along a scale. That figure
+has four reachable values and more than half of all the ways two people can
+answer come out at nought, which is not a disagreement: two people can each
+name something true and name different things. It is left off the overview
+as an alignment category, out of the whole-exercise figure and out of the
+action plan, and its own page shows both sets of answers side by side.
 
 ## 5. Conflict Patterns
 

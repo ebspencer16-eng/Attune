@@ -10,12 +10,10 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| W141 | **Take "What it is for" off the overview as an alignment category.** That bar has four possible values, and over half of all the ways two people can answer come out at 0, because it compares two picks from a list of six and different picks are not a disagreement. The detail page already leads with the chips. A quadrant instead, if you want one, is below. |
-| W142 | **The round quarters are built into the scale, not the maths.** Every option is worth 0, 0.25, 0.5, 0.75 or 1, so one step apart is always exactly 25 per cent. Communication has a one in three chance of landing on a quarter and Adventurousness one in two. Three ways out are below. Jitter is not one of them. |
+| W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
+| W142 | **Spacing the options by meaning: my answer to your question is that it is overkill now.** W145 already took Communication from a 1 in 3 chance of a round quarter to 1 in 18. This would be you hand-writing 82 numbers for a second pass at the same problem. One line back and I build it; otherwise I will leave it. |
+| S73 | **092 is approved and still needs running.** One block, below, Supabase SQL Editor. It is the only one of the three left to run. |
 | W146 | **W145 changes the Physical Intimacy figures of couples who already have results.** Your freeze rule says scoring should persist from when they took it, and it does for the couple type, which is stored. The intimacy figures have never been stored; they are recomputed from the answers on every request, and METHODOLOGY.md says so publicly. Tell me to leave it, or to freeze intimacy too, which needs a stored row and a migration. |
-| S71 | **The first 089 ran before I replaced it, so all thirteen got an order, including five premium ones.** Rebecca's row has no workbook, which only the old one would write. 091 below lists exactly what it created so you can see it; nothing is deleted until you say. |
-| S72 | **091 is below: what the backfill actually wrote.** It lists every row with what that account has done and groups them by package. Deletes nothing. |
-| S73 | **092 stops the feedback card asking people who have already answered.** It sets the flag from their completed survey row. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -189,6 +187,8 @@ opposite of what you are asking for.
 
 | # | What I am doing |
 |--|--|
+| W144 | **Your report that the columns and the cover titles are still left aligned.** Chasing it on the simulator now. The fix went in and you cannot see it, so either it is wrong or it never reached you. |
+| W141 | **Taking "What it is for" off the overview as a category.** Approved. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -198,11 +198,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| W143 | **Your 9 and 11.** 9: the tap that opens Highlights ended on the page it opened, and the page gesture does not remount, so the release was read as an edge tap and turned on to Couple Type. A page change now blocks a turn for 400ms. 11: both cover titles already asked for centre, and the Prose fix in W144 is what let them have it. |
-| W145 | **The intimacy questions are weighted now, like Communication.** Adventurousness went from 9 possible figures to 19 and from a 1 in 2 chance of a round quarter to 1 in 5; Communication from 13 to 71 and 1 in 3 to 1 in 18. Two couples who disagree one step on different questions now read differently, where they used to average to the same number. **The weights themselves are yours to move**: the table and a reason per question are in section 4 of METHODOLOGY.md. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
-| W140 | **Eight of your fourteen**: 2, 3, 4 on the sign-in screen, 5 the dropdowns, 6 the budget staying open, 7 and 8 the two stale prompts, 13 Phys. Intimacy, 14 the insight wraps. App update published. |
-| W144 | **Item 1, and it was not about that table.** Both cells already said centre. Prose turns alignment into a flex rule and put it on the wrong view, so every centred paragraph in the app has been left aligned since it was written. Driven to confirm. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -214,6 +210,11 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| S71 | **The first 089 wrote an order for all thirteen accounts, five of them premium.** 091 listed every row it created against what that account had actually done. You ran it and kept them. |
+| S72 | **091, the read-only review of the backfill.** Ran and saved. Nothing was deleted. |
+| W140 | **Eight of your fourteen**: 2, 3, 4 on the sign-in screen, 5 the dropdowns, 6 the budget staying open, 7 and 8 the two stale prompts, 13 Phys. Intimacy, 14 the insight wraps. |
+| W143 | **Your 9 and 11.** The tap that opened Highlights was landing on Couple Type, because the touch ended on the page it had just opened and the page gesture does not remount. A page change now blocks a turn for 400ms. |
+| W145 | **Intimacy questions are weighted now, like Communication.** Adventurousness went from 9 reachable figures to 19, Communication 13 to 71. Weights and reasons in METHODOLOGY.md §4, yours to move. |
 | S62 | **The beta-code list was written out twice**, in the endpoint that charges the card and the one that computes the tax, same 1-to-12 loop in both. One module now. They agreed, which is why nobody had looked. |
 | S63 |  **Segment by who raised someone.** Six new slicers under Growing up: each guardian, the pair, how many adults, had a mom, had a dad. |
 | S64 |  **A free add-on was being taxed.** The tax endpoint read five of the nine columns on a promo code and the payment endpoint read all nine, so a code giving Reflection away charged nothing and taxed $40 of it. |

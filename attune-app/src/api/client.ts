@@ -420,6 +420,15 @@ export type IntimacyDimension = {
   /** How far apart, as a percentage of the scale. Null when unanswered. */
   distancePct: number | null;
   /**
+   * Whether this aspect belongs on the overview's alignment list.
+   *
+   * False for What It Is For, which compares two picks from a list of six
+   * rather than two positions on a scale. Optional because a payload stored
+   * before the flag existed does not carry it, and the overview reads
+   * `!== false` so an older row keeps every aspect rather than losing them.
+   */
+  alignmentCategory?: boolean;
+  /**
    * 0 to 100. How close the two of you are, which is the distance inverted.
    * Null when one of you skipped the aspect: unanswered is not nought per
    * cent aligned.
