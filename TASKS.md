@@ -83,7 +83,6 @@ build it.
 |--|--|
 | A35 | **Expectations: Responsibilities at half width, Life & Values beside it**, same chart style. |
 | A37 | **Expectations: question order follows the exercise**, and responsibility poles read Myself and My partner so you can see who assumes it. |
-| A38 | **Expectations overview tile**: Avg life and values alignment, Avg responsibilities alignment, avg degree of misalignment for misaligned couples and for aligned ones. |
 | A40 | **Rel Reflection: postcoded column charts** for moments that matter and for the text-entry questions, qualities most admired as a column chart, and All questions without the section name on every row. |
 | A42 | **Expected vs experienced, both halves.** Shared-versus-not against what people now expect, and the gendered read you asked for. Pronouns are what we collect and Rebecca's are blank, so the chart will count and show the ones it cannot place rather than quietly dropping them. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
@@ -113,6 +112,7 @@ section 3 explaining things, just include the context I need in section 3."
 | A36 | **The who-does-what chart is empty because no couple has both halves of Expectations yet**, and it says so with the count instead of drawing one bar at zero. |
 | A33 | **Bottom sections are called All questions**, and the comparison mark is in: small grey for everyone, large coloured for your cut, on every slider in admin. |
 | A34 | **Communication at a glance**: alignment, understanding, and the two you agreed to. On the stub they name different dimensions, conflict and love, which is the whole argument that they are not inverses. |
+| A38 | **Expectations at a glance**: life & values, responsibilities, and the gap among misaligned couples against the gap among aligned ones. If the aligned group sits just under the line and the misaligned just over it, the label is doing more work than the distance. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

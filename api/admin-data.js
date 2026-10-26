@@ -47,7 +47,8 @@ import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understandingBandFor } from './_lib/results.js';
 import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
-import { mirrorRespKey, mirrorLifeId } from './_lib/expectations.js';
+import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
+import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -207,6 +208,63 @@ function buildResponseAggregates(profiles, sessions) {
    * This is the denominator: couples where BOTH partners answered at least one
    * responsibility. Sent so the tile can say which of the two it is.
    */
+  /**
+   * One pair of distances per couple: life questions, and responsibilities.
+   *
+   * ── WHY PER COUPLE ────────────────────────────────────────────────────
+   * Ellie: "Start with overview tile with 4 tiles: Avg life and values
+   * alignment, Avg responsibilities alignment, Avg degree of misalignment for
+   * misaligned couples, Avg degree of misalignment for aligned couples."
+   *
+   * The last two split couples by where they fall against the alignment
+   * threshold and then average inside each group, which cannot be done from a
+   * per-question average: you need each couple's own figure before you can
+   * decide which side of the line it is on.
+   *
+   * ── NOTHING IDENTIFYING ───────────────────────────────────────────────
+   * Two numbers per couple and no key of any kind, which is the same shape
+   * `expGaps` already sends. A couple cannot be picked out of a list of
+   * distances.
+   *
+   * ── THE DISTANCE IS NOT DECIDED HERE ──────────────────────────────────
+   * `respDistance` and `lifeDistance` come from api/_lib/expectations.js,
+   * which is what the results rows, the workbook and the domain roll-up all
+   * call. A second opinion about how far apart two answers are is the bug this
+   * codebase keeps having.
+   */
+  const expCoupleDistances = [];
+  pairs.forEach(([a, b]) => {
+    const ea = a.ex2_answers, eb = b.ex2_answers;
+    if (!ea || !eb) return;
+    const aName = (a.name || '').trim(), aPartner = (a.partner_name || '').trim();
+    const bName = (b.name || '').trim() || aPartner;
+    const respD = [], lifeD = [];
+    RESPONSIBILITY_CATEGORIES.forEach((cat) => (cat.items || []).forEach((item) => {
+      const key = cat.id + '__' + item;
+      const mirrored = mirrorRespKey(key);
+      const d = respDistance({
+        yourValue: ea.responsibilities?.[key],
+        theirValue: eb.responsibilities?.[mirrored],
+        yourDetail: ea.bothDetail?.[key],
+        theirDetail: eb.bothDetail?.[mirrored],
+        youName: aName, themName: bName,
+      });
+      if (d != null) respD.push(d);
+    }));
+    LIFE_QUESTIONS.forEach((q) => {
+      const d = lifeDistance(ea.life?.[q.id], eb.life?.[mirrorLifeId(q.id)], q);
+      if (d != null) lifeD.push(d);
+    });
+    /* A couple who answered nothing comparable contributes nothing, rather
+       than contributing a zero that would read as perfect agreement. */
+    if (!respD.length && !lifeD.length) return;
+    const mean = (arr) => arr.length ? arr.reduce((x, y) => x + y, 0) / arr.length : null;
+    expCoupleDistances.push({
+      life: lifeD.length ? Number(mean(lifeD).toFixed(4)) : null,
+      resp: respD.length ? Number(mean(respD).toFixed(4)) : null,
+    });
+  });
+
   const respPairs = pairs.filter(([a, b]) =>
     a.ex2_answers?.responsibilities && b.ex2_answers?.responsibilities).length;
   const respAgreement = [];
@@ -341,6 +399,12 @@ function buildResponseAggregates(profiles, sessions) {
     lifeGaps,
     respAgreement,
     respPairs,
+    expCoupleDistances,
+    /* The line between aligned and not, from api/_lib/alignment.js, which is
+       the only thing allowed to turn a distance into a judgement. Sent rather
+       than typed into the admin, because a threshold written in two places is
+       two answers to "are these two people aligned". */
+    alignedBand: ALIGNMENT_BANDS.aligned,
     pairs: pairs.length,
   };
 }

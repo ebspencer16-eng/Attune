@@ -314,6 +314,14 @@ const server = createServer((req, res) => {
        than by the product, which is the thing to be careful about. The real
        endpoint merges the compiled codes in; this does the same so the page
        can be looked at. */
+    /* Per-couple expectation distances, for the Expectations at a glance
+       tile. Spread either side of the 0.2 line so both of the last two tiles
+       have couples in them: a stub where everyone falls on one side draws an
+       em dash and looks like the tile is broken. */
+    const expCoupleDistances = Array.from({ length: 18 }, (_, k) => ({
+      life: Number((((k * 7) % 11) / 20).toFixed(4)),
+      resp: Number((((k * 5) % 9) / 20).toFixed(4)),
+    }));
     const beta_codes = [
       ...Object.entries(COMPILED_CODES).map(([code, meta]) => {
         const m = (typeof meta === 'string') ? { pkg: meta, mode: 'free', amount: 0 } : (meta || {});
@@ -324,7 +332,7 @@ const server = createServer((req, res) => {
       { code: 'SPRING25', package_key: 'core', discount_mode: 'percent', discount_value: 25, active: true, uses_count: 3, max_uses: 50, source: 'issued' },
       { code: 'FRIENDS10', package_key: '*', discount_mode: 'fixed', discount_value: 10, active: false, uses_count: 0, max_uses: null, source: 'issued' },
     ];
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, responses: payload }));
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, responses: payload }));
     return;
   }
   if (url.pathname.startsWith('/api/admin-typing')) {
@@ -645,6 +653,26 @@ if (process.env.NO_RESIZE !== '1') {
  * A real change event, not just a value: the handlers are on `onchange`, and
  * setting `.value` alone fires nothing.
  */
+/**
+ * TAB=Expectations — open a tab before the picture.
+ *
+ * Several admin pages are a row of tabs over one page, and the probe always
+ * landed on the first. So a tile on any other tab could not be looked at, and
+ * a run that drew nothing on it reported no errors.
+ */
+if (process.env.TAB) {
+  const want = process.env.TAB.trim().toLowerCase();
+  const got = await page.evaluate((w) => {
+    const tabs = [...document.querySelectorAll('.tab')];
+    const hit = tabs.find((t) => (t.textContent || '').trim().toLowerCase() === w);
+    if (!hit) return 'no tab called "' + w + '"; there are: ' + tabs.map((t) => (t.textContent || '').trim()).join(', ');
+    hit.click();
+    return 'opened ' + (hit.textContent || '').trim();
+  }, want);
+  console.log('  tab: ' + got);
+  await new Promise((r) => setTimeout(r, 1500));
+}
+
 if (process.env.SET) {
   const pairs = process.env.SET.split(',').map((p) => {
     const i = p.indexOf('=');
