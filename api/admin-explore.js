@@ -435,7 +435,12 @@ function buildCatalog(fbCatOptions) {
   for (const q of REFLECTION_QUESTIONS) {
     const isPick = q.kind === 'pick';
     const opts = (isPick ? q.options : q.labels) || [];
-    const fld = { key: 'ref_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + q.text, group: 'Ex3 · Relationship Reflection', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true };
+    /* Ellie: "All questions should not have the section name in each row."
+       Every reflection question carried its topic as a prefix, and four of the
+       five say "How We're Doing", so the useful half of each row started a
+       third of the way in. The topic is kept as a field of its own so a
+       grouping can still use it; it is just not printed on every line. */
+    const fld = { key: 'ref_' + q.id, label: q.text, topic: q.topic || null, group: 'Ex3 · Relationship Reflection', kind: 'cat', options: opts.map((v) => ({ v, label: v })), partnerable: true };
     if (!isPick && opts.length >= 2) { fld.ordinal = true; fld.poleLow = opts[0]; fld.poleHigh = opts[opts.length - 1]; }
     f.push(fld);
   }

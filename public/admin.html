@@ -1306,6 +1306,16 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
           </div>
         </div>
       </div>
+      <!-- Ellie: "Qualitities most admired in partner should be a column chart
+           above all questions tile." It is a pick from ten fixed options, so it
+           is a distribution and nothing has to be coded to draw it. -->
+      <div class="chart-card" style="margin-top:1.25rem">
+        <div class="chart-head">
+          <div><div class="chart-title">Quality most admired in a partner</div><div class="chart-subtitle">What people picked, out of ten</div></div>
+          <select class="tile-slicer" id="slz-admired" title="Cut this tile by a segment" aria-label="Slz admired"><option value="">Everyone</option></select>
+        </div>
+        <div class="chart-body"><canvas id="chart-admired"></canvas></div>
+      </div>
       <div class="qx-section" id="qx-story" style="margin-top:1.25rem"></div>
     </div>
 
@@ -7426,6 +7436,7 @@ function initCharts(page) {
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score'], true);
     renderExpSummary();
     renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what'], undefined, true);
+    wireCubeTile({target:'chart-admired',field:'ref_a8',selId:'slz-admired',color:'#E5578C'});
     renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection'], undefined, true);
     renderQuestionExplorer('qx-intimacy', ['Physical Intimacy'], undefined, true);
     renderQuestionExplorer('qx-conflict', ['Conflict Patterns'], undefined, true);
