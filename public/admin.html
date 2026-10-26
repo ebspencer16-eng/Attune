@@ -1165,11 +1165,33 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
     </div>
 
     <div id="resp-story" style="display:none">
-      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      <!-- Ellie: "I want that done to every page that has the boxes at the top,
+           I want those to be in a only slightly shaded tile that has the 2 slicers."
+           The period here is when the account was made, not when an order was
+           placed: these tiles count people. -->
+      <div class="chart-card kpi-shell">
+        <div class="chart-head">
+          <div><div class="chart-title">Relationship Reflection at a glance</div><div class="chart-subtitle">Across the people in this cut</div></div>
+          <div class="tile-slicers">
+            <select class="tile-slicer" id="slz-respsum-period" title="Limit this tile to a period" aria-label="Period">
+              <option value="">All time</option>
+              <option value="365">Past 12 months</option>
+              <option value="182">Past 6 months</option>
+              <option value="90">Past 90 days</option>
+              <option value="30">Past month</option>
+              <option value="7">Past week</option>
+            </select>
+            <select class="tile-slicer" id="slz-respsum" title="Cut this tile by a segment" aria-label="Slz respsum"><option value="">Everyone</option></select>
+          </div>
+        </div>
+        <div class="chart-body">
+      <div class="kpi-grid" id="respsum-tiles" style="grid-template-columns:repeat(4,1fr);">
         <div class="kpi-card indigo"><div class="kpi-label">Avg overall feel</div><div class="kpi-val" id="kpi-story-feel">—</div><div class="kpi-sub">Mean overall-feel score (1–5)</div></div>
         <div class="kpi-card green"><div class="kpi-label">Connection aligned</div><div class="kpi-val" id="kpi-story-conn">—</div><div class="kpi-sub">Partners within 1 step of each other</div></div>
         <div class="kpi-card amber"><div class="kpi-label">Fun gap flagged</div><div class="kpi-val" id="kpi-story-fun">—</div><div class="kpi-sub">≥2 step gap on fun/lightness</div></div>
         <div class="kpi-card orange"><div class="kpi-label">Comm gap flagged</div><div class="kpi-val" id="kpi-story-comm">—</div><div class="kpi-sub">≥2 step gap on communication ease</div></div>
+      </div>
+        </div>
       </div>
       <div class="chart-grid">
         <div class="chart-card">
@@ -1240,11 +1262,22 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
     <!-- The four numbers, cut by the period above. Every one of them is a
          question in the survey rather than a derived score, so a number here
          can always be traced to a tile below it. -->
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+    <!-- Ellie: "I want that done to every page that has the boxes at the top,
+         I want those to be in a only slightly shaded tile that has the 2 slicers."
+         The period here is when the account was made, not when an order was
+         placed: these tiles count people. -->
+    <div class="chart-card kpi-shell">
+      <div class="chart-head">
+        <div><div class="chart-title">Feedback at a glance</div><div class="chart-subtitle">This page keeps its own period control and filters below; a second set here would be two answers to one question</div></div>
+      </div>
+      <div class="chart-body">
+    <div class="kpi-grid" id="fbsum-tiles" style="grid-template-columns:repeat(4,1fr);">
       <div class="kpi-card green"><div class="kpi-label">Average rating</div><div class="kpi-val" id="fb-kpi-rating">&mdash;</div><div class="kpi-sub" id="fb-kpi-rating-sub">no answers yet</div></div>
       <div class="kpi-card green"><div class="kpi-label">NPS</div><div class="kpi-val" id="fb-kpi-nps">&mdash;</div><div class="kpi-sub" id="fb-kpi-nps-sub">no answers yet</div></div>
       <div class="kpi-card indigo"><div class="kpi-label">Prompted a Convo</div><div class="kpi-val" id="fb-kpi-convo">&mdash;</div><div class="kpi-sub" id="fb-kpi-convo-sub">no answers yet</div></div>
       <div class="kpi-card amber"><div class="kpi-label">Most important</div><div class="kpi-val" id="fb-kpi-aspect" style="font-size:1.05rem;line-height:1.3">&mdash;</div><div class="kpi-sub" id="fb-kpi-aspect-sub">ranked first most often</div></div>
+    </div>
+      </div>
     </div>
 
     <!-- One tile per question, two to a row, built from the question set so a
@@ -1842,7 +1875,16 @@ window.adminAuthHeaders = function(extra){
 
 
     <!-- KPI row -->
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+    <!-- Ellie: "I want that done to every page that has the boxes at the top,
+         I want those to be in a only slightly shaded tile that has the 2 slicers."
+         The period here is when the account was made, not when an order was
+         placed: these tiles count people. -->
+    <div class="chart-card kpi-shell">
+      <div class="chart-head">
+        <div><div class="chart-title">Types at a glance</div><div class="chart-subtitle">Type Analytics keeps its own filter bar below; a second set here would be two answers to one question</div></div>
+      </div>
+      <div class="chart-body">
+    <div class="kpi-grid" id="typesum-tiles" style="grid-template-columns:repeat(4,1fr);">
       <div class="kpi-card orange">
         <div class="kpi-label">Individuals typed</div>
         <div class="kpi-val" id="types-n-indiv">—</div>
@@ -1862,6 +1904,8 @@ window.adminAuthHeaders = function(extra){
         <div class="kpi-label">Top couple type</div>
         <div class="kpi-val" id="types-maxshare">—</div>
         <div class="kpi-sub" id="types-maxshare-sub">Concentration check</div>
+      </div>
+    </div>
       </div>
     </div>
 
@@ -5182,7 +5226,19 @@ function filterOrders(sel) { applyOrderFilters(); }
 // Rel-Reflection top tiles: overall-feel mean + couple-level alignment/gap rates.
 async function renderRelReflTiles(){
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
-  const rows=cube.rows||[];
+  /* ── BOTH SLICERS ──────────────────────────────────────────────────────
+     Ellie: "I want those to be in a only slightly shaded tile that has the 2
+     slicers." The segment one is the same control every other tile carries;
+     the period one is by the day the account was made, because these tiles
+     count people rather than orders. */
+  const seg=document.getElementById('slz-respsum');
+  const per=document.getElementById('slz-respsum-period');
+  if(seg){ populateSlicer(seg,null,cube.rows||[]); seg.classList.toggle('on',!!seg.value);
+    if(!seg.dataset.wired){ seg.dataset.wired='1'; seg.onchange=()=>renderRelReflTiles(); } }
+  if(per&&!per.dataset.wired){ per.dataset.wired='1'; per.onchange=()=>{ per.classList.toggle('on',!!per.value); renderRelReflTiles(); }; }
+  const rows=periodFilterRows(sliceFilter(cube.rows||[], seg?seg.value:''), per?per.value:'');
+  const anchorEl=document.getElementById('respsum-tiles');
+  if(anchorEl) setTileN(anchorEl, rows.length);
   const byKey={}; (cube.fields||[]).forEach(f=>byKey[f.key]=f);
   const setKpi=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
   const feelF=byKey['ref_a0'];
@@ -5744,6 +5800,29 @@ function periodFilter(orders, value){
  * hands off, so there is still one renderer and one place the drawing is
  * decided.
  */
+/**
+ * Cube ROWS inside a period, by the day the account was made.
+ *
+ * The sibling of periodFilter, which works on orders and reads `ts`. Kept
+ * separate rather than made generic over a field name, because the two answer
+ * different questions: one is "orders placed in this window", the other is
+ * "people who signed up in it", and a tile that mixed them would read as
+ * neither.
+ *
+ * A row with no signup day is dropped by every narrower period and kept by
+ * "all", the same rule the order version uses: a row that cannot say when it
+ * happened cannot be claimed to have happened inside a window.
+ */
+function periodFilterRows(rows, value){
+  const days = Number(value);
+  if (!value || !Number.isFinite(days) || days <= 0) return rows;
+  const cutoff = Date.now() - days * 86400000;
+  return (rows || []).filter(r => {
+    const t = r.signup_day ? new Date(r.signup_day + 'T00:00:00Z').getTime() : NaN;
+    return Number.isFinite(t) && t >= cutoff;
+  });
+}
+
 function wireOrderChartWithPeriod(opts){
   const per = document.getElementById(opts.periodId);
   if (per && !per.dataset.wired) { per.dataset.wired = '1'; per.onchange = () => { per.classList.toggle('on', !!per.value); renderOrderChart(opts); }; }

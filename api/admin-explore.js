@@ -661,6 +661,21 @@ export default async function handler(req) {
         // couple_id is set whenever a partner exists (so Ex2/Ex3 couple visuals
         // pair them), even when a communication type can't be computed.
         couple_id: hasPartner ? coupleHash(p.id, coupleKey) : null,
+        /**
+         * The day this account was made, so a tile can carry a period slicer.
+         *
+         * Ellie: "I want that done to every page that has the boxes at the
+         * top... one to select time period." The order-backed tiles could do
+         * that from the order date; the person-backed ones had no date at all,
+         * so the control would have been a decoration.
+         *
+         * A day, not a timestamp: the period buckets go down to a week, so a
+         * day is the coarsest thing that can answer all of them, and it is the
+         * least this has to carry to do the job. It is no more identifying
+         * than the ten dimension scores already on this row, which is the bar
+         * the rest of the cube is built to.
+         */
+        signup_day: p.created_at ? String(p.created_at).slice(0, 10) : null,
         couple_type: (ownType && partnerType) ? [ownType, partnerType].sort().join('') : null,
       };
       if (partner) { for (const k of PARTNERABLE) row['p_' + k] = partner[k]; if (partnerType) row.p_type = partnerType; }
