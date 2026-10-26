@@ -81,11 +81,7 @@ build it.
 
 | # | What I am doing |
 |--|--|
-| C33 | **Today's word, Belonging**, rewritten to your line and the words doc regenerated from the module. |
-| A33 | **All questions: a comparison mark.** Every 'all questions' section in admin shows the overall average as a smaller mark when a slicer is set. Rename every bottom section to All questions. |
-| A34 | **Comms overview tile**: Avg communication alignment, Avg understanding of partner, and two more. My answer to your question about the last two is below. |
 | A35 | **Expectations: Responsibilities at half width, Life & Values beside it**, same chart style. |
-| A36 | **The who-does-what chart is empty because no couple has both halves of Expectations yet.** Not a bug: it says so now, with the count, instead of drawing one bar at zero. If a couple ever has both halves and it still finds nothing, it says THAT instead. |
 | A37 | **Expectations: question order follows the exercise**, and responsibility poles read Myself and My partner so you can see who assumes it. |
 | A38 | **Expectations overview tile**: Avg life and values alignment, Avg responsibilities alignment, avg degree of misalignment for misaligned couples and for aligned ones. |
 | A40 | **Rel Reflection: postcoded column charts** for moments that matter and for the text-entry questions, qualities most admired as a column chart, and All questions without the section name on every row. |
@@ -113,6 +109,10 @@ section 3 explaining things, just include the context I need in section 3."
 | A39 | **Every overview tile shows the uncut figure** under the stat when a slicer is on. Dashboard, Order Details and Package Mix, driven and photographed with a period selected. |
 | S79 | **The back door was that "Prefer not to say" was stored as empty, and was the default.** Identical to never answering, and pre-selected on all five questions. It has a value of its own now, nothing is pre-selected, and declining is still one click. |
 | S80 | **Rebecca will be prompted, and so will anyone else who skipped.** Profile complete now means both names, pronouns and the five questions. The columns were not even being selected, so adding the rule without that would have told every account its profile was unfinished. |
+| C33 | **Belonging** reads your line, and WORDS-REVIEW.md is regenerated from the module. |
+| A36 | **The who-does-what chart is empty because no couple has both halves of Expectations yet**, and it says so with the count instead of drawing one bar at zero. |
+| A33 | **Bottom sections are called All questions**, and the comparison mark is in: small grey for everyone, large coloured for your cut, on every slider in admin. |
+| A34 | **Communication at a glance**: alignment, understanding, and the two you agreed to. On the stub they name different dimensions, conflict and love, which is the whole argument that they are not inverses. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

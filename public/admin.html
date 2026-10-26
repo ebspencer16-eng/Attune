@@ -1134,7 +1134,46 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
     </div>
 
     <div id="resp-comm">
-      <div class="chart-grid">
+      <!-- Ellie: "Start with overview tile at the top with 4 tiles: Avg
+           communication alignment, Avg understanding of partner, Where are
+           people worst at self-evaluation, where are partners worst at
+           evaluating the others' placement (are those last 2 inverse?)."
+
+           They were the same number with two captions: one distance between a
+           self-rating and a partner's reading of it, and which person is
+           "wrong" about it is not something the data can say. She agreed to
+           the two that genuinely come apart: where couples DIFFER most, and
+           where they MISREAD each other most. A dimension can carry a wide
+           real difference both people see clearly, which is fine, or a narrow
+           one neither sees, which is not. -->
+      <div class="chart-card kpi-shell">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Communication at a glance</div>
+            <div class="chart-subtitle">Across the couples in this cut</div>
+          </div>
+          <div class="tile-slicers">
+            <select class="tile-slicer" id="slz-commsum-period" title="Limit this tile to a period" aria-label="Period">
+              <option value="">All time</option>
+              <option value="365">Past 12 months</option>
+              <option value="182">Past 6 months</option>
+              <option value="90">Past 90 days</option>
+              <option value="30">Past month</option>
+              <option value="7">Past week</option>
+            </select>
+            <select class="tile-slicer" id="slz-commsum" title="Cut this tile by a segment" aria-label="Slz commsum"><option value="">Everyone</option></select>
+          </div>
+        </div>
+        <div class="chart-body">
+          <div class="kpi-grid" id="commsum-tiles" style="grid-template-columns:repeat(4,1fr);margin:0;">
+            <div class="kpi-card indigo"><div class="kpi-label">Avg communication alignment</div><div class="kpi-val" id="cs-align">—</div><div class="kpi-sub" id="cs-align-sub"></div></div>
+            <div class="kpi-card green"><div class="kpi-label">Avg understanding of partner</div><div class="kpi-val" id="cs-under">—</div><div class="kpi-sub" id="cs-under-sub"></div></div>
+            <div class="kpi-card amber"><div class="kpi-label">Couples differ most on</div><div class="kpi-val" id="cs-diff" style="font-size:1.15rem">—</div><div class="kpi-sub" id="cs-diff-sub"></div></div>
+            <div class="kpi-card orange"><div class="kpi-label">Misread each other most on</div><div class="kpi-val" id="cs-misread" style="font-size:1.15rem">—</div><div class="kpi-sub" id="cs-misread-sub"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-grid" style="margin-top:1.25rem">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment" aria-label="Slz rdim"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-dim-scores"></canvas></div>
@@ -5277,6 +5316,85 @@ function filterOrders(sel) { applyOrderFilters(); }
 // Reads real intimacy alignment from the analytics feed. No fabricated numbers:
 // shows an honest empty state until intimacy responses are wired into admin-data.
 // Rel-Reflection top tiles: overall-feel mean + couple-level alignment/gap rates.
+/**
+ * Communication at a glance: four figures over the couples in this cut.
+ *
+ * ── WHAT EACH ONE IS ──────────────────────────────────────────────────────
+ * Alignment is how close two people's own answers are, per dimension, averaged
+ * over the ten and then over the people. Understanding is how close one
+ * person's reading of their partner is to what that partner actually said,
+ * which the server computes as `read_error_mean`.
+ *
+ * Those two are different questions and the third and fourth are the same two
+ * asked per dimension: which one do couples DIFFER on most, and which do they
+ * MISREAD most. Ellie asked for "worst at self-evaluation" and "worst at
+ * reading your partner", which is one distance with two captions and one of
+ * them tells a person they are wrong about themselves. She agreed to these.
+ *
+ * ── THE SCALE ─────────────────────────────────────────────────────────────
+ * Both means are distances on a one-to-five scale, so the largest possible is
+ * four. They are shown as a closeness percentage, 100 minus the distance over
+ * four, because every other alignment figure in this product reads that way
+ * and a tile that reads the other way round is a tile somebody misreads once.
+ */
+async function renderCommsSummary() {
+  const host = document.getElementById('commsum-tiles');
+  if (!host) return;
+  let cube; try { cube = await ensureCube(); } catch (e) { return; }
+
+  const seg = document.getElementById('slz-commsum');
+  const per = document.getElementById('slz-commsum-period');
+  if (seg) { populateSlicer(seg, null, cube.rows || []); seg.classList.toggle('on', !!seg.value);
+    if (!seg.dataset.wired) { seg.dataset.wired = '1'; seg.onchange = () => renderCommsSummary(); } }
+  if (per && !per.dataset.wired) { per.dataset.wired = '1'; per.onchange = () => { per.classList.toggle('on', !!per.value); renderCommsSummary(); }; }
+
+  const all = cube.rows || [];
+  const rows = periodFilterRows(sliceFilter(all, seg ? seg.value : ''), per ? per.value : '');
+  const cut = !!(seg && seg.value) || !!(per && per.value);
+  setTileN(host, rows.length);
+
+  /* The ten dimension keys, from the fields the server sent rather than a list
+     typed here: an eleventh dimension would be counted without anybody
+     remembering this tile exists. */
+  const dims = (cube.fields || [])
+    .filter(f => /^dim_/.test(f.key))
+    .map(f => ({ key: f.key.slice(4), label: f.label }));
+
+  const mean = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+  /* A distance on a 1-5 scale, as a closeness percentage. */
+  const asPct = (d) => d == null ? '\u2014' : Math.round(100 - (d / 4) * 100) + '%';
+
+  /* How far apart the two people's OWN answers are, per dimension. `p_dim_x`
+     is the partner's score denormalised onto the same row by the server. */
+  const gapsFor = (set, d) => set
+    .map(r => (r['dim_' + d] != null && r['p_dim_' + d] != null) ? Math.abs(r['dim_' + d] - r['p_dim_' + d]) : null)
+    .filter(v => v != null);
+  /* How wrong a reading is, per dimension. Already a distance. */
+  const missFor = (set, d) => set.map(r => r['readerr_' + d]).filter(v => v != null && !Number.isNaN(v));
+
+  const overallGap = (set) => mean(dims.flatMap(d => gapsFor(set, d.key)));
+  const overallMiss = (set) => mean(set.map(r => r.read_error_mean).filter(v => v != null && !Number.isNaN(v)));
+
+  putKpi('cs-align', asPct(overallGap(rows)), cut ? asPct(overallGap(all)) : null, 'How close two answers are');
+  putKpi('cs-under', asPct(overallMiss(rows)), cut ? asPct(overallMiss(all)) : null, 'How well each reads the other');
+
+  /* The widest of the ten, named. A dimension nobody has answered has no
+     mean and is left out rather than counted as nought, which would make the
+     emptiest dimension look like the most agreed-upon one. */
+  const worst = (set, fn) => {
+    const scored = dims.map(d => ({ label: d.label, v: mean(fn(set, d.key)) })).filter(x => x.v != null);
+    if (!scored.length) return null;
+    return scored.sort((a, b) => b.v - a.v)[0];
+  };
+  const wd = worst(rows, gapsFor), wm = worst(rows, missFor);
+  putKpi('cs-diff', wd ? wd.label : '\u2014',
+    cut ? (worst(all, gapsFor) || {}).label || null : null,
+    wd ? asPct(wd.v) + ' aligned there' : 'Not enough answers yet');
+  putKpi('cs-misread', wm ? wm.label : '\u2014',
+    cut ? (worst(all, missFor) || {}).label || null : null,
+    wm ? asPct(wm.v) + ' read right there' : 'Not enough answers yet');
+}
+
 async function renderRelReflTiles(){
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
   /* ── BOTH SLICERS ──────────────────────────────────────────────────────
@@ -6223,7 +6341,11 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     '</div>') +
     '<div class="chart-card" style="padding:1.1rem 1.25rem;">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap;">' +
-        '<div style="font-size:.7rem;color:var(--muted);">Distribution for every measure (<span id="' + containerId + '-distn">n=' + rows.length + '</span>).</div>' +
+        /* Ellie: "Bottom section should be called 'All questions' (apply that
+           change to all sections like this)." One heading for one thing: the
+           block inside already said All questions, so the tile saying
+           something else was the same section with two names. */
+        '<div style="font-size:.74rem;font-weight:700;color:var(--text);">All questions <span style="font-weight:400;color:var(--muted);">(<span id="' + containerId + '-distn">n=' + rows.length + '</span>)</span></div>' +
         '<div style="display:flex;gap:.4rem;align-items:center;">' +
           (_hasSlider ? '<select class="tile-slicer" id="' + containerId + '-distmode" title="Mean position or full breakdown"><option value="mean">Mean</option><option value="breakdown">Breakdown</option></select>' : '') +
           '<select class="tile-slicer" id="' + containerId + '-distslz" title="Cut these distributions by a segment"><option value="">Everyone</option></select>' +
@@ -6441,7 +6563,11 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     distEl.innerHTML =
       (QX_MODE[containerId] === 'mean' ? '' : scaleLegend) + (highBox ? '' : meanKey) +
       (highFields.length && !highBox ? sectionHead('High-level views') + highFields.map(f => measureBar(f, drows, sliced)).join('') + '<div style="height:1.1rem;"></div>' : '') +
-      sectionHead('All questions') + detailFields.map(f => measureBar(f, drows, sliced)).join('');
+      /* No inner "All questions" head: the tile is called that now, and a
+         section head repeating its own tile's title is a line that says
+         nothing. It is still drawn when the high-level block is in here with
+         it, because then the two halves need telling apart. */
+      (highBox ? '' : sectionHead('All questions')) + detailFields.map(f => measureBar(f, drows, sliced)).join('');
   };
   QX_REPAINT[containerId] = () => renderDist(curSlice, curSliced);
   renderDist(rows, false);
@@ -7149,6 +7275,7 @@ function initCharts(page) {
     renderRelReflTiles();
     renderIntimacyResponses();
     renderSelfPartnerGap('svp-gap');
+    renderCommsSummary();
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score'], true);
     renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what'], undefined, true);
     renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection'], undefined, true);

@@ -153,6 +153,23 @@ for (let i = 0; i < 40; i++) {
   }
   for (const q of PERSONALITY_QUESTIONS) r['q_' + q.id] = ex1[q.id];
   DIMS.forEach((d, k) => { r[`p_pvdim_${d}`] = 2 + ((i + k + 1) % 3); });
+  /* ── THE PARTNER'S OWN SCORE, AND HOW WRONG EACH READING IS ──────────────
+     The Communication at a glance tile reads `p_dim_<d>` for how far apart two
+     people's own answers are, and `readerr_<d>` plus `read_error_mean` for how
+     wrong a reading is. The stub carried neither, so all four figures drew an
+     em dash and the probe reported no errors about a tile that was working.
+     The harness being thin looks exactly like the feature being broken.
+
+     The gaps are deliberately uneven across dimensions so the two "worst on"
+     tiles have something to pick out, and the widest gap is NOT the widest
+     misread, because those two being the same dimension is the thing Ellie
+     asked whether they always are. */
+  DIMS.forEach((d, k) => {
+    const own = r['dim_' + d];
+    if (own != null) r['p_dim_' + d] = Math.max(1, Math.min(5, own + ((i + k) % 5) * 0.4 - 0.8));
+    r['readerr_' + d] = Number((((i + k * 3) % 7) * 0.25).toFixed(2));
+  });
+  r.read_error_mean = Number((DIMS.reduce((a, d) => a + (r['readerr_' + d] || 0), 0) / DIMS.length).toFixed(3));
   for (const f of fields) {
     if (!f.options || !f.options.length) continue;
     if (f.key.startsWith('cq_') || f.key.startsWith('iq_')) {
