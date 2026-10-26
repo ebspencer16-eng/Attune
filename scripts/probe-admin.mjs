@@ -615,6 +615,42 @@ if (process.env.NO_RESIZE !== '1') {
    bars were photographed on one layout and the axis on another, which looked
    exactly like a chart drawing its columns in the wrong place. The chart's own
    model said the bars spanned the full width the whole time. */
+/**
+ * ── DRIVE A CONTROL BEFORE THE PICTURE ────────────────────────────────────
+ * SET=slz-ovsum-period=90,slz-ovsum=pronouns:she%2Fher
+ *
+ * A tile that behaves differently when a slicer is on cannot be checked by
+ * loading the page, because loading it is the case where nothing is selected.
+ * The comparison line Ellie asked for under every overview stat only exists
+ * when something is cut, so without this the probe takes a picture of the one
+ * state that does not have it and reports no errors.
+ *
+ * A real change event, not just a value: the handlers are on `onchange`, and
+ * setting `.value` alone fires nothing.
+ */
+if (process.env.SET) {
+  const pairs = process.env.SET.split(',').map((p) => {
+    const i = p.indexOf('=');
+    return [p.slice(0, i), decodeURIComponent(p.slice(i + 1))];
+  });
+  const applied = await page.evaluate((list) => {
+    const out = [];
+    for (const [id, value] of list) {
+      const el = document.getElementById(id);
+      if (!el) { out.push(id + ': no such control'); continue; }
+      const has = [...el.options].some((o) => o.value === value);
+      el.value = value;
+      /* Report a value the control does not offer rather than silently
+         selecting nothing, which looks exactly like the slicer not working. */
+      out.push(id + ' = ' + (el.value === value ? value : '(not offered: ' + value + ')') + (has ? '' : ' [absent]'));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    return out;
+  }, pairs);
+  for (const line of applied) console.log('  set ' + line);
+  await new Promise((r) => setTimeout(r, 1200));
+}
+
 const shot = await page.screenshot({ fullPage: process.env.FULL_PAGE === '1' });
 writeFileSync(OUT, Buffer.from(shot, 'base64'));
 console.log('picture: ' + OUT);

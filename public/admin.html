@@ -519,19 +519,23 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       </div>
       <div class="chart-body">
         <div class="kpi-grid" id="ov-sum-tiles" style="grid-template-columns:repeat(3,1fr);margin:0;">
+          <!-- A `-sub` line on each, which is where the uncut figure goes when a
+               slicer is on. The two trend divs stayed: they are a different
+               thing and nothing writes them today. -->
           <div class="kpi-card orange">
             <div class="kpi-label">Total orders</div>
             <div class="kpi-val" id="stat-orders">—</div>
-            <div class="kpi-trend up" id="stat-orders-trend"></div>
+            <div class="kpi-sub" id="stat-orders-sub"></div>
           </div>
           <div class="kpi-card green">
             <div class="kpi-label">Total revenue</div>
             <div class="kpi-val" id="stat-revenue">—</div>
-            <div class="kpi-trend up" id="stat-revenue-trend"></div>
+            <div class="kpi-sub" id="stat-revenue-sub"></div>
           </div>
           <div class="kpi-card amber">
             <div class="kpi-label">Avg order value</div>
             <div class="kpi-val" id="stat-aov">—</div>
+            <div class="kpi-sub" id="stat-aov-sub"></div>
           </div>
         </div>
       </div>
@@ -709,8 +713,11 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       <div class="chart-body">
         <div class="kpi-grid" id="ord-sum-tiles" style="grid-template-columns:repeat(3,1fr);margin:0;">
           <div class="kpi-card green"><div class="kpi-label">Revenue</div><div class="kpi-val" id="pr-revenue">—</div><div class="kpi-sub" id="pr-revenue-sub">All orders</div></div>
-          <div class="kpi-card blue"><div class="kpi-label">Avg order value</div><div class="kpi-val" id="pr-aov">—</div><div class="kpi-sub">Per order</div></div>
-          <div class="kpi-card orange"><div class="kpi-label">% orders with a code</div><div class="kpi-val" id="pr-code-pct">—</div><div class="kpi-sub" id="pr-code-n">—</div></div>
+          <!-- Every sub-line is id'd `<val>-sub`, which is the convention putKpi
+               reads. Two of these were not: one had no id and one was called
+               pr-code-n, so the comparison line had nowhere to go on either. -->
+          <div class="kpi-card blue"><div class="kpi-label">Avg order value</div><div class="kpi-val" id="pr-aov">—</div><div class="kpi-sub" id="pr-aov-sub">Per order</div></div>
+          <div class="kpi-card orange"><div class="kpi-label">% orders with a code</div><div class="kpi-val" id="pr-code-pct">—</div><div class="kpi-sub" id="pr-code-pct-sub">—</div></div>
         </div>
       </div>
     </div>
@@ -5637,6 +5644,44 @@ function _last12Months(){
   for(let i=11;i>=0;i--){ const m=new Date(now.getFullYear(),now.getMonth()-i,1); out.push({key:m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0'),label:m.toLocaleDateString('en-US',{month:'short'})}); }
   return out;
 }
+/**
+ * Write one overview tile: the figure for this cut, and underneath it the
+ * figure for everybody when a cut is on.
+ *
+ * ── WHY ───────────────────────────────────────────────────────────────────
+ * Ellie: "On all 'overview tiles' (what I'm calling the top tile on pages that
+ * contain the at a glance numbers) throughout admin, if a user selects a
+ * different timeframe or demo, I want the text under the stat in each tile to
+ * show the avg or not cut stat for comparison."
+ *
+ * A number with nothing to compare it against is a number you cannot act on:
+ * 38 per cent means one thing if everybody is at 60 and another if everybody
+ * is at 35. The sub-line already existed and said a static thing; it says the
+ * uncut figure instead, and only when something is actually cut.
+ *
+ * ── ONE PLACE, BECAUSE THERE ARE FOUR TILE SETS ───────────────────────────
+ * The dashboard's three, Order Details' three, Package Mix's four and
+ * Responses'. Four copies of "work it out twice and format the second one"
+ * would be four chances to format it differently, and the one that says
+ * "overall" where another says "everyone" reads as two different measures.
+ *
+ * @param id      the kpi-val element
+ * @param value   what to show for this cut
+ * @param overall what to show for everybody, or null when nothing is cut
+ * @param idle    what the sub-line says when nothing is cut
+ */
+function putKpi(id, value, overall, idle) {
+  const v = document.getElementById(id);
+  if (v) v.textContent = value;
+  const sub = document.getElementById(id + '-sub');
+  if (!sub) return;
+  /* `overall` null means nothing is cut, so there is nothing to compare
+     against and the line goes back to whatever it says at rest. A sub-line
+     reading "same as everyone" when nothing is selected is noise. */
+  sub.textContent = overall == null ? (idle || '') : overall + ' across everyone';
+  sub.style.color = overall == null ? '' : 'var(--muted)';
+}
+
 async function renderOrderChart(opts){
   const el=document.getElementById(opts.target); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
@@ -5644,6 +5689,9 @@ async function renderOrderChart(opts){
   if(sel){ populateSlicer(sel, null, cube.rows||[]); sel.classList.toggle('on', !!sel.value); }
   const orders=sliceFilter(cube.orders||[], sel?sel.value:'');
   setTileN(el, orders.length);
+  /* Everything, for the comparison line under each tile. Worked out here so a
+     kind cannot forget which of the two it is holding. */
+  const allOrders=cube.orders||[];
   if(opts.kind==='ovsum'){
     /* The dashboard's three tiles, cut the same two ways as Order Details'.
        They were written by the main data load, which is why they had no
@@ -5651,12 +5699,17 @@ async function renderOrderChart(opts){
     const per=opts.periodId?document.getElementById(opts.periodId):null;
     const within=periodFilter(orders, per?per.value:'');
     setTileN(el, within.length);
-    const total=within.reduce((a,o)=>a+(Number(o.amount)||0),0);
-    const put=(id,txt)=>{ const x=document.getElementById(id); if(x) x.textContent=txt; };
     const money=(n)=>'$'+Math.round(n).toLocaleString('en-US');
-    put('stat-orders', within.length.toLocaleString());
-    put('stat-revenue', money(total));
-    put('stat-aov', within.length? money(total/within.length) : '\u2014');
+    /* The same three figures over everybody, for the comparison line. `cut` is
+       false only when neither slicer is set, which is when there is nothing to
+       compare against. */
+    const cut = !!(sel&&sel.value) || !!(per&&per.value);
+    const sum=(arr)=>arr.reduce((a,o)=>a+(Number(o.amount)||0),0);
+    const total=sum(within), allTotal=sum(allOrders);
+    putKpi('stat-orders', within.length.toLocaleString(), cut? allOrders.length.toLocaleString() : null, '');
+    putKpi('stat-revenue', money(total), cut? money(allTotal) : null, '');
+    putKpi('stat-aov', within.length? money(total/within.length) : '\u2014',
+      cut? (allOrders.length? money(allTotal/allOrders.length) : '\u2014') : null, '');
     return;
   }
   if(opts.kind==='ordsum'){
@@ -5675,14 +5728,17 @@ async function renderOrderChart(opts){
     const within=periodFilter(orders, per?per.value:'');
     setTileN(el, within.length);
     const money=(n)=>'$'+(Math.round(n*100)/100).toLocaleString('en-US');
-    const total=within.reduce((a,o)=>a+(Number(o.amount)||0),0);
-    const coded=within.filter(o=>o.promo_code).length;
-    const put=(id,txt)=>{ const x=document.getElementById(id); if(x) x.textContent=txt; };
-    put('pr-revenue', money(total));
-    put('pr-revenue-sub', within.length? (within.length+' order'+(within.length===1?'':'s')) : 'No orders in this cut');
-    put('pr-aov', within.length? money(total/within.length) : '\u2014');
-    put('pr-code-pct', within.length? Math.round(coded/within.length*100)+'%' : '\u2014');
-    put('pr-code-n', coded+' of '+within.length+' orders');
+    const cut = !!(sel&&sel.value) || !!(per&&per.value);
+    const sum=(arr)=>arr.reduce((a,o)=>a+(Number(o.amount)||0),0);
+    const codedIn=(arr)=>arr.filter(o=>o.promo_code).length;
+    const total=sum(within), allTotal=sum(allOrders);
+    const pct=(arr)=>arr.length? Math.round(codedIn(arr)/arr.length*100)+'%' : '\u2014';
+    putKpi('pr-revenue', money(total), cut? money(allTotal) : null,
+      within.length? (within.length+' order'+(within.length===1?'':'s')) : 'No orders in this cut');
+    putKpi('pr-aov', within.length? money(total/within.length) : '\u2014',
+      cut? (allOrders.length? money(allTotal/allOrders.length) : '\u2014') : null, 'Per order');
+    putKpi('pr-code-pct', pct(within), cut? pct(allOrders) : null,
+      codedIn(within)+' of '+within.length+' orders');
     return;
   }
   if(opts.kind==='pkgkpis'){
@@ -5699,16 +5755,18 @@ async function renderOrderChart(opts){
     const per=opts.periodId?document.getElementById(opts.periodId):null;
     const within=periodFilter(orders, per?per.value:'');
     setTileN(el, within.length);
-    const cnt={}; within.forEach(o=>{ const k=o.order_pkg; if(k) cnt[k]=(cnt[k]||0)+1; });
-    const tot=PK.reduce((a,p)=>a+(cnt[p[0]]||0),0);
+    const share=(arr)=>{ const c={}; arr.forEach(o=>{ const k=o.order_pkg; if(k) c[k]=(c[k]||0)+1; });
+      const t=PK.reduce((a,p)=>a+(c[p[0]]||0),0); return { c, t }; };
+    const now=share(within), all=share(allOrders);
+    const cut = !!(sel&&sel.value) || !!(per&&per.value);
     PK.forEach(p=>{
-      const n=cnt[p[0]]||0;
-      const val=document.getElementById('pkgkpi-'+p[0]);
-      const sub=document.getElementById('pkgkpi-'+p[0]+'-sub');
+      const n=now.c[p[0]]||0;
       /* An em dash when there are no orders at all, not 0%. Nought per cent of
          nothing is a figure about a denominator that does not exist. */
-      if(val) val.textContent = tot ? Math.round(100*n/tot)+'%' : '\u2014';
-      if(sub) sub.textContent = n + (n===1?' order':' orders');
+      const fmt=(k,t)=> t ? Math.round(100*k/t)+'%' : '\u2014';
+      putKpi('pkgkpi-'+p[0], fmt(n, now.t),
+        cut? fmt(all.c[p[0]]||0, all.t) : null,
+        n + (n===1?' order':' orders'));
     });
     return;
   }

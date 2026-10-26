@@ -82,16 +82,12 @@ build it.
 | # | What I am doing |
 |--|--|
 | C33 | **Today's word, Belonging**, rewritten to your line and the words doc regenerated from the module. |
-| A30 | **Data labels: there were two label renderers and I turned off one.** svBarChart draws its own, which is why you still see them. Removing them leaves those tiles with no axis and no number, so hover becomes the only readout, which is what you asked for. |
-| A31 | **Comms: Avg individual dimension results** replaces couple type distribution. Ten slider bars, pole labels, mean placement, same tile height, and a small grey mean dot behind the selected demo's dot. |
-| A32 | **Comms: remove Distribution for every measure**, wrap pole labels onto as many lines as needed. |
 | A33 | **All questions: a comparison mark.** Every 'all questions' section in admin shows the overall average as a smaller mark when a slicer is set. Rename every bottom section to All questions. |
 | A34 | **Comms overview tile**: Avg communication alignment, Avg understanding of partner, and two more. My answer to your question about the last two is below. |
 | A35 | **Expectations: Responsibilities at half width, Life & Values beside it**, same chart style. |
 | A36 | **Expectations: Who does what agreement by question draws nothing.** Finding out why before changing it. |
 | A37 | **Expectations: question order follows the exercise**, and responsibility poles read Myself and My partner so you can see who assumes it. |
 | A38 | **Expectations overview tile**: Avg life and values alignment, Avg responsibilities alignment, avg degree of misalignment for misaligned couples and for aligned ones. |
-| A39 | **Every overview tile shows the uncut figure for comparison** under the stat when a timeframe or demo is selected. |
 | A40 | **Rel Reflection: postcoded column charts** for moments that matter and for the text-entry questions, qualities most admired as a column chart, and All questions without the section name on every row. |
 | A42 | **Expected vs experienced, both halves.** Shared-versus-not against what people now expect, and the gendered read you asked for. Pronouns are what we collect and Rebecca's are blank, so the chart will count and show the ones it cannot place rather than quietly dropping them. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
@@ -111,6 +107,10 @@ section 3 explaining things, just include the context I need in section 3."
 | A29 | **Every page with top tiles is in the shaded shell now.** Dashboard, Order Details, Package Mix and Responses carry both slicers. Feedback and Type Analytics carry the shell but keep their own existing filters: giving them a second set would be two ways to filter one tile. Moving their controls into the shell head is the one thing left. |
 | S78 | **Press Send invite on Order Details and Abram gets his.** New tile, "Waiting on a partner": anyone with a partner email, a code and nobody joined. Rebecca is A878FBAD. It lists codes only, never names or addresses, because that page promises it holds none. |
 | S74 | **Rebecca did finish her setup and her first exercise. My SQL said otherwise and was wrong.** 50 answers IS all of Communication: 25 about herself, 25 about Abram. Expectations is 6 answers in. Her profile is complete by the product's own rule. The only thing missing was Abram's invite. |
+| A30 | **Data labels gone, everywhere.** There were two renderers and I had turned off one; svBarChart had its own. Those tiles now have no axis and no number, so hover is the readout. Say if they read too bare and I will put the axis back. |
+| A31 | **Avg individual dimension results** replaces couple type distribution: ten sliders, pole labels, mean placement, same tile height. The ten are the block that was at the foot of that page, moved rather than rebuilt. |
+| A32 | **Pole labels wrap in full** instead of stopping at sixteen characters, and the comparison dot is the right way round everywhere: small grey for everyone, large coloured for your cut. |
+| A39 | **Every overview tile shows the uncut figure** under the stat when a slicer is on. Dashboard, Order Details and Package Mix, driven and photographed with a period selected. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
