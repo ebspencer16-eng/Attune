@@ -10,11 +10,10 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| S75 | **Abram was never invited, and it is not just Rebecca.** An invite code is minted only by the website. Anyone who set their profile up in the app gets none, so the partner email is collected and nothing can ever be sent. 094 below mints one for everybody missing it and tells you how many. |
+| S76 | **The app has no way to invite a partner at all.** No screen, no card, no prompt. Even with a code Rebecca could not send it from her phone. Building it is a decision: say go and I will, or she does it from the website in the meantime. |
+| S74 | **Rebecca: I still need the other two tables from 093.** You sent the partner one. The account setup and exercises tables were above it in the same run. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
-| W142 | **Spacing the options by meaning: my answer to your question is that it is overkill now.** W145 already took Communication from a 1 in 3 chance of a round quarter to 1 in 18. This would be you hand-writing 82 numbers for a second pass at the same problem. One line back and I build it; otherwise I will leave it. |
-| S73 | **092 is approved and still needs running.** Block below, Supabase SQL Editor. Its last statement was reading a column that does not exist and would have errored on you; fixed. |
-| S74 | **Rebecca: 093 below answers whether her setup, her exercises and her partner invite ever finished.** Read only, writes nothing. Paste the three tables back and I will tell you what to prompt her with. |
-| W146 | **W145 changes the Physical Intimacy figures of couples who already have results.** Your freeze rule says scoring should persist from when they took it, and it does for the couple type, which is stored. The intimacy figures have never been stored; they are recomputed from the answers on every request, and METHODOLOGY.md says so publicly. Tell me to leave it, or to freeze intimacy too, which needs a stored row and a migration. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -24,152 +23,102 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### Two to run, and one to read
+### One to run
 
-**Both blocks go in the Supabase SQL Editor, not Terminal.** Open Supabase, click
-SQL Editor, paste one block, click Run. Then do the same with the second.
+**This goes in the Supabase SQL Editor, not Terminal.** Open Supabase, click SQL
+Editor, paste the block, click Run.
 
-**S73, the one you approved.** 092 stops the feedback card asking anybody who has
-already finished the survey, by setting the flag from their completed row. Safe to
-run twice: it only fills a flag that is empty. The last statement shows you who is
-now recorded.
+**S75, the invite codes.** 094 gives a code to everybody who has none and can
+invite somebody. It skips the second partner, who joins on the first one's, and
+it never touches a code that already exists, because a code already in a sent
+link has to keep working. It prints a count before and after, and then the list
+of people who now have a partner to invite and the code to do it with.
 
-<!-- SQL 092_feedback_given_backfill.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 094_mint_missing_invite_codes.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 092: anybody who has finished the survey stops being asked for feedback.
+-- 094: everybody who can invite a partner gets a code to do it with.
 --
 -- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie: "I filled out the survey, I shouldn't still see the tell us what you
--- think action prompt."
+-- Ellie, of Rebecca: "Did she invite a partner? If no to any of that, we need
+-- to prompt her with it immediately."
 --
--- The home card is gated on `profiles.feedback_given_at`, and that column sat
--- unwritten for months: CLAUDE.md records it as "a flag nothing writes is a
--- prompt that never stops". api/survey.js writes it now, on the request that
--- finishes the survey. What it cannot do is reach back to a survey finished
--- before it learned to.
+-- Rebecca's row had Abram's name and Abram's email on it and no invite code,
+-- so nothing could ever be sent to him. That was not her broken sign-up. The
+-- code was only ever minted by the website; api/create-profile.js stored
+-- whatever a client sent and null when it sent nothing; and the app sends one
+-- only when somebody is JOINING on an invite.
 --
--- So this sets the flag from the thing that actually records the answer: a
--- completed row in survey_responses. The record is the evidence; the flag is
--- a copy of it kept for the home screen to read cheaply.
+-- So every first partner who set up in the app got no code, collected their
+-- partner's email, and could never invite them. The server mints it now, for
+-- any surface. This fills in the people it already happened to.
 --
--- Safe to run more than once. It only fills a flag that is null, so a date
--- already recorded is left alone.
+-- ── WHO IS LEFT OUT, AND WHY ────────────────────────────────────────────────
+-- The second partner. They joined on the first partner's code and have none by
+-- design: `joined_via_invite` records that. A second code on one couple makes
+-- "which code is this couple" a question with two answers.
+--
+-- ── SAFE TO RUN TWICE ───────────────────────────────────────────────────────
+-- It only fills a code that is missing. A code already there is never changed,
+-- because an invite already sent has that code in the link.
 --
 -- Run in the Supabase SQL Editor and click Run.
 -- ============================================================================
 
+-- ── Before: who is missing one ─────────────────────────────────────────────
+select
+  'before' as when,
+  count(*) filter (where coalesce(invite_code, '') = '' and coalesce(joined_via_invite, false) = false) as first_partners_with_no_code,
+  count(*) filter (where coalesce(invite_code, '') = '' and coalesce(joined_via_invite, false) = false
+                     and coalesce(partner_email, '') <> '')                                            as of_those_with_a_partner_email,
+  count(*) filter (where coalesce(invite_code, '') <> '')                                              as already_have_one
+from public.profiles;
+
+-- ── The fill ───────────────────────────────────────────────────────────────
+-- Eight uppercase hex characters, derived per row from that row's own id and a
+-- random draw. The id is in the hash so that two rows cannot land on the same
+-- code even if random() were to repeat; `invite_code` is unique, so a
+-- collision would fail this statement loudly rather than merge two couples.
+--
+-- The alphabet is 0-9 and A-F, which is not the alphabet the server mints
+-- from. That is deliberate and it is safe. The server's alphabet drops O and
+-- 0, and I and 1, because the one thing anybody does with a code is read it
+-- off a screen and type it into a phone. Hex has no letter O and no letter I,
+-- so its 0 and 1 are not ambiguous with anything. Both shapes pass the app's
+-- own check, which accepts A-Z and 0-9.
+--
+-- An earlier version built the string from generate_series and string_agg to
+-- match the server's alphabet exactly. It was harder to read, easy to get
+-- wrong in a way that hands every row the same code, and there is no Postgres
+-- on the machine this was written on to run it against. This form cannot have
+-- that bug by construction.
 update public.profiles p
-   set feedback_given_at = s.completed_at
-  from public.survey_responses s
- where s.respondent_id = p.id
-   and s.completed_at is not null
-   and p.feedback_given_at is null;
+   set invite_code = upper(substr(md5(p.id::text || random()::text), 1, 8))
+ where coalesce(p.invite_code, '') = ''
+   and coalesce(p.joined_via_invite, false) = false;
 
--- Who is now recorded as having given feedback.
---
--- The address comes from auth.users, because `profiles` has no email column.
--- The first version of this selected p.email and would have answered 42703 on
--- the one statement meant to show her the result. CLAUDE.md's own rule about a
--- read from a column that does not exist being as quiet as a write to one,
--- caught before she ran it rather than after.
-select u.email, p.feedback_given_at
-from public.profiles p
-join auth.users u on u.id = p.id
-where p.feedback_given_at is not null
-order by p.feedback_given_at desc;
-```
-<!-- /SQL -->
-
-**S74, Rebecca.** 093 writes nothing at all. It answers your three questions in
-three tables: whether her account setup finished, which exercises she has done,
-and whether a partner was ever invited. Paste the results back to me and I will
-tell you exactly what to prompt her with.
-
-<!-- SQL 093_rebecca_account_state.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- 093: What Rebecca has and has not done. READ ONLY. Writes nothing.
---
--- Ellie: "Since rebecca's login process was messed up, did she complete demos
--- and account setup? Did she invite a partner? If no to any of that, we need
--- to prompt her with it immediately."
---
--- Her sign-up went through a broken path, so the question is whether anything
--- was left half-finished. Three things, one row each, with a plain yes or no
--- and the date where there is one.
---
--- Nothing here changes a single value. Run it, read it, and nothing has moved.
---
--- She is found by email OR by the name on the profile, because a broken
--- sign-up is one of the ways those two come apart. If all three blocks come
--- back empty, the account is not under a name or address starting "rebecca"
--- and the thing to do is send me the email address rather than guess.
-
--- ── 1. Account setup ──────────────────────────────────────────────────────
--- A profile is set up when it has a name and the pronouns, which is what the
--- in-app editor writes. `profile_setup_complete` is the flag the app sets, and
--- it is reported separately from the fields because a broken path is exactly
--- how a flag and its fields come apart.
+-- ── After: nobody who can invite is without a code ─────────────────────────
 select
-  'account setup'                                       as question,
-  p.name                                                as name,
-  nullif(p.pronouns, '')                                as pronouns,
-  p.profile_setup_complete                              as setup_flag,
-  case
-    when coalesce(p.name, '') = '' then 'NO: no name'
-    when coalesce(p.pronouns, '') = '' then 'NO: no pronouns'
-    when p.profile_setup_complete is not true then 'PARTLY: fields are there, flag is not set'
-    else 'YES'
-  end                                                   as answer,
-  p.created_at
-from public.profiles p
-join auth.users u on u.id = p.id
-where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+  'after' as when,
+  count(*) filter (where coalesce(invite_code, '') = '' and coalesce(joined_via_invite, false) = false) as first_partners_with_no_code,
+  count(*) filter (where coalesce(invite_code, '') <> '')                                              as have_one
+from public.profiles;
 
--- ── 2. The exercises ──────────────────────────────────────────────────────
--- One row per exercise, so a half-finished set is visible rather than averaged
--- into a single yes. An answers column that is null or an empty object is not
--- started; one with keys in it has been answered.
+-- ── Who now has a partner to invite and a code to do it with ───────────────
+-- These are the people to prompt. An email on the row and nobody joined.
 select
-  'exercises'                                           as question,
-  x.exercise,
-  case
-    when x.answers is null then 'NO: not started'
-    when jsonb_typeof(x.answers) <> 'object' then 'ODD: stored value is not an object'
-    when x.answers = '{}'::jsonb then 'NO: started and empty'
-    when x.answers ? 'completedAt' then 'YES: finished ' || (x.answers ->> 'completedAt')
-    else 'PARTLY: ' || (select count(*) from jsonb_object_keys(x.answers)) || ' answers, no completedAt'
-  end                                                   as answer
-from public.profiles p
-join auth.users u on u.id = p.id
-cross join lateral (
-  values
-    ('Communication Styles',  p.ex1_answers),
-    ('Expectations',          p.ex2_answers),
-    ('Relationship Reflection', p.ex3_answers),
-    ('Physical Intimacy',     p.intimacy_data),
-    ('Conflict Patterns',     p.conflict_data)
-) as x(exercise, answers)
-where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
-
--- ── 3. The partner ────────────────────────────────────────────────────────
--- Three separate states, because they fail separately: no invite was ever
--- addressed, an invite was addressed but nobody joined, or a partner is linked.
-select
-  'partner'                                             as question,
-  nullif(p.partner_name, '')                            as partner_name,
-  nullif(p.partner_email, '')                           as partner_email,
+  u.email            as their_email,
+  p.name             as their_name,
+  p.partner_name,
+  p.partner_email,
   p.invite_code,
-  p.partner_joined,
-  case
-    when coalesce(p.partner_email, '') = '' then 'NO: no partner email on the profile'
-    when p.invite_code is null then 'NO: an email but no invite code, so nothing could be sent'
-    when p.partner_joined is not true then 'INVITED, NOT JOINED: ' || p.partner_email
-    else 'YES: joined'
-  end                                                   as answer
+  p.partner_joined
 from public.profiles p
 join auth.users u on u.id = p.id
-where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+where coalesce(p.partner_email, '') <> ''
+  and coalesce(p.partner_joined, false) = false
+  and coalesce(p.joined_via_invite, false) = false
+order by p.created_at;
 ```
 <!-- /SQL -->
 
@@ -178,56 +127,12 @@ where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecc
 
 ---
 
-### W141 and W142 — two decisions
-
-**W141, "What it is for".** Six options, you pick up to two, and the bar is how
-much your two picks overlap. That gives it four possible values: 0, 33, 50 and
-100 per cent. Over half of all possible pairs come out at 0, which the overview
-draws as complete misalignment. It is not one. Two people can each name a true
-thing and name different ones.
-
-My recommendation is to take it off the overview as a category and show the two
-sets of chips side by side, which is what its own detail page already does.
-
-If you want the quadrant instead, it works like this. Two axes, emotional to
-physical and steady to spark, and each of the six options gets a coordinate.
-Closeness and Reassurance sit emotional and steady, Ritual between them,
-Physical release sits physical, and Play and Feeling desired sit on the spark
-side. Then the bar becomes the distance between where your picks land and where
-theirs do, which has far more than four values. The catch is that placing the
-six is an editorial judgement and it is yours, not mine. Tell me to build it and
-the coordinates go in one small file with your words beside them.
-
-**W142, the round quarters.** Not a rounding artefact. Each option carries a
-number and those numbers are an even ladder: 1, 0.75, 0.5, 0.25, 0. One step
-apart is a quarter of the scale every time, in every question, so a dimension's
-bar can only ever be a mean of quarters. Adventurousness has two questions, so
-nine possible bars and a one in two chance of a round quarter. Communication has
-three, so thirteen and one in three. You landed on 75 twice because 75 is one of
-the few places the instrument can land.
-
-Three honest ways to add resolution:
-
-1. **Space the options by what they mean rather than evenly.** The number on
-   each option is already a field somebody chose, and it was chosen as a ladder.
-   "I want a lot of novelty" to "I lean adventurous" is a smaller real step than
-   "Somewhere in the middle" to "I prefer what I know works". Writing the spacing
-   to match makes the distances more accurate and breaks the quarters at the same
-   time. This is the one I recommend. It needs no new questions and the spacing is
-   yours to write.
-2. **More questions where the dimension is thin.** Adventurousness has two.
-   Four would roughly halve the chance of a quarter. Costs a longer exercise.
-3. **Say a band instead of a number** where there are only two questions behind
-   it. Honest, and weaker than the other two.
-
-What I would not do is nudge the number off 75 to make it look considered. A
-figure moved to look more precise is a figure that is not true, which is the
-opposite of what you are asking for.
 
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
+| S77 | **Minting the invite code on the server**, so the app path stops creating partners nobody can invite. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -237,7 +142,6 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| W144 | **The columns and the cover titles are centred, and your simulator was showing a bundle from before the fix.** I painted the word row red: no red appeared, which proved edits were not reaching it. After a forced relaunch the paint appeared and so did the centring. **Quit Expo Go on the simulator and reopen it** and you will see it. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
@@ -250,6 +154,10 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| S73 | **092 ran: anybody who had already finished the survey stops being asked for feedback.** Its last statement read a column that does not exist and was fixed before you ran it. |
+| W144 | **Centred the Ellie and Preston columns and the cover titles.** Prose put the alignment on the wrong view. Your simulator was also showing a stale bundle, which is why the first fix looked like nothing. |
+| W146 | **Intimacy figures stay live for now, frozen at launch.** Your call: we are all beta users. The launch reminder is W147. |
+| W142 | **Spacing the options by meaning: dropped.** The question weights in W145 already took Communication from a 1 in 3 chance of a round quarter to 1 in 18. |
 | W141 | **"What it is for" is off the overview**, out of the headline figure and out of the action plan. It compared two picks from a list of six, so most couples scored 0 on it. Its own page still shows both sets of answers. |
 | S71 | **The first 089 wrote an order for all thirteen accounts, five of them premium.** 091 listed every row it created against what that account had actually done. You ran it and kept them. |
 | S72 | **091, the read-only review of the backfill.** Ran and saved. Nothing was deleted. |

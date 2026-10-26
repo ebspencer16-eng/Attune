@@ -31,6 +31,7 @@ import { PKG_CAPS } from './_lib/entitlements.js';
 export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { safeError, jsonBody } from './_lib/http.js';
+import { newInviteCode, needsInviteCode } from './_lib/invite-code.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -111,6 +112,15 @@ export default async function handler(req) {
     partner_pronouns:     typeof body.partnerPronouns === 'string'  ? body.partnerPronouns.slice(0, 30)   : '',
     partner_email:        typeof body.partnerEmail === 'string'     ? body.partnerEmail.slice(0, 200).toLowerCase() : '',
     email_opt_in:         body.emailOptIn !== false,
+    /**
+     * The code this couple is found by.
+     *
+     * Taken from the body when the client sent one, which is the website
+     * building the invite URL in the same breath, and the second partner
+     * joining on the first one's code. Minted below when it is neither,
+     * because a first partner with no code can never invite anybody and the
+     * app has never sent one: see api/_lib/invite-code.js.
+     */
     invite_code:          (typeof body.inviteCode === 'string' && body.inviteCode.trim()) ? body.inviteCode.slice(0, 32) : null,
     partner_joined:       false,
     // pkg is NOT taken from the body. See the block below: it is derived from
@@ -123,6 +133,24 @@ export default async function handler(req) {
     signup_source:        typeof body.signupSource === 'string'       ? body.signupSource.slice(0, 50)    : null,
     joined_via_invite:    !!body.joinedViaInvite,
   };
+
+  /**
+   * ── A FIRST PARTNER ALWAYS LEAVES HERE WITH A CODE ──────────────────────
+   * Asked of the row rather than of the body, so the one rule covers a client
+   * that sent nothing, a client that sent an empty string, and a client that
+   * has not been written yet.
+   *
+   * The second partner is exempt and that is the point of the exemption:
+   * joining on somebody's invite means the couple already has a code, and a
+   * second one would make "which code is this couple" a question with two
+   * answers.
+   *
+   * Uniqueness is a column constraint, so a collision is a failed insert
+   * rather than two couples sharing a key. At eight characters from a
+   * 32-letter alphabet that is a thousand-billion-to-one, and retrying once
+   * costs nothing against never retrying and losing a profile.
+   */
+  if (needsInviteCode(profile)) profile.invite_code = newInviteCode();
 
   const admin = createClient(supabaseUrl, serviceKey);
 
@@ -217,7 +245,27 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ ok: true, existed: true, userId }), { status: 200, headers: CORS });
   }
 
-  const { error } = await admin.from('profiles').insert(profile);
+  let { error } = await admin.from('profiles').insert(profile);
+  /**
+   * ── ONE RETRY, AND ONLY FOR A TAKEN CODE ────────────────────────────────
+   * `profiles.invite_code` is unique, so two couples can never share one: a
+   * collision is a failed insert rather than a silent merge. 23505 is Postgres
+   * for "unique violation", and the only unique column this row can collide on
+   * besides its own id, which is the signed-in user and cannot be a surprise.
+   *
+   * At eight characters from a 32-letter alphabet a collision is about a
+   * thousand billion to one, so this will almost certainly never run. It is
+   * here because the alternative is losing somebody's profile to a dice roll,
+   * and because a comment promising a retry with no retry under it is worse
+   * than no comment.
+   *
+   * Once, not in a loop. If a second random code also collides, something is
+   * wrong that retrying will not fix, and the honest answer is the error.
+   */
+  if (error?.code === '23505' && !body.inviteCode && needsInviteCode({ ...profile, invite_code: null })) {
+    profile.invite_code = newInviteCode();
+    ({ error } = await admin.from('profiles').insert(profile));
+  }
   if (error) {
     console.error('[create-profile] insert error:', error);
     return new Response(JSON.stringify({ error: safeError('create-profile', error, 'Could not create your profile.') }), { status: 500, headers: CORS });
@@ -235,5 +283,8 @@ export default async function handler(req) {
   // setting up an account they have paid for.
   await recordConsent({ email: authEmail, userId, source: 'account_creation' });
 
-  return new Response(JSON.stringify({ ok: true, created: true, userId }), { status: 200, headers: CORS });
+  /* The code that was actually stored, so a caller builds its invite link from
+     what is in the row rather than from what it hoped it sent. Null for the
+     second partner, who joins on the first one's. */
+  return new Response(JSON.stringify({ ok: true, created: true, userId, inviteCode: profile.invite_code || null }), { status: 200, headers: CORS });
 }
