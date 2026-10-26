@@ -85,6 +85,27 @@ export default async function handler(req) {
       if ('discount_value' in row)    clean.discount_value = Number(row.discount_value) || 0;
       if ('applies_to' in row)        clean.applies_to = String(row.applies_to || '').slice(0, 60);
       if ('includes_workbook' in row) clean.includes_workbook = !!row.includes_workbook;
+      /**
+       * ── THE OTHER FOUR ADD-ONS ──────────────────────────────────────────
+       * `codeMetaFromRow` in api/_lib/beta-codes.js reads all five
+       * `includes_*` columns, and the checkout and the tax endpoint both act
+       * on all five. This allowlist carried only the workbook, so a code built
+       * here could never give away Reflection, the Budget, the Checklist or
+       * Physical Intimacy, however the form was filled in: the write dropped
+       * the field silently and the code shipped bundling nothing.
+       *
+       * Found while building the admin's own create-a-code form, which is the
+       * first thing that has ever written one of these rows from a page.
+       *
+       * Conflict Patterns is deliberately absent, because codeMetaFromRow does
+       * not read a column for it and there is none on the table. Adding the
+       * field here without the half that honours it would be a control that
+       * looks like it works.
+       */
+      if ('includes_reflection' in row) clean.includes_reflection = !!row.includes_reflection;
+      if ('includes_budget' in row)     clean.includes_budget = !!row.includes_budget;
+      if ('includes_checklist' in row)  clean.includes_checklist = !!row.includes_checklist;
+      if ('includes_intimacy' in row)   clean.includes_intimacy = !!row.includes_intimacy;
       if ('workbook_variant' in row)  clean.workbook_variant = row.workbook_variant == null ? null : String(row.workbook_variant).slice(0, 20);
       if ('max_uses' in row)          clean.max_uses = row.max_uses == null ? null : (Number(row.max_uses) || null);
       if ('expires_at' in row)        clean.expires_at = row.expires_at || null;

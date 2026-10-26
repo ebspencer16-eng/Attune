@@ -52,6 +52,7 @@ const { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS } = await import(`${ROOT}api/_conf
    probe reported no error, which is a harness saying nothing about a third of
    the page. */
 const { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } = await import(`${ROOT}api/_type-engine.js`);
+const { COMPILED_BETA_CODES: COMPILED_CODES } = await import(`${ROOT}api/_lib/beta-codes.js`);
 const { PERSONALITY_QUESTIONS } = await import(`${ROOT}api/_questions.js`);
 const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
@@ -185,7 +186,11 @@ for (let i = 0; i < 48; i++) {
   const d = new Date();
   d.setMonth(d.getMonth() - (i % 12));
   const pkg = PKGS[i % PKGS.length];
-  const promo = i % 2 === 0 ? 'BETA' + (i % 12) : null;
+  /* Codes the lookup will actually resolve: eleven of the compiled ones, plus
+     the two issued ones, plus one that is in no list at all so the "Unknown"
+     bucket is still exercised rather than being assumed empty. */
+  const CODE_POOL = [...Object.keys(COMPILED_CODES).slice(0, 11), 'SPRING25', 'FRIENDS10', 'GONE-FROM-THE-TABLE'];
+  const promo = i % 2 === 0 ? CODE_POOL[i % CODE_POOL.length] : null;
   const row = {
     pkg_key: pkg,
     addon_workbook: i % 7 === 0,
@@ -257,8 +262,28 @@ const server = createServer((req, res) => {
       order_num: 'A' + (1000 + i), pkg_key: ['core', 'newlywed', 'anniversary', 'premium'][i % 4],
       total: [89, 139, 139, 198][i % 4], created_at: new Date(Date.now() - i * 864e5).toISOString(),
       buyer_email: null, shipping_state: 'CA', shipping_country: 'US',
+      /* A code on half of them, so the table's Promo and Discount columns have
+         something to draw and the empty case is still represented. */
+      promo_code: i % 2 === 0 ? ['BETA-CORE', 'SPRING25', 'FRIENDS10', 'ATTUNE-BETA-01'][i % 4] : null,
     }));
-    res.end(JSON.stringify({ ok: true, orders, responses: payload }));
+    /* ── CODES ───────────────────────────────────────────────────────────
+       The stub had none, so __codeByName was empty: every Discount cell was
+       blank and the whole discount chart was one "Unknown" bar. That is the
+       exact bug Ellie reported in production, reproduced by the harness rather
+       than by the product, which is the thing to be careful about. The real
+       endpoint merges the compiled codes in; this does the same so the page
+       can be looked at. */
+    const beta_codes = [
+      ...Object.entries(COMPILED_CODES).map(([code, meta]) => {
+        const m = (typeof meta === 'string') ? { pkg: meta, mode: 'free', amount: 0 } : (meta || {});
+        return { code, pkg_key: m.pkg || null, discount_mode: m.mode || 'free',
+          discount_value: m.mode === 'percent' ? (m.amount ?? 100) : (m.amount ?? 0),
+          includes_workbook: !!m.includesWorkbook, active: true, source: 'compiled' };
+      }),
+      { code: 'SPRING25', package_key: 'core', discount_mode: 'percent', discount_value: 25, active: true, uses_count: 3, max_uses: 50, source: 'issued' },
+      { code: 'FRIENDS10', package_key: '*', discount_mode: 'fixed', discount_value: 10, active: false, uses_count: 0, max_uses: null, source: 'issued' },
+    ];
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, responses: payload }));
     return;
   }
   if (url.pathname.startsWith('/api/admin-typing')) {

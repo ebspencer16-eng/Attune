@@ -46,6 +46,7 @@ import { pronounLabel } from './_lib/pronouns.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understandingBandFor } from './_lib/results.js';
+import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -549,7 +550,46 @@ export default async function handler(req) {
       responses,
       responsesBySegment,
       orders,
-      beta_codes: codesQ.data || [],
+      /**
+       * Every code the product will accept, not just the issued ones.
+       *
+       * Ellie: "Discount size distribution shows 100% off and unknown, each
+       * with 9. I believe all 18 orders are 100% off, please adjust this
+       * chart."
+       *
+       * She was right and the chart was not wrong about what it had. Codes
+       * come from two places, the same two the checkout and the tax endpoint
+       * read: the compiled set in api/_lib/beta-codes.js, and the beta_codes
+       * table where per-couple codes are issued. This endpoint sent only the
+       * table, so every order placed on a compiled code looked up to nothing
+       * and fell into "Unknown". Nine and nine.
+       *
+       * The compiled ones go first and a table row of the same name wins, so
+       * a code that has been edited in the admin reads as edited.
+       */
+      beta_codes: [
+        ...Object.entries(COMPILED_BETA_CODES || {})
+          .filter(([code]) => !(codesQ.data || []).some((r) => String(r.code || '').toUpperCase() === String(code).toUpperCase()))
+          /**
+           * A compiled entry is either a package key on its own, meaning a
+           * free code for that package, or an object with mode and amount.
+           * Shaped into the same columns a beta_codes row has, because the
+           * admin reads one lookup and must not learn two shapes.
+           */
+          .map(([code, meta]) => {
+            const m = (typeof meta === 'string') ? { pkg: meta, mode: 'free', amount: 0 } : (meta || {});
+            return {
+              code,
+              pkg_key: m.pkg || null,
+              discount_mode: m.mode || 'free',
+              discount_value: m.mode === 'percent' ? (m.amount ?? 100) : (m.amount ?? 0),
+              includes_workbook: !!m.includesWorkbook,
+              active: true,
+              source: 'compiled',
+            };
+          }),
+        ...(codesQ.data || []).map((r) => ({ ...r, source: 'issued' })),
+      ],
       profiles: {
         demographics: profiles.map(p => ({
           /* Normalised the way the other two admin endpoints normalise it, so

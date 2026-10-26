@@ -338,17 +338,16 @@
       Dashboard
     </a>
     <div class="sb-section">Revenue</div>
+    <!-- Ellie: "I'd like to combine promo analytics into the orders page: call
+         it order details, move it above package mix page." Promo Analytics is
+         gone as a destination; everything it held is on this page now. -->
+    <a class="sb-item" onclick="showPage('orders')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      Order Details
+    </a>
     <a class="sb-item" onclick="showPage('packages')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Package Mix
-    </a>
-    <a class="sb-item" onclick="showPage('promos')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-      Promo Analytics
-    </a>
-    <a class="sb-item" onclick="showPage('orders')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-      Orders
     </a>
     <div class="sb-section">Analytics</div>
     <a class="sb-item" onclick="showPage('responses')">
@@ -413,6 +412,58 @@
 <div class="main">
 
   <!-- ══ DASHBOARD ══ -->
+<style>
+/* ── A KPI SHELL ───────────────────────────────────────────────────────────
+   Ellie: "I want those to be in a only slightly shaded tile that has the 2
+   slicers." Slightly: the shell is the page ground rather than card white, so
+   the four cards inside it still read as cards. A heavier fill makes the cards
+   float and the group read as a chart with no chart in it. */
+.kpi-shell{background:var(--bg);}
+.kpi-shell .chart-head{border-bottom:1px solid var(--border);}
+.kpi-shell .kpi-card{box-shadow:none;}
+.tile-slicers{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
+/* ── SHOW ALL ──────────────────────────────────────────────────────────────
+   Sits under a table and says how many rows are hidden, because the number is
+   the reason to press it. */
+.table-more{display:flex;justify-content:center;padding:.3rem 0 .15rem;}
+.table-more:empty{display:none;}
+.table-more-btn{display:inline-flex;align-items:center;gap:.1rem;background:transparent;border:1px solid var(--border);border-radius:999px;
+  padding:.34rem .9rem;font-family:var(--bfont);font-size:.7rem;color:var(--muted);cursor:pointer;transition:border-color .15s,color .15s;}
+.table-more-btn:hover{border-color:var(--orange);color:var(--orange);}
+.response-table th[data-sort-col]:hover{color:var(--orange);}
+/* ── THE STATUS TOGGLE ─────────────────────────────────────────────────────
+   A dot and a word rather than a switch, because a switch in a table row reads
+   as a filter for that row rather than as the row's own state. */
+.promo-toggle{display:inline-flex;align-items:center;gap:.35rem;background:transparent;border:1px solid var(--border);border-radius:999px;
+  padding:.2rem .55rem;font-family:var(--bfont);font-size:.66rem;color:var(--muted);cursor:pointer;transition:border-color .15s,color .15s;}
+.promo-toggle:hover{border-color:var(--orange);color:var(--orange);}
+.promo-toggle[disabled]{opacity:.55;cursor:default;}
+.promo-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.promo-toggle[data-on="1"]{color:var(--text);}
+.promo-toggle[data-on="1"] .promo-dot{background:#34D399;}
+/* ── THE NEW CODE DIALOG ───────────────────────────────────────────────────
+   A <dialog>, so focus, Escape and stacking are the browser's job. */
+.admin-dialog{border:none;border-radius:14px;padding:0;background:var(--card);color:var(--text);max-width:460px;width:calc(100% - 2rem);
+  box-shadow:0 24px 60px rgba(16,24,40,.22);font-family:var(--bfont);}
+.admin-dialog::backdrop{background:rgba(16,24,40,.42);}
+.admin-dialog form{padding:1.35rem 1.4rem 1.2rem;display:flex;flex-direction:column;gap:.95rem;}
+.admin-dialog-head{margin-bottom:.1rem;}
+.admin-field{display:flex;flex-direction:column;gap:.35rem;border:none;padding:0;margin:0;}
+.admin-field > span{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:700;}
+.admin-field input[type=text],.admin-field input[type=number],.admin-field select{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;color:var(--text);
+  font-family:var(--bfont);outline:none;width:100%;}
+.admin-field input:focus,.admin-field select:focus{border-color:var(--orange);}
+.admin-field small{font-size:.66rem;color:var(--muted);line-height:1.5;}
+.admin-row{display:flex;gap:.5rem;}
+.admin-row select{flex:1.2;} .admin-row input{flex:1;}
+.admin-checks{display:flex;flex-wrap:wrap;gap:.4rem .9rem;}
+.admin-checks label{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--text);}
+.admin-dialog-err{font-size:.72rem;color:#B91C1C;line-height:1.5;}
+.admin-dialog-err:empty{display:none;}
+.admin-dialog-foot{display:flex;justify-content:flex-end;gap:.5rem;padding-top:.2rem;}
+details[open] > summary > span:first-child{transform:rotate(90deg);display:inline-block}
+</style>
   <div class="page active" id="page-overview">
     <div class="topbar">
       <div>
@@ -445,20 +496,44 @@
       <p><strong>Data separation active.</strong> This dashboard operates on fully anonymized records. No names, email addresses, or personally identifiable information are present in any dataset shown here. Records are identified by random UUID only. This system has no access to the authentication system that holds PII.</p>
     </div>
 
-    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
-      <div class="kpi-card orange">
-        <div class="kpi-label">Total orders</div>
-        <div class="kpi-val" id="stat-orders">—</div>
-        <div class="kpi-trend up" id="stat-orders-trend"></div>
+    <!-- Ellie: "I want that done to every page that has the boxes at the top,
+         I want those to be in a only slightly shaded tile that has the 2
+         slicers." -->
+    <div class="chart-card kpi-shell">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Orders at a glance</div>
+          <div class="chart-subtitle">Across the orders in this cut</div>
+        </div>
+        <div class="tile-slicers">
+          <select class="tile-slicer" id="slz-ovsum-period" title="Limit this tile to a period" aria-label="Period">
+            <option value="">All orders</option>
+            <option value="365">Past 12 months</option>
+            <option value="182">Past 6 months</option>
+            <option value="90">Past 90 days</option>
+            <option value="30">Past month</option>
+            <option value="7">Past week</option>
+          </select>
+          <select class="tile-slicer" id="slz-ovsum" title="Cut this tile by a segment" aria-label="Slz ovsum"><option value="">Everyone</option></select>
+        </div>
       </div>
-      <div class="kpi-card green">
-        <div class="kpi-label">Total revenue</div>
-        <div class="kpi-val" id="stat-revenue">—</div>
-        <div class="kpi-trend up" id="stat-revenue-trend"></div>
-      </div>
-      <div class="kpi-card amber">
-        <div class="kpi-label">Avg order value</div>
-        <div class="kpi-val" id="stat-aov">—</div>
+      <div class="chart-body">
+        <div class="kpi-grid" id="ov-sum-tiles" style="grid-template-columns:repeat(3,1fr);margin:0;">
+          <div class="kpi-card orange">
+            <div class="kpi-label">Total orders</div>
+            <div class="kpi-val" id="stat-orders">—</div>
+            <div class="kpi-trend up" id="stat-orders-trend"></div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Total revenue</div>
+            <div class="kpi-val" id="stat-revenue">—</div>
+            <div class="kpi-trend up" id="stat-revenue-trend"></div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label">Avg order value</div>
+            <div class="kpi-val" id="stat-aov">—</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -589,11 +664,18 @@
     </div>
   </div>
 
+  <!-- ══ ORDER DETAILS ══
+       Ellie: "I'd like to combine promo analytics into the orders page: call
+       it order details, move it above package mix page. Start with the tile
+       with the tiles, but reorder them and drop one. I want: Revenue, Avg
+       order value, % orders with a code. Then show orders table. Then show
+       discount size distribution. Then show promo code table."
+       Built in exactly that order. -->
   <div class="page" id="page-orders">
     <div class="topbar">
       <div>
-        <div class="topbar-title">Orders</div>
-        <div class="topbar-sub">Anonymized transaction records</div>
+        <div class="topbar-title">Order Details</div>
+        <div class="topbar-sub">Every order, the codes they used, and how much came off</div>
       </div>
       <div class="topbar-right">
         <button class="export-btn" onclick="exportAdminCSV('orders')">
@@ -602,7 +684,38 @@
         </button>
       </div>
     </div>
-    <div class="chart-grid">
+
+    <!-- Ellie: "I want the same thing done to these top 4 boxes as we did to
+         the ones on package mix... I want those to be in a only slightly
+         shaded tile that has the 2 slicers." -->
+    <div class="chart-card kpi-shell">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Order summary</div>
+          <div class="chart-subtitle">Across the orders in this cut</div>
+        </div>
+        <div class="tile-slicers">
+          <select class="tile-slicer" id="slz-ordsum-period" title="Limit this tile to a period" aria-label="Period">
+            <option value="">All orders</option>
+            <option value="365">Past 12 months</option>
+            <option value="182">Past 6 months</option>
+            <option value="90">Past 90 days</option>
+            <option value="30">Past month</option>
+            <option value="7">Past week</option>
+          </select>
+          <select class="tile-slicer" id="slz-ordsum" title="Cut this tile by a segment" aria-label="Slz ordsum"><option value="">Everyone</option></select>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div class="kpi-grid" id="ord-sum-tiles" style="grid-template-columns:repeat(3,1fr);margin:0;">
+          <div class="kpi-card green"><div class="kpi-label">Revenue</div><div class="kpi-val" id="pr-revenue">—</div><div class="kpi-sub" id="pr-revenue-sub">All orders</div></div>
+          <div class="kpi-card blue"><div class="kpi-label">Avg order value</div><div class="kpi-val" id="pr-aov">—</div><div class="kpi-sub">Per order</div></div>
+          <div class="kpi-card orange"><div class="kpi-label">% orders with a code</div><div class="kpi-val" id="pr-code-pct">—</div><div class="kpi-sub" id="pr-code-n">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid" style="margin-top:1.25rem">
       <div class="chart-card">
         <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed</div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment" aria-label="Slz sfunnel"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-funnel"></canvas></div>
@@ -612,6 +725,9 @@
         <div class="chart-body"><div id="geo-breakdown"></div></div>
       </div>
     </div>
+
+    <!-- The couple type filter is gone. Ellie: "Remove couple type filter from
+         order table." -->
     <div class="filter-bar">
       <span class="filter-label">Filter:</span>
       <select class="filter-select" id="orders-pkg-filter" onchange="applyOrderFilters()" aria-label="Orders pkg filter">
@@ -627,40 +743,111 @@
         <option value="30">Last 30 days</option>
         <option value="90">Last 90 days</option>
       </select>
-      <select class="filter-select" id="orders-type-filter" onchange="applyOrderFilters()" aria-label="Orders type filter">
-        <option value="">All couple types</option>
-        <option value="WW">WW – The Mirror</option>
-        <option value="WY">WY – The Balance</option>
-        <option value="WZ">WZ – The Bridge</option>
-        <option value="YY">YY – The Steady</option>
-        <option value="YZ">YZ – The Channel</option>
-        <option value="ZZ">ZZ – The Current</option>
-      </select>
       <input type="text" id="orders-search" placeholder="Search order ID or name…" oninput="applyOrderFilters()"
         style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.45rem .85rem;font-size:.75rem;color:var(--text);font-family:var(--bfont);outline:none;min-width:200px;transition:border-color .15s"
         onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'"/>
       <span id="orders-count-label" style="font-size:.72rem;color:var(--muted);margin-left:auto;font-family:var(--mono);"></span>
     </div>
+
     <div class="chart-card" style="margin-top:1.25rem">
       <div class="table-wrap">
-        <table class="response-table" id="orders-table">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Date</th>
-              <th>Package</th>
-              <th>Amount</th>
-              <th>Couple type</th>
-              <th>Promo</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="orders-tbody"></tbody>
-        </table>
+        <table class="response-table" id="orders-table"><thead></thead><tbody></tbody></table>
       </div>
+      <div class="table-more" data-table-more="orders-table"></div>
     </div>
-  </div>
 
+    <div class="chart-card" style="margin-top:1.25rem;">
+      <div class="chart-head"><div><div class="chart-title">Discount size distribution</div><div class="chart-subtitle">Orders that used a code, by how much came off</div></div><select class="tile-slicer" id="slz-pdisc" title="Cut this tile by a segment" aria-label="Slz pdisc"><option value="">Everyone</option></select></div>
+      <div class="chart-body"><div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div></div>
+    </div>
+
+    <div class="chart-card" style="margin-top:1.25rem;">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Promo codes</div>
+          <div class="chart-subtitle">Orders matched joins on the order's code; configured uses is the counter on the code itself.</div>
+        </div>
+        <button type="button" class="export-btn" id="promo-new-btn" title="Create a promo code">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New code
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table class="response-table" id="promo-code-table"><thead></thead><tbody></tbody></table>
+      </div>
+      <div class="table-more" data-table-more="promo-code-table"></div>
+    </div>
+
+    <!-- ── NEW CODE ───────────────────────────────────────────────────────
+         Ellie: "If we click plus it should take us through a setup popup
+         little form that has us name the code, select discount amount, select
+         if it's only for a certain package/addon or something, then select max
+         uses. Once we fill out what we want the code to be/do, I want the code
+         to be activated. Can you do that or do I have to run the migration?"
+
+         No migration. api/admin-actions.js already had `beta_upsert`, which
+         writes a beta_codes row with the service key, and nothing on any page
+         had ever called it. The code is live the moment this form is saved.
+
+         A <dialog> rather than a div with a backdrop: it traps focus, closes
+         on Escape and sits above everything without a z-index argument, all of
+         which would otherwise be written by hand and got wrong. -->
+    <dialog id="promo-new" class="admin-dialog">
+      <form method="dialog" id="promo-new-form">
+        <div class="admin-dialog-head">
+          <div class="chart-title">New promo code</div>
+          <div class="chart-subtitle">It goes live as soon as you save it.</div>
+        </div>
+        <label class="admin-field">
+          <span>Code</span>
+          <input id="pn-code" type="text" autocomplete="off" spellcheck="false" placeholder="SPRING25" required />
+          <small>Letters, numbers and dashes. It is stored and matched in capitals.</small>
+        </label>
+        <label class="admin-field">
+          <span>Discount</span>
+          <div class="admin-row">
+            <select id="pn-mode">
+              <option value="free">100% off</option>
+              <option value="percent">Percentage off</option>
+              <option value="fixed">Fixed amount off</option>
+            </select>
+            <input id="pn-value" type="number" min="0" step="1" value="0" />
+          </div>
+          <small id="pn-value-hint">Nothing to set: this code makes the order free.</small>
+        </label>
+        <label class="admin-field">
+          <span>Packages it works on</span>
+          <select id="pn-pkg">
+            <option value="*">Any package</option>
+            <option value="core">Assessment</option>
+            <option value="newlywed">Starting Out</option>
+            <option value="anniversary">Anniversary</option>
+            <option value="premium">Premium</option>
+          </select>
+        </label>
+        <fieldset class="admin-field">
+          <span>Add-ons it includes free</span>
+          <div class="admin-checks">
+            <label><input type="checkbox" id="pn-workbook" /> Workbook</label>
+            <label><input type="checkbox" id="pn-reflection" /> Reflection</label>
+            <label><input type="checkbox" id="pn-budget" /> Budget</label>
+            <label><input type="checkbox" id="pn-checklist" /> Merging Lives Checklist</label>
+            <label><input type="checkbox" id="pn-intimacy" /> Physical Intimacy</label>
+          </div>
+          <small>Conflict Patterns is not here because the checkout has no column for it, so a tick would do nothing.</small>
+        </fieldset>
+        <label class="admin-field">
+          <span>Max uses</span>
+          <input id="pn-max" type="number" min="1" step="1" placeholder="Leave blank for unlimited" />
+        </label>
+        <div class="admin-dialog-err" id="pn-err"></div>
+        <div class="admin-dialog-foot">
+          <button type="button" class="table-more-btn" id="pn-cancel">Cancel</button>
+          <button type="button" class="export-btn" id="pn-save">Create and activate</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
 
   <!-- ══ PACKAGE MIX ══ -->
   <div class="page" id="page-packages">
@@ -679,7 +866,7 @@
          The period select is first because it is the one that is specific to
          this tile; the segment select is the same control, with the same id
          shape, that every other tile on the page carries. -->
-    <div class="chart-card">
+    <div class="chart-card kpi-shell">
       <div class="chart-head">
         <div>
           <div class="chart-title">Historical package mix</div>
@@ -1820,59 +2007,6 @@ window.adminAuthHeaders = function(extra){
 
   </div>
 
-  <div class="page" id="page-promos">
-    <style>details[open] > summary > span:first-child{transform:rotate(90deg);display:inline-block}
-#page-promos .chart-card{padding:1.1rem 1.25rem 1.25rem;}#page-promos .chart-title{font-size:.8rem;font-weight:700;color:var(--text);}#page-promos .chart-sub{font-size:.68rem;color:var(--muted);margin-top:.15rem;line-height:1.5;}</style>
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Promo Analytics</div>
-        <div class="topbar-sub">Discount code usage, order value, and add-on attachment across real orders.</div>
-      </div>
-      <div class="topbar-right">
-        <div class="date-badge" id="promos-last-updated">—</div>
-        <button class="export-btn" onclick="renderPromosPage(true)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.95"/></svg>
-          Refresh
-        </button>
-      </div>
-    </div>
-
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
-      <div class="kpi-card orange">
-        <div class="kpi-label">Orders with a code</div>
-        <div class="kpi-val" id="pr-code-pct">—</div>
-        <div class="kpi-sub" id="pr-code-n">—</div>
-      </div>
-      <div class="kpi-card blue">
-        <div class="kpi-label">Avg order value</div>
-        <div class="kpi-val" id="pr-aov">—</div>
-        <div class="kpi-sub">All orders</div>
-      </div>
-      <div class="kpi-card green">
-        <div class="kpi-label">Avg full-price order</div>
-        <div class="kpi-val" id="pr-aov-full">—</div>
-        <div class="kpi-sub">Orders without a code</div>
-      </div>
-      <div class="kpi-card purple">
-        <div class="kpi-label">Revenue</div>
-        <div class="kpi-val" id="pr-revenue">—</div>
-        <div class="kpi-sub" id="pr-revenue-sub">All orders</div>
-      </div>
-    </div>
-
-    <div class="chart-card" style="margin-top:1rem;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-title">Discount size distribution</div><div class="chart-sub">Count of code-redeeming orders by discount size</div></div><select class="tile-slicer" id="slz-pdisc" title="Cut this tile by a segment" aria-label="Slz pdisc"><option value="">Everyone</option></select></div>
-      <div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div>
-    </div>
-
-    <div class="chart-card" style="margin-top:1rem;">
-      <div class="chart-title">Code usage</div>
-      <div class="chart-sub">Most recently used at the top. Orders matched joins on the order's promo code; configured uses is the counter on the code itself.</div>
-      <div id="pr-code-table" style="margin-top:.75rem;">—</div>
-    </div>
-  </div>
-
-
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
 // ADMIN LOGIN GATE — initialized FIRST so it works even if the rest of the
@@ -2397,8 +2531,8 @@ function setTileText(id, text) {
 // ── PROMO ANALYTICS PAGE ──────────────────────────────────────────────────────
 let __prDiscountChart = null, __prAddonChart = null;
 async function renderPromosPage(force) {
-  const updatedEl = document.getElementById('promos-last-updated');
-  if (updatedEl) updatedEl.textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  /* The Promo Analytics topbar and its refresh button went with that page.
+     This function kept its name because every caller uses it. */
 
   const data = await fetchAdminData(force);
   const orders = (data && data.orders) || [];
@@ -2407,17 +2541,20 @@ async function renderPromosPage(force) {
   codes.forEach(c => { codeByName[(c.code || '').toUpperCase()] = c; });
 
   const withCode = orders.filter(o => o.promo_code);
-  const fullPrice = orders.filter(o => !o.promo_code);
   const sum = arr => arr.reduce((s, o) => s + (Number(o.total) || 0), 0);
   const fmt$ = n => '$' + (Math.round(n * 100) / 100).toLocaleString('en-US');
 
   // KPIs
-  const el = id => document.getElementById(id);
-  if (el('pr-code-pct'))  el('pr-code-pct').textContent  = orders.length ? Math.round(withCode.length / orders.length * 100) + '%' : '—';
-  if (el('pr-code-n'))    el('pr-code-n').textContent    = withCode.length + ' of ' + orders.length + ' orders';
-  if (el('pr-aov'))       el('pr-aov').textContent       = orders.length ? fmt$(sum(orders) / orders.length) : '—';
-  if (el('pr-aov-full'))  el('pr-aov-full').textContent  = fullPrice.length ? fmt$(sum(fullPrice) / fullPrice.length) : '—';
-  if (el('pr-revenue'))   el('pr-revenue').textContent   = fmt$(sum(orders));
+  /* ── THE THREE TILES ARE NOT WRITTEN HERE ─────────────────────────────
+     They are drawn by renderOrderChart's `ordsum` kind, which reads the cube
+     and so can honour the period select and the segment select Ellie asked
+     for. This function wrote them too, from a different source: the cube
+     excludes demo accounts and this payload does not, so the same tile said
+     "48 orders" in one line and "0 of 40 orders" in the next, on screen, in
+     the first render after the merge.
+
+     Two writers on one element, which is this codebase's oldest failure, and
+     it took three minutes to appear. Nothing is set here. */
 
   // Discount size distribution. Bucket each code-redeeming order by the
   // discount its code is configured with: free => 100% off, percent => its
@@ -2473,43 +2610,167 @@ async function renderPromosPage(force) {
     const k = (c.code || '').toUpperCase();
     if (!usage[k] && (c.uses_count || 0) > 0) usage[k] = { code: k, orders: 0, revenue: 0, lastUsed: c.last_used_at ? new Date(c.last_used_at).getTime() : null };
   });
-  // Ordered by most recently used (newest at top). Codes never used fall to the
-  // bottom, themselves ordered by configured usage so active-but-unused codes
-  // don't bury the ones with activity.
-  const rows = Object.values(usage).filter(r => (codeByName[r.code]?.active) !== false).sort((a, b) => {
-    if (a.lastUsed && b.lastUsed) return b.lastUsed - a.lastUsed;
-    if (a.lastUsed) return -1;
-    if (b.lastUsed) return 1;
-    const ua = (codeByName[a.code]?.uses_count) || 0, ub = (codeByName[b.code]?.uses_count) || 0;
-    return ub - ua;
+  /* The fixed ordering that was here is gone: the table sorts on any column
+     now, so a single order baked in is one the reader cannot get back to. It
+     also filtered inactive codes out, which is the opposite of what she asked
+     for: an inactive code has to be visible to be switched back on. */
+  /* ── THE PROMO CODE TABLE ────────────────────────────────────────────
+     Ellie: "This table should also include a column on the far left that shows
+     status active or deactivated and we can toggle to activate or turn off."
+     And: "Add sorting carats... only show 8 rows but have the option to drop
+     down."
+
+     It shows every code the product will accept, not only the ones that have
+     been redeemed. A code created and never used is the one you most need to
+     see, because the question you have about it is whether it is live. */
+  const codeRows = Object.values(codeByName).map((c) => {
+    const used = usage[String(c.code || '').toUpperCase()] || { orders: 0, revenue: 0, lastUsed: 0 };
+    return {
+      code: c.code,
+      pkg: c.package_key || c.pkg_key || null,
+      mode: c.discount_mode || 'free',
+      value: Number(c.discount_value) || 0,
+      uses: c.uses_count == null ? null : Number(c.uses_count),
+      maxUses: c.max_uses == null ? null : Number(c.max_uses),
+      orders: used.orders || 0,
+      revenue: used.revenue || 0,
+      lastUsed: used.lastUsed || 0,
+      /* A compiled code cannot be switched off from here: it is in the
+         deployed source, not in a table. Said in the cell rather than drawn as
+         a toggle that silently does nothing. */
+      compiled: c.source === 'compiled',
+      active: c.active !== false,
+    };
   });
-  const tableEl = document.getElementById('pr-code-table');
-  if (tableEl) {
-    if (rows.length === 0) {
-      tableEl.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;">No code redemptions yet.</div>';
-    } else {
-      const discountLabel = c => {
-        if (!c) return '—';
-        if ((c.discount_mode || 'free') === 'free') return '100% off';
-        if (c.discount_mode === 'fixed') return '$' + (Number(c.discount_value) || 0) + ' off';
-        return (Number(c.discount_value) || 0) + '% off';
-      };
-      tableEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.75rem">
-        <thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">${['Code','Package','Discount','Configured uses','Orders matched','Revenue','Last used'].map(hd=>`<th style="text-align:left;padding:.5rem .75rem;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">${hd}</th>`).join('')}</tr></thead>
-        <tbody>${rows.map(r => {
-          const c = codeByName[r.code];
-          return `<tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:.5rem .75rem;font-family:var(--mono)">${r.code}</td>
-            <td style="padding:.5rem .75rem;color:var(--muted)">${c ? (c.package_key || '—') : '—'}</td>
-            <td style="padding:.5rem .75rem">${discountLabel(c)}</td>
-            <td style="padding:.5rem .75rem;color:var(--muted)">${c ? (c.uses_count || 0) : '—'}</td>
-            <td style="padding:.5rem .75rem">${r.orders}</td>
-            <td style="padding:.5rem .75rem">$${(Math.round(r.revenue*100)/100).toLocaleString('en-US')}</td>
-            <td style="padding:.5rem .75rem;color:var(--dim)">${r.lastUsed ? new Date(r.lastUsed).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table>`;
+  const discountText = (r) => r.mode === 'free' ? '100% off'
+    : r.mode === 'fixed' ? ('$' + r.value + ' off')
+    : (r.value + '% off');
+  /* Sorts by what came off. Null for a fixed amount, which cannot be ordered
+     against a percentage; renderSortableTable puts nulls last either way. */
+  const discountAmount = (r) => r.mode === 'free' ? 100 : r.mode === 'fixed' ? null : r.value;
+
+  renderSortableTable('promo-code-table', [
+    {
+      label: 'Status', sort: (r) => (r.active ? 0 : 1),
+      cell: (r) => r.compiled
+        ? '<span class="pill green" title="Built into the deployed code rather than stored in a table, so it cannot be switched off from here.">Always on</span>'
+        : '<button type="button" class="promo-toggle" data-code="' + QX_ESC(r.code) + '" data-on="' + (r.active ? '1' : '0') + '">'
+          + '<span class="promo-dot"></span>' + (r.active ? 'Active' : 'Off') + '</button>',
+    },
+    { label: 'Code', sort: (r) => r.code, style: 'font-family:var(--mono)', cell: (r) => QX_ESC(String(r.code)) },
+    { label: 'Package', sort: (r) => r.pkg || null, style: 'color:var(--muted)', cell: (r) => QX_ESC(r.pkg || '—') },
+    { label: 'Discount', sort: discountAmount, cell: (r) => QX_ESC(discountText(r)) },
+    { label: 'Uses', sort: (r) => (r.uses == null ? null : r.uses), style: 'color:var(--muted)', cell: (r) => r.uses == null ? '—' : (r.uses + (r.maxUses ? ' / ' + r.maxUses : '')) },
+    { label: 'Orders matched', sort: (r) => r.orders, cell: (r) => String(r.orders) },
+    { label: 'Revenue', sort: (r) => r.revenue, style: 'font-family:var(--mono)', cell: (r) => '$' + (Math.round(r.revenue * 100) / 100).toLocaleString('en-US') },
+    { label: 'Last used', sort: (r) => r.lastUsed || null, style: 'color:var(--dim)', cell: (r) => r.lastUsed ? new Date(r.lastUsed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' },
+  ], codeRows, { pageSize: 8, empty: 'No promo codes yet.' });
+
+  document.querySelectorAll('.promo-toggle').forEach((b) => {
+    b.onclick = () => togglePromoCode(b.dataset.code, b.dataset.on !== '1');
+  });
+  wirePromoForm();
+}
+
+/**
+ * Switch a code on or off.
+ *
+ * Goes through api/admin-actions.js, which already had `beta_toggle` for
+ * exactly this and nothing on any page called it. Optimistic nothing: the
+ * button says what it is doing and the table is redrawn from the server's
+ * answer, because a toggle that looks like it worked and did not is worse than
+ * one that takes a second.
+ */
+/**
+ * The create-a-code form.
+ *
+ * Wired once, on the first render that draws the button, rather than inline in
+ * the markup: an onclick attribute on a button inside a table that is rebuilt
+ * on every sort is a handler that has to be re-attached and sometimes is not.
+ */
+function wirePromoForm() {
+  const open = document.getElementById('promo-new-btn');
+  const dlg = document.getElementById('promo-new');
+  if (!open || !dlg || open.dataset.wired) return;
+  open.dataset.wired = '1';
+
+  const el = (id) => document.getElementById(id);
+  const mode = el('pn-mode'), value = el('pn-value'), hint = el('pn-value-hint'), err = el('pn-err');
+
+  /* The amount field only means something for two of the three modes, and a
+     number box that is ignored is a number box somebody will fill in and
+     expect to matter. */
+  const syncMode = () => {
+    const m = mode.value;
+    value.disabled = m === 'free';
+    value.style.opacity = m === 'free' ? '.5' : '1';
+    hint.textContent = m === 'free' ? 'Nothing to set: this code makes the order free.'
+      : m === 'percent' ? 'A percentage off the order, 1 to 100.'
+      : 'A fixed number of dollars off the order.';
+  };
+  mode.onchange = syncMode;
+  syncMode();
+
+  open.onclick = () => { err.textContent = ''; dlg.showModal(); el('pn-code').focus(); };
+  el('pn-cancel').onclick = () => dlg.close();
+
+  el('pn-save').onclick = async () => {
+    err.textContent = '';
+    const code = (el('pn-code').value || '').trim().toUpperCase();
+    if (!/^[A-Z0-9-]{3,64}$/.test(code)) { err.textContent = 'A code is 3 to 64 letters, numbers or dashes.'; return; }
+    const m = mode.value;
+    const v = Number(value.value) || 0;
+    if (m === 'percent' && (v <= 0 || v > 100)) { err.textContent = 'A percentage is between 1 and 100.'; return; }
+    if (m === 'fixed' && v <= 0) { err.textContent = 'A fixed discount has to be more than nothing.'; return; }
+    const max = el('pn-max').value.trim();
+    if (max && Number(max) < 1) { err.textContent = 'Max uses is either blank or at least one.'; return; }
+
+    /* Refused before it is written, not after. `beta_upsert` is an upsert on
+       `code`, so saving a name that already exists would quietly replace a
+       live code's terms, which is the one mistake in this form that cannot be
+       undone by looking at it. */
+    const existing = (window.__codeByName || {})[code];
+    if (existing) { err.textContent = 'That code already exists. Pick another name, or switch the existing one off in the table.'; return; }
+
+    const btn = el('pn-save');
+    btn.disabled = true; btn.textContent = 'Creating…';
+    try {
+      const r = await adminAction({ action: 'beta_upsert', row: {
+        code,
+        package_key: el('pn-pkg').value,
+        active: true,
+        discount_mode: m,
+        discount_value: m === 'free' ? 0 : v,
+        includes_workbook: el('pn-workbook').checked,
+        includes_reflection: el('pn-reflection').checked,
+        includes_budget: el('pn-budget').checked,
+        includes_checklist: el('pn-checklist').checked,
+        includes_intimacy: el('pn-intimacy').checked,
+        max_uses: max ? Number(max) : null,
+      } });
+      if (!r || r.error) throw new Error(r && r.error ? r.error : 'The code could not be created.');
+      dlg.close();
+      el('pn-code').value = ''; el('pn-max').value = '';
+      await renderPromosPage(true);
+    } catch (e) {
+      err.textContent = String(e.message || e);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create and activate';
     }
+  };
+}
+
+async function togglePromoCode(code, next) {
+  const btns = [...document.querySelectorAll('.promo-toggle')].filter((b) => b.dataset.code === code);
+  btns.forEach((b) => { b.disabled = true; b.textContent = '…'; });
+  try {
+    const r = await adminAction({ action: 'beta_toggle', code, active: !!next });
+    if (!r || r.error) throw new Error(r && r.error ? r.error : 'The code could not be changed.');
+    await renderPromosPage(true);
+  } catch (e) {
+    /* Says so rather than snapping back silently, which reads as the click
+       not having registered. */
+    btns.forEach((b) => { b.disabled = false; b.textContent = 'Could not change'; b.title = String(e.message || e); });
   }
 }
 
@@ -3076,7 +3337,8 @@ function showPage(id) {
   if (id==='testimonials') renderTestimonials();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
-  if (id==='promos') renderPromosPage();
+  /* 'promos' is not a page any more: Order Details draws everything it held,
+     and showPage('orders') calls renderPromosPage itself. */
   if (id==='engagement') renderEngagementPage();
   if (id==='explore' && window.__initExplore) window.__initExplore();
   if (typeof initAllSlicers === 'function') initAllSlicers();
@@ -3087,7 +3349,7 @@ function restorePageFromHash() {
   const id = (location.hash || '').replace(/^#/, '').trim();
   if (id && id !== 'overview' && document.getElementById('page-'+id)) showPage(id);
 }
-const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'ux-views':true,'explore':true,'promos':true,'engagement':true};
+const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'ux-views':true,'explore':true,'engagement':true};
 let SURVEY_DATA = null;
 
 async function loadSurvey(force) {
@@ -4194,6 +4456,7 @@ async function loadRealDemographics() {
     // being active) since renderBars/mkChart work on off-screen elements too.
     // Cube-backed + sliceable — keep consistent with initCharts('overview').
     wireCubeTile({target:'chart-rellength',field:'relationship_length',selId:'slz-ovrellen',color:'#5C6DDA'});
+    wireOrderChartWithPeriod({target:'ov-sum-tiles',kind:'ovsum',selId:'slz-ovsum',periodId:'slz-ovsum-period'});
     wireCubeTile({target:'chart-source',field:'signup_source',mode:'pie',selId:'slz-source',color:DEMO_HUE});
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
@@ -4212,9 +4475,10 @@ function updateStatsFromRealData(orders) {
   const aov = total > 0 ? revenue / total : 0;
 
   const el = id => document.getElementById(id);
-  if (el('stat-orders'))  el('stat-orders').textContent  = total.toLocaleString();
-  if (el('stat-revenue')) el('stat-revenue').textContent = '$' + Math.round(revenue).toLocaleString();
-  if (el('stat-aov'))     el('stat-aov').textContent     = '$' + aov.toFixed(0);
+  /* The three dashboard tiles are drawn by renderOrderChart's `ovsum` kind,
+     which reads the cube and honours both slicers. Writing them here as well
+     is the thing that put "48 orders" above "0 of 40 orders" on Order Details
+     within minutes of that merge. */
   if (el('stat-digital')) el('stat-digital').textContent = digital;
   if (el('stat-physical')) el('stat-physical').textContent = physical;
 
@@ -4642,10 +4906,130 @@ function updateDashboardFulfillmentKPIs() {
   if (badge) { const n = stats.pending.length; badge.textContent = n > 0 ? n : ''; badge.style.display = n > 0 ? 'inline' : 'none'; }
 }
 
+/* ══ SORTABLE, PAGED TABLES ═══════════════════════════════════════════════
+   Ellie: "Add sorting carats into the code usage table, I should be able to
+   select which of these colummns to sort and how." And, of the orders table:
+   "Add sorting carats to each column of the table" and "Orders table should
+   show 8 rows with a dropdown option at the bottom to see the full table."
+
+   One implementation for both tables rather than two, because two tables with
+   two sorts is two places for the sort to be subtly different and only one of
+   them gets fixed.
+
+   ── WHAT A COLUMN SORTS BY ────────────────────────────────────────────────
+   Not its rendered text. "$1,200" sorts before "$9" as a string, and
+   "Oct 3" before "Sep 1". Each column declares a `sort` function returning a
+   number or a string, so the cell can say whatever reads best and the order is
+   still right. A column with no `sort` is not sortable and draws no caret,
+   which is honest: a caret that does nothing is worse than no caret. */
+
+/** The show-all slot for a table, searched from the card that holds both. */
+function tableFooter(id, table) {
+  const card = table.closest('.chart-card') || table.parentElement;
+  return card ? card.querySelector('[data-table-more="' + id + '"]') : null;
+}
+
+/** Rows currently shown, per table, so a re-sort does not re-filter. */
+const TABLE_STATE = {};
+
+/**
+ * @param id      the <table> id
+ * @param cols    [{ label, cell(row), sort(row)|null, style }]
+ * @param rows    every row that passed the filters
+ * @param opts    { pageSize, empty }
+ */
+function renderSortableTable(id, cols, rows, opts) {
+  const table = document.getElementById(id);
+  if (!table) return;
+  const o = opts || {};
+  const pageSize = o.pageSize || 8;
+  const st = TABLE_STATE[id] = TABLE_STATE[id] || { sort: null, dir: 1, all: false };
+
+  /* ── THE HEAD ────────────────────────────────────────────────────────────
+     Rebuilt every render so a caret always matches the state it is drawn from.
+     The alternative, toggling a class on a head built once, drifts the first
+     time a render happens from somewhere that does not know about the caret. */
+  const thead = table.querySelector('thead') || table.appendChild(document.createElement('thead'));
+  const caret = (i) => {
+    if (!cols[i].sort) return '';
+    const on = st.sort === i;
+    /* Both carets always, the active one solid. One caret that flips is
+       ambiguous: it cannot say "sortable but not sorted". */
+    const up = on && st.dir === 1 ? 'var(--orange)' : 'var(--border)';
+    const dn = on && st.dir === -1 ? 'var(--orange)' : 'var(--border)';
+    return '<span style="display:inline-flex;flex-direction:column;line-height:0;margin-left:.3rem;vertical-align:middle">'
+      + '<svg width="7" height="4" viewBox="0 0 8 5" style="margin-bottom:1px"><path d="M4 0l4 5H0z" fill="' + up + '"/></svg>'
+      + '<svg width="7" height="4" viewBox="0 0 8 5"><path d="M4 5L0 0h8z" fill="' + dn + '"/></svg></span>';
+  };
+  thead.innerHTML = '<tr>' + cols.map((c, i) =>
+    '<th' + (c.sort ? ' data-sort-col="' + i + '" style="cursor:pointer;user-select:none"' : '') + '>'
+    + QX_ESC(c.label) + caret(i) + '</th>').join('') + '</tr>';
+  thead.querySelectorAll('[data-sort-col]').forEach((th) => {
+    th.onclick = () => {
+      const i = Number(th.dataset.sortCol);
+      /* Same column flips direction; a new column starts ascending, which is
+         what every table anybody has used does. */
+      if (st.sort === i) st.dir = -st.dir; else { st.sort = i; st.dir = 1; }
+      renderSortableTable(id, cols, TABLE_STATE[id].rows || rows, opts);
+    };
+  });
+
+  st.rows = rows;
+  let out = rows.slice();
+  if (st.sort != null && cols[st.sort] && cols[st.sort].sort) {
+    const key = cols[st.sort].sort;
+    out.sort((a, b) => {
+      const av = key(a), bv = key(b);
+      /* A missing value sorts last in both directions. Sorting by a column
+         half the rows do not have, and having those rows march to the top on
+         one click, reads as the sort being broken. */
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      const r = typeof av === 'number' && typeof bv === 'number'
+        ? av - bv : String(av).localeCompare(String(bv), 'en', { numeric: true });
+      return r * st.dir;
+    });
+  }
+
+  const tbody = table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
+  if (!out.length) {
+    tbody.innerHTML = '<tr><td colspan="' + cols.length + '" style="padding:1.9rem 1rem;text-align:center;color:var(--dim);font-size:.82rem">'
+      + (o.empty || 'Nothing here yet.') + '</td></tr>';
+    const f0 = tableFooter(id, table);
+    if (f0) f0.innerHTML = '';
+    return;
+  }
+  const shown = st.all ? out : out.slice(0, pageSize);
+  tbody.innerHTML = shown.map((r) => '<tr' + (r.__rowStyle ? ' style="' + r.__rowStyle + '"' : '') + '>'
+    + cols.map((c) => '<td' + (c.style ? ' style="' + c.style + '"' : '') + '>' + c.cell(r) + '</td>').join('')
+    + '</tr>').join('');
+
+  /* ── THE SHOW-ALL ────────────────────────────────────────────────────────
+     Ellie asked for "a dropdown option at the bottom to see the full table".
+     A control that says how many are hidden, rather than a bare chevron: the
+     number is the reason to press it. */
+  /* ── FINDING THE FOOTER ────────────────────────────────────────────────
+     From the card, not from the table's parent. The table sits inside
+     .table-wrap and the show-all sits beside that wrap, so parentElement found
+     nothing and the button never drew: eight rows of forty with no way to see
+     the rest, and nothing saying so. */
+  const foot = tableFooter(id, table);
+  if (foot) {
+    if (out.length <= pageSize) { foot.innerHTML = ''; }
+    else {
+      foot.innerHTML = '<button type="button" class="table-more-btn">'
+        + (st.all ? 'Show fewer' : 'Show all ' + out.length)
+        + '<svg width="10" height="6" viewBox="0 0 10 6" style="margin-left:.4rem;transform:rotate(' + (st.all ? 180 : 0) + 'deg)"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button>';
+      foot.querySelector('button').onclick = () => { st.all = !st.all; renderSortableTable(id, cols, st.rows, opts); };
+    }
+  }
+}
+
 function applyOrderFilters() {
   const pkg    = document.getElementById('orders-pkg-filter')?.value || '';
   const days   = parseInt(document.getElementById('orders-date-filter')?.value || '0');
-  const type   = document.getElementById('orders-type-filter')?.value || '';
+  /* The couple type filter is gone at Ellie's ask, so nothing reads it. */
   const search = (document.getElementById('orders-search')?.value || '').toLowerCase().trim();
 
   const cutoff = days ? Date.now() - days * 86400000 : 0;
@@ -4653,7 +5037,7 @@ function applyOrderFilters() {
   let rows = ORDERS.filter(o => {
     if (pkg && !o.pkg.startsWith(pkg)) return false;
     if (cutoff && o.date < cutoff) return false;
-    if (type && !(o.coupleType?.id || '').startsWith(type)) return false;
+
     if (search && !o.id.toLowerCase().includes(search) && !(o.name||'').toLowerCase().includes(search)) return false;
     return true;
   });
@@ -4664,40 +5048,66 @@ function applyOrderFilters() {
 
 function renderOrdersTable(rows) {
   if (!rows) rows = ORDERS;
-  const tbody = document.getElementById('orders-tbody');
-  if (!tbody) return;
   const pkgColors = {core:'#C55329',newlywed:'#FBBF24','newlywed-box':'#FBBF24',anniversary:'#5C6DDA','anniversary-box':'#5C6DDA',premium:'#34D399','premium-box':'#34D399'};
   const pkgNames  = {core:'Assessment',newlywed:'Starting Out','newlywed-box':'Starting Out',anniversary:'Anniversary','anniversary-box':'Anniversary',premium:'Premium','premium-box':'Premium'};
   const label = document.getElementById('orders-count-label');
-  if (label) label.textContent = `${rows.length} order${rows.length === 1 ? '' : 's'}`;
+  if (label) label.textContent = rows.length + ' order' + (rows.length === 1 ? '' : 's');
 
-  if (rows.length === 0) {
-    // Empty state — use colspan so the row spans the full table
-    const colCount = tbody.closest('table')?.querySelector('thead tr')?.children.length || 8;
-    tbody.innerHTML = `<tr><td colspan="${colCount}" style="padding:1.98rem 1rem;text-align:center;color:var(--dim);font-size:.82rem">No orders yet.<br><span style="font-size:.7rem;color:var(--dim);margin-top:.4rem;display:inline-block">Orders will appear here as soon as customers start checking out.</span></td></tr>`;
-    return;
+  /* ── PROMO AND DISCOUNT ARE TWO COLUMNS ───────────────────────────────
+     Ellie: "Split promo column into 2. Promo (should be blank or should read
+     the promo) and discount (this should give the %off number)."
+
+     Blank, not a dash, when there is no code: a dash in one column and a code
+     in the next row's is a column you have to read twice. Discount sorts by
+     the number rather than by the text, so "100% off" and "$1 off" order by
+     what came off and not by whether they start with a digit.
+
+     The couple type column is gone with its filter. */
+  const cols = [
+    { label: 'Order ID', sort: o => o.id, cell: o => '<span style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">' + QX_ESC(o.id) + '</span>' },
+    { label: 'Date', sort: o => o.date || 0, cell: o => QX_ESC(o.dateStr || '') },
+    { label: 'Package', sort: o => pkgNames[o.pkg] || o.pkg || '', cell: o => '<span class="pkg-tag" style="background:' + (pkgColors[o.pkg]||'#888') + '22;color:' + (pkgColors[o.pkg]||'#888') + '">' + QX_ESC(pkgNames[o.pkg] || o.pkg || '—') + '</span>' },
+    { label: 'Amount', sort: o => Number(o.price) || 0, style: 'font-family:var(--mono);color:var(--text)', cell: o => '$' + QX_ESC(String(o.price)) },
+    { label: 'Promo', sort: o => o.promo || null, cell: o => o.promo ? '<span class="pill green">' + QX_ESC(String(o.promo)) + '</span>' : '' },
+    { label: 'Discount', sort: o => discountOf(o).amount, style: 'font-family:var(--mono);font-size:.72rem;color:var(--muted)', cell: o => QX_ESC(discountOf(o).text) },
+    { label: 'Status', sort: null, cell: () => '<span class="pill green">Complete</span>' },
+  ];
+  renderSortableTable('orders-table', cols, rows.map(o => ({ ...o, __rowStyle: (o.isLiveSession || o.isRealOrder) ? 'background:rgba(16,185,129,0.07)' : '' })), {
+    pageSize: 8,
+    empty: 'No orders yet.<br><span style="font-size:.7rem;color:var(--dim);margin-top:.4rem;display:inline-block">Orders will appear here as soon as customers start checking out.</span>',
+  });
+}
+
+/**
+ * What came off this order, as a number to sort by and words to show.
+ *
+ * One reading, used by the Discount column and by the discount chart, so a row
+ * that the table calls 100% off cannot sit in a different bucket on the chart
+ * below it. The lookup covers both kinds of code now: the compiled ones and
+ * the ones issued into beta_codes, which the server merges before sending.
+ *
+ * `amount` is a percentage for a percentage code and null for a fixed one,
+ * because a dollar figure and a percentage cannot be ordered against each
+ * other and pretending otherwise sorts $1 above 50% off.
+ */
+function discountOf(o) {
+  if (!o.promo) return { amount: null, text: '' };
+  const c = (window.__codeByName || {})[String(o.promo).toUpperCase()];
+  if (c) {
+    const mode = c.discount_mode || 'free';
+    if (mode === 'free') return { amount: 100, text: '100% off' };
+    if (mode === 'fixed') return { amount: null, text: '$' + (Number(c.discount_value) || 0) + ' off' };
+    return { amount: Number(c.discount_value) || 0, text: (Number(c.discount_value) || 0) + '% off' };
   }
+  /* A code nothing knows about, on an order that cost nothing, came off in
+     full however it was configured. Said rather than guessed: the chart counts
+     it the same way. */
+  if ((Number(o.price) || 0) === 0) return { amount: 100, text: '100% off' };
+  return { amount: null, text: '—' };
+}
 
-  tbody.innerHTML = rows.slice(0,100).map(o=>`
-    <tr${o.isLiveSession||o.isRealOrder ? ' style="background:rgba(16,185,129,0.07)"' : ''}>
-      <td><span style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">${o.id}</span></td>
-      <td>${o.dateStr}</td>
-      <td><span class="pkg-tag" style="background:${pkgColors[o.pkg]}22;color:${pkgColors[o.pkg]}">${pkgNames[o.pkg]}</span></td>
-      <td style="font-family:var(--mono);color:var(--text)">$${o.price}</td>
-      <td>${o.coupleType ? `<span style="font-family:var(--mono);font-size:.7rem;background:rgba(27,37,71,0.06);padding:.15rem .45rem;border-radius:4px" title="${o.coupleType.name||''}">${o.coupleType.id||'—'}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
-      <td>${promoCell(o)}</td>
-      <td><span class="pill green">Complete</span></td>
-    </tr>`).join('');
-}
-function promoCell(o){
-  if(!o.promo) return '-';
-  const code=String(o.promo);
-  const c=(window.__codeByName||{})[code.toUpperCase()];
-  let disc='';
-  if(c){ const m=c.discount_mode||'free'; disc = m==='free' ? '100% off' : (m==='fixed' ? ('$'+(Number(c.discount_value)||0)+' off') : ((Number(c.discount_value)||0)+'% off')); }
-  else if((Number(o.price)||0)===0) disc='100% off';
-  return '<span class="pill green">'+QX_ESC(code)+'</span>'+(disc?' <span style="color:var(--muted);font-size:.66rem;">'+disc+'</span>':'');
-}
+/* promoCell was here. The table has a Promo column and a Discount column
+   now, and `discountOf` above is the one reading of what came off. */
 function filterOrders(sel) { applyOrderFilters(); }
 
 // ── Physical Intimacy responses aggregation ──────────────────────────────────
@@ -5086,6 +5496,47 @@ async function renderOrderChart(opts){
   if(sel){ populateSlicer(sel, null, cube.rows||[]); sel.classList.toggle('on', !!sel.value); }
   const orders=sliceFilter(cube.orders||[], sel?sel.value:'');
   setTileN(el, orders.length);
+  if(opts.kind==='ovsum'){
+    /* The dashboard's three tiles, cut the same two ways as Order Details'.
+       They were written by the main data load, which is why they had no
+       slicer. One writer: the old fill is removed below. */
+    const per=opts.periodId?document.getElementById(opts.periodId):null;
+    const within=periodFilter(orders, per?per.value:'');
+    setTileN(el, within.length);
+    const total=within.reduce((a,o)=>a+(Number(o.amount)||0),0);
+    const put=(id,txt)=>{ const x=document.getElementById(id); if(x) x.textContent=txt; };
+    const money=(n)=>'$'+Math.round(n).toLocaleString('en-US');
+    put('stat-orders', within.length.toLocaleString());
+    put('stat-revenue', money(total));
+    put('stat-aov', within.length? money(total/within.length) : '\u2014');
+    return;
+  }
+  if(opts.kind==='ordsum'){
+    /* ── THE THREE TILES ──────────────────────────────────────────────
+       Ellie: "Start with the tile with the tiles, but reorder them and drop
+       one. I want: Revenue, Avg order value, % orders with a code."
+
+       Avg full-price order is the one dropped. It divides by the orders with
+       no code, and there are none, so it has read an em dash since the day it
+       shipped and would go on doing so until somebody pays by card.
+
+       They were filled from the raw orders array by renderPromosPage, which is
+       why they had no slicer. They read the cube now, so the period select and
+       the segment select both reach them. */
+    const per=opts.periodId?document.getElementById(opts.periodId):null;
+    const within=periodFilter(orders, per?per.value:'');
+    setTileN(el, within.length);
+    const money=(n)=>'$'+(Math.round(n*100)/100).toLocaleString('en-US');
+    const total=within.reduce((a,o)=>a+(Number(o.amount)||0),0);
+    const coded=within.filter(o=>o.promo_code).length;
+    const put=(id,txt)=>{ const x=document.getElementById(id); if(x) x.textContent=txt; };
+    put('pr-revenue', money(total));
+    put('pr-revenue-sub', within.length? (within.length+' order'+(within.length===1?'':'s')) : 'No orders in this cut');
+    put('pr-aov', within.length? money(total/within.length) : '\u2014');
+    put('pr-code-pct', within.length? Math.round(coded/within.length*100)+'%' : '\u2014');
+    put('pr-code-n', coded+' of '+within.length+' orders');
+    return;
+  }
   if(opts.kind==='pkgkpis'){
     /* ── THE FOUR TILES, CUT TWO WAYS ──────────────────────────────────
        They used to be filled once from the raw orders array on the main data
@@ -5250,7 +5701,20 @@ async function renderSatFunnel(selId){
   // orders/couples with individuals is what made 'started' exceed 'ordered').
   const byCouple={}; let solo=0;
   rows.forEach(r=>{ if(r.couple_id){ (byCouple[r.couple_id]=byCouple[r.couple_id]||[]).push(r); } else solo++; });
-  const ordered=orders.length;
+  /* ── ORDERED COUNTS COUPLES, LIKE EVERY BAR AFTER IT ──────────────────
+     Ellie: "is the ordered column a count of individuals and the other columns
+     are counting couples? That would make more sense to me."
+
+     It was a count of ORDERS. A couple who bought a package and then an add-on
+     separately counted twice and stood taller than the bar for couples who had
+     started, which is the thing a funnel must never do. The comment two lines
+     above already claimed the whole chart was in couples.
+
+     An order whose buyer has no partner linked has no couple id and counts as
+     one unit of its own, the same way `solo` is counted in `started`. */
+  const orderedUnits=new Set(); let orderedSolo=0;
+  orders.forEach(o=>{ if(o.couple_id) orderedUnits.add(o.couple_id); else orderedSolo++; });
+  const ordered=orderedUnits.size+orderedSolo;
   const started=Object.keys(byCouple).length + solo;
   const bothDone=Object.values(byCouple).filter(g=>g.length>=2 && g.every(r=>r.has_ex2)).length;
   const viewed=bothDone;
@@ -6323,9 +6787,19 @@ function initCharts(page) {
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
     wireCubeTile({target:'chart-rellength',field:'relationship_length',selId:'slz-ovrellen',color:'#5C6DDA'});
+    wireOrderChartWithPeriod({target:'ov-sum-tiles',kind:'ovsum',selId:'slz-ovsum',periodId:'slz-ovsum-period'});
     wireCubeTile({target:'chart-source',field:'signup_source',mode:'pie',selId:'slz-source',color:DEMO_HUE});
   }
-  else if (page==='orders') { applyOrderFilters(); renderSatFunnel('slz-sfunnel'); if (typeof renderGeography === 'function') renderGeography(); }
+  else if (page==='orders') {
+    /* Order Details holds everything Promo Analytics used to, so its three
+       renderers are wired here: the summary tiles, the discount distribution
+       and the promo code table, which renderPromosPage still builds. */
+    wireOrderChartWithPeriod({target:'ord-sum-tiles',kind:'ordsum',selId:'slz-ordsum',periodId:'slz-ordsum-period'});
+    applyOrderFilters();
+    renderSatFunnel('slz-sfunnel');
+    if (typeof renderGeography === 'function') renderGeography();
+    if (typeof renderPromosPage === 'function') renderPromosPage();
+  }
   else if (page==='fulfillment') {
     renderFulfillmentTable();
     const stats = getFulfillmentStats();

@@ -684,6 +684,20 @@ export default async function handler(req) {
       rows.push(row);
       // Anonymized segment snapshot for order joins (keyed by id + email; no PII emitted).
       const _seg = {}; for (const k of SEG_KEYS) _seg[k] = row[k] !== undefined ? row[k] : null;
+      /**
+       * The anonymous couple key travels with the segment snapshot.
+       *
+       * Ellie, of the completion funnel: "is the ordered column a count of
+       * individuals and the other columns are counting couples? That would
+       * make more sense to me."
+       *
+       * Close. It was a count of ORDERS, while every bar after it counted
+       * couples, so a couple who bought twice stood taller than a couple who
+       * bought once and the funnel could not be read as a funnel. It is not a
+       * SEG_KEY because it is not something to slice by; it is the key the
+       * funnel groups on.
+       */
+      _seg.couple_id = row.couple_id || null;
       segById[p.id] = _seg;
       if (p.email) segByEmail[String(p.email).toLowerCase()] = _seg;
     }
@@ -733,6 +747,9 @@ export default async function handler(req) {
       orderRows = (ords || []).map((o) => {
         const email = o.buyer_email ? String(o.buyer_email).toLowerCase() : null;
         const seg = (o.user_id && segById[o.user_id]) || (email && segByEmail[email]) || {};
+        /* Carried out of the segment snapshot explicitly: `merged` below only
+           copies SEG_KEYS, and this is deliberately not one of those. */
+        const orderCouple = seg.couple_id || null;
         const merged = {};
         for (const k of SEG_KEYS) merged[k] = seg[k] != null ? seg[k] : null;
         // Retroactive beta-code couple-type tagging when the profile join is absent.
@@ -744,6 +761,11 @@ export default async function handler(req) {
           ts: o.created_at || null,
           amount: Number(o.total) || 0,
           order_pkg: o.pkg_key || null,
+          /* Which couple this order belongs to, so the funnel counts couples
+             all the way across instead of orders at the first bar. Null for an
+             order whose buyer has no partner linked, which the funnel counts
+             as one unit of its own. */
+          couple_id: orderCouple,
           is_physical: !!o.is_physical,
           promo_code: o.promo_code || null,
           addon_workbook: o.addon_workbook || null,

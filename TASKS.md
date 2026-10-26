@@ -10,8 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| S78 | **Abram still has not been invited, and nothing in the app can send one.** The invite email is sent from six places in the website and from nowhere else. Rebecca now has a code. Say the word and I will have the server send the invite whenever a profile is saved with a partner email, which fixes her and everyone after her without an app screen. |
-| S74 | **The 093 paste lost two of its three tables.** Only the partner one arrived. Run this in Terminal after re-running 093 and copying the result, then tell me the line count: `pbpaste > /Users/Ellie/Projects/unison/ellie-paste.txt && wc -l /Users/Ellie/Projects/unison/ellie-paste.txt` |
+| S74 | **Nothing to re-find: 093 is in the block below.** Run it, then copy each of the three tables separately, or copy the whole result and run this in Terminal and tell me the line count: `pbpaste > /Users/Ellie/Projects/unison/ellie-paste.txt && wc -l /Users/Ellie/Projects/unison/ellie-paste.txt` |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -27,99 +26,101 @@ Every code block says which window it goes in, above the block.
 **This goes in the Supabase SQL Editor, not Terminal.** Open Supabase, click SQL
 Editor, paste the block, click Run.
 
-**S75, the invite codes.** 094 gives a code to everybody who has none and can
-invite somebody. It skips the second partner, who joins on the first one's, and
-it never touches a code that already exists, because a code already in a sent
-link has to keep working. It prints a count before and after, and then the list
-of people who now have a partner to invite and the code to do it with.
+**S74.** This is 093 again, so you do not have to find it. It writes nothing. It
+answers whether Rebecca's account setup finished, which exercises she has done,
+and whether a partner was ever invited. It returns three separate tables, and
+the chat only carried the third one last time, so copy them one at a time or use
+the Terminal line in the S74 row above.
 
-<!-- SQL 094_mint_missing_invite_codes.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 093_rebecca_account_state.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
--- ============================================================================
--- 094: everybody who can invite a partner gets a code to do it with.
+-- 093: What Rebecca has and has not done. READ ONLY. Writes nothing.
 --
--- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie, of Rebecca: "Did she invite a partner? If no to any of that, we need
+-- Ellie: "Since rebecca's login process was messed up, did she complete demos
+-- and account setup? Did she invite a partner? If no to any of that, we need
 -- to prompt her with it immediately."
 --
--- Rebecca's row had Abram's name and Abram's email on it and no invite code,
--- so nothing could ever be sent to him. That was not her broken sign-up. The
--- code was only ever minted by the website; api/create-profile.js stored
--- whatever a client sent and null when it sent nothing; and the app sends one
--- only when somebody is JOINING on an invite.
+-- Her sign-up went through a broken path, so the question is whether anything
+-- was left half-finished. Three things, one row each, with a plain yes or no
+-- and the date where there is one.
 --
--- So every first partner who set up in the app got no code, collected their
--- partner's email, and could never invite them. The server mints it now, for
--- any surface. This fills in the people it already happened to.
+-- Nothing here changes a single value. Run it, read it, and nothing has moved.
 --
--- ── WHO IS LEFT OUT, AND WHY ────────────────────────────────────────────────
--- The second partner. They joined on the first partner's code and have none by
--- design: `joined_via_invite` records that. A second code on one couple makes
--- "which code is this couple" a question with two answers.
---
--- ── SAFE TO RUN TWICE ───────────────────────────────────────────────────────
--- It only fills a code that is missing. A code already there is never changed,
--- because an invite already sent has that code in the link.
---
--- Run in the Supabase SQL Editor and click Run.
--- ============================================================================
+-- She is found by email OR by the name on the profile, because a broken
+-- sign-up is one of the ways those two come apart. If all three blocks come
+-- back empty, the account is not under a name or address starting "rebecca"
+-- and the thing to do is send me the email address rather than guess.
 
--- ── Before: who is missing one ─────────────────────────────────────────────
+-- ── 1. Account setup ──────────────────────────────────────────────────────
+-- A profile is set up when it has a name and the pronouns, which is what the
+-- in-app editor writes. `profile_setup_complete` is the flag the app sets, and
+-- it is reported separately from the fields because a broken path is exactly
+-- how a flag and its fields come apart.
 select
-  'before' as when,
-  count(*) filter (where coalesce(invite_code, '') = '' and coalesce(joined_via_invite, false) = false) as first_partners_with_no_code,
-  count(*) filter (where coalesce(invite_code, '') = '' and coalesce(joined_via_invite, false) = false
-                     and coalesce(partner_email, '') <> '')                                            as of_those_with_a_partner_email,
-  count(*) filter (where coalesce(invite_code, '') <> '')                                              as already_have_one
-from public.profiles;
-
--- ── The fill ───────────────────────────────────────────────────────────────
--- Eight uppercase hex characters, derived per row from that row's own id and a
--- random draw. The id is in the hash so that two rows cannot land on the same
--- code even if random() were to repeat; `invite_code` is unique, so a
--- collision would fail this statement loudly rather than merge two couples.
---
--- The alphabet is 0-9 and A-F, which is not the alphabet the server mints
--- from. That is deliberate and it is safe. The server's alphabet drops O and
--- 0, and I and 1, because the one thing anybody does with a code is read it
--- off a screen and type it into a phone. Hex has no letter O and no letter I,
--- so its 0 and 1 are not ambiguous with anything. Both shapes pass the app's
--- own check, which accepts A-Z and 0-9.
---
--- An earlier version built the string from generate_series and string_agg to
--- match the server's alphabet exactly. It was harder to read, easy to get
--- wrong in a way that hands every row the same code, and there is no Postgres
--- on the machine this was written on to run it against. This form cannot have
--- that bug by construction.
-update public.profiles p
-   set invite_code = upper(substr(md5(p.id::text || random()::text), 1, 8))
- where coalesce(p.invite_code, '') = ''
-   and coalesce(p.joined_via_invite, false) = false;
-
--- ── After: nobody who can invite is without a code ─────────────────────────
-select
-  'after' as when,
-  count(*) filter (where coalesce(invite_code, '') = '' and coalesce(joined_via_invite, false) = false) as first_partners_with_no_code,
-  count(*) filter (where coalesce(invite_code, '') <> '')                                              as have_one
-from public.profiles;
-
--- ── Who now has a partner to invite and a code to do it with ───────────────
--- These are the people to prompt. An email on the row and nobody joined.
-select
-  u.email            as their_email,
-  p.name             as their_name,
-  p.partner_name,
-  p.partner_email,
-  p.invite_code,
-  p.partner_joined
+  'account setup'                                       as question,
+  p.name                                                as name,
+  nullif(p.pronouns, '')                                as pronouns,
+  p.profile_setup_complete                              as setup_flag,
+  case
+    when coalesce(p.name, '') = '' then 'NO: no name'
+    when coalesce(p.pronouns, '') = '' then 'NO: no pronouns'
+    when p.profile_setup_complete is not true then 'PARTLY: fields are there, flag is not set'
+    else 'YES'
+  end                                                   as answer,
+  p.created_at
 from public.profiles p
 join auth.users u on u.id = p.id
-where coalesce(p.partner_email, '') <> ''
-  and coalesce(p.partner_joined, false) = false
-  and coalesce(p.joined_via_invite, false) = false
-order by p.created_at;
+where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+
+-- ── 2. The exercises ──────────────────────────────────────────────────────
+-- One row per exercise, so a half-finished set is visible rather than averaged
+-- into a single yes. An answers column that is null or an empty object is not
+-- started; one with keys in it has been answered.
+select
+  'exercises'                                           as question,
+  x.exercise,
+  case
+    when x.answers is null then 'NO: not started'
+    when jsonb_typeof(x.answers) <> 'object' then 'ODD: stored value is not an object'
+    when x.answers = '{}'::jsonb then 'NO: started and empty'
+    when x.answers ? 'completedAt' then 'YES: finished ' || (x.answers ->> 'completedAt')
+    else 'PARTLY: ' || (select count(*) from jsonb_object_keys(x.answers)) || ' answers, no completedAt'
+  end                                                   as answer
+from public.profiles p
+join auth.users u on u.id = p.id
+cross join lateral (
+  values
+    ('Communication Styles',  p.ex1_answers),
+    ('Expectations',          p.ex2_answers),
+    ('Relationship Reflection', p.ex3_answers),
+    ('Physical Intimacy',     p.intimacy_data),
+    ('Conflict Patterns',     p.conflict_data)
+) as x(exercise, answers)
+where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+
+-- ── 3. The partner ────────────────────────────────────────────────────────
+-- Three separate states, because they fail separately: no invite was ever
+-- addressed, an invite was addressed but nobody joined, or a partner is linked.
+select
+  'partner'                                             as question,
+  nullif(p.partner_name, '')                            as partner_name,
+  nullif(p.partner_email, '')                           as partner_email,
+  p.invite_code,
+  p.partner_joined,
+  case
+    when coalesce(p.partner_email, '') = '' then 'NO: no partner email on the profile'
+    when p.invite_code is null then 'NO: an email but no invite code, so nothing could be sent'
+    when p.partner_joined is not true then 'INVITED, NOT JOINED: ' || p.partner_email
+    else 'YES: joined'
+  end                                                   as answer
+from public.profiles p
+join auth.users u on u.id = p.id
+where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
 ```
 <!-- /SQL -->
+
+---
+
 
 ---
 
@@ -132,12 +133,7 @@ order by p.created_at;
 | # | What I am doing |
 |--|--|
 | C33 | **Today's word, Belonging**, rewritten to your line and the words doc regenerated from the module. |
-| A21 | **Dashboard**: revenue chart that does not widen with the window, relationship length as a column chart, how couples found Attune as a pie. |
-| A22 | **Package mix**: labels off the stacked columns and hover only, conflict and the checklist added to add-on attachment, the attachment figures corrected, and the four tiles wrapped in Historical package mix with a period slicer and the demo slicer. |
-| A24 | **Promo Analytics**: the four top tiles into a shaded tile with both slicers, data labels off everywhere in admin, the discount chart showing one bucket rather than splitting 18 orders into 9 and 9, and sort carats on the code usage table. |
-| A25 | **Orders becomes Order Details**, above Package Mix, with Promo Analytics folded into it: three tiles, the orders table at 8 rows with a show-all, discount distribution, then the promo code table. |
-| A26 | **A + button that builds a promo code from the admin**, with a form for name, discount, what it applies to and max uses, plus an active/off toggle per code. |
-| A27 | **The funnel's Ordered column counts people where the rest count couples.** Checking which it is and making the whole row one unit. |
+| S78 | **Sending Abram his invite.** Building it as a button in the admin rather than a one-off, because it is the thing to reach for the next time too. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -147,6 +143,12 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A24 | **Order Details replaces Orders and Promo Analytics**, above Package Mix. Three tiles in a shaded shell with both slicers, orders table at 8 rows with sort carats and Promo split from Discount, discount distribution, then the promo code table. |
+| A25 | **The + button creates a live code.** No migration: the admin could already write the row and nothing had ever called it. Name, discount, package, which add-ons it gives free, max uses. It also could not write four of the five add-on columns the checkout honours; it can now. |
+| A26 | **Status column with an on/off toggle** on every code, including the ones never redeemed. A compiled code reads "Always on" rather than drawing a switch that cannot do anything. |
+| A27 | **The funnel counted orders at the first bar and couples at the rest.** A couple who bought twice stood taller than a couple who had started. Couples all the way across now. |
+| A28 | **Discount distribution had 9 of 18 as Unknown.** Codes come from two places and the admin was sent one of them, so every order on a compiled code looked up to nothing. |
+| A29 | **Data labels are off on every chart**, dashboard tiles are in the same shaded shell. **Five pages still have bare top tiles**: Engagement, Responses, Feedback, Type Analytics and Demographics. Their tiles count people rather than orders and each reads a different source, so I want to do those deliberately rather than in the same pass. Say go. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
