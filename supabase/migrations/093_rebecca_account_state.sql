@@ -15,68 +15,69 @@
 -- back empty, the account is not under a name or address starting "rebecca"
 -- and the thing to do is send me the email address rather than guess.
 
--- ── 1. Account setup ──────────────────────────────────────────────────────
--- A profile is set up when it has a name and the pronouns, which is what the
--- in-app editor writes. `profile_setup_complete` is the flag the app sets, and
--- it is reported separately from the fields because a broken path is exactly
--- how a flag and its fields come apart.
-select
-  'account setup'                                       as question,
-  p.name                                                as name,
-  nullif(p.pronouns, '')                                as pronouns,
-  p.profile_setup_complete                              as setup_flag,
-  case
-    when coalesce(p.name, '') = '' then 'NO: no name'
-    when coalesce(p.pronouns, '') = '' then 'NO: no pronouns'
-    when p.profile_setup_complete is not true then 'PARTLY: fields are there, flag is not set'
-    else 'YES'
-  end                                                   as answer,
-  p.created_at
-from public.profiles p
-join auth.users u on u.id = p.id
-where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+-- ── ONE RESULT, NOT THREE ───────────────────────────────────────────────────
+-- This asked three questions as three SELECTs, and Ellie got the third one
+-- back twice while telling me she had pasted everything. She had. The Supabase
+-- SQL Editor shows the result of the LAST statement in a run and silently
+-- discards the ones before it, so a three-statement script can only ever hand
+-- back a third of its answer.
+--
+-- It is one query now. Every row is a question with its answer, in one table
+-- she can copy whole.
+-- ============================================================================
 
--- ── 2. The exercises ──────────────────────────────────────────────────────
+with me as (
+  select p.*, u.email as auth_email
+    from public.profiles p
+    join auth.users u on u.id = p.id
+   where lower(u.email) like 'rebecca%'
+      or lower(coalesce(p.name, '')) like 'rebecca%'
+),
 -- One row per exercise, so a half-finished set is visible rather than averaged
--- into a single yes. An answers column that is null or an empty object is not
--- started; one with keys in it has been answered.
-select
-  'exercises'                                           as question,
-  x.exercise,
-  case
-    when x.answers is null then 'NO: not started'
-    when jsonb_typeof(x.answers) <> 'object' then 'ODD: stored value is not an object'
-    when x.answers = '{}'::jsonb then 'NO: started and empty'
-    when x.answers ? 'completedAt' then 'YES: finished ' || (x.answers ->> 'completedAt')
-    else 'PARTLY: ' || (select count(*) from jsonb_object_keys(x.answers)) || ' answers, no completedAt'
-  end                                                   as answer
-from public.profiles p
-join auth.users u on u.id = p.id
-cross join lateral (
-  values
-    ('Communication Styles',  p.ex1_answers),
-    ('Expectations',          p.ex2_answers),
-    ('Relationship Reflection', p.ex3_answers),
-    ('Physical Intimacy',     p.intimacy_data),
-    ('Conflict Patterns',     p.conflict_data)
-) as x(exercise, answers)
-where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
-
--- ── 3. The partner ────────────────────────────────────────────────────────
--- Three separate states, because they fail separately: no invite was ever
--- addressed, an invite was addressed but nobody joined, or a partner is linked.
-select
-  'partner'                                             as question,
-  nullif(p.partner_name, '')                            as partner_name,
-  nullif(p.partner_email, '')                           as partner_email,
-  p.invite_code,
-  p.partner_joined,
-  case
-    when coalesce(p.partner_email, '') = '' then 'NO: no partner email on the profile'
-    when p.invite_code is null then 'NO: an email but no invite code, so nothing could be sent'
-    when p.partner_joined is not true then 'INVITED, NOT JOINED: ' || p.partner_email
-    else 'YES: joined'
-  end                                                   as answer
-from public.profiles p
-join auth.users u on u.id = p.id
-where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+-- into a single yes.
+ex as (
+  select x.exercise, x.answers
+    from me
+    cross join lateral (
+      values
+        ('1. Communication Styles',    me.ex1_answers),
+        ('2. Expectations',            me.ex2_answers),
+        ('3. Relationship Reflection', me.ex3_answers),
+        ('4. Physical Intimacy',       me.intimacy_data),
+        ('5. Conflict Patterns',       me.conflict_data)
+    ) as x(exercise, answers)
+)
+select 1 as ord, 'account' as section, 'Name'::text as item,
+       coalesce(nullif(me.name, ''), 'NOT SET')::text as answer from me
+union all
+select 2, 'account', 'Pronouns',
+       coalesce(nullif(me.pronouns, ''), 'NOT SET')::text from me
+union all
+select 3, 'account', 'Setup marked complete',
+       case when me.profile_setup_complete then 'YES' else 'NO' end::text from me
+union all
+select 4, 'account', 'Signed up',
+       to_char(me.created_at, 'YYYY-MM-DD')::text from me
+union all
+select 5, 'exercises', ex.exercise,
+       (case
+          when ex.answers is null then 'NOT STARTED'
+          when jsonb_typeof(ex.answers) <> 'object' then 'ODD: stored value is not an object'
+          when ex.answers = '{}'::jsonb then 'STARTED, EMPTY'
+          when ex.answers ? 'completedAt' then 'FINISHED ' || (ex.answers ->> 'completedAt')
+          else 'PARTLY: ' || (select count(*) from jsonb_object_keys(ex.answers))::text || ' answers, not finished'
+        end)::text
+  from ex
+union all
+select 6, 'partner', 'Partner name',
+       coalesce(nullif(me.partner_name, ''), 'NOT SET')::text from me
+union all
+select 7, 'partner', 'Partner email',
+       coalesce(nullif(me.partner_email, ''), 'NOT SET')::text from me
+union all
+select 8, 'partner', 'Invite code',
+       coalesce(me.invite_code, 'NONE')::text from me
+union all
+select 9, 'partner', 'Partner joined',
+       case when me.partner_joined then 'YES' else 'NO' end::text from me
+order by ord, item;

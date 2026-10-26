@@ -216,6 +216,30 @@ const CUBE = { ok: true, fields, rows, orders, demoFilterApplied: true };
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 const server = createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
+  /* ── ADMIN ACTIONS ──────────────────────────────────────────────────────
+     The page asks this for the waiting-on-a-partner list and writes through it
+     to create and toggle codes. Without it the tile answered "nobody is
+     waiting", which is a claim rather than a stub: the empty case and the
+     unknown case looked identical, which is the thing this probe exists to
+     stop. Two rows, so the Send button is on screen to be looked at. */
+  if (url.pathname.startsWith('/api/admin-actions')) {
+    let raw = '';
+    req.on('data', (c) => { raw += c; });
+    req.on('end', () => {
+      let action = '';
+      try { action = JSON.parse(raw || '{}').action || ''; } catch {}
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      if (action === 'waiting_partners') {
+        res.end(JSON.stringify({ ok: true, waiting: [
+          { id: '00000000-0000-4000-8000-000000000001', inviteCode: 'A878FBAD' },
+          { id: '00000000-0000-4000-8000-000000000002', inviteCode: 'K3MQ7PWZ' },
+        ] }));
+        return;
+      }
+      res.end(JSON.stringify({ ok: true }));
+    });
+    return;
+  }
   if (url.pathname.startsWith('/api/admin-explore')) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(CUBE));

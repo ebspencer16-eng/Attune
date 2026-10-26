@@ -761,6 +761,27 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       <div class="chart-body"><div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div></div>
     </div>
 
+    <!-- ── WAITING ON A PARTNER ───────────────────────────────────────────
+         Ellie, of Rebecca: "Just send for Abram."
+
+         The invite email is sent from the website and from nowhere else, so a
+         couple whose first partner set up in the app has a code and no way to
+         use it. This is the place to press. It lists anyone with a partner
+         email, a code, and nobody joined, which is exactly the set that is
+         stuck. When it is empty, nobody is. -->
+    <div class="chart-card" style="margin-top:1.25rem;">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Waiting on a partner</div>
+          <div class="chart-subtitle">A partner email on the account, an invite code, and nobody joined. Shown by code only: this page holds no names or addresses.</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="response-table" id="waiting-table"><thead></thead><tbody></tbody></table>
+      </div>
+      <div class="table-more" data-table-more="waiting-table"></div>
+    </div>
+
     <div class="chart-card" style="margin-top:1.25rem;">
       <div class="chart-head">
         <div>
@@ -2688,6 +2709,51 @@ async function renderPromosPage(force) {
  * the markup: an onclick attribute on a button inside a table that is rebuilt
  * on every sort is a handler that has to be re-attached and sometimes is not.
  */
+/**
+ * Who is stuck waiting for a partner, and the button that unsticks them.
+ *
+ * Reads the cube, which carries one row per person. A row qualifies when it
+ * has a partner email, a code of its own, and no partner linked. That is the
+ * same set 094's last statement lists, asked of the live data instead.
+ */
+async function renderWaitingOnPartner() {
+  const table = document.getElementById('waiting-table');
+  if (!table) return;
+  let waiting = [];
+  try {
+    const r = await adminAction({ action: 'waiting_partners' });
+    if (!r || r.error) throw new Error(r && r.error ? r.error : 'Could not read who is waiting.');
+    waiting = r.waiting || [];
+  } catch (e) {
+    /* Says it could not read rather than drawing an empty table, which here
+       would mean "nobody is stuck" and is the opposite of unknown. */
+    renderSortableTable('waiting-table', [{ label: 'Status', sort: null, cell: () => '' }], [], { empty: QX_ESC(String(e.message || e)) });
+    return;
+  }
+
+  renderSortableTable('waiting-table', [
+    { label: 'Invite code', sort: (r) => r.inviteCode, style: 'font-family:var(--mono)', cell: (r) => QX_ESC(r.inviteCode) },
+    { label: '', sort: null, cell: (r) => '<button type="button" class="table-more-btn send-invite" data-user="' + QX_ESC(r.id) + '" data-code="' + QX_ESC(r.inviteCode) + '">Send invite</button>' },
+  ], waiting, { pageSize: 8, empty: 'Nobody is waiting on a partner.' });
+
+  table.querySelectorAll('.send-invite').forEach((b) => {
+    b.onclick = async () => {
+      b.disabled = true; b.textContent = 'Sending…';
+      try {
+        const r = await adminAction({ action: 'send_partner_invite', userId: b.dataset.user, inviteCode: b.dataset.code });
+        if (!r || r.error) throw new Error(r && r.error ? r.error : 'It could not be sent.');
+        /* `mock` is the server saying it has no mail key, which is a real
+           answer and not a sent email. Nothing is reported as sent that was
+           not: "it said it sent" is how nobody chases it. */
+        b.textContent = r.mock ? 'Not sent: no mail key' : 'Sent';
+        b.title = r.mock ? 'RESEND_API_KEY is not set, so send-email logged it instead of sending it.' : 'Sent.';
+      } catch (e) {
+        b.disabled = false; b.textContent = 'Could not send'; b.title = String(e.message || e);
+      }
+    };
+  });
+}
+
 function wirePromoForm() {
   const open = document.getElementById('promo-new-btn');
   const dlg = document.getElementById('promo-new');
@@ -6799,6 +6865,7 @@ function initCharts(page) {
     renderSatFunnel('slz-sfunnel');
     if (typeof renderGeography === 'function') renderGeography();
     if (typeof renderPromosPage === 'function') renderPromosPage();
+    if (typeof renderWaitingOnPartner === 'function') renderWaitingOnPartner();
   }
   else if (page==='fulfillment') {
     renderFulfillmentTable();

@@ -28,6 +28,8 @@ import { corsHeaders, safeError, jsonBody } from './_lib/http.js';
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
+import { SITE_URL } from './_lib/site.js';
+import { selectProfiles } from './_lib/demo-accounts.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -71,6 +73,104 @@ export default async function handler(req) {
       const { error } = await admin.from('beta_codes').update({ active: !!body.active }).eq('code', code);
       if (error) return json({ error: safeError('admin-actions', error, 'Action failed.') }, 500);
       return json({ ok: true });
+    }
+
+    /**
+     * ── WHO IS STUCK WAITING FOR A PARTNER ──────────────────────────────
+     * A partner email on the account, a code of their own, and nobody joined.
+     * That is exactly the set that cannot get any further on their own.
+     *
+     * It answers with an id and a code and NOTHING ELSE. No name, no address.
+     * The admin page carries a banner saying it holds none of those, and the
+     * anonymised cube is built to keep that true; a list like this is where it
+     * would quietly stop being true. The page shows a count and a button, the
+     * server does the lookup, and the address never leaves here.
+     *
+     * The code is not an identity. It is a share token the owner puts in a
+     * link, and the operator needs to see something to tell two rows apart.
+     */
+    if (body.action === 'waiting_partners') {
+      /* Through selectProfiles, like every other admin read of this table.
+         Not only so Alex and Sam stay out of the list: a demo account has a
+         partner email on it, and the button beside it would send a real
+         invitation to a made-up couple. */
+      const { data: rows, error: wErr } = await selectProfiles(admin, (q) =>
+        q.select('id, invite_code, partner_joined, partner_email, joined_via_invite').limit(2000));
+      if (wErr) return json({ error: safeError('admin-actions', wErr, 'Could not read who is waiting.') }, 500);
+      const waiting = (rows || [])
+        .filter((p) => p.partner_email && p.invite_code && !p.partner_joined && !p.joined_via_invite)
+        .map((p) => ({ id: p.id, inviteCode: p.invite_code }));
+      return json({ ok: true, waiting });
+    }
+
+    /**
+     * ── SEND SOMEBODY THEIR PARTNER INVITE ──────────────────────────────
+     * Ellie, of Rebecca: "Just send for Abram."
+     *
+     * The partner invite email is sent from six places in src/App.jsx and from
+     * nowhere else, so a couple whose first partner set up in the app has a
+     * code and no way to use it. Rebecca is the first of those; she will not
+     * be the last until the app has a screen for it, which is S76.
+     *
+     * The URL is built here rather than on the page, because the page would be
+     * guessing at a route the website owns. It is the same shape the website
+     * builds: the code, who it is from, and both addresses so the invitee is
+     * matched to the right couple on arrival.
+     *
+     * No new mail path. It posts to /api/send-email with the internal secret,
+     * which is the server-to-server route that already exists and that
+     * api/generate-workbook-promo.js uses. A second sender would be a second
+     * copy of the from address, the retry and the dev-mode fallback.
+     */
+    if (body.action === 'send_partner_invite') {
+      const userId = String(body.userId || '').trim();
+      const code = String(body.inviteCode || '').trim().toUpperCase();
+      if (!userId && !code) return json({ error: 'Need a person to send for.' }, 400);
+
+      /* Through the gateway too, so a demo account cannot be the one this
+         sends for even if its id is passed in directly. */
+      const { data: rows, error: readErr } = await selectProfiles(admin, (q) => {
+        const sel = q.select('id, name, partner_name, partner_email, invite_code, partner_joined');
+        return userId ? sel.eq('id', userId) : sel.eq('invite_code', code);
+      });
+      /* Read the error. supabase-js returns it rather than throwing, so a
+         `try` around this catches nothing and a broken query looks exactly
+         like nobody matching. */
+      if (readErr) return json({ error: safeError('admin-actions', readErr, 'Could not look that person up.') }, 500);
+      const p = (rows || [])[0];
+      if (!p) return json({ error: 'No account matches that.' }, 404);
+      if (!p.partner_email) return json({ error: 'That account has no partner email on it, so there is nobody to send to.' }, 400);
+      if (!p.invite_code) return json({ error: 'That account has no invite code. Run migration 094.' }, 400);
+      if (p.partner_joined) return json({ error: 'Their partner has already joined.' }, 409);
+
+      const site = SITE_URL.replace(/\/$/, '');
+      const inviteUrl = `${site}/app?invite=${encodeURIComponent(p.invite_code)}`
+        + `&from=${encodeURIComponent(p.name || '')}`
+        + `&iie=${encodeURIComponent(String(p.partner_email).toLowerCase())}`;
+
+      const res = await fetch(`${site}/api/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-attune-internal': process.env.INTERNAL_API_SECRET || '' },
+        body: JSON.stringify({
+          type: 'partner_invite',
+          fromName: p.name || 'Your partner',
+          toEmail: p.partner_email,
+          toName: p.partner_name || 'there',
+          inviteUrl,
+        }),
+      });
+      const out = await res.json().catch(() => ({}));
+      /* `mock: true` is send-email with no RESEND_API_KEY, which is a real
+         answer and not a sent email. Said out loud rather than reported as
+         success, because "it said it sent" is how nobody chases it. */
+      if (!res.ok || out.ok === false) {
+        return json({ error: 'The invite could not be sent. ' + (out.error ? JSON.stringify(out.error).slice(0, 200) : 'Status ' + res.status) }, 502);
+      }
+      /* No address in the answer. The admin page's own banner promises "no
+         names, email addresses, or personally identifiable information are
+         present in any dataset shown here", and a success message naming the
+         recipient would quietly make that untrue. */
+      return json({ ok: true, mock: !!out.mock });
     }
 
     if (body.action === 'beta_upsert') {

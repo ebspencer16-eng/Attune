@@ -8,6 +8,7 @@
 
 export const EMAIL_TRIGGERS = {
   "partner_invite": [
+    "api/admin-actions.js:155",
     "src/App.jsx:12481",
     "src/App.jsx:12583",
     "src/App.jsx:12901",
@@ -20,7 +21,7 @@ export const EMAIL_TRIGGERS = {
     "src/App.jsx:16303"
   ],
   "shipping_notification": [
-    "public/admin.html:6365"
+    "public/admin.html:6431"
   ],
   "workbook_promo": [
     "api/generate-workbook-promo.js:185"

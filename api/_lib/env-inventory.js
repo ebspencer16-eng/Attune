@@ -24,7 +24,7 @@ export const ENV_VARS = [
   { name: "DIGEST_TO", required: false, readBy: ["api/cron-beta-digest.js","api/cron-feedback-synthesis.js"] },
   { name: "EXPO_ACCESS_TOKEN", required: false, readBy: ["api/_lib/push.js"] },
   { name: "FROM_EMAIL", required: false, readBy: ["api/cron-beta-digest.js","api/cron-checkin.js","api/cron-feedback-synthesis.js","api/cron-survey-nudge.js"] },
-  { name: "INTERNAL_API_SECRET", required: false, readBy: ["api/_lib/origin.js","api/generate-workbook-promo.js"] },
+  { name: "INTERNAL_API_SECRET", required: false, readBy: ["api/_lib/origin.js","api/admin-actions.js","api/generate-workbook-promo.js"] },
   { name: "RESEND_API_KEY", required: true, readBy: ["api/cron-beta-digest.js","api/cron-checkin.js","api/cron-feedback-synthesis.js","api/cron-survey-nudge.js"], note: "Without it, no email is sent at all." },
   { name: "RESEND_AUDIENCE_ID", required: false, readBy: ["api/join-waitlist.js"] },
   { name: "RESEND_SEGMENT_ID", required: false, readBy: ["api/join-waitlist.js"] },
