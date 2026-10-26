@@ -23,15 +23,23 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const ROOT = new URL('..', import.meta.url).pathname;
 const TASKS = `${ROOT}TASKS.md`;
 
-/** The one block, and which file fills it. */
-const OPEN = /<!-- SQL ([\w.-]+): written by scripts\/build-tasks-sql\.mjs\. Do not edit\. -->\n```sql\n([\s\S]*?)```\n<!-- \/SQL -->/;
+/**
+ * Every block, and which file fills each one.
+ *
+ * It was one block, matched once. She can have more than one thing to run at a
+ * time: an approved migration she has not got to yet, and a new read-only
+ * question that cannot wait behind it. Pointing the single block at the newer
+ * one would have quietly dropped the older from the document, which is how an
+ * approved migration stops being asked for.
+ *
+ * Global, so every marker in the file is filled from its own named migration.
+ */
+const OPEN = /<!-- SQL ([\w.-]+): written by scripts\/build-tasks-sql\.mjs\. Do not edit\. -->\n```sql\n([\s\S]*?)```\n<!-- \/SQL -->/g;
 
 export function fill(doc, read = (f) => readFileSync(`${ROOT}supabase/migrations/${f}`, 'utf8')) {
-  const m = OPEN.exec(doc);
-  if (!m) return { doc, name: null, changed: false };
-  const sql = read(m[1]).replace(/\s+$/, '');
-  const block = `<!-- SQL ${m[1]}: written by scripts/build-tasks-sql.mjs. Do not edit. -->\n`
-    + '```sql\n' + sql + '\n```\n<!-- /SQL -->';
+  OPEN.lastIndex = 0;
+  const names = [...doc.matchAll(OPEN)].map((m) => m[1]);
+  if (!names.length) return { doc, name: null, names: [], changed: false };
   /**
    * ── A REPLACER FUNCTION, NOT A STRING ─────────────────────────────────
    * String.prototype.replace reads $&, $', $` and $1 inside a STRING
@@ -45,13 +53,19 @@ export function fill(doc, read = (f) => readFileSync(`${ROOT}supabase/migrations
    * for eighteen migrations and was waiting for the first one with a dollar
    * sign in it.
    */
-  const out = doc.replace(OPEN, () => block);
-  return { doc: out, name: m[1], changed: out !== doc };
+  OPEN.lastIndex = 0;
+  const out = doc.replace(OPEN, (...args) => {
+    const file = args[1];
+    const sql = read(file).replace(/\s+$/, '');
+    return `<!-- SQL ${file}: written by scripts/build-tasks-sql.mjs. Do not edit. -->\n`
+      + '```sql\n' + sql + '\n```\n<!-- /SQL -->';
+  });
+  return { doc: out, name: names[0], names, changed: out !== doc };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const doc = readFileSync(TASKS, 'utf8');
-  const { doc: out, name, changed } = fill(doc);
+  const { doc: out, name, names, changed } = fill(doc);
   if (!name) {
     /* Nothing to run is a state the document is allowed to be in: she has run
        everything, and the block comes back with the next migration. It used to
@@ -62,5 +76,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(0);
   }
   if (changed) writeFileSync(TASKS, out);
-  console.log(`[build-tasks-sql] TASKS.md carries ${name}${changed ? ', rewritten' : ', already current'}.`);
+  console.log(`[build-tasks-sql] TASKS.md carries ${names.length} migration block(s): `
+    + `${names.join(', ')}${changed ? ', rewritten' : ', already current'}.`);
 }

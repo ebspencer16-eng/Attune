@@ -29,7 +29,14 @@ update public.profiles p
    and p.feedback_given_at is null;
 
 -- Who is now recorded as having given feedback.
-select p.email, p.feedback_given_at
+--
+-- The address comes from auth.users, because `profiles` has no email column.
+-- The first version of this selected p.email and would have answered 42703 on
+-- the one statement meant to show her the result. CLAUDE.md's own rule about a
+-- read from a column that does not exist being as quiet as a write to one,
+-- caught before she ran it rather than after.
+select u.email, p.feedback_given_at
 from public.profiles p
+join auth.users u on u.id = p.id
 where p.feedback_given_at is not null
 order by p.feedback_given_at desc;

@@ -12,7 +12,8 @@ Every code block says which window it goes in, above the block.
 |--|--|
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W142 | **Spacing the options by meaning: my answer to your question is that it is overkill now.** W145 already took Communication from a 1 in 3 chance of a round quarter to 1 in 18. This would be you hand-writing 82 numbers for a second pass at the same problem. One line back and I build it; otherwise I will leave it. |
-| S73 | **092 is approved and still needs running.** One block, below, Supabase SQL Editor. It is the only one of the three left to run. |
+| S73 | **092 is approved and still needs running.** Block below, Supabase SQL Editor. Its last statement was reading a column that does not exist and would have errored on you; fixed. |
+| S74 | **Rebecca: 093 below answers whether her setup, her exercises and her partner invite ever finished.** Read only, writes nothing. Paste the three tables back and I will tell you what to prompt her with. |
 | W146 | **W145 changes the Physical Intimacy figures of couples who already have results.** Your freeze rule says scoring should persist from when they took it, and it does for the couple type, which is stored. The intimacy figures have never been stored; they are recomputed from the answers on every request, and METHODOLOGY.md says so publicly. Tell me to leave it, or to freeze intimacy too, which needs a stored row and a migration. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -23,79 +24,17 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### S72 and S73 — two to run
+### Two to run, and one to read
 
-**Both go in the Supabase SQL Editor, not Terminal.**
+**Both blocks go in the Supabase SQL Editor, not Terminal.** Open Supabase, click
+SQL Editor, paste one block, click Run. Then do the same with the second.
 
-091 reads only. It shows every order the backfill wrote, what each account has
-actually done, and a count by package. The undo sits at the foot, commented
-out; tell me which should go and I will uncomment the list.
+**S73, the one you approved.** 092 stops the feedback card asking anybody who has
+already finished the survey, by setting the flag from their completed row. Safe to
+run twice: it only fills a flag that is empty. The last statement shows you who is
+now recorded.
 
-<!-- SQL 091_review_backfilled_orders.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 091: what the backfill actually created. Reads only. Deletes nothing.
---
--- ── WHY ─────────────────────────────────────────────────────────────────────
--- The first version of 089 wrote an order for EVERY profile that had none,
--- carrying whatever package the profile said. It ran before it was replaced.
--- 090 then came back with no rows, which is how we know: there is nobody left
--- without an order, so all thirteen got one.
---
--- Five of those thirteen carried `premium` on the profile, and
--- `create-profile` used to take the package from the request, so signing up at
--- ?pkg=premium granted premium. Four of the five date from July, before that
--- was closed. Those five now have a premium ORDER behind them, which is in the
--- revenue figures and reads exactly like a sale.
---
--- Nothing here changes any of that. It shows what exists so Ellie can say
--- which should stay. The undo is at the foot, commented out, and takes a list
--- the same way 089 does.
---
--- Run in the Supabase SQL Editor and click Run.
--- ============================================================================
-
--- Every row the backfill wrote, with what that account has actually done.
-select
-  o.order_num,
-  coalesce(p.email, '(no email)')        as email,
-  o.pkg_key                              as granted,
-  p.pkg                                  as pkg_on_profile,
-  coalesce(p.is_demo, false)             as is_demo,
-  p.created_at::date                     as joined,
-  (p.ex1_answers is not null)            as started_comms,
-  (p.ex2_answers is not null)            as started_expectations,
-  (p.partner_profile_id is not null)     as partner_linked
-from public.orders o
-left join public.profiles p on p.id = o.user_id
-where o.promo_code = 'BACKFILL-COMPED'
-order by o.pkg_key desc, p.created_at;
-
--- And the shape of it in one line.
-select o.pkg_key as granted, count(*) as rows_written
-from public.orders o
-where o.promo_code = 'BACKFILL-COMPED'
-group by o.pkg_key
-order by o.pkg_key;
-
--- ── THE UNDO, WHEN SHE HAS SAID WHO ─────────────────────────────────────────
--- Commented out on purpose. Every row it would remove was written by the
--- backfill and by nothing else, so this cannot touch a real sale: the filter
--- is the promo_code the backfill stamped and the email list she names.
---
--- delete from public.orders
---  where promo_code = 'BACKFILL-COMPED'
---    and lower(buyer_email) in (
---      'someone@example.com',
---      'someone-else@example.com'
---    );
-```
-<!-- /SQL -->
-
-092 stops the feedback card asking anybody who has already finished the
-survey, by setting the flag from their completed row.
-
-<!-- SQL2 092_feedback_given_backfill.sql -->
+<!-- SQL 092_feedback_given_backfill.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
 -- 092: anybody who has finished the survey stops being asked for feedback.
@@ -128,12 +67,114 @@ update public.profiles p
    and p.feedback_given_at is null;
 
 -- Who is now recorded as having given feedback.
-select p.email, p.feedback_given_at
+--
+-- The address comes from auth.users, because `profiles` has no email column.
+-- The first version of this selected p.email and would have answered 42703 on
+-- the one statement meant to show her the result. CLAUDE.md's own rule about a
+-- read from a column that does not exist being as quiet as a write to one,
+-- caught before she ran it rather than after.
+select u.email, p.feedback_given_at
 from public.profiles p
+join auth.users u on u.id = p.id
 where p.feedback_given_at is not null
 order by p.feedback_given_at desc;
 ```
-<!-- /SQL2 -->
+<!-- /SQL -->
+
+**S74, Rebecca.** 093 writes nothing at all. It answers your three questions in
+three tables: whether her account setup finished, which exercises she has done,
+and whether a partner was ever invited. Paste the results back to me and I will
+tell you exactly what to prompt her with.
+
+<!-- SQL 093_rebecca_account_state.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- 093: What Rebecca has and has not done. READ ONLY. Writes nothing.
+--
+-- Ellie: "Since rebecca's login process was messed up, did she complete demos
+-- and account setup? Did she invite a partner? If no to any of that, we need
+-- to prompt her with it immediately."
+--
+-- Her sign-up went through a broken path, so the question is whether anything
+-- was left half-finished. Three things, one row each, with a plain yes or no
+-- and the date where there is one.
+--
+-- Nothing here changes a single value. Run it, read it, and nothing has moved.
+--
+-- She is found by email OR by the name on the profile, because a broken
+-- sign-up is one of the ways those two come apart. If all three blocks come
+-- back empty, the account is not under a name or address starting "rebecca"
+-- and the thing to do is send me the email address rather than guess.
+
+-- ── 1. Account setup ──────────────────────────────────────────────────────
+-- A profile is set up when it has a name and the pronouns, which is what the
+-- in-app editor writes. `profile_setup_complete` is the flag the app sets, and
+-- it is reported separately from the fields because a broken path is exactly
+-- how a flag and its fields come apart.
+select
+  'account setup'                                       as question,
+  p.name                                                as name,
+  nullif(p.pronouns, '')                                as pronouns,
+  p.profile_setup_complete                              as setup_flag,
+  case
+    when coalesce(p.name, '') = '' then 'NO: no name'
+    when coalesce(p.pronouns, '') = '' then 'NO: no pronouns'
+    when p.profile_setup_complete is not true then 'PARTLY: fields are there, flag is not set'
+    else 'YES'
+  end                                                   as answer,
+  p.created_at
+from public.profiles p
+join auth.users u on u.id = p.id
+where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+
+-- ── 2. The exercises ──────────────────────────────────────────────────────
+-- One row per exercise, so a half-finished set is visible rather than averaged
+-- into a single yes. An answers column that is null or an empty object is not
+-- started; one with keys in it has been answered.
+select
+  'exercises'                                           as question,
+  x.exercise,
+  case
+    when x.answers is null then 'NO: not started'
+    when jsonb_typeof(x.answers) <> 'object' then 'ODD: stored value is not an object'
+    when x.answers = '{}'::jsonb then 'NO: started and empty'
+    when x.answers ? 'completedAt' then 'YES: finished ' || (x.answers ->> 'completedAt')
+    else 'PARTLY: ' || (select count(*) from jsonb_object_keys(x.answers)) || ' answers, no completedAt'
+  end                                                   as answer
+from public.profiles p
+join auth.users u on u.id = p.id
+cross join lateral (
+  values
+    ('Communication Styles',  p.ex1_answers),
+    ('Expectations',          p.ex2_answers),
+    ('Relationship Reflection', p.ex3_answers),
+    ('Physical Intimacy',     p.intimacy_data),
+    ('Conflict Patterns',     p.conflict_data)
+) as x(exercise, answers)
+where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+
+-- ── 3. The partner ────────────────────────────────────────────────────────
+-- Three separate states, because they fail separately: no invite was ever
+-- addressed, an invite was addressed but nobody joined, or a partner is linked.
+select
+  'partner'                                             as question,
+  nullif(p.partner_name, '')                            as partner_name,
+  nullif(p.partner_email, '')                           as partner_email,
+  p.invite_code,
+  p.partner_joined,
+  case
+    when coalesce(p.partner_email, '') = '' then 'NO: no partner email on the profile'
+    when p.invite_code is null then 'NO: an email but no invite code, so nothing could be sent'
+    when p.partner_joined is not true then 'INVITED, NOT JOINED: ' || p.partner_email
+    else 'YES: joined'
+  end                                                   as answer
+from public.profiles p
+join auth.users u on u.id = p.id
+where lower(u.email) like 'rebecca%' or lower(coalesce(p.name, '')) like 'rebecca%';
+```
+<!-- /SQL -->
+
+---
+
 
 ---
 
@@ -187,8 +228,6 @@ opposite of what you are asking for.
 
 | # | What I am doing |
 |--|--|
-| W144 | **Your report that the columns and the cover titles are still left aligned.** Chasing it on the simulator now. The fix went in and you cannot see it, so either it is wrong or it never reached you. |
-| W141 | **Taking "What it is for" off the overview as a category.** Approved. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -198,6 +237,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| W144 | **The columns and the cover titles are centred, and your simulator was showing a bundle from before the fix.** I painted the word row red: no red appeared, which proved edits were not reaching it. After a forced relaunch the paint appeared and so did the centring. **Quit Expo Go on the simulator and reopen it** and you will see it. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
@@ -210,6 +250,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| W141 | **"What it is for" is off the overview**, out of the headline figure and out of the action plan. It compared two picks from a list of six, so most couples scored 0 on it. Its own page still shows both sets of answers. |
 | S71 | **The first 089 wrote an order for all thirteen accounts, five of them premium.** 091 listed every row it created against what that account had actually done. You ran it and kept them. |
 | S72 | **091, the read-only review of the backfill.** Ran and saved. Nothing was deleted. |
 | W140 | **Eight of your fourteen**: 2, 3, 4 on the sign-in screen, 5 the dropdowns, 6 the budget staying open, 7 and 8 the two stale prompts, 13 Phys. Intimacy, 14 the insight wraps. |
