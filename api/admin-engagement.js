@@ -36,6 +36,7 @@ import { EXERCISES } from './_exercises.js';
 import { resultsNav } from './_lib/results-sections.js';
 import { axisScores, calcDimScores, typeCodeFromAxes } from './_type-engine.js';
 import { fetchProfiles, ownedBy } from './_lib/demo-accounts.js';
+import { marketingPageName, abbreviate } from './_lib/page-names.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -217,9 +218,12 @@ function resultsGroups(nav) {
     const children = item.children?.length
       ? item.children.map((c) => ({ key: `app:results:${c.id}`, label: c.label, id: c.id }))
       : [{ key: `app:results:${item.id}`, label: item.label, id: item.id }];
+    /* The group's own name is what the results chart draws, and eight of them
+       do not fit across one tile. */
     groups.push({
       id: item.id,
-      label: item.shortLabel || item.label,
+      label: abbreviate(item.shortLabel || item.label),
+      full: item.shortLabel || item.label,
       sections: children,
     });
   }
@@ -321,7 +325,9 @@ function engagementFromEvents(events, { profiles, notes, tags, noteTags, reads, 
     .filter((e) => e.kind === 'page_time' && String(e.key || '').startsWith('/'))
     .map((e) => e.key))].sort();
 
-  const exerciseEntries = EXERCISES.map((ex) => ({ key: `app:${ex.view}`, label: ex.label }));
+  /* Abbreviated, at her ask: five full exercise names will not sit under five
+     columns in a third-width tile. The long name is still in the hover. */
+  const exerciseEntries = EXERCISES.map((ex) => ({ key: `app:${ex.view}`, label: abbreviate(ex.label), full: ex.label }));
   const RESOURCE_VIEWS = [
     { key: 'app:workbook', label: 'Workbook' },
     { key: 'app:budget', label: 'Shared Budget' },
@@ -330,7 +336,11 @@ function engagementFromEvents(events, { profiles, notes, tags, noteTags, reads, 
 
   const timePerPage = {
     marketing: measured
-      ? clustered(events, marketingKeys.map((k) => ({ key: k, label: k })))
+      /* The page's name, not its path. Ellie: "Marketing pages column labels
+         are wrong, they should be Home, Our Purpose, Packages, Registry, In
+         Practice, FAQs." The label was the key because nothing had ever given
+         it anything else. */
+      ? clustered(events, marketingKeys.map((k) => ({ key: k, label: marketingPageName(k) })))
       : notYet,
     exercises: measured ? clustered(events, exerciseEntries) : notYet,
     resources: measured ? clustered(events, RESOURCE_VIEWS) : notYet,
@@ -447,6 +457,17 @@ function learningFromData({ events, notes, tags, noteTags, reads, posts, groups 
     const g = groups.find((x) => x.sections.some((sn) => sn.id === anchorKey));
     return g ? g.label : null;
   };
+  /* ── ABBREVIATED AT THE SOURCE, NOT AT THE CHART ──────────────────────
+     Ellie: "Notes by section should also use the abbreviation."
+
+     This array is both the label list AND the key every note is counted
+     against, so mapping it on the way out gave `shape` a lookup whose keys no
+     longer matched its accumulator and the endpoint answered 500. Caught by
+     check-body-parsing in the same run, which is what that gate is for.
+
+     `groups` already carries the abbreviation, because the results chart
+     needed it: taking it from there means these two tiles cannot come to
+     disagree about what a section is called. */
   const sectionLabels = [...groups.map((g) => g.label), IN_PRACTICE_LABEL];
 
   const bySection = tally(notes, (n) => {

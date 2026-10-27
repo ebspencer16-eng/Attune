@@ -150,7 +150,22 @@
   /* align-items:start so a short tile keeps its own height instead of being
      stretched to match a tall neighbour, which left half a tile of white under
      several of them. */
-  .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(.75rem,1.4vw,1.4rem);margin-bottom:1.25rem;align-items:start}
+  /* ── A PAIR OF TILES IS ONE ROW ────────────────────────────────────────
+     Ellie: "Package mix chart tile should be shorter so that it's the same
+     height as revenue over time. All 3 charts on the right hand side of that
+     page are slightly longer than their counterpart on the left column."
+
+     The canvases were already identical, 532 by 220 on both sides. What
+     differed was the CARD: `align-items:start` lets each one be its own
+     height, and the right-hand heads carry a longer subtitle that wraps to a
+     second line, so every right-hand tile ended up a line taller than the one
+     beside it.
+
+     Stretching the row makes a pair one height, and the chart body takes up
+     the slack so the charts themselves do not move. */
+  .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(.75rem,1.4vw,1.4rem);margin-bottom:1.25rem;align-items:stretch}
+  .chart-grid > .chart-card{display:flex;flex-direction:column;}
+  .chart-grid > .chart-card > .chart-body{flex:1 1 auto;}
   .chart-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
   .chart-grid.full{grid-template-columns:minmax(0,1fr)}
   @media(max-width:820px){.chart-grid{grid-template-columns:minmax(0,1fr)}}
@@ -487,6 +502,14 @@
    Ellie: "I want the Q text to be on the left and right-aligned, and I want
    the bars with pole labels to the right of that content. Pole labels and
    question text can wrap, but rows should be clear." */
+/* Ellie: "Stack the slicers on notes by section and notes by page so that the
+   title isn't squished, the slicers can be vertically stacked." Two controls
+   beside a two-word title in a third-width tile leaves the title about forty
+   points; stacked, it gets the width back. */
+.chart-head:has(.eng-stack){align-items:flex-start;}
+.chart-head:has(.eng-stack) .tile-slicers,
+.chart-head:has(.eng-stack) > .eng-stack{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;}
+.eng-stack{max-width:150px;}
 .qrow{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;}
 .qrow-label{flex:0 0 30%;min-width:96px;max-width:300px;font-size:.74rem;color:var(--text);text-align:right;line-height:1.35;overflow-wrap:anywhere;}
 .qrow-body{flex:1 1 auto;min-width:0;}
@@ -1186,7 +1209,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
         <div class="chart-head">
           <div><div class="chart-title">Notes by section</div><div class="chart-subtitle" id="eng-ns-n">&mdash;</div></div>
           <div style="display:flex;gap:.4rem">
-            <select class="tile-slicer" id="eng-ns-mode" title="How to count" aria-label="Eng ns mode">
+            <select class="tile-slicer eng-stack" id="eng-ns-mode" title="How to count" aria-label="Eng ns mode">
               <option value="total">Total engagement</option>
               <option value="detail">Detailed engagement</option>
             </select>
@@ -1203,7 +1226,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
               <option value="total">Total engagement</option>
               <option value="detail">Detailed engagement</option>
             </select>
-            <select class="tile-slicer" id="eng-nd-pick" title="Which section" aria-label="Eng nd pick"></select>
+            <select class="tile-slicer eng-stack" id="eng-nd-pick" title="Which section" aria-label="Eng nd pick"></select>
             <select class="tile-slicer eng-slicer" id="slz-eng-nd" data-tile="nd" title="Cut this tile by a segment" aria-label="Slz eng nd"><option value="">Everyone</option></select>
           </div>
         </div>
@@ -1483,24 +1506,27 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
              the same themes rise and fall between them. "Getting through
              something hard" topping both pride and regret is a sentence two
              separate charts cannot say. -->
+        <!-- Swapped with the admired chart below, for spacing: Ellie,
+             "What people wrote about chart should be swapped with quality most
+             admired in partner chart for spacing reasons." -->
         <div class="chart-card">
           <div class="chart-head">
-            <div><div class="chart-title">What people wrote about</div><div class="chart-subtitle" id="refcode-sub">Themes across the written answers</div></div>
-            <select class="tile-slicer" id="refcode-q" title="Which written question" aria-label="Written question"></select>
+            <div><div class="chart-title">Quality most admired in a partner</div><div class="chart-subtitle">What people picked, out of ten</div></div>
+            <select class="tile-slicer" id="slz-admired" title="Cut this tile by a segment" aria-label="Slz admired"><option value="">Everyone</option></select>
           </div>
-          <div class="chart-body"><canvas id="chart-refcodes"></canvas></div>
+          <div class="chart-body"><canvas id="chart-admired"></canvas></div>
         </div>
       </div>
       <!-- Ellie: "Qualitities most admired in partner should be a column chart
            above all questions tile." It is a pick from ten fixed options, so it
            is a distribution and nothing has to be coded to draw it. -->
       <div class="chart-card" style="margin-top:1.25rem">
-        <div class="chart-head">
-          <div><div class="chart-title">Quality most admired in a partner</div><div class="chart-subtitle">What people picked, out of ten</div></div>
-          <select class="tile-slicer" id="slz-admired" title="Cut this tile by a segment" aria-label="Slz admired"><option value="">Everyone</option></select>
+          <div class="chart-head">
+            <div><div class="chart-title">What people wrote about</div><div class="chart-subtitle" id="refcode-sub">Themes across the written answers</div></div>
+            <select class="tile-slicer" id="refcode-q" title="Which written question" aria-label="Written question"></select>
+          </div>
+          <div class="chart-body"><canvas id="chart-refcodes"></canvas></div>
         </div>
-        <div class="chart-body"><canvas id="chart-admired"></canvas></div>
-      </div>
       <div class="qx-section" id="qx-story" style="margin-top:1.25rem"></div>
     </div>
 
@@ -1630,7 +1656,11 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
            'what makes disagreements go better than expected' and 'what do
            people appreciate about conflict handling'." Both are free text and
            go through the same code frame as the reflection answers. -->
-      <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.25rem">
+      <!-- Ellie: "When it went better than expected and what they appreciate
+           about how it is handled should both be full width carts stacked
+           vertically so that I can read column labels." Ten coded themes
+           across half a page turns every label sideways or drops one. -->
+      <div class="chart-grid" style="grid-template-columns:minmax(0,1fr);margin-top:1.25rem">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">When it went better than expected</div><div class="chart-subtitle" id="cfcode-c9-sub">Themes in what people wrote</div></div></div>
           <div class="chart-body"><canvas id="chart-cfcode-c9"></canvas></div>
@@ -2542,7 +2572,7 @@ window.adminAuthHeaders = function(extra){
       const data = ctx.rLabels.map(r => valueAt(r, ''));
       cfg = picked === 'pie'
         ? { type: 'pie', data: { labels: ctx.rLabels, datasets: [{ data, backgroundColor: PAL, borderColor: '#fff', borderWidth: 3 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, font: { size: 10 } } } } } }
         : { type: picked === 'line' ? 'line' : 'bar',
             data: { labels: ctx.rLabels, datasets: [{ data, backgroundColor: PAL[0], borderColor: PAL[0], borderRadius: 4, maxBarThickness: 46, tension: .3 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
@@ -2557,7 +2587,7 @@ window.adminAuthHeaders = function(extra){
       cfg = { type: picked === 'line' ? 'line' : 'bar',
         data: { labels: ctx.rLabels, datasets: sets },
         options: { responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, font: { size: 10 } } } },
           scales: { y: { beginAtZero: true, stacked, grid: { display: false }, ticks: { font: { size: 10 } } },
                     x: { stacked, grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 } } } } };
     }
@@ -3176,7 +3206,7 @@ function drawHeadlines() {
     if (m.available === false) {
       return '<div class="kpi-card ' + tone + '">'
         + '<div class="kpi-label">' + label + '</div>'
-        + '<div class="kpi-val" style="font-size:1rem;color:var(--dim)">Not measured</div>'
+        + '<div class="kpi-val" style="font-size:1rem;color:var(--dim);padding:.1rem .1rem .35rem">Not measured</div>'
         + '<div class="kpi-sub">' + QX_ESC(m.needs || '') + '</div></div>';
     }
     const change = m.change == null
@@ -3211,7 +3241,7 @@ function drawFunnel() {
         };
       }),
     },
-    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10 } } },
+    options: { plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10 } } },
       scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
   });
 }
@@ -3233,7 +3263,7 @@ function drawAcquisition() {
   mkChart(document.getElementById('chart-eng-acq'), {
     type: 'line',
     data: { labels: a.months || [], datasets: sets },
-    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10 } } },
+    options: { plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10 } } },
       scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
   });
   /* ── THE CAVEAT GOES IN THE SUBTITLE, NOT BESIDE THE TILE ─────────────
@@ -3280,19 +3310,33 @@ function drawTimePerPage() {
   }
   const detailed = (tp('det').detailed || {})[chosen];
 
-  // Each of the five may be on a different cut, and the shared ceiling is
-  // computed across whatever they are each showing right now. Ellie asked for
-  // one max height so the columns can be compared between tiles; cutting one
-  // tile must not silently rescale it against the others.
+  /* ── EACH CHART TO ITS OWN DATA ────────────────────────────────────────
+     Two of her reports, and one cause.
+
+     "max height should automatically adjust based on data, time per page for
+     marketing, exercises, and resources should change axis height."
+     "Why are the other charts changing when I select a different pill from
+     the detailed results pages tile? That selection should only change that
+     tile."
+
+     One ceiling was computed across all five and handed to every one of them,
+     so a tall column anywhere flattened everything else, and the pill, which
+     changes which detailed set is in that list, rescaled the other four.
+
+     This reverses her earlier ask, and both quotes are kept because the round
+     trip is the instruction: "five time charts to one height", from R9, so
+     that three seconds on one chart could not read as three minutes on
+     another. What that was protecting is still true BETWEEN the web and app
+     series inside one tile, which share an axis and are meant to be compared.
+     Across tiles it cost her the ability to read the small ones at all. */
   const t = { marketing: tp('mk').marketing, exercises: tp('ex').exercises,
               resources: tp('res').resources, results: tp('rs').results };
-  const all = [t.marketing, t.exercises, t.resources, t.results, detailed];
-  let max = 0;
-  all.forEach(function (c) {
-    if (!c || c.available === false) return;
+  const ceilingFor = function (c) {
+    let max = 0;
+    if (!c || c.available === false) return undefined;
     (c.site || []).concat(c.app || []).forEach(function (v) { if (v > max) max = v; });
-  });
-  const ceiling = max > 0 ? Math.ceil(max * 1.1) : undefined;
+    return max > 0 ? Math.ceil(max * 1.1) : undefined;
+  };
 
   /* Ellie: "should the categories be web and app not seconds and app?" They
      should. The first series had no label of its own, so it fell back to the
@@ -3308,7 +3352,7 @@ function drawTimePerPage() {
         second: { label: 'App', data: v.app, colour: '#E8673A' },
         colour: '#5C6DDA',
         axis: 'seconds',
-        max: ceiling,
+        max: ceilingFor(measure),
       };
     });
   };
@@ -3317,7 +3361,7 @@ function drawTimePerPage() {
     return {
       subtitle: 'Mean seconds' + (v.n ? (' · n=' + v.n) : ' · nothing timed yet'),
       labels: v.labels, data: v.site.map(function (s, i) { return s || v.app[i]; }),
-      colour: '#34D399', axis: 'seconds', max: ceiling,
+      colour: '#34D399', axis: 'seconds', max: ceilingFor(t.marketing),
     };
   });
   clustered('chart-eng-ex', 'eng-ex-n', t.exercises, 'Mean seconds');
@@ -3522,7 +3566,7 @@ function drawTimeTile(canvasId, subId, measure, unit, shape) {
       datasets: v.labels && v.labels.length ? datasets : [{ label: v.axis, data: [0], backgroundColor: '#E6ECF6' }],
     },
     options: {
-      plugins: { legend: { display: datasets.length > 1, position: 'bottom', labels: { boxWidth: 10, padding: 10 } } },
+      plugins: { legend: { display: datasets.length > 1, position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10 } } },
       scales: {
         x: { grid: { display: false }, stacked: !!v.stacked },
         y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 }, beginAtZero: true, max: v.max, stacked: !!v.stacked },
@@ -6454,7 +6498,7 @@ async function renderIntimacySummary() {
           { label: 'Regularly intimate', data: rows.map(r => pct(r.intimate)), backgroundColor: '#B5546E', borderRadius: 4, maxBarThickness: 22 },
         ] },
         options: { responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } },
+          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10, font: { size: 10 } } },
             tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + c.parsed.y + '% along' } } },
           scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { display: false } },
                     x: { ticks: { font: { size: 9 } }, grid: { display: false } } } } });
@@ -6612,7 +6656,7 @@ async function renderConflictPage() {
     mkChart(el, { type,
       data: { labels, datasets: [{ data, backgroundColor: palette, borderColor: '#FFFFFF', borderWidth: type === 'pie' ? 3 : 0, borderRadius: type === 'bar' ? 4 : 0, maxBarThickness: 46 }] },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: type === 'pie' ? { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } : { display: false },
+        plugins: { legend: type === 'pie' ? { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10, font: { size: 10 } } } : { display: false },
           tooltip: { callbacks: { label: c2 => ' ' + c2.parsed + ' of ' + valuesOf(rows, id).length } } },
         ...(type === 'bar' ? { scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } }, x: { ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 }, grid: { display: false } } } } : { cutout: 0 }) } });
   };
@@ -8483,6 +8527,46 @@ function mkChart(el, cfg) {
   o.hover = Object.assign({ animationDuration: 0 }, o.hover);
   o.plugins = o.plugins || {};
   o.plugins.tooltip = Object.assign({ animation: false, position: 'nearest' }, o.plugins.tooltip);
+
+  /* ── NO VALUE AXIS, NO GRIDLINES, ANYWHERE ─────────────────────────────
+     Ellie: "I like the view of 'what lands best from a partner' with no y
+     axis and no gridlines, can we please implement this throughout every
+     chart in admin?"
+
+     That tile set it by hand, and so did about a dozen others, each one its
+     own copy of the same two lines. This is the one place every chart in the
+     admin is built, so it belongs here and the per-tile copies become
+     redundant rather than contradictory.
+
+     It is the VALUE axis that goes: the category axis keeps its names,
+     because a column with no label is a column you cannot read. On a
+     horizontal bar the value axis is x and the categories are y, so which
+     one to silence is read off indexAxis rather than assumed.
+
+     A tile that has already said something about its value axis keeps it:
+     the percentage scales that pin themselves to 0-100 are making a point
+     about the ceiling, and silently overriding them would be this file
+     deciding it knows better than the tile. Ticks and grid only, so a stacked
+     or beginAtZero setting is untouched.
+
+     Pie, doughnut, radar and polar area have no cartesian axis at all, and
+     creating one draws gridlines behind the slices, which is a complaint she
+     has already made twice. */
+  {
+    const CARTESIAN = cfg.type !== 'doughnut' && cfg.type !== 'pie'
+      && cfg.type !== 'radar' && cfg.type !== 'polarArea';
+    if (CARTESIAN) {
+      o.scales = o.scales || {};
+      const valueKey = o.indexAxis === 'y' ? 'x' : 'y';
+      const axis = o.scales[valueKey] = o.scales[valueKey] || {};
+      if (axis.display !== true) axis.display = false;
+      axis.grid = Object.assign({ display: false, drawBorder: false }, axis.grid);
+      /* The category axis keeps its labels and loses only its grid. */
+      const catKey = valueKey === 'y' ? 'x' : 'y';
+      const cat = o.scales[catKey] = o.scales[catKey] || {};
+      cat.grid = Object.assign({ display: false, drawBorder: false }, cat.grid);
+    }
+  }
   flatTicks(cfg);
   /* ── NO COLUMN SAYS ITS OWN NUMBER ANY MORE ─────────────────────────────
      Ellie, 26 October: "remove data labels anywhere they exist in admin, I

@@ -1131,6 +1131,13 @@ if (process.env.PICKER) {
   }
 }
 
+if (process.env.CARDS) {
+  const out = await page.evaluate(() => [...document.querySelectorAll('.chart-grid')]
+    .filter((g) => g.offsetParent !== null)
+    .map((g) => [...g.children].map((c) => Math.round(c.getBoundingClientRect().height)).join(' vs ')));
+  for (const row of out) console.log('  card row: ' + row);
+}
+
 if (process.env.PANEL) {
   const out = await page.evaluate(() => {
     const b = document.querySelector('.fp-btn'); if (!b) return 'no picker';
