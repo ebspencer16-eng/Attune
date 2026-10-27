@@ -68,6 +68,15 @@
   .topbar-sub{font-size:.78rem;color:var(--muted);margin-top:.15rem}
   .topbar-right{display:flex;align-items:center;gap:.75rem}
   .date-badge{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;font-size:.72rem;color:var(--muted);font-family:var(--mono)}
+  /* ── .btn HAD NO RULE AT ALL ──────────────────────────────────────────
+     Two buttons carry this class, Refresh on the Engagement page and "Show
+     all" under a long table, and both rendered as a bare native control: a
+     grey rounded box in a page where every other button is a bordered pill.
+     A class with no stylesheet behind it looks exactly like a styling choice,
+     which is why it survived. Same rule as .export-btn, which is the shape
+     every other button on these pages already has. */
+  .btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;font-size:.72rem;color:var(--text);cursor:pointer;font-family:var(--bfont);transition:all .15s;}
+  .btn:hover{border-color:var(--accent,#5C6DDA);color:var(--accent,#5C6DDA);}
   .export-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;font-size:.72rem;color:var(--text);cursor:pointer;font-family:var(--bfont);transition:all .15s;display:flex;align-items:center;gap:.4rem}
   .export-btn:hover{border-color:var(--orange);color:var(--orange)}
 
@@ -2910,14 +2919,20 @@ function drawAcquisition() {
     options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10 } } },
       scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
   });
+  /* ── THE CAVEAT GOES IN THE SUBTITLE, NOT BESIDE THE TILE ─────────────
+     This built a loose div and inserted it between the tile's head and its
+     chart, so the one sentence explaining why half the tile is empty sat
+     outside the tile's own structure and read as a stray line on the page.
+     Every other tile here says what it cannot show in its subtitle, and this
+     tile already has one.
+
+     The title is "Visits and downloads" and only one of the two is collected,
+     so which is which belongs beside the title rather than under it. */
   if (!a.downloads) {
-    const card = document.getElementById('chart-eng-acq').closest('.chart-card');
-    if (card && !card.querySelector('[data-dl-note]')) {
-      const n = document.createElement('div');
-      n.setAttribute('data-dl-note', '1');
-      n.style.cssText = 'font-size:.72rem;color:var(--dim);padding:.3rem 0 .5rem;line-height:1.5';
-      n.textContent = 'Downloads: ' + (a.downloadsNeeds || 'not collected.');
-      card.insertBefore(n, card.querySelector('.chart-body'));
+    const sub = document.getElementById('eng-acq-n');
+    if (sub && sub.textContent.indexOf('Downloads:') === -1) {
+      sub.textContent = (sub.textContent || '').replace(/\s*$/, '')
+        + ' \u00b7 Downloads: ' + (a.downloadsNeeds || 'not collected.');
     }
   }
 }
@@ -8315,6 +8330,25 @@ function flatTicks(cfg) {
     ticks.maxRotation = 0;
     ticks.minRotation = 0;
     ticks.autoSkipPadding = ticks.autoSkipPadding == null ? 6 : ticks.autoSkipPadding;
+    /* ── EVERY COLUMN KEEPS ITS NAME, WHERE THERE IS ROOM FOR ONE ─────────
+       Ellie, W103: "Every column keeps its name, at any width... Chart.js
+       drops ticks it thinks would collide and says nothing, so that is
+       switched off." That was done on one chart. It is a rule about every
+       chart, and this is the one place every chart in the admin is built, so
+       it belongs here: the Engagement page's exercise tile was drawing three
+       of five names, silently, which is the same bug she reported months ago
+       wearing a different tile.
+
+       Not unconditionally. The comment above says a crowded axis reads better
+       skipping some labels than slanting them, and that is true past a dozen
+       categories: forty names in a 330 point box is a grey smear whatever you
+       do. Under that, the labels are wrapped and upright already and the room
+       exists, so dropping one is a loss with nothing bought by it. Twelve
+       because the widest of these tiles is a third of the page and twelve
+       wrapped labels is where that stops being readable, measured rather than
+       chosen. */
+    const cats = (cfg.data && cfg.data.labels) ? cfg.data.labels.length : 0;
+    if (cats && cats <= 12 && ticks.autoSkip == null) ticks.autoSkip = false;
     ticks.font = Object.assign({ size: 10 }, ticks.font);
     ticks.color = ticks.color || '#5A6478';
     ticks.callback = function (value) {

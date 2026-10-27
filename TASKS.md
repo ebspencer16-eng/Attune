@@ -117,7 +117,6 @@ Complete a survey after running it and it will say 1, which is the proof.
 
 | # | What I am doing |
 |--|--|
-| A72 | Making Engagement readable. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -127,6 +126,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A72 | **Engagement is not broken, and I was about to rebuild it on a stale note.** The "not readable" round turned out to be my own test harness, and you have approved two things on that page since. What I did find by looking: Refresh was an unstyled browser button, the Exercises chart was silently drawing three of five names, and the downloads caveat sat as a loose line outside its tile. All three fixed. The funnel and acquisition lines are your own spec from R9, so they stay. |
 | A77 | **The three at-a-glance tiles have slicers now.** They could not have worked before the payload fix either: the cut of every one of those measures has always been sent and the page read none of it. Cutting Physical Intimacy to Married moves alignment 78 to 75. |
 | A75 | **Type Analytics had no filters at all, and said it did.** Three dropdowns were being read by the code and existed nowhere in the markup, so every figure on that page has always been the whole population. They are in the top tile now and they cut it: the E:W ratio goes 2:3 to 6:7. Feedback's period control moved into its tile. |
 | A80 | **Explore: the title is just the two fields, the default is a clustered column, and the dropdown names the chart.** The measure moved to the line underneath rather than being dropped. It also said "undefined total" in my harness, which was the harness. |
