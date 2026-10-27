@@ -38,7 +38,7 @@ import { withEffectivePromoCodes } from './_lib/order-promo.js';
 import { categoryAlignment } from './_lib/resp-agreement.js';
 import { genericLabel } from './_lib/generic-label.js';
 import { DIM_META, DIM_SCALE_POLES } from './_lib/dimensions.js';
-import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS } from './_conflict-questions.js';
+import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS, forcedABValue } from './_conflict-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
 // other admin endpoints. Without this, Vercel's Node runtime can't invoke it
@@ -288,7 +288,11 @@ function ownFields(p) {
       /* Stored as the chosen side. The label is the sentence they picked,
          which is what makes a distribution readable without the question
          beside it. */
-      r['cq_' + q.id] = raw === 'a' ? q.a : raw === 'b' ? q.b : null;
+      /* 'a' and 'b' matched nothing either surface ever wrote: the website
+         stores 'A'/'B' and the app stored 0/1, so this dropped every forced
+         choice for everybody and two charts drew empty. */
+      const ab = forcedABValue(raw);
+      r['cq_' + q.id] = ab === 'A' ? q.a : ab === 'B' ? q.b : null;
     } else if (q.kind === 'pickOne') {
       r['cq_' + q.id] = (typeof raw === 'string' && raw) ? raw : null;
     }
@@ -591,8 +595,30 @@ function buildCatalog(fbCatOptions) {
   const CSECTION_LABEL = { start: 'How it goes', openings: 'Openings', risk: 'Risk patterns', works: 'What works', repair: 'Repair', closing: 'Closing' };
   for (const q of CONFLICT_QUESTIONS) {
     let options = null;
-    if (q.kind === 'scale') options = (q.options || []).map((o) => ({ v: o.label, label: o.label, val: o.value }));
-    else if (q.kind === 'frequency') options = FREQUENCY_OPTIONS.map((o) => ({ v: o.label, label: o.label, val: o.value }));
+    /* ── A POSITION IS 0 TO 1, AND THESE WERE SENDING 0 TO 4 ──────────────
+       Ellie: "I don't think the all questions section is correct, I don't
+       think everyone said often for everything."
+
+       She was right and it was not the data. `val` is where an answer sits on
+       the row's slider, and the admin reads it as a fraction: the mean dot is
+       drawn at `Math.max(2, Math.min(98, val * 100))` per cent. These two
+       lines passed the option's own value, which is 0 to 4 for the self
+       assessment and 0 to 3 for the four horsemen, so every value above 1
+       clamped to 98 and the dot pinned itself to the right-hand end of every
+       one of those five rows. The far right of the horsemen rows is "Often".
+
+       Nothing was wrong with the answers. Every other field on these pages
+       was already normalised, which is why only conflict looked like that:
+       the responsibilities send 0, 0.5 and 1, and the intimacy options are
+       fractions already. Five fields out of thirty-nine. */
+    const span = (list) => {
+      const vals = list.map((o) => o.value).filter((v) => typeof v === 'number');
+      const lo = Math.min(...vals), hi = Math.max(...vals);
+      const range = hi - lo;
+      return (o) => (typeof o.value === 'number' && range ? (o.value - lo) / range : null);
+    };
+    if (q.kind === 'scale') { const at = span(q.options || []); options = (q.options || []).map((o) => ({ v: o.label, label: o.label, val: at(o) })); }
+    else if (q.kind === 'frequency') { const at = span(FREQUENCY_OPTIONS); options = FREQUENCY_OPTIONS.map((o) => ({ v: o.label, label: o.label, val: at(o) })); }
     else if (q.kind === 'forcedAB') options = [{ v: q.a, label: q.a }, { v: q.b, label: q.b }];
     else if (q.kind === 'pickOne') options = (q.options || []).map((o) => ({ v: o.label || o, label: o.label || o }));
     if (!options) continue;

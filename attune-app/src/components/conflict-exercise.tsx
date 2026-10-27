@@ -231,14 +231,25 @@ function Body({
   frequencyOptions: { value: number; label: string }[];
 }) {
   if (q.kind === 'forcedAB') {
+    /* ── 'A' AND 'B', WHICH IS WHAT EVERYTHING ELSE STORES ─────────────────
+       This stored 0 and 1, the index in this list. The website stores 'A' and
+       'B' and the results prose is keyed on exactly those two letters, so a
+       couple who answered Conflict Patterns in the app got nothing at all for
+       these three questions on their results page: the lookup was
+       `{ A: ..., B: ... }[1]`, which is undefined, and undefined renders as
+       nothing. Nobody saw an error because there was not one.
+
+       Rows already written with 0 and 1 are repaired on the way out, by
+       forcedABValue in api/_conflict-questions.js, since conflict_data is
+       never rewritten. This is the write side of that same rule. */
     return (
       <View style={{ gap: Spacing.md }}>
-        {[['A', q.a, 0], ['B', q.b, 1]].map(([letter, text, val]) => (
+        {[['A', q.a], ['B', q.b]].map(([letter, text]) => (
           <Choice
             key={String(letter)}
             label={String(text ?? '')}
-            selected={value === val}
-            onPress={() => onChange(val as number)}
+            selected={value === letter || (letter === 'A' && value === 0) || (letter === 'B' && value === 1)}
+            onPress={() => onChange(letter as unknown as number)}
           />
         ))}
       </View>

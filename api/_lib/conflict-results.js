@@ -18,6 +18,7 @@
 
 import {
   CONFLICT_QUESTIONS, RISK_QUESTIONS, CONFLICT_REQUIRED, conflictQuestionsInOrder,
+  forcedABValue,
 } from '../_conflict-questions.js';
 import { resetForm } from '../_conflict-results-prose.js';
 
@@ -93,7 +94,18 @@ export function summarizeConflict(answers) {
        resetForm in api/_conflict-results-prose.js. */
     strength: answers.c8 ? resetForm(answers.c8) : null,
     repairRanking: Array.isArray(answers.c_repair) ? answers.c_repair : [],
-    openings: { start: answers.c1 ?? null, middle: answers.c2 ?? null, oldTopics: answers.c_topic ?? null },
+    /* ── THROUGH THE ONE ENCODING ──────────────────────────────────────
+       These three went out raw, and three surfaces spelled them three ways:
+       'A'/'B' from the website, 0/1 from the app, and the admin reading
+       'a'/'b'. The results prose keys on A and B, so every couple who
+       answered in the app got nothing for these three questions. Normalising
+       HERE rather than at each writer is what repairs the rows already
+       stored, because conflict_data is never rewritten. */
+    openings: {
+      start: forcedABValue(answers.c1),
+      middle: forcedABValue(answers.c2),
+      oldTopics: forcedABValue(answers.c_topic),
+    },
     reflection: (answers.c9 || '').trim() || null,
     appreciation: (answers.c_grat || '').trim() || null,
   };

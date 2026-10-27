@@ -119,7 +119,10 @@ export function readInheritance(answers, profile, items, adults) {
 
   for (const { key } of items) {
     const exp = answers?.responsibilities?.[key];
-    const slot = answers?.childhood?.[key];
+    /* Through childhoodSlot, because most answers in the database are in the
+       older spelling: the adult's own word rather than the slot. See the note
+       on that function; without it every one of these counts as unknown. */
+    const slot = childhoodSlot(answers?.childhood?.[key], adults);
 
     const a = experiencedShape(slot), b = expectedShape(exp, selfName, partnerName);
     if (a == null || b == null) shape.unknown++;
@@ -143,4 +146,44 @@ export function readInheritance(answers, profile, items, adults) {
     else gendered.handsOffOtherGenderRole++;
   }
   return { shape, gendered };
+}
+
+/**
+ * A stored childhood answer, resolved to a slot.
+ *
+ * ── WHY ───────────────────────────────────────────────────────────────────
+ * Ellie: "Why are what people expect and inherited roles charts both listed
+ * as not classified?"
+ *
+ * Because every answer she has is in the older spelling. The website stores a
+ * SLOT now, 'a', 'b', 'both' or 'neither', and it used to store the adult's
+ * own word: "Mom", "Dad", "Grandma". src/App.jsx still says so in a comment
+ * beside the writer, "A resume from before this change stored the word, so an
+ * old answer still matches its own column by label", and it matches it in the
+ * exercise and nowhere else. `experiencedShape` only ever understood slots,
+ * so every older answer resolved to null, every item counted as unknown, and
+ * both charts drew one bar reading Not classified.
+ *
+ * Nothing was broken enough to notice. Not classified is a real category and
+ * a chart full of it looks like a product nobody has used yet.
+ *
+ * ── WHY IT RESOLVES AGAINST THE COUPLE'S OWN ADULTS ───────────────────────
+ * "Mom" is slot a for one person and slot b for another: the slots are just
+ * the two adults that person named, in the order they named them. So the word
+ * can only be turned into a slot using guardiansOf for that same person,
+ * which is what the caller already has in hand.
+ */
+export function childhoodSlot(stored, adults) {
+  if (stored == null || stored === '') return null;
+  const v = String(stored).trim();
+  const low = v.toLowerCase();
+  if (['a', 'b', 'both', 'neither', 'yes', 'no', 'na', 'sometimes'].includes(low)) return low;
+  /* The legacy words for the two shared cases, which never named an adult. */
+  if (low === 'both of them' || low === 'both of us') return 'both';
+  if (low === 'nobody' || low === 'no one' || low === 'neither of them') return 'neither';
+  const a = (adults?.rawA ?? adults?.a ?? '').toString().trim().toLowerCase();
+  const b = (adults?.rawB ?? adults?.b ?? '').toString().trim().toLowerCase();
+  if (a && low === a) return 'a';
+  if (b && low === b) return 'b';
+  return null;
 }

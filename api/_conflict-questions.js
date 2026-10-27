@@ -159,3 +159,35 @@ export function conflictQuestionsInOrder() {
   const byId = new Map(CONFLICT_QUESTIONS.map(q => [q.id, q]));
   return CONFLICT_SECTIONS.flatMap(s => s.questions.map(id => byId.get(id)).filter(Boolean));
 }
+
+/**
+ * One encoding for a forced choice, whoever recorded it.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
+ * Three surfaces stored or read the same answer three different ways, and all
+ * three looked right on their own:
+ *
+ *   src/App.jsx stored 'A' and 'B', which is what the results prose keys on.
+ *   attune-app stored 0 and 1, straight out of the index in its option list.
+ *   api/admin-explore.js read 'a' and 'b', lower case, matching neither.
+ *
+ * So a couple who answered Conflict Patterns in the APP got nothing for the
+ * three forced-choice questions on their results page: the prose map is
+ * `{ A: ..., B: ... }` and the stored answer was 1. And the admin dropped
+ * those questions for everybody, whichever surface they used, which is what
+ * Ellie saw as two empty charts.
+ *
+ * Nothing threw. A missing key is undefined, undefined renders as nothing,
+ * and an empty chart looks like a question nobody answered.
+ *
+ * ── WHY IT ACCEPTS ALL THREE ──────────────────────────────────────────────
+ * Answers already in the database were written by the old app and the old
+ * website, and conflict_data is not rewritten. A reader that only understood
+ * the new spelling would leave every existing app answer blank for ever, so
+ * this understands what was stored as well as what will be.
+ */
+export function forcedABValue(raw) {
+  if (raw === 'A' || raw === 'a' || raw === 0 || raw === '0') return 'A';
+  if (raw === 'B' || raw === 'b' || raw === 1 || raw === '1') return 'B';
+  return null;
+}

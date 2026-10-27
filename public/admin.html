@@ -721,7 +721,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
         <div class="chart-body" style="height:230px"><canvas id="regroup-misaligned"></canvas></div><div id="regroup-misaligned-note" style="padding:0 1.4rem 1rem;font-size:.7rem;color:var(--muted);"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Understanding</div><div class="chart-subtitle">Couples where either partner reads the other 1.5+ points wrong in 3 or more dimensions count as misunderstood. Needs Part 2 answers, so the denominator is smaller.</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Understanding</div><div class="chart-subtitle">Couples where either partner reads the other 1.5+ points wrong in 3 or more dimensions count as misunderstood.</div></div></div>
         <div class="chart-body" style="height:230px"><canvas id="regroup-misunderstood"></canvas></div><div id="regroup-misunderstood-note" style="padding:0 1.4rem 1rem;font-size:.7rem;color:var(--muted);"></div>
       </div>
       <div class="chart-card" style="grid-column:1/-1">
@@ -1367,7 +1367,16 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
         <div class="chart-head">
           <div>
             <div class="chart-title">Expectations at a glance</div>
-            <div class="chart-subtitle">Across the couples who have both halves</div>
+            <!-- Ellie: "Why is there no data for aligned couples? Dashboard page
+                 says 3/6 are aligned." Two different measures wearing one word.
+                 The dashboard's figure is COMMUNICATION alignment, computed over
+                 the ten dimensions. These two tiles split couples by how far
+                 apart their EXPECTATIONS answers are, against the same
+                 threshold the product uses for a distance. A couple can be
+                 aligned on one and not the other, and with six couples an empty
+                 group is a real answer rather than a missing number. Saying
+                 which measure this is, because the word on its own cannot. -->
+            <div class="chart-subtitle">Across the couples who have both halves &middot; aligned here means their expectations answers are close, not the communication figure on the dashboard</div>
           </div>
           <select class="tile-slicer" id="slz-expsum" title="Cut this tile by a segment" aria-label="Slz expsum"><option value="">Everyone</option></select>
         </div>
@@ -1375,8 +1384,8 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
           <div class="kpi-grid" id="expsum-tiles" style="grid-template-columns:repeat(4,1fr);margin:0;">
             <div class="kpi-card indigo"><div class="kpi-label">Avg life &amp; values alignment</div><div class="kpi-val" id="es-life">—</div><div class="kpi-sub" id="es-life-sub"></div></div>
             <div class="kpi-card green"><div class="kpi-label">Avg responsibilities alignment</div><div class="kpi-val" id="es-resp">—</div><div class="kpi-sub" id="es-resp-sub"></div></div>
-            <div class="kpi-card orange"><div class="kpi-label">Gap among misaligned couples</div><div class="kpi-val" id="es-gap-mis">—</div><div class="kpi-sub" id="es-gap-mis-sub"></div></div>
-            <div class="kpi-card amber"><div class="kpi-label">Gap among aligned couples</div><div class="kpi-val" id="es-gap-al">—</div><div class="kpi-sub" id="es-gap-al-sub"></div></div>
+            <div class="kpi-card orange"><div class="kpi-label">Avg gap among misaligned couples</div><div class="kpi-val" id="es-gap-mis">—</div><div class="kpi-sub" id="es-gap-mis-sub"></div></div>
+            <div class="kpi-card amber"><div class="kpi-label">Avg gap among aligned couples</div><div class="kpi-val" id="es-gap-al">—</div><div class="kpi-sub" id="es-gap-al-sub"></div></div>
           </div>
         </div>
       </div>
@@ -4091,7 +4100,7 @@ async function loadBetaCodes() {
     <thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">
       <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Code</th>
       <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Package</th>
-      <th style="text-align:center;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Uses</th>
+      <th style="text-align:center;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Max uses</th>
       <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Last used</th>
       <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Status</th>
       <th style="text-align:right;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Action</th>
