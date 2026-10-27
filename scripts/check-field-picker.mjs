@@ -1,5 +1,6 @@
 /**
- * The Explore field picker draws every section, in its own colour, as a band.
+ * The Explore field pickers are a drill-down, and every section is a painted
+ * banner you can click into and back out of.
  *
  * ── WHAT ELLIE ASKED FOR, TWICE ───────────────────────────────────────────
  * First: "Seven coloured sections in the row and column pickers." Then, of the
@@ -59,9 +60,11 @@ for (const line of lines) {
   if (p.err) { fail.push(`${who}: ${p.err}`); continue; }
   if (!p.open) fail.push(`${who}: the panel did not open when its button was clicked`);
   if (!p.closes) fail.push(`${who}: the panel did not close when its button was clicked again`);
-  /* The two halves agreeing is the whole reason the select is still there. */
-  if (p.bands !== p.groups) fail.push(`${who}: ${p.groups} sections in the select and ${p.bands} bands drawn`);
-  if (p.opts !== p.selOpts) fail.push(`${who}: ${p.selOpts} selectable options and ${p.opts} drawn`);
+  /* The two halves agreeing is the whole reason the select is still there:
+     the tree is what is drawn and the select is what everything else reads. */
+  if (p.bands !== p.sections) fail.push(`${who}: ${p.sections} sections in the tree and ${p.bands} bands drawn`);
+  if (p.missing) fail.push(`${who}: ${p.missing} of ${p.leaves} leaves have no option in the select, so they cannot be chosen`);
+  if (p.extra) fail.push(`${who}: ${p.extra} options in the select that no row offers, so they are unreachable`);
   if (!p.bands) fail.push(`${who}: no section bands at all`);
   /* The bug she reported three times: a band with no colour on it. */
   if (p.flat) fail.push(`${who}: ${p.flat} of ${p.bands} bands have no painted background, which is the banner she could not see`);
@@ -70,6 +73,17 @@ for (const line of lines) {
   if (p.panelWide && p.wide < p.panelWide * 0.8) {
     fail.push(`${who}: a band is ${p.wide}px in a ${p.panelWide}px panel, which is a swatch rather than a banner`);
   }
+  /* ── THE PART THAT MAKES IT A DRILL-DOWN ────────────────────────────────
+     Ellie: "high-level with arrows to click into that section... a back arrow
+     in the top left when you click into a detailed section." A list of
+     sections that does nothing when one is clicked looks finished and is not,
+     which is the same shape as a band with no colour. */
+  if (!p.drilled) fail.push(`${who}: clicking a section opened nothing, or left no back arrow`);
+  if (!p.rowsInside) fail.push(`${who}: a section opened onto no rows`);
+  if (!p.crumb) fail.push(`${who}: nothing says which section is open`);
+  if (!p.wentBack) fail.push(`${who}: the back arrow did not return to the sections`);
+  /* Her one extra row per exercise section. */
+  if (!p.allQuestions) fail.push(`${who}: no section offers "All questions", so the full list is unreachable`);
   if (!p.btnText) fail.push(`${who}: the button shows no field name, so the picker cannot say what is selected`);
 }
 
@@ -78,5 +92,5 @@ if (fail.length) {
   for (const f of fail) console.error('  - ' + f);
   process.exit(1);
 }
-console.log(`[check-field-picker] both Explore field pickers open, draw one full-width band per section in its own painted colour, `
-  + `list every option the select holds, and close again.`);
+console.log(`[check-field-picker] both Explore pickers open onto one full-width painted banner per section, `
+  + `drill in and back out, carry an All questions row, and offer exactly the options their select holds.`);

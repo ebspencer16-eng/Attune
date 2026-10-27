@@ -11,3 +11,7 @@ __pycache__/
 
 # A file for Ellie to paste into. Read, applied, then deleted; never committed.
 ellie-paste.txt
+
+# Probe screenshots. probe-admin.mjs writes admin-<page>.png next to the repo
+# root by default, and two of them were committed by a `git add -A`.
+admin-*.png

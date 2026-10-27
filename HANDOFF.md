@@ -4015,3 +4015,59 @@ missed that both surfaces handle covers and conversations by pattern. And
 `understanding.asymmetry` looked website-only until the matches turned out to
 be a comment and a line of copy. The `understanding` block itself was already
 stripped before sending, by the same audit, recorded in api/results.js.
+
+## 2026-10-27, fifth round: her 36-item admin review, finished
+
+All 36 are built. Section 2 of TASKS.md is empty and says so; everything is in
+section 3 for her eye.
+
+**The largest of them, A133, is the slicer taxonomy she wrote out.** Six
+sections, four levels in places, with a back arrow. The thing that made it a
+safe change rather than a rewrite is that the `<select>` stays, hidden, with
+one option per leaf: every tile still reads `sel.value`, listens for `change`
+and filters through `sliceFilter`, and the drill-down is a renderer over it.
+That is the same trick the Explore field picker used, and that picker is gone
+now, because the drill does its job for every picker on the page.
+
+**Most of her rows are not a column.** "Children or No children" regroups five
+stored answers, "Energy & Recharge - Independent" is a band of a score,
+"Household - aligned" is a percentage either side of a line. Those are
+predicates registered under stable ids in `SLICE_PRED` and spelled `g::<id>`
+in the select, which `sliceFilter` resolves. Stable ids matter: the tree is
+rebuilt per tile per render, and a chosen cut has to survive that.
+
+**Three fields had to be added to the cube** for the Experiences branch:
+`guardian_same_gender`, `guardian_parents` and `gen_roles`. All three are
+inferences from the name of a childhood role, so they go through the map in
+`api/_lib/inherited-roles.js` that already makes that inference and says why
+it is a guess. The derivation is `api/_lib/growing-up.js` because the probe
+needs the same answer; so is `showsHorseman`, which moved into
+`_conflict-questions.js` for the same reason.
+
+**What held, and what to watch.** `check-slicer-tree` opens a real slicer,
+drills in and back out, picks the first derived cut and reads every tile's n:
+it fails on a predicate that matches everybody, a `sliceFilter` that ignores
+derived cuts, a section that does not open, and a shared filter across tiles.
+That last plant passed on its first attempt, because a tile only reads a
+slicer when it renders and nothing had re-rendered. The gate nudges every
+other slicer before reading. `check-field-picker` was rewritten for the
+drill-down and fails on five plants including the banner losing its colour.
+
+**The harness was wrong about four things this round**, which is the usual
+ratio and worth knowing:
+
+- /api/admin-survey fell through probe-admin's catch-all, so the whole
+  Feedback page was an empty grid and the probe reported no errors about it.
+- Every stub row answered every question while its own `has_ex2` and
+  `has_intimacy` flags said otherwise, so no tile could show a narrowed
+  slicer and A132 was unmeasurable.
+- The stub had no `horse_*` and no `expalign_*` fields at all, so two whole
+  branches of the taxonomy drew nothing.
+- Conflict answers existed only for even `i` and the option index was `i`, so
+  every two-option conflict question landed on the same side for everybody:
+  one of its two answers was never stored and that slicer row never drew.
+
+And two measurement traps: a full-page screenshot re-lays-out responsive
+charts (SCROLL= takes an ordinary viewport shot instead), and the probe's
+staleness check read `.x` for the category position, which on a sideways bar
+is where the bar ends.

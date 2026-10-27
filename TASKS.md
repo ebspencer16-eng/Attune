@@ -41,18 +41,8 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| A104 | **Order Details: the orders table gets the white header the promo table has**, titled All orders, with the filters in it. |
-| A107 | **Package Mix: package split over time and revenue contribution side by side**, both line charts with four lines. |
-| A113 | **Inherited roles classify now; the chart shape is still to come.** The classifier only understood the newer stored spelling, so every answer resolved to null: on the demo couple it went from 20 of 20 unknown to 10 same, 5 one-to-shared, 5 unknown. Next is the clustered column per expectations category. |
-| A114 | **Expectations: All questions rows still carry the section title.** Dropping it and adding eyebrow headings with the questions under them. |
-| A116 | **All questions everywhere: a third option on the mean/breakdown dropdown, Count**, drawing a table with columns 1-5 and the poles either side of each row. |
-| A129 | **UX views: the Conflict Patterns demo has no exercises section.** |
-| A130 | **Feedback: charts need an x axis line.** |
-| A131 | **Feedback: order the aspects becomes a bar chart** so every label is readable. |
-| A132 | **Slicers: only offer options that have data for that tile**, the way the testimonials filter does. |
-| A133 | **Slicers: the whole taxonomy you wrote out, as a drill-down.** High level rows with arrows, a back arrow top left, and your groupings for all six exercises. The same rows become the Explore dropdowns, plus one All questions row per exercise that opens the full list. The largest of these; it is last on purpose. |
+**Nothing open.** Every one of the 36 items from your admin review is built
+and sitting in section 3 for your eye.
 
 ## 3. For you to review
 
@@ -61,6 +51,17 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A133 | **The taxonomy is built, all six sections of it, and it is the Explore dropdowns too.** Open any tile's slicer: a coloured banner per section, an arrow into each, a back arrow top left. The rows that are not a stored column are computed, so "Children / No children", the score bands, "Household - aligned", the eight Rel Relf ends, aligned by intimacy dimension and the sixteen horsemen rows all work as cuts. Same control on the Explore pickers, with a search and your All questions row, and on the Feedback tiles. |
+| A133b | **Three things your taxonomy asked for that nothing stored.** "Two guardians of the same gender", "raised by someone other than a parent", and whether somebody kept, swapped or widened the roles they grew up with. All three are inferences from the name of a childhood role, which is the inference that file already makes and says so about. Tell me if you want any of the three worded differently. |
+| A116 | **All questions has a third view, Count.** Five cells per row, shaded by share, with the question's own poles either side. A column is where an answer sits between the poles, so on Me / Both / My partner it puts Both in the middle column, which an option number would not. |
+| A113 | **Both inheritance charts are a cluster per expectations category.** One bar per outcome over every item at once said whether arrangements changed and not where, and where is the half worth having. |
+| A107 | **Package split over time and revenue contribution sit side by side, four lines each.** A stack said how many altogether and hid how any one package was doing. |
+| A104 | **The orders table has the promo table's white head, titled All orders, with the filters in it.** Its search box offered to match a buyer's name, which left this payload when the Fulfilment page did. |
+| A114 | **The Expectations rows have eyebrow headings and no section title.** In mean mode the category was not even split off, which is why you were still seeing it: two renderers, one of them taught. |
+| A132 | **A slicer offers only what its own tile has.** Two faults with one symptom: the up-front fill locked the list before any tile knew its own rows, and every question explorer started from the whole cube, so the Conflict tab counted people who have never opened Conflict Patterns. Its slicer now offers 32 cuts where Communication's offers 44. |
+| A131 | **Order the aspects is rows, full width, every label on one line.** That reverses "I want column charts", so both quotes are in the code: five short answers read best as columns and eleven phrases do not. |
+| A130 | **The Feedback charts have their x axis line back.** It is the category axis's own border; the value axis stays gone. |
+| A129 | **UX Views has all five exercises.** It was four cards typed into the page while the product has had five since Conflict Patterns shipped, so the newest one was the one nobody could preview. Communication's dot was a violet; the registry says it is the brand orange. |
 | A117 | **You were right about All questions, and the cause was five sliders pinned to their right-hand end.** The admin draws the mean at val times 100 per cent, so val has to be a fraction, and five of the thirty-nine conflict fields sent the option's own number, 0 to 4. Everything above 1 clamps to the far right, and the far right of a horseman row says Often. |
 | A120 | **The two empty conflict tiles were three forced-choice questions stored three different ways.** The site stored A and B, the app stored 0 and 1, the admin read a and b. Anyone who answered that exercise in the app also got nothing for those three on their own results page. The reader understands all three spellings, because stored answers are never rewritten. |
 | A112 | **Those two figures were never in disagreement: they are two different measures.** The dashboard's 3 of 6 aligned is a communication figure, and the Expectations gap tiles split couples by expectations distance. Both tiles now say which alignment they mean, which was the whole of your question. |

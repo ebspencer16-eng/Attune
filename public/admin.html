@@ -556,20 +556,36 @@
    still what every other piece of code on this page reads and writes: the
    picker renders it rather than holding a second copy of the field list, which
    is the only way the two cannot drift. */
-.fp{position:relative;display:inline-block;}
-.fp-btn{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;min-width:260px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;font:inherit;font-size:.78rem;color:var(--text);cursor:pointer;text-align:left;}
-.fp-btn:hover,.fp-btn[aria-expanded="true"]{border-color:var(--accent,#5C6DDA);}
-.fp-btn .fp-caret{color:var(--dim);font-size:.6rem;flex:0 0 auto;}
-.fp-panel{position:absolute;z-index:40;top:calc(100% + 4px);left:0;min-width:320px;max-width:420px;max-height:min(60vh,420px);overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 28px rgba(16,24,48,.16);padding:.4rem;}
-.fp-search{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:7px;padding:.42rem .6rem;font:inherit;font-size:.76rem;margin-bottom:.4rem;}
-/* The banner she asked for: a full-width bar in the section's own colour. */
-.fp-band{display:block;padding:.34rem .6rem;margin:.5rem 0 .25rem;border-radius:6px;font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;}
-.fp-band:first-child{margin-top:.1rem;}
-.fp-sub{display:block;padding:.3rem .6rem .12rem 1.1rem;font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);}
-.fp-opt{display:block;width:100%;box-sizing:border-box;text-align:left;background:transparent;border:0;border-radius:6px;padding:.34rem .6rem .34rem 1.9rem;font:inherit;font-size:.76rem;color:var(--text);cursor:pointer;line-height:1.35;}
-.fp-opt:hover,.fp-opt.fp-cursor{background:var(--surface);}
-.fp-opt[aria-selected="true"]{color:var(--accent,#5C6DDA);font-weight:600;}
-.fp-none{padding:.6rem;font-size:.74rem;color:var(--dim);}
+/* ── THE SLICER DRILL-DOWN ────────────────────────────────────────────────
+   A tile head is a small space, so the button is the size the old <select>
+   was and the panel is wider than the button and right-aligned to it, which
+   is what a native popup does. */
+.sd{position:relative;display:inline-block;max-width:100%;}
+.sd-btn{display:inline-flex;align-items:center;justify-content:space-between;gap:.4rem;max-width:230px;cursor:pointer;text-align:left;}
+.sd-btn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sd-caret{color:var(--dim);font-size:.6rem;flex:0 0 auto;}
+.sd-panel{position:absolute;z-index:45;top:calc(100% + 4px);right:0;min-width:260px;max-width:340px;
+  max-height:min(60vh,380px);overflow-y:auto;background:var(--card);border:1px solid var(--border);
+  border-radius:10px;box-shadow:0 10px 28px rgba(16,24,48,.16);padding:.35rem;}
+.sd-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;box-sizing:border-box;
+  text-align:left;background:transparent;border:0;border-radius:6px;padding:.38rem .55rem;font:inherit;
+  font-size:.76rem;color:var(--text);cursor:pointer;line-height:1.35;}
+.sd-row:hover{background:var(--surface);}
+.sd-row[aria-selected="true"]{color:var(--accent,#5C6DDA);font-weight:600;}
+.sd-chev{color:var(--dim);flex:0 0 auto;font-size:.9rem;line-height:1;}
+.sd-back{color:var(--muted);font-size:.72rem;gap:.35rem;justify-content:flex-start;}
+.sd-arrow{font-size:.85rem;}
+.sd-head{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim);padding:.25rem .55rem .4rem;border-bottom:1px solid var(--border);margin-bottom:.25rem;}
+.sd-none{color:var(--dim);font-size:.72rem;padding:.5rem .55rem;}
+.sd-band{margin:.35rem 0 .2rem;font-size:.64rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;}
+.sd-band:first-child{margin-top:.1rem;}
+.sd-band .sd-chev{color:inherit;opacity:.8;}
+.sd-search{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);
+  color:var(--text);border-radius:6px;padding:.35rem .5rem;font:inherit;font-size:.74rem;margin-bottom:.3rem;}
+.sd-trail{color:var(--dim);font-size:.62rem;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* The .fp rules went with mountFieldPicker. A stylesheet for a control
+   nothing mounts is the same clutter as the control. */
 .kpi-shell{background:var(--surface);border:1px solid var(--border);margin-bottom:1.5rem;}
 .kpi-shell .chart-head{border-bottom:1px solid var(--border);}
 /* The orders head carries three controls rather than one slicer, so it wraps
@@ -2082,285 +2098,82 @@ window.adminAuthHeaders = function(extra){
    * Every selection writes to the select and dispatches `change`, which is the
    * same event the native control sent, so nothing downstream can tell.
    */
-  function mountFieldPicker(sel) {
-    /* ── IT MUST NOT BE ABLE TO TAKE THE PAGE DOWN ────────────────────────
-       Ellie, the morning after this shipped: "Explore page isn't loading."
+  /* mountFieldPicker was here. It was the coloured-banner picker built for
+     the two Explore selects, and the drill-down above does that job for every
+     picker on the page now, so keeping it would be two controls that both
+     render a <select> and only one of which anybody opens. Its contrast
+     helper survived as qxInk, which is the only part the drill needed. */
 
-       I could not reproduce it: the probe drives this page against a stubbed
-       cube and the picker mounts, opens and selects. But the mount sits in the
-       middle of the Explore page's init, between the defaults being set and
-       the change listeners being attached, so ANY throw inside it takes the
-       rest of init with it and the page draws nothing. A control that only
-       changes how a list looks had been given the power to stop the page.
-
-       So the mount is wrapped, and a failure puts the native <select> back
-       rather than leaving a hidden control and no replacement. The page then
-       works the way it did last week, with an uglier dropdown, which is the
-       right thing to degrade to. The error goes to the console with a prefix
-       worth searching for.
-
-       This is not the diagnosis. It is the thing that should have been true
-       before the diagnosis was needed. */
-    try { mountFieldPickerUnsafe(sel); }
-    catch (e) {
-      console.error('[admin] field picker failed to mount, falling back to the plain dropdown:', e);
-      try {
-        sel.hidden = false;
-        const w = sel.closest('.fp');
-        if (w && w.parentNode) { w.parentNode.insertBefore(sel, w); w.remove(); }
-        /* ── A DEGRADED STATE THAT SAYS SO ────────────────────────────────
-           Without this the page comes back looking exactly like last week,
-           and the only way anyone learns the picker failed is by noticing the
-           colour is missing and remembering it used to be there. One line,
-           only ever drawn when something went wrong, so the fallback reports
-           itself instead of hiding inside a working page. */
-        if (sel.parentNode && !sel.parentNode.querySelector('[data-fp-fell-back]')) {
-          const n = document.createElement('div');
-          n.setAttribute('data-fp-fell-back', '1');
-          n.style.cssText = 'font-size:.6rem;color:var(--dim);margin-top:.2rem;line-height:1.3';
-          n.textContent = 'Plain list: the coloured picker could not start.';
-          sel.parentNode.insertBefore(n, sel.nextSibling);
-        }
-      } catch (e2) { console.error('[admin] and the fallback failed too:', e2); }
-    }
-  }
-
-  function mountFieldPickerUnsafe(sel) {
-    if (!sel || sel.dataset.fp) return;
-    sel.dataset.fp = '1';
-    const wrap = document.createElement('div');
-    wrap.className = 'fp';
-    sel.parentNode.insertBefore(wrap, sel);
-    wrap.appendChild(sel);
-    sel.hidden = true;
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'fp-btn';
-    btn.setAttribute('aria-haspopup', 'listbox');
-    btn.setAttribute('aria-expanded', 'false');
-    if (sel.getAttribute('aria-label')) btn.setAttribute('aria-label', sel.getAttribute('aria-label'));
-    wrap.appendChild(btn);
-
-    const panel = document.createElement('div');
-    panel.className = 'fp-panel';
-    panel.setAttribute('role', 'listbox');
-    panel.hidden = true;
-    wrap.appendChild(panel);
-
-    /* Black or white on the band, whichever can be read on it. The seven
-       section colours run from a deep rose to a light green, and white on the
-       light ones is the kind of thing a contrast sweep finds later. */
-    const ink = (hex) => {
-      const h = String(hex || '').trim();
-      const m = /^#?([0-9a-f]{6})$/i.exec(h.startsWith('rgb') ? '' : h);
-      let r, g, b;
-      if (m) { const n = parseInt(m[1], 16); r = n >> 16 & 255; g = n >> 8 & 255; b = n & 255; }
-      else { const p = h.match(/\d+/g); if (!p || p.length < 3) return '#fff'; r = +p[0]; g = +p[1]; b = +p[2]; }
-      const lin = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
-      const L = .2126 * lin(r) + .7152 * lin(g) + .0722 * lin(b);
-      return (L + .05) / .05 > 21 / ((L + .05) / .05) ? '#1B2547' : '#fff';
-    };
-    const trim = (t) => String(t == null ? '' : t).replace(/ /g, ' ').trim();
-
-    const label = () => {
-      const o = sel.selectedOptions && sel.selectedOptions[0];
-      btn.innerHTML = '';
-      const t = document.createElement('span');
-      t.textContent = trim(o ? o.textContent : '') || 'Choose a field';
-      const c = document.createElement('span');
-      c.className = 'fp-caret'; c.textContent = '▾';
-      btn.appendChild(t); btn.appendChild(c);
-    };
-
-    let cursor = -1;
-    const draw = (q) => {
-      const needle = trim(q).toLowerCase();
-      panel.innerHTML = '';
-      const search = document.createElement('input');
-      search.className = 'fp-search';
-      search.type = 'search';
-      search.placeholder = 'Search ' + sel.options.length + ' fields';
-      search.value = q || '';
-      search.addEventListener('input', () => { draw(search.value); });
-      /* Typing must not close the panel or re-enter the page's own keyboard
-         handling, and Escape here closes the picker rather than only clearing
-         the field, which is what a search input does by itself. */
-      search.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { e.preventDefault(); close(); btn.focus(); }
-        if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); move(e.key === 'Enter' ? 0 : 1, e.key === 'Enter'); }
+  /**
+   * ── THE EXPLORE PICKERS, AS THE SAME DRILL-DOWN ───────────────────────
+   * Ellie: "the above should be the high-level options for the explore page
+   * dropdowns as well, and then there should be one additional row in each
+   * exercise section that says all questions and that one opens to the full
+   * question list."
+   *
+   * Same shape as the slicer tree and the same component renders it, because
+   * two drill-downs is two answers to what a back arrow does. The difference
+   * is what a leaf IS: a slicer's leaf is a cut, and this one is a field to
+   * put on an axis, so the value is the field's key.
+   *
+   * The section, the tier and the group all come from the cube, which is
+   * where that decision is made and sent. Nothing here re-decides which group
+   * is high-level.
+   */
+  function fieldTree(includeNone) {
+    const sections = (CUBE.sections && CUBE.sections.length) ? CUBE.sections : null;
+    const out = [];
+    if (includeNone) out.push({ label: '\u2014 none \u2014', value: '' });
+    if (!sections) {
+      /* An older payload has no sections: one branch per group, which is the
+         flat list with one click in front of it rather than nothing. */
+      const groups = [];
+      CUBE.fields.forEach((f) => {
+        const g = groups.find((x) => x.label === f.group);
+        if (g) g.children.push({ label: f.label, value: f.key });
+        else groups.push({ label: f.group, children: [{ label: f.label, value: f.key }] });
       });
-      panel.appendChild(search);
-
-      let shown = 0;
-      const addOpt = (o) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'fp-opt';
-        b.setAttribute('role', 'option');
-        b.setAttribute('aria-selected', String(o.value === sel.value));
-        b.dataset.value = o.value;
-        b.textContent = trim(o.textContent);
-        b.addEventListener('click', () => { pick(o.value); });
-        panel.appendChild(b);
-        shown++;
-      };
-      const matches = (o) => !needle || trim(o.textContent).toLowerCase().indexOf(needle) >= 0;
-
-      for (const node of sel.children) {
-        if (node.tagName === 'OPTION') { if (matches(node)) addOpt(node); continue; }
-        if (node.tagName !== 'OPTGROUP') continue;
-        const opts = [...node.children].filter((o) => !o.disabled && matches(o));
-        if (!opts.length) continue;
-        const band = document.createElement('span');
-        band.className = 'fp-band';
-        /* The colour the server gave this section, and the banner she asked
-           for rather than a block character standing in for one. */
-        const colour = node.style.color || 'var(--surface)';
-        band.style.background = colour;
-        band.style.color = ink(colour);
-        band.textContent = trim(node.label).replace(/^█\s*/, '');
-        panel.appendChild(band);
-        /* The sub-heads are disabled options in the select. Drawn where they
-           fall, so "High level" and "Every question" keep their questions
-           under them, and dropped when a search has emptied them. */
-        for (const o of node.children) {
-          if (o.disabled) {
-            const next = [...node.children].slice([...node.children].indexOf(o) + 1);
-            const any = next.slice(0, next.findIndex((x) => x.disabled) === -1 ? next.length : next.findIndex((x) => x.disabled));
-            if (!any.some(matches)) continue;
-            const h = document.createElement('span');
-            h.className = 'fp-sub';
-            h.textContent = trim(o.textContent);
-            panel.appendChild(h);
-            continue;
-          }
-          if (matches(o)) addOpt(o);
-        }
-      }
-      if (!shown) {
-        const n = document.createElement('div');
-        n.className = 'fp-none';
-        n.textContent = 'No field matches that.';
-        panel.appendChild(n);
-      }
-      cursor = -1;
-      return search;
-    };
-
-    const opts = () => [...panel.querySelectorAll('.fp-opt')];
-    const move = (d, takeFirst) => {
-      const list = opts();
-      if (!list.length) return;
-      if (takeFirst) { pick(list[0].dataset.value); return; }
-      cursor = Math.max(0, Math.min(list.length - 1, cursor + d));
-      list.forEach((el, i) => el.classList.toggle('fp-cursor', i === cursor));
-      list[cursor].scrollIntoView({ block: 'nearest' });
-    };
-
-    const pick = (v) => {
-      sel.value = v;
-      label();
-      close();
-      btn.focus();
-      sel.dispatchEvent(new Event('change', { bubbles: true }));
-    };
-
-    const close = () => {
-      panel.hidden = true;
-      btn.setAttribute('aria-expanded', 'false');
-      document.removeEventListener('mousedown', onAway, true);
-      document.removeEventListener('keydown', onKey, true);
-    };
-    const onAway = (e) => { if (!wrap.contains(e.target)) close(); };
-    const onKey = (e) => {
-      if (e.key === 'Escape') { close(); btn.focus(); }
-      else if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
-      else if (e.key === 'Enter' && cursor >= 0) { e.preventDefault(); pick(opts()[cursor].dataset.value); }
-    };
-    const open = () => {
-      const search = draw('');
-      panel.hidden = false;
-      btn.setAttribute('aria-expanded', 'true');
-      document.addEventListener('mousedown', onAway, true);
-      document.addEventListener('keydown', onKey, true);
-      search.focus();
-    };
-    btn.addEventListener('click', () => { panel.hidden ? open() : close(); });
-
-    /* The button follows the select, so code that sets `.value` directly,
-       which this page does in four places, still shows the right thing. */
-    sel.addEventListener('change', label);
-    /* Four places on this page assign `.value` straight onto the select and do
-       not dispatch an event, which a native control redraws from and this one
-       cannot see. Rather than finding all four and hoping there is no fifth,
-       the button re-reads the select whenever the page renders: `render()` is
-       the one function every one of those paths ends in. */
-    label();
-    sel.__fpLabel = label;
+      return out.concat(groups);
+    }
+    /* "Ex2 \u00b7 Life & values (1\u20135)" is a group name written for a list that
+       has no sections above it. Inside its own section both halves of that
+       are noise. */
+    const friendly = (g) => String(g || '').replace(/^Ex\d+\s*[\u00b7.]\s*/, '').replace(/\s*\([^)]*\)\s*$/, '');
+    sections.forEach((sec) => {
+      const mine = CUBE.fields.filter((f) => f.section === sec.id);
+      if (!mine.length) return;
+      const kids = [];
+      const groups = [];
+      mine.filter((f) => f.tier === 'high').forEach((f) => {
+        const g = groups.find((x) => x.raw === f.group);
+        if (g) g.fields.push(f); else groups.push({ raw: f.group, fields: [f] });
+      });
+      groups.forEach((g) => kids.push({ label: friendly(g.raw), children: g.fields.map((f) => ({ label: f.label, value: f.key })) }));
+      const detail = mine.filter((f) => f.tier !== 'high');
+      /* Her one extra row. One per section rather than per group, because the
+         question list is the thing behind it and it is one list. */
+      if (detail.length) kids.push({ label: 'All questions', children: detail.map((f) => ({ label: f.label, value: f.key })) });
+      if (kids.length) out.push({ label: sec.label, color: sec.color, children: kids });
+    });
+    return out;
   }
 
   function fillFieldSelect(sel, includeNone){
-    const sections = (CUBE.sections && CUBE.sections.length) ? CUBE.sections : null;
-    let html = includeNone ? '<option value="">\u2014 none \u2014</option>' : '';
-    const opt = (f) => '<option value="' + f.key + '">' + f.label.replace(/</g,'&lt;') + '</option>';
-
-    if (!sections) {
-      /* An older payload has no sections. Falling back to the flat list keeps
-         the page usable rather than empty, which is the difference between an
-         out-of-date server and a broken page. */
-      const groups = {};
-      CUBE.fields.forEach(f => { (groups[f.group] = groups[f.group] || []).push(f); });
-      Object.keys(groups).forEach(g => {
-        html += '<optgroup label="' + g + '">';
-        groups[g].forEach(f => { html += opt(f); });
-        html += '</optgroup>';
-      });
-      sel.innerHTML = html;
-      return;
-    }
-
-    sections.forEach(sec => {
-      const mine = CUBE.fields.filter(f => f.section === sec.id);
-      if (!mine.length) return;
-      const high = mine.filter(f => f.tier === 'high');
-      const detail = mine.filter(f => f.tier !== 'high');
-      /* The block is the coloured row: a select cannot be told to paint one,
-         so the colour is drawn as a character the browser will render. */
-      /* ── THE COLOURED BANNER, AND WHY IT MAY STILL BE BLACK ───────────────
-         Ellie: "Not seeing the colored banners, and I want the lists indented
-         for differentiation."
-
-         She is right and the block character was always going to be black: a
-         native <select> popup is drawn outside CSS's reach on most platforms,
-         so `\u2588` rendered in whatever colour the list text is. The colour is
-         now set on the optgroup and on the block itself, which Chrome does
-         honour in its own popup on some platforms and ignores on others. If it
-         still reads black, the answer is a custom picker rather than a
-         <select>, and that is a bigger build than a style attribute: say the
-         word.
-
-         The indenting is not conditional on any of that. */
-      html += '<optgroup style="color:' + (sec.color || 'inherit') + '" label="\u2588 ' + sec.label.replace(/</g,'&lt;') + '">';
-      /* ── ONE STEP PER LEVEL ───────────────────────────────────────────────
-         The section is the optgroup label, its two sub-heads sat at two
-         spaces, and the questions under them sat at none: the rows she reads
-         were LESS indented than the heading above them, which is the
-         "differentiation" she is asking for and the opposite of it. Two spaces
-         for a sub-head, four for the fields under it. */
-      const indented = (f) => '<option value="' + f.key + '">\u00a0\u00a0\u00a0\u00a0' + f.label.replace(/</g,'&lt;') + '</option>';
-      if (high.length) {
-        html += '<option disabled>\u00a0\u00a0High level</option>';
-        high.forEach(f => { html += indented(f); });
-      }
-      if (detail.length) {
-        html += '<option disabled>\u00a0\u00a0Every question</option>';
-        detail.forEach(f => { html += indented(f); });
-      }
-      html += '</optgroup>';
+    /* The select still holds the answer; the drill-down renders it. One
+       option per leaf, labelled with its whole path, so the button has
+       something to print and a browser with no JavaScript for the picker
+       still has a usable list. */
+    const tree = fieldTree(includeNone);
+    let html = '';
+    const esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+    const walk = (nodes, trail) => nodes.forEach((n) => {
+      if (n.children) walk(n.children, trail.concat(n.label));
+      else html += '<option value="' + esc(n.value) + '">' + esc(trail.concat(n.label).join(' \u00b7 ')) + '</option>';
     });
+    walk(tree, []);
     sel.innerHTML = html;
+    sel.__sliceTree = tree;
+    sel.dataset.sdSearch = '1';
   }
   function fillScaleSelect(sel){
     const scales = CUBE.fields.filter(f => f.kind === 'scale');
@@ -2399,9 +2212,9 @@ window.adminAuthHeaders = function(extra){
 
   function render(){
     /* Keep each picker's button showing what its select actually holds. See
-       the note in mountFieldPicker: a value assigned in code fires no event. */
+       the note in mountSliceDrill: a value assigned in code fires no event. */
     for (const id of ['xp-row-field', 'xp-col-field']) {
-      const el = $(id); if (el && el.__fpLabel) el.__fpLabel();
+      const el = $(id); if (el && el.__sdLabel) el.__sdLabel();
     }
     if (!loaded) return;
     const rowField = $('xp-row-field').value, rowSide = 'self';
@@ -2724,8 +2537,8 @@ window.adminAuthHeaders = function(extra){
       /* The coloured picker goes on after the options exist and after the
          default is set, because it draws what the select holds. Mounting it
          first would have given a button labelled from an empty list. */
-      mountFieldPicker($('xp-row-field'));
-      mountFieldPicker($('xp-col-field'));
+      mountSliceDrill($('xp-row-field'));
+      mountSliceDrill($('xp-col-field'));
       ['xp-row-field','xp-col-field','xp-cell','xp-measure-field'].forEach(id => { const el = $(id); if (el) el.addEventListener('change', render); });
       $('xp-add-filter').onclick = () => { FILTERS.push({ field:'', value:'', side:'self' }); renderFilters(); };
       $('xp-export').onclick = exportCSV;
@@ -4529,24 +4342,40 @@ function svSlice(rows, val) {
 }
 
 /** Fill one tile's slicer from the segments that actually occur. */
+/**
+ * The Feedback page's own tile slicers, as the same drill-down.
+ *
+ * These cut a survey response rather than a cube row, so they cannot use
+ * sliceTree: the segments arrive on the response itself. What they CAN share
+ * is the control, because a page where some slicers drill and others drop a
+ * native list is two answers to the same gesture.
+ *
+ * One branch per segment, which is the shape her taxonomy's first section has
+ * and the most these seven fields can honestly be given.
+ */
 function svFillSlicer(sel, rows) {
-  if (!sel || sel.dataset.ready === String(rows.length)) return;
-  sel.dataset.ready = String(rows.length);
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">Everyone</option>';
+  if (!sel) return;
+  const tree = [];
   for (const [key, label] of SV_DIMS) {
     const vals = [...new Set(rows.map((r) => (r.segment || {})[key]).filter(Boolean))].sort();
     if (!vals.length) continue;
-    const g = document.createElement('optgroup');
-    g.label = label;
-    for (const v of vals) {
-      const o = document.createElement('option');
-      o.value = key + '::' + v; o.textContent = v;
-      g.appendChild(o);
-    }
-    sel.appendChild(g);
+    tree.push({ label, children: vals.map((v) => ({ label: v, value: key + '::' + v })) });
   }
-  try { sel.value = cur; } catch (e) {}
+  let html = '<option value="">Everyone</option>';
+  tree.forEach((n) => n.children.forEach((c) => {
+    html += '<option value="' + svEsc(c.value) + '">' + svEsc(n.label + ' \u00b7 ' + c.label) + '</option>';
+  }));
+  /* Rebuilt only when the list itself changes, so a cut survives a redraw. */
+  const sig = html.length + ':' + html.charCodeAt(html.length >> 1);
+  if (sel.dataset.ready !== sig) {
+    const cur = sel.value;
+    sel.innerHTML = html;
+    sel.dataset.ready = sig;
+    try { sel.value = cur; } catch (e) {}
+    if (sel.value !== cur) sel.value = '';
+  }
+  sel.__sliceTree = tree;
+  mountSliceDrill(sel);
 }
 
 /** Add or remove a theme on one written answer, then redraw both pages. */
@@ -7358,6 +7187,603 @@ function orderedCats(key, rows){
  * a field whose section is unknown keeps working in a section of its own
  * rather than disappearing.
  */
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SLICER DRILL-DOWN
+   ═══════════════════════════════════════════════════════════════════════════
+   Ellie: "Trying to think through this in a way that is easy to navigate. I
+   think the slicer dropdown in each tile should show high-level with arrows to
+   click into that section, the indented list below shows which sections have
+   more clicks or which are the final destination. There should be a back arrow
+   in the top left when you click into a detailed section, and users can click
+   to exactly what they're looking for." She then wrote out the whole taxonomy,
+   six sections deep in places.
+
+   ── WHY THE <select> IS STILL HERE ────────────────────────────────────────
+   Every tile reads `sel.value`, listens for `change`, or assigns `.value`
+   directly, and `sliceFilter` turns that value into a filter. Replacing the
+   control would have meant editing all of that and holding the cut list twice.
+   So the select stays, hidden, holding one option per LEAF, and this renders
+   it. Choosing writes to the select and dispatches change, so nothing
+   downstream can tell. That is the same trick the Explore field picker uses,
+   and it is the reason this is a safe change rather than a rewrite.
+
+   ── WHY A LEAF CAN BE A FUNCTION ──────────────────────────────────────────
+   Most of her rows are a stored value: "Age · 25-34" is `age_range::25-34`.
+   Many are not. "Children or No Children" regroups five stored answers into
+   two. "Energy & Recharge - Independent" is a band of a score. "Household -
+   aligned" is a percentage either side of a line. None of those is a column,
+   so a leaf may instead carry a predicate, registered under a STABLE id so
+   that rebuilding the tree re-registers the same test and a chosen cut
+   survives a redraw.
+
+   ── WHY IT IS BUILT FROM THE ROWS, EVERY TIME ─────────────────────────────
+   A branch with nothing under it is dropped, which is the other half of her
+   instruction that a slicer should only offer what the tile has. So the tree
+   is built per tile from that tile's own rows, and an exercise nobody in this
+   tile has done does not appear at all.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Black or white on a coloured band, whichever can be read on it.
+ *
+ * The seven section colours run from a deep rose to a light green, and white
+ * on the light ones is the kind of thing a contrast sweep finds later. Lifted
+ * out of the Explore field picker when the drill-down took that job over, so
+ * there is one answer rather than two.
+ */
+function qxInk(hex) {
+  const h = String(hex || '').trim();
+  const m = /^#?([0-9a-f]{6})$/i.exec(h.startsWith('rgb') ? '' : h);
+  let r, g, b;
+  if (m) { const n = parseInt(m[1], 16); r = n >> 16 & 255; g = n >> 8 & 255; b = n & 255; }
+  else { const p = h.match(/\d+/g); if (!p || p.length < 3) return '#fff'; r = +p[0]; g = +p[1]; b = +p[2]; }
+  const lin = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
+  const L = .2126 * lin(r) + .7152 * lin(g) + .0722 * lin(b);
+  return (L + .05) / .05 > 21 / ((L + .05) / .05) ? '#1B2547' : '#fff';
+}
+
+/** Derived cuts, by stable id. See the note above on why ids are stable. */
+const SLICE_PRED = {};
+
+/** The bands Ellie set for a one-to-five score: below 2.5, 2.5 to 3.5, above. */
+const SLICE_BANDS = [
+  { id: 'lo', test: (v) => v < 2.5 },
+  { id: 'mid', test: (v) => v >= 2.5 && v <= 3.5 },
+  { id: 'hi', test: (v) => v > 3.5 },
+];
+
+/* One option step on the intimacy 0..1 scale, the same figure the intimacy
+   tile uses to call a pair aligned. Lifted out of that function rather than
+   typed again here: two answers to "how close is close enough" is how a tile
+   and its slicer come to disagree about the same couple. */
+const INTIMACY_ALIGN_STEP = 0.25;
+
+/* Half the items in a category, which is where "aligned" starts. The figure is
+   a percentage of that category's items the two of them named the same person
+   on, so the line is the only one that means anything without inventing a
+   threshold: more often than not. */
+const EXP_ALIGNED_PCT = 50;
+
+/**
+ * Built once per list of rows, not once per render.
+ *
+ * Every leaf asks "does anybody here match", which is a pass over the rows,
+ * and there are a hundred-odd leaves and thirty-odd slicers. At forty beta
+ * rows that is nothing; at ten thousand it is a page that takes a second to
+ * draw every time a tile redraws. The same array of rows always produces the
+ * same tree, so it is remembered against that array, which is thrown away
+ * when the cube is refetched.
+ */
+const SLICE_TREE_CACHE = new WeakMap();
+
+function sliceTree(cube, rows, excludeKey, onlyKeys) {
+  const ck = (excludeKey || '-') + '|' + (onlyKeys ? onlyKeys.join(',') : '-');
+  if (rows && typeof rows === 'object') {
+    const hit = SLICE_TREE_CACHE.get(rows);
+    if (hit && hit[ck]) return hit[ck];
+  }
+  const built = sliceTreeBuild(cube, rows, excludeKey, onlyKeys);
+  if (rows && typeof rows === 'object') {
+    const bag = SLICE_TREE_CACHE.get(rows) || {};
+    bag[ck] = built;
+    SLICE_TREE_CACHE.set(rows, bag);
+  }
+  return built;
+}
+
+function sliceTreeBuild(cube, rows, excludeKey, onlyKeys) {
+  const fields = (cube && cube.fields) || [];
+  const byKey = {}; fields.forEach((f) => { byKey[f.key] = f; });
+  const secColor = {}; ((cube && cube.sections) || []).forEach((s) => { secColor[s.id] = s.color; });
+  const allow = (key) => key !== excludeKey && (!onlyKeys || onlyKeys.indexOf(key) >= 0);
+  const has = (key) => rows.some((r) => r[key] != null && r[key] !== '');
+
+  /** One leaf per stored value, in the page's own order, dropped when empty. */
+  const valueRows = (key) => {
+    if (!allow(key) || !has(key)) return [];
+    return orderedCats(key, rows).map((v) => ({ label: sliceLabel(key, v), value: key + '::' + v }));
+  };
+  /** A branch, or nothing when there is nothing under it. */
+  const node = (label, children) => {
+    const kids = (children || []).filter(Boolean);
+    return kids.length ? { label, children: kids } : null;
+  };
+  /**
+   * A derived leaf.
+   *
+   * Dropped when a tile is restricted to named cuts (onlyKeys), because those
+   * tiles count couples and a derived cut over individuals would be counted
+   * twice; and dropped when nobody in these rows matches, which is the same
+   * rule the value rows follow.
+   */
+  const pred = (id, label, test) => {
+    if (onlyKeys) return null;
+    if (!rows.some(test)) return null;
+    SLICE_PRED[id] = { label, test };
+    return { label, value: 'g::' + id };
+  };
+  /** The options of a field, in the order the server sent them. */
+  const optsOf = (key) => ((byKey[key] && byKey[key].options) || []).map((o) => (o && o.v != null ? o.v : o));
+  /** A field's label, falling back to its key so nothing draws blank. */
+  const labelOf = (key) => (byKey[key] && byKey[key].label) || key;
+
+  /* ── 1 · DEMOGRAPHICS ──────────────────────────────────────────────── */
+  const demographics = node('Demographics', [
+    node('Age', valueRows('age_range')),
+    node('Gender', valueRows('pronouns')),
+    node('Marital status', valueRows('relationship_status')),
+    node('Children', [
+      /* Her regrouped pair first, then every stored answer. "Expecting" is in
+         neither group on purpose: it is not yet children and it is not the
+         absence of them, and it has its own row below. */
+      pred('kids:yes', 'Children', (r) => ['1', '2', '3+'].indexOf(String(r.children)) >= 0),
+      pred('kids:no', 'No children', (r) => String(r.children) === 'none'),
+      ...valueRows('children'),
+    ]),
+    node('Time together', valueRows('relationship_length')),
+    node('How they found us', valueRows('signup_source')),
+    node('Package', valueRows('pkg')),
+  ]);
+
+  /* ── 2 · COMMUNICATION STYLES ──────────────────────────────────────── */
+  const dims = fields.filter((f) => f.group === 'Dimensions (score 1–5)' && f.key.indexOf('dim_') === 0);
+  const dimNodes = dims.map((f) => {
+    if (!allow(f.key) || !has(f.key)) return null;
+    /* Her own example names the poles: "Energy & Recharge - Independent,
+       Energy & Recharge - Neutral, Energy & Recharge - Togetherness". The
+       poles come with the field, so a renamed dimension renames its rows. */
+    const names = [f.poleLow || 'lower', 'Neutral', f.poleHigh || 'higher'];
+    return node(f.label, SLICE_BANDS.map((b, i) => pred(
+      'dim:' + f.key + ':' + b.id,
+      f.label + ' - ' + names[i],
+      (r) => typeof r[f.key] === 'number' && b.test(r[f.key]),
+    )));
+  });
+  const comms = node('Communication Styles', [
+    node('Typing', [
+      node('Individual type', valueRows('type')),
+      node('Couple type', valueRows('couple_type')),
+    ]),
+    node('Dimensions', dimNodes),
+    node('Understanding', [
+      ...valueRows('alignment_group'),
+      ...valueRows('understanding_group'),
+    ]),
+  ]);
+
+  /* ── 3 · EXPECTATIONS ──────────────────────────────────────────────── */
+  /* Life and values, one branch per category. A category is several questions,
+     so the cut is where somebody sits across all of them: each answer's
+     position between the poles, averaged, then banded the same way a dimension
+     is. One question would be a question row, which is the detailed list she
+     deliberately kept out of the slicers. */
+  const lifeFields = fields.filter((f) => f.group === 'Ex2 · Life & values');
+  const lifeCats = [];
+  lifeFields.forEach((f) => {
+    const cat = (f.label.indexOf(' · ') > -1) ? f.label.slice(0, f.label.indexOf(' · ')) : 'Other';
+    const hit = lifeCats.find((c) => c.label === cat);
+    if (hit) hit.fields.push(f); else lifeCats.push({ label: cat, fields: [f] });
+  });
+  const lifePos = (r, flds) => {
+    let sum = 0, n = 0;
+    flds.forEach((f) => {
+      const opts = (f.options || []).map((o) => (o && o.v != null ? o.v : o));
+      const i = opts.indexOf(r[f.key]);
+      if (i < 0 || opts.length < 2) return;
+      sum += 1 + (i / (opts.length - 1)) * 4; n += 1;
+    });
+    return n ? sum / n : null;
+  };
+  const lifeNodes = lifeCats.map((c) => node(c.label, SLICE_BANDS.map((b, i) => pred(
+    'life:' + c.label + ':' + b.id,
+    c.label + ' - ' + ['low end (1-2)', 'middle (3)', 'high end (4-5)'][i],
+    (r) => { const p = lifePos(r, c.fields); return p != null && b.test(p); },
+  ))));
+
+  /* Alignment by category: two rows per category, which is her twelve. */
+  const alignFields = fields.filter((f) => f.key.indexOf('expalign_') === 0 && f.key !== 'expalign_overall');
+  const alignRows = [];
+  alignFields.forEach((f) => {
+    const name = f.label.replace(/ alignment$/, '');
+    alignRows.push(pred('expal:' + f.key + ':y', name + ' - aligned',
+      (r) => typeof r[f.key] === 'number' && r[f.key] >= EXP_ALIGNED_PCT));
+    alignRows.push(pred('expal:' + f.key + ':n', name + ' - misaligned',
+      (r) => typeof r[f.key] === 'number' && r[f.key] < EXP_ALIGNED_PCT));
+  });
+
+  const expectations = node('Expectations', [
+    node('Life and values orientation', lifeNodes),
+    node('Alignment by category', alignRows),
+    node('Experiences', [
+      node('Guardians', [
+        pred('g:mom', 'Had a mother figure', (r) => r.guardian_mom === 'Yes'),
+        pred('g:nomom', 'Had no mother figure', (r) => r.guardian_mom === 'No'),
+        pred('g:dad', 'Had a father figure', (r) => r.guardian_dad === 'Yes'),
+        pred('g:nodad', 'Had no father figure', (r) => r.guardian_dad === 'No'),
+        pred('g:same', 'Two guardians of the same gender', (r) => r.guardian_same_gender === 'Yes'),
+        pred('g:notparent', 'Raised by someone other than a parent', (r) => r.guardian_parents === 'Raised by someone else'),
+      ]),
+      node('Generational differences', valueRows('gen_roles')),
+    ]),
+  ]);
+
+  /* ── 4 · RELATIONSHIP REFLECTION ───────────────────────────────────── */
+  /* Her eight rows, each the bottom two or the top two answers to one
+     question. The words either side are hers; the questions and their answer
+     lists come from the cube, so a reworded option moves the cut with it. */
+  const REF_ENDS = {
+    ref_a0: ['Relationship feel - poor', 'Relationship feel - great'],
+    ref_a_sat_conn: ['Connection - not', 'Connection - very'],
+    ref_a_sat_comm: ['Communication - avoid', 'Communication - easy'],
+    ref_a_sat_fun: ['Fun - little', 'Fun - lots'],
+  };
+  const refRows = [];
+  Object.keys(REF_ENDS).forEach((key) => {
+    const f = byKey[key];
+    if (!f || !allow(key) || !has(key)) return;
+    const opts = optsOf(key);
+    if (opts.length < 4) return;
+    const low = opts.slice(0, 2), high = opts.slice(-2);
+    refRows.push(pred('ref:' + key + ':lo', REF_ENDS[key][0], (r) => low.indexOf(r[key]) >= 0));
+    refRows.push(pred('ref:' + key + ':hi', REF_ENDS[key][1], (r) => high.indexOf(r[key]) >= 0));
+  });
+  const reflection = node('Relationship Reflection', refRows);
+
+  /* ── 5 · PHYSICAL INTIMACY ─────────────────────────────────────────── */
+  /* Two rows per dimension. Aligned is the same step the intimacy tile uses,
+     measured the same way: how far apart the two of them sat, averaged over
+     that dimension's questions. */
+  const iqFields = fields.filter((f) => f.key.indexOf('iq_') === 0 && f.dim);
+  const iqDims = [];
+  iqFields.forEach((f) => {
+    const hit = iqDims.find((d) => d.id === f.dim);
+    if (hit) hit.fields.push(f); else iqDims.push({ id: f.dim, label: f.dimLabel || f.dim, fields: [f] });
+  });
+  const iqGap = (r, flds) => {
+    let sum = 0, n = 0;
+    flds.forEach((f) => {
+      const a = qxPosOf(f, r[f.key]), b = qxPosOf(f, r['p_' + f.key]);
+      if (a == null || b == null) return;
+      sum += Math.abs(a - b); n += 1;
+    });
+    return n ? sum / n : null;
+  };
+  const intimacy = node('Physical Intimacy', iqDims.map((d) => node(d.label, [
+    pred('iq:' + d.id + ':y', d.label + ' - aligned',
+      (r) => { const g = iqGap(r, d.fields); return g != null && g <= INTIMACY_ALIGN_STEP; }),
+    pred('iq:' + d.id + ':n', d.label + ' - misaligned',
+      (r) => { const g = iqGap(r, d.fields); return g != null && g > INTIMACY_ALIGN_STEP; }),
+  ])));
+
+  /* ── 6 · CONFLICT PATTERNS ─────────────────────────────────────────── */
+  /* The two ends of the first question, the two sides of the second, and the
+     people who say they notice the pattern when something old comes up. Each
+     reads the option list the cube sent rather than matching on the words, so
+     a copy edit to an answer does not quietly empty a cut. */
+  const cqEnds = (key, lowLabel, highLabel) => {
+    const f = byKey[key];
+    if (!f || !allow(key) || !has(key)) return [];
+    const opts = optsOf(key);
+    if (opts.length < 4) return [];
+    const low = opts.slice(0, 2), high = opts.slice(-2);
+    return [
+      pred('cq:' + key + ':hi', highLabel, (r) => high.indexOf(r[key]) >= 0),
+      pred('cq:' + key + ':lo', lowLabel, (r) => low.indexOf(r[key]) >= 0),
+    ];
+  };
+  const cqSide = (key, i, label) => {
+    const f = byKey[key];
+    if (!f || !allow(key) || !has(key)) return null;
+    const opts = optsOf(key);
+    if (opts.length < 2) return null;
+    const want = opts[i === 0 ? 0 : opts.length - 1];
+    return pred('cq:' + key + ':' + (i === 0 ? 'a' : 'b'), label, (r) => r[key] === want);
+  };
+  const horse = fields.filter((f) => f.key.indexOf('horse_') === 0);
+  const horseRows = (prefix, want, idTag) => horse.map((f) => {
+    const key = prefix + f.key;
+    if (!allow(f.key)) return null;
+    const name = String(f.label || '').replace(/^Shows /, '');
+    return pred('horse:' + idTag + ':' + f.key, name, (r) => r[key] === want);
+  });
+  const conflict = node('Conflict Patterns', [
+    node('Reactions to conflict', [
+      ...cqEnds('cq_c0', 'React poorly', 'React well'),
+      cqSide('cq_c2', 0, 'Keep talking'),
+      cqSide('cq_c2', 1, 'Pause first'),
+      cqSide('cq_c_topic', 1, 'Notices the older pattern'),
+    ]),
+    node('Horsemen', [
+      node('People who display', horseRows('', 'Yes', 'self-yes')),
+      node('People whose partners display', horseRows('p_', 'Yes', 'partner-yes')),
+      node('People who do not display', horseRows('', 'No', 'self-no')),
+      node('People whose partners do not display', horseRows('p_', 'No', 'partner-no')),
+    ]),
+  ]);
+
+  /* ── ANYTHING ELSE THE CUBE OFFERS ─────────────────────────────────── */
+  /* A cut that works today and is not in her taxonomy keeps working, in a
+     section that says so. Dropping one silently would be this page deciding
+     which of her questions are worth asking. */
+  /* What the taxonomy above already offers, so "Other cuts" does not offer it
+     a second time under a different name: the horsemen are eight rows in
+     SLICE_DIMS and sixteen under Conflict Patterns, and one cut reachable two
+     ways by two names is how a reader comes to think they are two measures. */
+  const placed = ['age_range', 'pronouns', 'relationship_status', 'children', 'relationship_length',
+    'signup_source', 'pkg', 'type', 'couple_type', 'alignment_group', 'understanding_group', 'gen_roles',
+    'horse_crit', 'horse_cont', 'horse_def', 'horse_stone',
+    'p_horse_crit', 'p_horse_cont', 'p_horse_def', 'p_horse_stone'];
+  const others = (typeof SLICE_DIMS !== 'undefined' ? SLICE_DIMS : [])
+    .filter((d) => placed.indexOf(d.key) < 0 && d.key.indexOf('dim_') !== 0)
+    .map((d) => node(d.label, valueRows(d.key)));
+  const other = node('Other cuts', others);
+
+  const out = [
+    demographics && { ...demographics, color: secColor.demographic },
+    comms && { ...comms, color: secColor.comms },
+    expectations && { ...expectations, color: secColor.expectations },
+    reflection && { ...reflection, color: secColor.reflection },
+    intimacy && { ...intimacy, color: secColor.intimacy },
+    conflict && { ...conflict, color: secColor.conflict },
+    other && { ...other, color: secColor.engagement },
+  ].filter(Boolean);
+  return out;
+}
+
+/**
+ * The drill-down itself.
+ *
+ * Modelled on the Explore field picker, for the reason that one exists: a
+ * native <select> popup is painted by the operating system, so a list with
+ * levels, colours and a back arrow cannot be built inside one. The select
+ * stays and this renders it.
+ *
+ * It must not be able to take a page down. The field picker learned that the
+ * morning after it shipped ("Explore page isn't loading"), and this mounts on
+ * thirty-odd tiles rather than two, so a throw here would be thirty tiles
+ * instead of one page. A failure puts the plain dropdown back and says so.
+ */
+function mountSliceDrill(sel) {
+  try { mountSliceDrillUnsafe(sel); }
+  catch (e) {
+    console.error('[admin] slicer drill-down failed to mount, falling back to the plain dropdown:', e);
+    try {
+      sel.hidden = false;
+      const w = sel.closest('.sd');
+      if (w && w.parentNode) { w.parentNode.insertBefore(sel, w); w.remove(); }
+      sel.dataset.sd = 'failed';
+    } catch (e2) { console.error('[admin] and the fallback failed too:', e2); }
+  }
+}
+
+function mountSliceDrillUnsafe(sel) {
+  if (!sel || sel.dataset.sd) { if (sel && sel.__sdLabel) sel.__sdLabel(); return; }
+  sel.dataset.sd = '1';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'sd';
+  sel.parentNode.insertBefore(wrap, sel);
+  wrap.appendChild(sel);
+  sel.hidden = true;
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'tile-slicer sd-btn';
+  btn.setAttribute('aria-haspopup', 'listbox');
+  btn.setAttribute('aria-expanded', 'false');
+  if (sel.getAttribute('aria-label')) btn.setAttribute('aria-label', sel.getAttribute('aria-label'));
+  if (sel.getAttribute('title')) btn.setAttribute('title', sel.getAttribute('title'));
+  wrap.appendChild(btn);
+
+  const panel = document.createElement('div');
+  panel.className = 'sd-panel';
+  panel.setAttribute('role', 'listbox');
+  panel.hidden = true;
+  wrap.appendChild(panel);
+
+  /* The button says the whole path of what is chosen, which is what the
+     option's own text already is: "Demographics · Age · 25-34". A cut you
+     cannot name is a cut you cannot undo. */
+  const label = () => {
+    const o = sel.selectedOptions && sel.selectedOptions[0];
+    const txt = (o ? o.textContent : '').trim();
+    btn.innerHTML = '';
+    const t = document.createElement('span');
+    t.className = 'sd-btn-text';
+    t.textContent = txt || 'Everyone';
+    const c = document.createElement('span');
+    c.className = 'sd-caret'; c.textContent = '▾';
+    btn.appendChild(t); btn.appendChild(c);
+    btn.classList.toggle('on', !!sel.value);
+  };
+  sel.__sdLabel = label;
+
+  /* Where in the tree the panel is. Reset on open, so the list always starts
+     at the top rather than wherever it was left days ago. */
+  let path = [];
+
+  const here = () => {
+    let list = sel.__sliceTree || [];
+    for (const step of path) {
+      const hit = list.find((n) => n.label === step);
+      list = (hit && hit.children) || [];
+    }
+    return list;
+  };
+
+  const row = (cls) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'sd-row ' + (cls || '');
+    return b;
+  };
+
+  /* What the search box holds, kept across redraws of the panel. */
+  let query = '';
+
+  /** Every leaf, with the path that leads to it, for searching. */
+  const flatten = (nodes, trail, out) => {
+    nodes.forEach((n) => {
+      if (n.children) flatten(n.children, trail.concat(n.label), out);
+      else out.push({ label: n.label, value: n.value, trail: trail.join(' \u00b7 ') });
+    });
+    return out;
+  };
+
+  const draw = () => {
+    panel.innerHTML = '';
+    /* ── SEARCH, WHERE THE LIST IS LONG ────────────────────────────────
+       Sixty-eight fields is a list to search; six age brackets is not. The
+       two Explore pickers ask for this and the tile slicers do not, so it is
+       a flag rather than a second component. A search is across EVERY level,
+       because the thing somebody is looking for is usually two levels down
+       and they do not know which two. */
+    if (sel.dataset.sdSearch) {
+      const box = document.createElement('input');
+      box.type = 'search';
+      box.className = 'sd-search';
+      box.placeholder = 'Search\u2026';
+      box.value = query;
+      box.oninput = () => { query = box.value; draw(); box.focus(); };
+      box.onclick = (e) => e.stopPropagation();
+      panel.appendChild(box);
+      if (query.trim()) {
+        const q = query.trim().toLowerCase();
+        const hits = flatten(sel.__sliceTree || [], [], [])
+          .filter((h) => (h.trail + ' ' + h.label).toLowerCase().indexOf(q) >= 0)
+          .slice(0, 60);
+        if (!hits.length) {
+          const none = document.createElement('div');
+          none.className = 'sd-none';
+          none.textContent = 'Nothing matches that.';
+          panel.appendChild(none);
+        }
+        hits.forEach((h) => {
+          const r = row('sd-leaf');
+          r.innerHTML = '<span>' + QX_ESC(h.label) + '</span>'
+            + '<span class="sd-trail">' + QX_ESC(h.trail) + '</span>';
+          if (sel.value === h.value) r.setAttribute('aria-selected', 'true');
+          r.onclick = () => pick(h.value);
+          panel.appendChild(r);
+        });
+        return;
+      }
+    }
+    if (path.length) {
+      /* Her back arrow, top left, with where it goes beside it. */
+      const back = row('sd-back');
+      back.innerHTML = '<span class="sd-arrow">←</span><span>' +
+        QX_ESC(path.length > 1 ? path[path.length - 2] : 'All sections') + '</span>';
+      back.onclick = (e) => { e.stopPropagation(); path.pop(); draw(); };
+      panel.appendChild(back);
+      const head = document.createElement('div');
+      head.className = 'sd-head';
+      head.textContent = path.join(' · ');
+      panel.appendChild(head);
+    } else if (!(sel.__sliceTree || []).some((n) => !n.children && n.value === '')) {
+      /* "Everyone" is the no-cut row, and a slicer needs one because its
+         empty value means everybody. A FIELD picker's empty value already has
+         a row of its own, "— none —", so this would be the same choice twice
+         under two names. Asked of the tree rather than of which page we are
+         on: the tree is the thing that knows. */
+      const all = row('sd-leaf');
+      all.textContent = 'Everyone';
+      if (!sel.value) all.setAttribute('aria-selected', 'true');
+      all.onclick = () => pick('');
+      panel.appendChild(all);
+    }
+
+    const list = here();
+    if (!list.length) {
+      const none = document.createElement('div');
+      none.className = 'sd-none';
+      none.textContent = 'Nothing to cut by here.';
+      panel.appendChild(none);
+    }
+    list.forEach((n) => {
+      const r = row(n.children ? 'sd-branch' : 'sd-leaf');
+      if (n.children) {
+        /* ── A FULL COLOUR BANNER, NOT A SQUARE ────────────────────────
+           Ellie, three times, about the Explore pickers: "I'd like for it to
+           be a full color banner not just a square." A native popup is
+           painted outside the page, which is why that took a control of our
+           own; this is that control, so the section's row IS the band. The
+           ink is chosen against the colour rather than assumed white. */
+        r.innerHTML = '<span>' + QX_ESC(n.label) + '</span><span class="sd-chev">›</span>';
+        if (!path.length && n.color) {
+          r.classList.add('sd-band');
+          r.style.background = n.color;
+          r.style.color = qxInk(n.color);
+        }
+        r.onclick = (e) => { e.stopPropagation(); path.push(n.label); draw(); };
+      } else {
+        r.textContent = n.label;
+        if (sel.value === n.value) r.setAttribute('aria-selected', 'true');
+        r.onclick = () => pick(n.value);
+      }
+      panel.appendChild(r);
+    });
+  };
+
+  const pick = (v) => {
+    sel.value = v;
+    label();
+    close();
+    btn.focus();
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  const close = () => {
+    panel.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('mousedown', onAway, true);
+    document.removeEventListener('keydown', onKey, true);
+  };
+  const onAway = (e) => { if (!wrap.contains(e.target)) close(); };
+  const onKey = (e) => {
+    if (e.key !== 'Escape') return;
+    /* Escape steps back out one level before it closes, which is what the
+       back arrow does and what a reader three levels in expects. */
+    if (path.length) { path.pop(); draw(); } else { close(); btn.focus(); }
+  };
+  const open = () => {
+    path = [];
+    query = '';
+    draw();
+    panel.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+    document.addEventListener('mousedown', onAway, true);
+    document.addEventListener('keydown', onKey, true);
+  };
+  btn.addEventListener('click', () => { panel.hidden ? open() : close(); });
+
+  /* Code that assigns `.value` directly fires no event, and this page does
+     that in several places, so the button re-reads the select rather than
+     trusting a list of them. */
+  sel.addEventListener('change', label);
+  label();
+}
+
 /**
  * ── ONLY THE OPTIONS THIS TILE HAS ────────────────────────────────────────
  * Ellie: "Slicers should only offer options that have data for that tile, the
@@ -7383,95 +7809,46 @@ function populateSlicer(sel, excludeKey, rows, onlyKeys){
   /* A short, stable signature. The markup itself is the thing being compared
      and is far too big to park in a DOM attribute. */
   const sign = (t) => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return t.length + ':' + h; };
-  const apply = (markup) => {
-    const sig = sign(markup);
-    if (sel.dataset.sig === sig) return;
+
+  const cube = window.__CUBE_FOR_SLICERS || null;
+  const tree = sliceTree(cube, rows || [], excludeKey, onlyKeys);
+
+  /* Every LEAF becomes an option, labelled with its whole path, so the select
+     is still the thing that holds the answer and the button has something to
+     print. The drill-down is a renderer; this is the state. */
+  let html = '<option value="">Everyone</option>';
+  const walk = (nodes, trail) => nodes.forEach((n) => {
+    if (n.children) walk(n.children, trail.concat(n.label));
+    else html += '<option value="' + QX_ESC(n.value) + '">' + QX_ESC(trail.concat(n.label).join(' \u00b7 ')) + '</option>';
+  });
+  walk(tree, []);
+
+  const sig = sign(html);
+  if (sel.dataset.sig !== sig) {
     const keep = sel.value;
-    sel.innerHTML = markup;
+    sel.innerHTML = html;
     sel.dataset.sig = sig;
-    /* `pop` is kept so anything still reading it sees a populated control. */
     sel.dataset.pop = '1';
     if (keep) {
-      const still = [...sel.options].some(o => o.value === keep && !o.disabled);
+      const still = [...sel.options].some((o) => o.value === keep);
       sel.value = still ? keep : '';
       if (!still) sel.classList.remove('on');
     }
-  };
-  const cube = window.__CUBE_FOR_SLICERS || null;
-  const sections = (cube && cube.sections) || null;
-  /* The section for a slicer key, read off the field the server sent. A
-     partner key is p_<key>, and the partner's copy of a field sits in the same
-     section as the field itself. */
-  const sectionOf = (key) => {
-    if (!cube || !cube.fields) return null;
-    const bare = key.indexOf('p_') === 0 ? key.slice(2) : key;
-    const f = cube.fields.find(x => x.key === bare);
-    return f ? f.section : null;
-  };
-  /* ── ONE STEP PER LEVEL ──────────────────────────────────────────────
-     Ellie: "I want the lists indented for differentiation." The same fault as
-     the row and column pickers: the field name sat at two spaces and its own
-     options sat at none, so the rows being chosen from were less indented
-     than the heading above them. Four spaces for an option, two for the field
-     it belongs to, and the section is the optgroup label. */
-  const rowsFor = (d) => {
-    const cats = orderedCats(d.key, rows);
-    if (!cats.length) return '';
-    return cats.map(v => '<option value="' + d.key + '::' + QX_ESC(v) + '">\u00a0\u00a0\u00a0\u00a0'
-      + QX_ESC(sliceLabel(d.key, v)) + '</option>').join('');
-  };
-
-  let html = '<option value="">Everyone</option>';
-  const wanted = SLICE_DIMS.filter(d => d.key !== excludeKey && (!onlyKeys || onlyKeys.indexOf(d.key) >= 0));
-
-  if (!sections) {
-    /* No sections in the payload: the old flat list, which still works. */
-    wanted.forEach(d => { const r = rowsFor(d); if (r) html += '<optgroup label="' + QX_ESC(d.label) + '">' + r + '</optgroup>'; });
-    apply(html);
-    return;
   }
-
-  const placed = new Set();
-  sections.forEach(sec => {
-    const mine = wanted.filter(d => sectionOf(d.key) === sec.id);
-    if (!mine.length) return;
-    let body = '';
-    mine.forEach(d => {
-      const r = rowsFor(d);
-      if (!r) return;
-      placed.add(d.key);
-      /* The field's own name above its options, because "Shares openly" on its
-         own does not say which dimension it belongs to. */
-      body += '<option disabled>\u00a0\u00a0' + QX_ESC(d.label) + '</option>' + r;
-    });
-    /* The section's own colour on the optgroup, the same as the row and
-       column pickers. Whether a native popup paints it is the platform's
-       call; the indenting above does not depend on it. */
-    /* ── NO BLOCK CHARACTER HERE EITHER ──────────────────────────────────
-       The block was standing in for a colour a native <select> will not
-       paint, and now that the row and column pickers draw a real banner it
-       was the only black square left on the page. A glyph that stands for a
-       colour nobody can see is just a glyph. The colour stays on the optgroup
-       for the browsers that do honour it, and a browser that does not now
-       shows an ordinary group heading rather than a square with no meaning.
-
-       These are small controls in tile heads rather than the two big field
-       pickers, so they keep the native list for now. Say the word and
-       mountFieldPicker goes on them too: it renders whatever select it is
-       given. */
-    if (body) html += '<optgroup style="color:' + (sec.color || 'inherit') + '" label="' + QX_ESC(sec.label) + '">' + body + '</optgroup>';
-  });
-  /* Anything the cube does not place keeps working, in a group that says so
-     rather than being dropped. */
-  const leftovers = wanted.filter(d => !placed.has(d.key));
-  let other = '';
-  leftovers.forEach(d => { const r = rowsFor(d); if (r) other += '<option disabled>\u00a0\u00a0' + QX_ESC(d.label) + '</option>' + r; });
-  if (other) html += '<optgroup label="Other">' + other + '</optgroup>';
-
-  apply(html);
+  sel.__sliceTree = tree;
+  mountSliceDrill(sel);
 }
 function sliceFilter(rows, val){
   if (!val) return rows;
+  /* A derived cut: a regroup, a band, an alignment either side of a line.
+     See SLICE_PRED and the note above sliceTree for why these exist. An id
+     nothing registered is a bug rather than "everyone", so it says so instead
+     of quietly widening the tile to the whole population. */
+  if (val.indexOf('g::') === 0) {
+    const p = SLICE_PRED[val.slice(3)];
+    if (!p) { console.error('[admin] no such derived cut: ' + val); return rows; }
+    return rows.filter(p.test);
+  }
   const i=val.indexOf('::'); const k=val.slice(0,i), v=val.slice(i+2);
   return rows.filter(r=>String(r[k])===v);
 }

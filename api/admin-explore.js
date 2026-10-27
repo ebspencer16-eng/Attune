@@ -31,14 +31,18 @@ function typeFromEx1(ans){
   return typeCodeFromAxes(withdrawScore, openScore);
 }
 import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES,
-  CHILDHOOD_ROLES, guardiansOf } from './_questions.js';
+  CHILDHOOD_ROLES, guardiansOf, canonicalGuardian } from './_questions.js';
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 import { withEffectivePromoCodes } from './_lib/order-promo.js';
 import { categoryAlignment } from './_lib/resp-agreement.js';
 import { genericLabel } from './_lib/generic-label.js';
+/* The three derived growing-up answers, in one module because the probe
+   reads them too. */
+import { growingUp, GROWING_UP_FIELDS } from './_lib/growing-up.js';
 import { DIM_META, DIM_SCALE_POLES } from './_lib/dimensions.js';
-import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS, forcedABValue } from './_conflict-questions.js';
+import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS, forcedABValue,
+  HORSEMAN_KEYS, showsHorseman } from './_conflict-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
 // other admin endpoints. Without this, Vercel's Node runtime can't invoke it
@@ -202,6 +206,9 @@ function ownFields(p) {
   r.guardian_count = guardians?.count || null;
   r.guardian_mom = guardians ? (guardians.hadMom ? 'Yes' : 'No') : null;
   r.guardian_dad = guardians ? (guardians.hadDad ? 'Yes' : 'No') : null;
+  /* The three derived growing-up answers, from the module the probe also
+     calls, so the stub cannot invent its own version of them. */
+  Object.assign(r, growingUp(p.ex2_answers, p, guardians));
 
   // Ex2 responsibilities: stored flat under ex2_answers.responsibilities, keyed
   // `categoryId__item`. Values are names — normalize to Me/Partner/Both/N/A here.
@@ -303,7 +310,7 @@ function ownFields(p) {
      not there. */
   for (const h of HORSEMAN_KEYS) {
     const v = r['cq_' + h.id];
-    r[h.key] = v == null ? null : (HORSEMAN_PRESENT.includes(v) ? 'Yes' : 'No');
+    r[h.key] = showsHorseman(v);
   }
   return r;
 }
@@ -327,8 +334,8 @@ function ownFields(p) {
  * slicer cutting at the old place, which is two answers to "does this show up
  * for them".
  */
-const HORSEMAN_PRESENT = ['Sometimes', 'Often'];
-const HORSEMAN_KEYS = RISK_QUESTIONS.map((q) => ({ key: 'horse_' + q.id.replace(/^c_/, ''), id: q.id, label: q.riskLabel || q.id }));
+/* HORSEMAN_PRESENT and HORSEMAN_KEYS moved into _conflict-questions.js, with
+   the questions they are about, because the probe needs the same answer. */
 
 const PARTNERABLE = [
   'type', 'axisEngage', 'axisOpen', ...DEMO_KEYS,
@@ -336,6 +343,7 @@ const PARTNERABLE = [
      most want side by side: a mom-and-dad household beside a
      grandparent one. */
   'guardian_a', 'guardian_b', 'guardian_pair', 'guardian_count', 'guardian_mom', 'guardian_dad',
+  'guardian_same_gender', 'guardian_parents', 'gen_roles',
   /* The partner half of Ellie's eight rows. Marked partnerable rather than
      computed twice: the denormaliser already copies every partnerable key onto
      the row as p_<key>, so "partner exhibits Contempt" is the same derivation
@@ -416,6 +424,7 @@ function buildCatalog(fbCatOptions) {
     options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true });
   f.push({ key: 'guardian_dad', label: 'Had a dad', group: 'Growing up', kind: 'cat',
     options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true });
+  for (const g of GROWING_UP_FIELDS) f.push({ ...g });
   f.push({ key: 'couple_type', label: 'Couple type', group: 'Type & axes', kind: 'cat' });
   f.push({ key: 'pkg', label: 'Package', group: 'Package & cohort', kind: 'cat',
     options: [['core', 'Core'], ['newlywed', 'Newlywed'], ['anniversary', 'Anniversary'], ['premium', 'Premium']].map(([v, label]) => ({ v, label })) });

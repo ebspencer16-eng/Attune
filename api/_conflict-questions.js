@@ -154,6 +154,32 @@ export const CONFLICT_REQUIRED = CONFLICT_QUESTIONS.map(q => q.id);
 
 export const RISK_QUESTIONS = CONFLICT_QUESTIONS.filter(q => q.kind === 'frequency');
 
+/**
+ * How often counts as showing a horseman.
+ *
+ * ── WHY IT IS HERE ────────────────────────────────────────────────────────
+ * The admin draws a chart of who shows each pattern and offers the same thing
+ * as a slicer, and the probe that photographs the admin has to produce rows
+ * the same way or it is a claim about the server made without running it.
+ * That is three readers of one line, which is one more than this codebase
+ * survives keeping by hand.
+ *
+ * Sometimes and Often, not Rarely: the question asks about frequency and the
+ * two upper answers are the ones the results prose treats as a pattern.
+ */
+export const HORSEMAN_PRESENT = ['Sometimes', 'Often'];
+
+/** The four yes/no fields built from those questions, keyed as the cube keys them. */
+export const HORSEMAN_KEYS = RISK_QUESTIONS.map((q) => ({
+  key: 'horse_' + q.id.replace(/^c_/, ''), id: q.id, label: q.riskLabel || q.id,
+}));
+
+/** Whether one stored frequency answer counts as showing it. Null stays null. */
+export function showsHorseman(answer) {
+  if (answer == null || answer === '') return null;
+  return HORSEMAN_PRESENT.includes(answer) ? 'Yes' : 'No';
+}
+
 /** Every question in display order, which is the order sections are listed. */
 export function conflictQuestionsInOrder() {
   const byId = new Map(CONFLICT_QUESTIONS.map(q => [q.id, q]));

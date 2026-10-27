@@ -48,7 +48,10 @@ import { CHILDHOOD_ROLES, canonicalGuardian } from '../_questions.js';
  * are left null because the word carries no gender and assigning one would be
  * inventing data rather than reading it.
  */
-const ROLE_GENDER = {
+/* Exported because the cube derives two growing-up fields from it. A second
+   copy in api/admin-explore.js would be a second answer to whether "Grandma"
+   is a woman, and the two would drift the first time a role was added. */
+export const ROLE_GENDER = {
   Mom: 'woman', Stepmom: 'woman', Grandma: 'woman', Aunt: 'woman',
   Dad: 'man', Stepdad: 'man', Grandpa: 'man', Uncle: 'man',
   Guardian: null, 'Foster parent': null, 'Older sibling': null,

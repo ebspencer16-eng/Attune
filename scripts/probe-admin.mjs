@@ -59,6 +59,59 @@ const { withEffectivePromoCodes, coupleKeyFromProfiles } = await import(`${ROOT}
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
 const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_questions.js`);
 const { readInheritance } = await import(`${ROOT}api/_lib/inherited-roles.js`);
+const { growingUp, GROWING_UP_FIELDS } = await import(`${ROOT}api/_lib/growing-up.js`);
+const { HORSEMAN_KEYS, showsHorseman } = await import(`${ROOT}api/_conflict-questions.js`);
+const { categoryAlignment } = await import(`${ROOT}api/_lib/resp-agreement.js`);
+
+/**
+ * One person's Expectations answers, built once and read twice.
+ *
+ * The growing-up fields on a cube row and the inheritance charts are two
+ * readings of the SAME answers, and the stub had been generating them
+ * separately: two fixtures for one person, which can disagree, and did.
+ * Deterministic in `i`, so it can be called wherever it is needed rather
+ * than stored on the row and stripped before sending.
+ */
+const STUB_ADULT_SETS = [
+  { a: 'Mom', b: 'Dad', solo: false },
+  { a: 'Mom', b: 'Stepdad', solo: false },
+  { a: 'Grandma', b: 'Grandpa', solo: false },
+  { a: 'Mom', b: '', solo: true },
+  { a: 'Mrs Patel', b: '', solo: true },
+  /* Two guardians the role names imply are the same gender. Her taxonomy
+     asks for that row, and without a pair like this in the fixture the row
+     is never drawn and nothing can say whether it works. */
+  { a: 'Mom', b: 'Stepmom', solo: false },
+];
+function stubEx2(i) {
+  const set = STUB_ADULT_SETS[i % STUB_ADULT_SETS.length];
+  const ans = { childhoodAdults: set, responsibilities: {}, childhood: {} };
+  const items = RESPONSIBILITY_CATEGORIES.flatMap((c) => (c.items || []).map((item) => ({ key: c.id + '__' + item, cat: c.id })));
+  items.forEach((it, k) => {
+    const ci = RESPONSIBILITY_CATEGORIES.findIndex((c) => c.id === it.cat);
+    /* Two independent walks. The first version offset the childhood answer
+       exactly one step from the expectation, which made "same as they saw"
+       impossible and put every gendered case in the one combination the rule
+       cannot classify: 0, 0, 0, 0 and 800 unknown, which reads exactly like
+       the bug these charts were reported for. */
+    const e = (i + k + ci) % 4;
+    const c2 = (i * 3 + k * 7 + ci) % 4;
+    const who = ['Both of us', STUB_SELF, STUB_PARTNER, "Doesn't apply to us"][e];
+    ans.responsibilities[it.key] = who;
+    /* Half in the slot spelling the site writes now and half in the word
+       spelling most stored answers are in, because a reader that understands
+       only one of those is the bug these charts were reported for. */
+    const asWord = (i % 2) === 0;
+    const slot = ['a', 'b', 'both', 'neither'][c2];
+    ans.childhood[it.key] = asWord
+      ? ({ a: set.a, b: set.b || set.a, both: 'Both of them', neither: 'Nobody' })[slot]
+      : slot;
+  });
+  return ans;
+}
+const STUB_SELF = 'A';
+const STUB_PARTNER = 'B';
+const stubProfile = (i) => ({ name: STUB_SELF, partner_name: STUB_PARTNER, pronouns: pick(PRONOUNS, i) });
 /* The survey, from the module the endpoint sends and the function that builds
    its one per-person list, rather than nine questions typed out here. */
 const { SURVEY_QUESTIONS, TEXT_QUESTIONS, SURVEY_VERSION, rankOptionsFor } = await import(`${ROOT}api/_lib/survey.js`);
@@ -87,6 +140,21 @@ const fields = [
   { key: 'guardian_count', label: 'How many adults', group: 'Growing up', kind: 'cat', options: [{ v: 'One adult', label: 'One adult' }, { v: 'Two adults', label: 'Two adults' }], partnerable: true },
   { key: 'guardian_mom', label: 'Had a mom', group: 'Growing up', kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true },
   { key: 'guardian_dad', label: 'Had a dad', group: 'Growing up', kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true },
+  /* The three derived ones, from the module the endpoint builds them with. */
+  ...GROWING_UP_FIELDS,
+  /* ── TWO BRANCHES THE STUB DID NOT HAVE AT ALL ──────────────────────────
+     The slicer taxonomy has a Horsemen branch and an Alignment by category
+     branch, and neither field existed here, so both drew nothing and the
+     probe said nothing about them. The horsemen are derived from the
+     frequency answers by the module that owns those questions; the alignment
+     is the real categoryAlignment over this person and the next one. */
+  ...HORSEMAN_KEYS.map((h) => ({ key: h.key, label: 'Shows ' + h.label, group: 'Conflict Patterns',
+    kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true })),
+  { key: 'expalign_overall', label: 'Alignment across categories', group: 'Ex2 \u00b7 Alignment across categories',
+    kind: 'scale', poleLow: 'Different answers', poleHigh: 'Same answers', partnerable: false },
+  ...RESPONSIBILITY_CATEGORIES.map((c) => ({ key: 'expalign_' + c.id, label: c.label + ' alignment',
+    group: 'Ex2 \u00b7 Alignment across categories', kind: 'scale',
+    poleLow: 'Different answers', poleHigh: 'Same answers', partnerable: false })),
   { key: 'couple_type', label: 'Couple type', group: 'Type & axes', kind: 'cat' },
   /* The label and the poles as api/admin-explore.js sends them, not the raw
      key. This sent `label: d` and no poles at all, so the dimension tile drew
@@ -207,14 +275,8 @@ for (let i = 0; i < 40; i++) {
        draw. Mixed on purpose: two-parent, single, grandparents and a
        typed word that no role matches. */
     ...(() => {
-      const sets = [
-        { a: 'Mom', b: 'Dad', solo: false },
-        { a: 'Mom', b: 'Stepdad', solo: false },
-        { a: 'Grandma', b: 'Grandpa', solo: false },
-        { a: 'Mom', b: '', solo: true },
-        { a: 'Mrs Patel', b: '', solo: true },
-      ];
-      const g = guardiansOf({ childhoodAdults: pick(sets, i) });
+      const ex2 = stubEx2(i);
+      const g = guardiansOf(ex2);
       return {
         guardian_a: g.a || 'Something else',
         guardian_b: g.solo ? null : (g.b || 'Something else'),
@@ -222,12 +284,17 @@ for (let i = 0; i < 40; i++) {
         guardian_count: g.count,
         guardian_mom: g.hadMom ? 'Yes' : 'No',
         guardian_dad: g.hadDad ? 'Yes' : 'No',
+        /* The three derived ones, through the module the endpoint uses. */
+        ...growingUp(ex2, stubProfile(i), g),
       };
     })(),
     age_range: pick(AGES, i),
     relationship_status: pick(STATUS, i),
     relationship_length: pick(LENGTH, i),
-    children: i % 3 === 0 ? 'No' : 'Yes',
+    /* The values the product actually stores. 'Yes' and 'No' were invented
+       here, so the regrouped "Children / No children" rows the slicer builds
+       from 'none', '1', '2', '3+' matched nobody and never drew. */
+    children: pick(['none', '1', '2', '3+', 'expecting'], i),
     signup_source: pick(SOURCE, i),
   };
   for (const dim of Object.keys(DIM_KEYS)) {
@@ -270,8 +337,43 @@ for (let i = 0; i < 40; i++) {
     const prefix = Object.keys(has).find((k) => f.key.startsWith(k));
     if (!prefix) continue;
     if (!has[prefix]) continue;
-    r[f.key] = pick(f.options, i + f.key.length).v;
-    r['p_' + f.key] = pick(f.options, i + 1 + f.key.length).v;
+    /* ── A FIXTURE'S PARITY CAN HIDE HALF A QUESTION ───────────────────
+       This indexed by `i`, and conflict answers only exist for even `i`, so
+       every two-option conflict question landed on the same side for
+       everybody: one of its two answers was never stored and the slicer row
+       for that side drew nothing. Halving `i` first breaks the collision. */
+    r[f.key] = pick(f.options, (i >> 1) + i + f.key.length).v;
+    /* How far the partner sits from them varies. It was always one step,
+       which on a five-option scale is exactly the width that counts as
+       aligned, so every intimacy dimension came out aligned for everybody and
+       the "misaligned" half of that branch was never drawn. */
+    r['p_' + f.key] = pick(f.options, i + 1 + (i % 3) + f.key.length).v;
+  }
+  /* The four yes/no horsemen, from the frequency answers, through the module
+     the endpoint uses. Null where they did not do the exercise, which is what
+     the server leaves too: a slicer counting somebody who never answered as
+     "does not show contempt" reports about people who are not there. */
+  for (const h of HORSEMAN_KEYS) {
+    r[h.key] = showsHorseman(r['cq_' + h.id]);
+    r['p_' + h.key] = showsHorseman(r['p_cq_' + h.id]);
+  }
+  /* Alignment per category, run rather than invented: this person's
+     Expectations answers against the next person's, through the same rule the
+     Responses page and the cube both call. */
+  if (r.has_ex2) {
+    const mine = { name: STUB_SELF, partner_name: STUB_PARTNER, ex2_answers: stubEx2(i) };
+    /* Half of these couples answer identically, so the "aligned" half of her
+       twelve category rows has somebody in it. With every partner one step
+       away, every category came out misaligned and six of those rows could
+       never be drawn. Keyed on 2 rather than 3: has_ex2 is false exactly when
+       i % 3 === 0, so a rule keyed on 3 picks out the people who are not in
+       this half of the cube at all. */
+    const theirs = { name: STUB_PARTNER, partner_name: STUB_SELF, ex2_answers: stubEx2(i % 2 === 1 ? i : i + 1) };
+    const ca = categoryAlignment(mine, theirs);
+    r.expalign_overall = ca.overall;
+    for (const c of RESPONSIBILITY_CATEGORIES) {
+      r['expalign_' + c.id] = ca.byCategory[c.id] ? ca.byCategory[c.id].pct : null;
+    }
   }
   rows.push(r);
 }
@@ -497,43 +599,8 @@ const server = createServer((req, res) => {
         categories: RESPONSIBILITY_CATEGORIES.map((c) => ({ id: c.id, label: c.label })),
       };
       rows.forEach((r, i) => {
-        const adultSets = [
-          { a: 'Mom', b: 'Dad' }, { a: 'Mom', b: 'Stepdad' },
-          { a: 'Grandma', b: 'Grandpa' }, { a: 'Mom', b: '' }, { a: 'Guardian', b: 'Aunt' },
-        ];
-        const set = adultSets[i % adultSets.length];
-        const ans = { childhoodAdults: set, responsibilities: {}, childhood: {} };
-        items.forEach((it, k) => {
-          const ci = RESPONSIBILITY_CATEGORIES.findIndex((c) => c.id === it.cat);
-          /* Two independent walks. The first version offset the childhood
-             answer by exactly one step from the expectation, which made
-             "same as they saw" impossible and put every gendered case in the
-             one combination the rule cannot classify: 0 and 0 and 800
-             unknown, which reads exactly like the bug this chart was reported
-             for. A fixture whose two halves move together tests one diagonal
-             of the matrix. */
-          const e = (i + k + ci) % 4;
-          const c2 = (i * 3 + k * 7 + ci) % 4;
-          /* What they expect: the four shapes the exercise stores. */
-          ans.responsibilities[it.key] = ['Both of us', 'Primarily mine', 'Primarily theirs', "Doesn't apply to us"][e];
-          /* What they saw. Half in the slot spelling the site writes now and
-             half in the word spelling most stored answers are in, because a
-             reader that only understands one of those is the bug this chart
-             was reported for. */
-          const asWord = (i % 2) === 0;
-          const slot = ['a', 'b', 'both', 'neither'][c2];
-          ans.childhood[it.key] = asWord
-            ? ({ a: set.a, b: set.b || set.a, both: 'Both of them', neither: 'Nobody' })[slot]
-            : slot;
-        });
-        const profile = { name: 'A', partner_name: 'B', pronouns: r.pronouns };
-        /* "Primarily theirs" is not one of the exercise's words; expectedWho
-           reads the partner's NAME, so the stub has to speak the same way the
-           product does. */
-        items.forEach((it) => {
-          if (ans.responsibilities[it.key] === 'Primarily theirs') ans.responsibilities[it.key] = profile.partner_name;
-          if (ans.responsibilities[it.key] === 'Primarily mine') ans.responsibilities[it.key] = profile.name;
-        });
+        const ans = stubEx2(i);
+        const profile = stubProfile(i);
         const adults = guardiansOf(ans);
         const got = readInheritance(ans, profile, items, adults);
         out.people += 1;
@@ -867,6 +934,12 @@ const WIDTH = Number(process.env.WIDTH || 1500);
 const page = await launch({ width: WIDTH, height: Number(process.env.HEIGHT || 1100) });
 const errors = [];
 page.on('console', (m) => { if (/error/i.test(m.type || '')) errors.push(m.text); });
+/* ── AN UNCAUGHT THROW IS NOT A console.error ──────────────────────────────
+   This listened for console messages and nothing else, so a page whose init
+   threw reported "no console errors" while half of it had never run. That is
+   what hid an empty Explore page for a run: two selects with no options, a
+   title with no text, and a harness saying everything was fine. */
+page.on('pageerror', (t) => errors.push('uncaught: ' + t));
 
 /* The page gates on `attune_admin_s`, read by window.adminApiSecret, and
    hides #admin-login-gate once signed in. Both are set before the first script
@@ -1203,13 +1276,17 @@ if (process.env.TAB) {
    be compared. */
 if (process.env.OPTS) {
   const ids = process.env.OPTS.split(',').map((x) => x.trim()).filter(Boolean);
+  if (process.env.OPTS_ALL) await page.evaluate(() => { window.__optsAll = true; });
   const got = await page.evaluate((list) => list.map((id) => {
     const el = document.getElementById(id);
     if (!el) return id + ': no such control';
     const opts = [...el.options];
     const real = opts.filter((o) => o.value && !o.disabled);
-    return id + ': ' + real.length + ' choices  [' + real.slice(0, 6).map((o) => o.value).join(' | ')
-      + (real.length > 6 ? ' | …' : '') + ']';
+    /* OPTS_ALL prints every value rather than the first six: a taxonomy is
+       only checkable if you can read the rows it produced. */
+    const show = window.__optsAll ? real : real.slice(0, 6);
+    return id + ': ' + real.length + ' choices  [' + show.map((o) => o.value).join(' | ')
+      + (show.length < real.length ? ' | …' : '') + ']';
   }), ids);
   for (const line of got) console.log('  opts ' + line);
 }
@@ -1279,40 +1356,124 @@ if (process.env.PICKER) {
     const out = await page.evaluate((selId) => {
       const sel = document.getElementById(selId);
       if (!sel) return { id: selId, err: 'no such select' };
-      const wrap = sel.closest('.fp');
+      const wrap = sel.closest('.sd');
       if (!wrap) return { id: selId, err: 'the select was never mounted in a picker' };
-      const btn = wrap.querySelector('.fp-btn');
+      const btn = wrap.querySelector('.sd-btn');
       if (!btn) return { id: selId, err: 'no button' };
+      const panel = wrap.querySelector('.sd-panel');
       const r = btn.getBoundingClientRect();
-      btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
-        clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
-      const panel = wrap.querySelector('.fp-panel');
-      const bands = [...panel.querySelectorAll('.fp-band')];
+      const hit = (el) => {
+        const b = el.getBoundingClientRect();
+        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+          clientX: Math.round(b.left + b.width / 2), clientY: Math.round(b.top + b.height / 2) }));
+      };
+      hit(btn);
+
+      const bands = [...panel.querySelectorAll('.sd-band')];
       /* The painted colour, not the declared one: a band whose background
          resolved to nothing is the bug she reported, a banner that is not
          there. */
       const colours = bands.map((b) => getComputedStyle(b).backgroundColor);
+      /* What the tree says, walked here rather than counted from the markup,
+         because only the top level is drawn at any moment. */
+      const leafVals = (nodes, out) => { (nodes || []).forEach((x) => { if (x.children) leafVals(x.children, out); else out.push(x.value); }); return out; };
+      const vals = leafVals(sel.__sliceTree, []);
+      const opts = [...sel.querySelectorAll('option')].map((o) => o.value);
+      /* Compared as sets rather than as counts, because the empty value is
+         legitimately in one and not the other: a slicer's "Everyone" row is
+         drawn by the picker and a field picker's "— none —" is a leaf. */
+      const inTree = new Set(vals), inSel = new Set(opts);
+      const sections = (sel.__sliceTree || []).filter((n) => n.children).length;
       const res = {
         id: selId,
         open: !panel.hidden,
         bands: bands.length,
-        groups: sel.querySelectorAll('optgroup').length,
-        opts: panel.querySelectorAll('.fp-opt').length,
-        selOpts: [...sel.querySelectorAll('option')].filter((o) => !o.disabled).length,
+        sections,
+        leaves: vals.length,
+        selOpts: opts.length,
+        /* A leaf nothing can select, and an option nothing offers. */
+        missing: vals.filter((v) => !inSel.has(v)).length,
+        extra: opts.filter((v) => v !== '' && !inTree.has(v)).length,
         flat: colours.filter((c) => !c || c === 'transparent' || c === 'rgba(0, 0, 0, 0)').length,
         /* Every band is its own colour, or two sections look like one. */
         distinct: new Set(colours).size,
         wide: bands.length ? Math.round(bands[0].getBoundingClientRect().width) : 0,
         panelWide: Math.round(panel.getBoundingClientRect().width),
-        btnText: (btn.textContent || '').replace(/\u25be/g, '').trim().slice(0, 40),
+        btnText: (btn.textContent || '').replace(/\u25be/g, '').trim().slice(0, 60),
       };
-      btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
-        clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
+
+      /* ── IT HAS TO GO SOMEWHERE AND COME BACK ────────────────────────
+         A panel that lists sections and does nothing when one is clicked is
+         the same failure as a band with no colour: it looks finished. */
+      if (bands.length) {
+        hit(bands[0]);
+        const back = panel.querySelector('.sd-back');
+        res.drilled = !!back && !!panel.querySelector('.sd-row:not(.sd-back)');
+        res.rowsInside = panel.querySelectorAll('.sd-row:not(.sd-back)').length;
+        res.crumb = (panel.querySelector('.sd-head') || {}).textContent || '';
+        if (back) { hit(back); res.wentBack = panel.querySelectorAll('.sd-band').length === bands.length; }
+      }
+      /* Her extra row, which only the field pickers have. */
+      res.allQuestions = (sel.__sliceTree || []).some((n) => (n.children || []).some((c) => c.label === 'All questions'));
+
+      hit(btn);
       res.closes = !!panel.hidden;
       return res;
     }, id);
     console.log('  picker ' + JSON.stringify(out));
   }
+}
+
+/* ── CUTTEST= ──────────────────────────────────────────────────────────────
+   Does a DERIVED cut actually cut, and does it cut only its own tile?
+
+   A regroup, a score band or an alignment either side of a line is not a
+   column, so it is a predicate held in the page rather than a value in a row.
+   Nothing about that is visible in the markup: a predicate that matches
+   everybody and a predicate that is never consulted both leave the tile
+   showing the whole population, and both look exactly like a working slicer.
+
+   So this picks the first derived cut a slicer offers, the way a person would,
+   and reads every tile's n before and after. */
+if (process.env.CUTTEST) {
+  const out = await page.evaluate((selId) => {
+    const sel = document.getElementById(selId);
+    if (!sel) return { err: 'no such select' };
+    const nOf = () => [...document.querySelectorAll('.page.active .chart-card')]
+      .map((c) => {
+        const sub = c.querySelector('.chart-subtitle');
+        const m = /n=(\d+)/.exec((sub && sub.textContent) || '');
+        return m ? Number(m[1]) : null;
+      });
+    const mine = [...document.querySelectorAll('.page.active .chart-card')].findIndex((c) => c.contains(sel));
+    const derived = [...sel.options].find((o) => o.value.indexOf('g::') === 0);
+    if (!derived) return { err: 'this slicer offers no derived cut at all' };
+    const before = nOf();
+    sel.value = derived.value;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    return { id: selId, mine, cut: derived.value, label: derived.textContent, before };
+  }, process.env.CUTTEST);
+  await new Promise((r) => setTimeout(r, 900));
+  /* ── MAKE THE OTHER TILES REDRAW ────────────────────────────────────────
+     A tile only reads a slicer when it renders, so a tile that reads the
+     WRONG slicer keeps its old number until something makes it draw again:
+     the first version of this plant-tested clean against exactly that bug,
+     because nothing on the page had re-rendered. Nudging every other slicer
+     with its own unchanged value is what a person does by touching anything
+     else on the page. */
+  await page.evaluate((selId) => {
+    [...document.querySelectorAll('.page.active .sd select')]
+      .filter((s) => s.id !== selId)
+      .forEach((s) => s.dispatchEvent(new Event('change', { bubbles: true })));
+  }, process.env.CUTTEST);
+  await new Promise((r) => setTimeout(r, 900));
+  const after = await page.evaluate(() => [...document.querySelectorAll('.page.active .chart-card')]
+    .map((c) => {
+      const sub = c.querySelector('.chart-subtitle');
+      const m = /n=(\d+)/.exec((sub && sub.textContent) || '');
+      return m ? Number(m[1]) : null;
+    }));
+  console.log('  cuttest ' + JSON.stringify({ ...out, after }));
 }
 
 if (process.env.SORTPROBE) {
@@ -1421,6 +1582,20 @@ if (process.env.READ) {
     }, id);
     console.log('  read #' + id + ': ' + out);
   }
+}
+
+/* ── TEXT= ─────────────────────────────────────────────────────────────────
+   The words at a CSS selector. Most of what the admin says about a tile is in
+   a subtitle with no id, so READ=, which takes ids, cannot reach it: "n=40"
+   against "n=12" is the only way to tell whether a cut actually cut. */
+if (process.env.TEXT) {
+  const sels = process.env.TEXT.split('|').map((x) => x.trim()).filter(Boolean);
+  const got = await page.evaluate((list) => list.map((q) => {
+    const els = [...document.querySelectorAll(q)].filter((e) => e.offsetParent !== null);
+    if (!els.length) return q + ': nothing visible matches';
+    return q + ': ' + els.slice(0, 6).map((e) => (e.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 70)).join('  |  ');
+  }), sels);
+  for (const line of got) console.log('  text ' + line);
 }
 
 /* ── SCROLL= ───────────────────────────────────────────────────────────────
