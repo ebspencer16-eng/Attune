@@ -11,6 +11,7 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 
 | Sweep | What it measures | What it found |
 |--|--|--|
+| sweep-unwritten-columns | every column api/ selects, against every column anything writes | Nothing, on its second scope. Its first looked for writes in api/ alone and reported six, all false: one is written by the website, one by Ellie in the SQL editor, and two through EXERCISE_COLUMNS, which is the registry blindness CLAUDE.md names |
 | sweep-fetch-routes | every literal /api path a surface calls, against the endpoints and the rewrites | Nothing. 126 paths across 134 files, all resolving, and the only wildcard rewrite does not touch /api |
 | sweep-page-console | every static page loaded in a browser, with a canary page that throws on purpose | One, and it is a deliberate noindex redirect shell. Its real value was pointing the id sweep at the pages that then gave up the sticky-bar bug |
 | sweep-silent-read-failures | every catch round a database or network read outside the admin | Nothing. 56 such catches, 10 with an empty body, and 9 of those 10 carry a written reason for being empty |

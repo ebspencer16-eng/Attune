@@ -1,228 +1,86 @@
-#!/usr/bin/env node
 /**
- * S41: a column the code selects that nothing ever writes.
+ * Every column the server READS, against every column the server WRITES.
  *
  * ── WHY ───────────────────────────────────────────────────────────────────
- * `profiles.feedback_given_at` has existed since migration 050 and no code
- * has ever set it. Two home cards were gated on `!state.feedbackGivenAt`, so
- * both would have asked for ever. The card looked correct in every reading of
- * the file that drew it, because the bug is not in the reader.
+ * `feedback_given_at` has existed since migration 050 and nothing ever set
+ * it, so both home cards gated on `!state.feedbackGivenAt` would have asked
+ * for ever. The condition looked correct in every reading of the file,
+ * because the bug is not in the reader.
  *
- * CLAUDE.md: "When a condition reads a column, grep for the write before
- * trusting it." This is that grep, over every column in every migration.
+ * It happened again: `profile_setup_complete` is read by api/home.js and the
+ * one function that wrote it sat in src/App.jsx with no caller.
  *
- * ── WHAT IS MEASURED ──────────────────────────────────────────────────────
- * For each column the migrations create:
+ * ── WHY THE FINDINGS NEED READING, NOT COUNTING ───────────────────────────
+ * A column can be written somewhere this cannot see: by a migration's
+ * backfill, by a database default, by a trigger, or by a surface outside
+ * api/. So a name here is a question, not a verdict. What makes the question
+ * worth asking is that the answer is usually one grep.
  *
- *   read   it is named in a PostgREST `select=` list or a `.select('...')`
- *   write  it is an object-literal key anywhere under api/, which is how a
- *          row is built for an insert, an update or an upsert here
- *
- * A finding is a column that is read and never written. Both halves are
- * string matches on shapes this codebase actually uses, which is the part
- * worth checking before believing a count.
- *
- * ── WHAT IT CANNOT SEE ────────────────────────────────────────────────────
- * A write performed in SQL by a migration or by a trigger. Those are listed
- * separately rather than counted as absent, because a column that a migration
- * backfills is written, just not by this code.
- *
- * A `select=*`. Three endpoints use one; they are named in the output, and a
- * column read only through a star is invisible to the read half here.
+ * The interesting ones are columns a CONDITION depends on, because an
+ * unwritten column read as a condition is a branch that can never be taken,
+ * and that is indistinguishable from the branch simply not applying yet.
  */
-
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const ROOT = new URL('../..', import.meta.url).pathname;
+/* ── WRITES HAPPEN IN FOUR PLACES, NOT ONE ────────────────────────────────
+   The first version read writes out of api/ alone and reported six columns,
+   every one of them a false positive. `ex3_completed` is written by
+   src/App.jsx when somebody finishes the exercise. `is_comp` is set by Ellie
+   in the SQL editor, which migration 028 says in its own header. And
+   `conflict_data` and `intimacy_data` are written through EXERCISE_COLUMNS,
+   which is the registry blindness CLAUDE.md already names: the literal never
+   appears because the column is reached through a list.
 
-/** Every column any migration creates, with the table it belongs to. */
-const columns = new Map();            // col -> Set(table)
-const sqlFiles = readdirSync(join(ROOT, 'supabase/migrations')).filter((f) => f.endsWith('.sql'));
-let sqlText = '';
-for (const f of sqlFiles) sqlText += '\n' + readFileSync(join(ROOT, 'supabase/migrations', f), 'utf8');
-
-const sql = sqlText.replace(/^\s*--[^\n]*/gm, ' ');
-
-/* add column [if not exists] <name> */
-for (const m of sql.matchAll(/add\s+column\s+(?:if\s+not\s+exists\s+)?([a-z_][a-z0-9_]*)/gi)) {
-  const col = m[1].toLowerCase();
-  const before = sql.slice(0, m.index);
-  const t = [...before.matchAll(/alter\s+table\s+(?:public\.)?([a-z_][a-z0-9_]*)/gi)].pop();
-  if (!columns.has(col)) columns.set(col, new Set());
-  columns.get(col).add(t ? t[1] : '?');
-}
-/* create table ( ... ) */
-for (const m of sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-z_][a-z0-9_]*)\s*\(([^;]*?)\)\s*;/gis)) {
-  const table = m[1];
-  for (const line of m[2].split('\n')) {
-    const c = /^\s*([a-z_][a-z0-9_]*)\s+(?:text|jsonb|json|uuid|boolean|bool|int|integer|bigint|numeric|timestamptz|timestamp|date|serial)/i.exec(line);
-    if (!c) continue;
-    const col = c[1].toLowerCase();
-    if (['primary', 'unique', 'constraint', 'foreign', 'check'].includes(col)) continue;
-    if (!columns.has(col)) columns.set(col, new Set());
-    columns.get(col).add(table);
-  }
+   So reads come from api/, which is the only place that queries, and writes
+   are looked for across the server, the website, the app and the migrations.
+   A column written by a human in the SQL editor is still written. */
+const files = [];
+const walk = (d, into) => { for (const e of readdirSync(d, { withFileTypes: true })) {
+  if (e.isDirectory()) walk(join(d, e.name), into);
+  else if (/\.(js|jsx|ts|tsx|sql)$/.test(e.name)) into.push(join(d, e.name)); } };
+walk('api', files);
+const writeFiles = [];
+for (const d of ['api', 'src', 'attune-app/src', 'supabase/migrations']) {
+  try { walk(d, writeFiles); } catch {}
 }
 
-/** Every source file that could read or write one. */
-const src = [];
-(function walk(dir) {
-  for (const name of readdirSync(dir)) {
-    if (name === 'node_modules' || name.startsWith('.')) continue;
-    const full = join(dir, name);
-    if (statSync(full).isDirectory()) walk(full);
-    else if (/\.(js|mjs|jsx|tsx?|html)$/.test(name)) src.push(full);
-  }
-})(join(ROOT, 'api'));
-for (const d of ['src', 'public', 'attune-app/src', 'scripts']) {
-  (function walk(dir) {
-    for (const name of readdirSync(dir)) {
-      if (name === 'node_modules' || name.startsWith('.')) continue;
-      const full = join(dir, name);
-      if (statSync(full).isDirectory()) walk(full);
-      else if (/\.(js|mjs|jsx|tsx?|html)$/.test(name)) src.push(full);
-    }
-  })(join(ROOT, d));
-}
+const read = new Map();      // column -> first file:line that selects it
+const written = new Set();
+const COL = /^[a-z][a-z0-9_]{3,}$/;
 
-const text = new Map();
-for (const f of src) text.set(f.replace(ROOT, ''), readFileSync(f, 'utf8'));
-
-const stars = [];
-for (const [rel, body] of text) {
-  if (/select=\*|\.select\(\s*['"`]\*/.test(body)) stars.push(rel);
-}
-
-const readIn = new Map();   // col -> [files]
-const writeIn = new Map();
-
-for (const [rel, body] of text) {
-  const code = body.replace(/\/\*[^]*?\*\//g, ' ').replace(/^\s*\/\/[^\n]*/gm, ' ');
-
-  /* Reads: every select list, as PostgREST writes them. */
-  const lists = [
-    ...[...code.matchAll(/select=([a-z0-9_,().:\s*]+)/gi)].map((m) => m[1]),
-    ...[...code.matchAll(/\.select\(\s*['"`]([^'"`]*)['"`]/g)].map((m) => m[1]),
-    ...[...code.matchAll(/[?&]order=([a-z0-9_.]+)/gi)].map((m) => m[1]),
-    ...[...code.matchAll(/([a-z_][a-z0-9_]*)=(?:eq|neq|gt|gte|lt|lte|is|in|not)\./gi)].map((m) => m[1]),
-  ];
-  /* ── AND A COLUMN LIST BUILT AS AN ARRAY ────────────────────────────
-     The first run said 61 columns were written and never read, and the first
-     one checked, `feedback_given_at`, is read by api/home.js. It is not in a
-     `select=` string: it is an element of a JavaScript array of column names
-     that is joined later. CLAUDE.md's own rule, pointed at this scan: when a
-     scanner looks for a string, ask what the indirection for that string is.
-     A bare quoted string equal to a column name is a read. */
-  for (const m of code.matchAll(/['"`]([a-z_][a-z0-9_]{3,})['"`]/g)) {
-    const col = m[1].toLowerCase();
-    if (!columns.has(col)) continue;
-    if (!readIn.has(col)) readIn.set(col, new Set());
-    readIn.get(col).add(rel);
-  }
-
-  for (const list of lists) {
-    for (const part of String(list).split(/[,()\s]+/)) {
-      const col = part.replace(/\..*$/, '').trim().toLowerCase();
-      if (!col || !columns.has(col)) continue;
-      if (!readIn.has(col)) readIn.set(col, new Set());
-      readIn.get(col).add(rel);
+for (const file of files) {
+  const src = readFileSync(file, 'utf8');
+  for (const m of src.matchAll(/\.select\(\s*(['"`])([^'"`]+)\1/g)) {
+    for (const raw of m[2].split(',')) {
+      const c = raw.trim().split(/[\s(]/)[0];
+      if (COL.test(c) && !read.has(c)) read.set(c, `${file}:${src.slice(0, m.index).split('\n').length}`);
     }
   }
+}
 
-  /* Writes: assigned onto a patch object. `patch.tz_offset_minutes = ...` is
-     a write and has no colon in it, which is why the first run reported that
-     column as read and never written while api/daily-push.js sets it. */
-  for (const m of code.matchAll(/\.\s*([a-z_][a-z0-9_]*)\s*=[^=]/g)) {
-    const col = m[1].toLowerCase();
-    if (!columns.has(col)) continue;
-    if (!writeIn.has(col)) writeIn.set(col, new Set());
-    writeIn.get(col).add(rel);
+for (const file of writeFiles) {
+  const src = readFileSync(file, 'utf8');
+  if (file.endsWith('.sql')) {
+    /* A migration writes a column by adding it with a default, by setting it,
+       or by naming it in an insert's column list. */
+    for (const m of src.matchAll(/(?:add column(?: if not exists)?|set|,)\s+([a-z][a-z0-9_]{3,})\s*(?:=|boolean|text|int|uuid|timestamptz|jsonb|numeric)/gi)) written.add(m[1].toLowerCase());
+    continue;
   }
-
-  /* Writes: the column as an object key, which is how every row is built. */
-  for (const m of code.matchAll(/(?:^|[{,\s])(?:'([a-z_][a-z0-9_]*)'|"([a-z_][a-z0-9_]*)"|([a-z_][a-z0-9_]*))\s*:/gm)) {
-    const col = (m[1] || m[2] || m[3] || '').toLowerCase();
-    if (!columns.has(col)) continue;
-    if (!writeIn.has(col)) writeIn.set(col, new Set());
-    writeIn.get(col).add(rel);
+  /* A key assigned in an object literal, anywhere in a file that writes. */
+  if (/\.(insert|update|upsert)\(|method:\s*['"](?:PATCH|POST)/.test(src)) {
+    for (const m of src.matchAll(/([a-z][a-z0-9_]{3,})\s*:/g)) written.add(m[1]);
   }
+  for (const m of src.matchAll(/[?&]([a-z][a-z0-9_]{3,})=/g)) written.add(m[1]);
+  /* Reached through a registry: EXERCISE_COLUMNS and friends list the column
+     names as plain strings and the write is a computed key. */
+  for (const m of src.matchAll(/['"]([a-z][a-z0-9_]{3,})['"]\s*[,\]]/g)) written.add(m[1]);
 }
 
-/**
- * ── AND THE WRITES THIS CODEBASE BUILDS BY NAME RATHER THAN BY KEY ───────
- * The first honest run listed twenty columns read and never written, and
- * nineteen were the matcher. This repository writes a column through a
- * computed key more often than it writes one literally:
- *
- *   updates[`${exercise}_completed_at`] = ...        api/save-exercise.js
- *   [`ex${exerciseNum}_progress`]: ...               src/App.jsx
- *   markSent(user.id, 'checkin_sent_at')             api/cron-checkin.js
- *   patch[DAILY_KINDS[kind]] = ...                   api/daily-push.js
- *
- * CLAUDE.md's own rule, pointed at this scan: when a scanner looks for a
- * string, ask what the indirection for that string is. So a column also
- * counts as possibly written when its name appears in a file that writes to
- * the table at all. That is weaker than a literal key and it is said out loud:
- * the two are reported separately, and only "never seen in a writing file" is
- * a finding.
- */
-const writesRows = new Set();
-for (const [rel, body] of text) {
-  if (/method:\s*['"`]PATCH['"`]|method:\s*['"`]POST['"`]|\.update\(|\.upsert\(|\.insert\(/.test(body)) writesRows.add(rel);
-}
-const maybeWritten = new Map();
-for (const [rel, body] of text) {
-  if (!writesRows.has(rel)) continue;
-  const code = body.replace(/\/\*[^]*?\*\//g, ' ').replace(/^\s*\/\/[^\n]*/gm, ' ');
-  for (const col of columns.keys()) {
-    if (writeIn.has(col)) continue;
-    /* The whole name, or its tail after a template hole: `${e}_completed_at`. */
-    const tail = col.replace(/^ex\d|^daily|^checkin/, '');
-    const re = new RegExp(`(['"\`\\$\\{}])${col}\\b|\\$\\{[^}]*\\}${tail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
-    if (!re.test(code)) continue;
-    if (!maybeWritten.has(col)) maybeWritten.set(col, new Set());
-    maybeWritten.get(col).add(rel);
-  }
-}
-
-/** Written by SQL rather than by this code: an update or an insert in a migration. */
-const sqlWritten = new Set();
-for (const col of columns.keys()) {
-  if (new RegExp(`set\\s+${col}\\s*=|insert\\s+into[^;]*\\b${col}\\b`, 'i').test(sql)) sqlWritten.add(col);
-}
-
-const readNeverWritten = [...columns.keys()]
-  .filter((c) => readIn.has(c) && !writeIn.has(c) && !maybeWritten.has(c) && !sqlWritten.has(c))
-  .sort();
-const readMaybeWritten = [...columns.keys()]
-  .filter((c) => readIn.has(c) && !writeIn.has(c) && (maybeWritten.has(c) || sqlWritten.has(c)))
-  .sort();
-const writtenNeverRead = [...columns.keys()]
-  .filter((c) => writeIn.has(c) && !readIn.has(c))
-  .sort();
-
-console.log(`[sweep-unwritten-columns] ${columns.size} columns across ${sqlFiles.length} migrations,`
-  + ` read in ${readIn.size}, written in ${writeIn.size}.\n`);
-
-console.log(`read, and named in no file that writes to a table: ${readNeverWritten.length}`);
-for (const c of readNeverWritten) {
-  const where = [...readIn.get(c)].slice(0, 3).join(', ');
-  console.log(`  ${c.padEnd(28)} on ${[...columns.get(c)].join('/')}`
-    + `${sqlWritten.has(c) ? '  [a migration writes it]' : ''}  read in ${where}`);
-}
-
-console.log(`\nread, with no literal key but named inside a file that writes: ${readMaybeWritten.length}`);
-for (const c of readMaybeWritten) {
-  const where = [...(maybeWritten.get(c) || new Set())].slice(0, 2).join(', ');
-  console.log(`  ${c.padEnd(28)} ${sqlWritten.has(c) ? '[a migration writes it] ' : ''}${where}`);
-}
-
-console.log(`\nwritten and never selected by name: ${writtenNeverRead.length}`);
-for (const c of writtenNeverRead.slice(0, 40)) {
-  console.log(`  ${c.padEnd(28)} on ${[...columns.get(c)].join('/')}`);
-}
-if (writtenNeverRead.length > 40) console.log(`  ... and ${writtenNeverRead.length - 40} more`);
-
-console.log(`\nfiles using select=*, where a read is invisible to this scan: ${stars.length}`);
-for (const s of stars) console.log('  ' + s);
+const unwritten = [...read.entries()].filter(([c]) => !written.has(c));
+console.log('[sweep-unwritten-columns]');
+console.log(`  ${read.size} distinct columns selected across ${files.length} files; `
+  + `${written.size} names appear as a written key across api/, src/, the app and the migrations.`);
+if (!unwritten.length) { console.log('  Every column read is written somewhere.'); process.exit(0); }
+console.log(`  ${unwritten.length} read and never written anywhere (each is a question, not a verdict):`);
+for (const [c, where] of unwritten.sort()) console.log(`    ${c.padEnd(30)} first selected at ${where}`);

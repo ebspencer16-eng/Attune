@@ -314,7 +314,6 @@ const USER_LOCALSTORAGE_KEYS = [
   'attune_intimacy', 'attune_intimacy_progress',
   'attune_workbook_ready', 'attune_workbook_blob',
   'attune_workbook_print_queued',
-  'attune_profile_setup_done',
   'attune_results_email_sent', 'attune_stay_subscribed',
   'attune_results_state', 'attune_couple_type_saved',
   'attune_post_survey_done', 'attune_survey_done', 'attune_survey_dismissed',
@@ -10453,7 +10452,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       if (sk.theirsSkipped && !sk.mineSkipped) return partnerName;
       return null;
     };
-    const proseFor = (dimId, state) => sub(INTIMACY_RESULTS_PROSE[dimId]?.[state] || INTIMACY_RESULTS_PROSE[dimId]?.discuss || "");
+    
     const alignedCount = dims.filter(d => d.state === "aligned").length;
     const exploreCount = dims.filter(d => d.state === "discuss" || d.state === "different").length;
     const dimIds = INTIMACY_DIMENSIONS.map(d => d.id);
@@ -10779,9 +10778,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         fontFamily: BFONT, fontWeight: 600, marginRight: "0.4rem", marginBottom: "0.4rem" }}>{children}</span>
     );
 
-    const chipsFor = (ans) => ['c1', 'c2', 'c_topic']
-      .map(id => OPENING_CHIPS[id]?.[ans?.[id]])
-      .filter(Boolean);
+    
 
     // The four bars. Colour tracks the band rather than the pattern, so the
     // page reads at a glance without needing to know which is which.
@@ -11081,30 +11078,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   }
 
   if (section === "what-comes-next") {
-    const NavActionLink = ({ onClick, bg, border, icon, title, sub, accentColor }) => {
-      const iconSvgs = {
-        "💬": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/></svg>,
-        "comm": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/></svg>,
-        "📋": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>,
-        "💚": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
-        "✅": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>,
-        "💰": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
-        "🧠": <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.04-4.69A2.5 2.5 0 0 1 5 12a2.5 2.5 0 0 1 2-2.45V4.5A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.04-4.69A2.5 2.5 0 0 0 19 12a2.5 2.5 0 0 0-2-2.45V4.5A2.5 2.5 0 0 0 14.5 2z"/></svg>,
-      };
-      return (
-      <button onClick={onClick}
-        style={{ display: "flex", alignItems: "center", gap: "1rem", background: bg, border, borderRadius: 14, padding: "1rem 1.25rem", cursor: "pointer", textAlign: "left", width: "100%" }}>
-        <div style={{ width: 36, height: 36, borderRadius: 10, background: accentColor + "22", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          {iconSvgs[icon] || <div style={{ width: 10, height: 10, borderRadius: "50%", background: accentColor }} />}
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>{title}</div>
-          <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT }}>{sub}</div>
-        </div>
-        <span style={{ color: accentColor, fontSize: "1rem", flexShrink: 0 }}>→</span>
-      </button>
-      );
-    };
+    
     return (
       <ResultsLayout {...shell} accent="#E8673A">
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
@@ -14579,9 +14553,7 @@ export default function App() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const handleInstall = () => {
-    if (pwaPrompt) { pwaPrompt.prompt(); pwaPrompt.userChoice.then(() => setPwaPrompt(null)); }
-  };
+  
 
   // ── "Get the app" banner ────────────────────────────────────────────────
   // Shown on the portal to signed-in people on a phone. Dismissal is
@@ -14601,9 +14573,7 @@ export default function App() {
       return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     } catch { return false; }
   })();
-  const _isIOS = (() => {
-    try { return /iPad|iPhone|iPod/.test(navigator.userAgent); } catch { return false; }
-  })();
+  
   const params = new URLSearchParams(window.location.search);
   // The dashboard renders only for a logged-in account. Demo mode has none, so
   // defaulting a demo link to "home" produced a blank page. Send demo straight
@@ -14723,20 +14693,11 @@ export default function App() {
 
   const isLoggedIn = !!account;
   const profileComplete = !!(account?.name && account?.partnerName);
-  // Per-person profile setup: has the user completed the onboarding tile?
-  const [profileSetupDone, setProfileSetupDone] = useState(() => {
-    try { return localStorage.getItem('attune_profile_setup_done') === '1'; } catch { return false; }
-  });
-  const completeProfileSetup = () => {
-    setProfileSetupDone(true);
-    try { localStorage.setItem('attune_profile_setup_done', '1'); } catch {}
-    // Persist to Supabase
-    if (account?.id) {
-      import('./supabase.js').then(({ supabase: sb, hasSupabase }) => {
-        if (hasSupabase()) sb.from('profiles').update({ profile_setup_complete: true }).eq('id', account.id).catch(() => {});
-      }).catch(() => {});
-    }
-  };
+  /* The profile-setup state was here, with the modal that set it. Nothing
+     read it: the one place that did was the modal's own writer, which had no
+     caller. Whether a profile is finished is the server's answer now, from
+     the fields themselves. */
+  
 
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
@@ -15895,7 +15856,6 @@ export default function App() {
               // sign-out. Else-remove so a second account cannot inherit them.
               if (profile?.conflict_data)      { localStorage.setItem('attune_conflict', JSON.stringify(profile.conflict_data)); setConflictData(profile.conflict_data); }
               else if (read.ok)                { localStorage.removeItem('attune_conflict'); setConflictData(null); }
-              if (profile?.profile_setup_complete) localStorage.setItem('attune_profile_setup_done', '1');
               // Invitee (Partner B) completion marker. Routing keys off
               // attune_partner_session; without it, an invitee who finished on
               // another device (or after clearing local data) gets routed back
@@ -17158,7 +17118,7 @@ export default function App() {
   const ex1InProgress = !ex1Answers && _hasProgress('attune_ex1_progress', p => Object.keys(p.answers || {}).length > 0);
   const ex2InProgress = !ex2Answers && _hasProgress('attune_ex2_progress', p => p.phase && p.phase !== 'intro');
   const ex3InProgress = !ex3Answers && _hasProgress('attune_ex3_progress', p => Object.keys(p.answers || {}).length > 0);
-  const inProgressFor = (viewId) => viewId === 'exercise1' ? ex1InProgress : viewId === 'exercise2' ? ex2InProgress : viewId === 'exercise3' ? ex3InProgress : false;
+  
 
   /**
    * How far through an exercise someone is, as the app shows it.

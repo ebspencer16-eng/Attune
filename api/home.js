@@ -167,7 +167,7 @@ export default async function handler(req) {
          one describing the bug it was written about. */
       ...DEMOGRAPHIC_COLUMNS,
       'email',
-      'budget_data', 'checklist_data', 'profile_setup_complete',
+      'budget_data', 'checklist_data',
       'results_last_opened_at', 'partner_nudged_at', 'feedback_given_at',
     ].join(',');
 
@@ -548,14 +548,23 @@ export default async function handler(req) {
        * can finish this form in one click without telling us anything, and the
        * product can still tell them apart from somebody who never looked.
        *
-       * `profile_setup_complete` stays as an OR so nobody who already passed
-       * starts failing. It is written by one website modal and false for most
-       * accounts, which is why it cannot be the test on its own.
+       * `profile_setup_complete` is gone from this rule. It was an OR term,
+       * there so nobody who had passed the old website modal started failing,
+       * and that modal is gone: its writer sat in src/App.jsx with no caller
+       * until a sweep for dead functions found it, so the column is now one
+       * nothing can set. check-prompt-state-written exists for exactly that
+       * and failed the moment the dead writer went, which is the gate doing
+       * its job.
+       *
+       * The rule is the field test, which is what Ellie approved as S80:
+       * "Profile complete now means both names, pronouns and the five
+       * questions." An account that passed the old modal and still has a
+       * blank field will now be asked to finish it, which is what that
+       * change was for.
        */
-      profileComplete: !!me.profile_setup_complete
-        || (!!(me.name || '').trim() && !!(me.partner_name || '').trim()
-            && !!(me.pronouns || '').trim()
-            && DEMOGRAPHIC_COLUMNS.every((c) => !!(me[c] || '').trim())),
+      profileComplete: !!(me.name || '').trim() && !!(me.partner_name || '').trim()
+        && !!(me.pronouns || '').trim()
+        && DEMOGRAPHIC_COLUMNS.every((c) => !!(me[c] || '').trim()),
       profileMissing: [
         !(me.name || '').trim() && 'your name',
         !(me.partner_name || '').trim() && "your partner's name",
