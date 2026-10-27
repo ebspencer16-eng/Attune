@@ -10,8 +10,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A60 | **Likely cause: the admin excludes demo accounts, and your own may be one.** 095 below tells the three possibilities apart in one table and names any demo account that has a survey row. Read only. |
-| A64 | **I drew Engagement against a full set of data and every tile works.** The funnel, the visits line, all five time charts, the detailed picker. Every one is gated on `page_events` having rows, so with none the page is a column of grey boxes, which is what "isn't readable" looks like. 096 below says which it is. A rebuild cannot fix missing data. |
+| A60 | **095 is run: paste me the table.** It says whether the survey row is missing, unjoinable, or being excluded as a demo account. I cannot act on it without seeing which. |
+| A64 | **096 is run: paste me that table too.** It says whether `page_events` has any rows. If it does and Engagement still looks wrong, tell me what you see and I will chase it. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -22,50 +22,6 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### A41 — your two design questions
-
-**"Where are people worst at self-evaluation" and "where are partners worst at
-evaluating the other's placement": yes, those are the same number.**
-
-For one dimension and one couple there is one distance: how you rated yourself
-against how your partner rated you. Calling that "you misjudge yourself" or
-"they misread you" is an attribution the data cannot settle, because nobody
-here is objectively right. Two tiles would show one figure twice with two
-captions, and one of the captions would be telling a customer they are wrong
-about themselves.
-
-What is genuinely two different things, and worth both tiles:
-
-- **Where couples differ most.** Your answer against their answer, averaged per
-  dimension. A real difference.
-- **Where couples misread each other most.** Your answer against their reading
-  of you. A difference in perception.
-
-Those come apart, and the gap between them is the interesting part. A dimension
-can carry a big real difference that both people see clearly, which is fine. Or
-a small one that neither sees, which is not. So the fourth tile I would build
-is **the share of couples whose widest gap is one neither of them has noticed**:
-large real difference and large misread at the same time. That is the number
-that tells you something to act on rather than something to look at.
-
-**Expected versus experienced: you were right that it needs care, and it does
-not need pronouns.**
-
-The two answers are stored on different axes. What you experienced is which of
-*your own two childhood adults* did a thing. What you expect is whether *you or
-your partner* will. "Mum did it" cannot be turned into "me" or "my partner"
-without deciding who somebody identifies with, which is exactly the inference
-this product should not make.
-
-What compares cleanly is the **shape** of the arrangement, which both answers
-carry: shared between two people, done by one, or nobody. So the visual is, per
-responsibility, how many people grew up with one person doing it and expect to
-share it, how many grew up with it shared and expect one person to own it, and
-how many expect what they saw.
-
-That answers your question, "instances of expecting something different than
-you experienced", with no guessing about anybody's gender. Say go and I will
-build it.
 
 ---
 
@@ -82,144 +38,6 @@ build it.
 
 ---
 
-### Two to run
-
-**This goes in the Supabase SQL Editor, not Terminal.** Open Supabase, click SQL
-Editor, paste the block, click Run.
-
-**A60.** It writes nothing. It answers whether the survey row is missing,
-unjoinable, or being excluded because the person is marked as a demo account,
-and it names any demo account that has one.
-
-<!-- SQL 095_survey_visibility.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 095: why the admin shows no survey responses. READ ONLY. Writes nothing.
---
--- Ellie: "There should be some survey responses, I know I completed it at
--- least."
---
--- There are three ways a completed survey can be invisible in the admin, and
--- they want different fixes, so this tells them apart rather than guessing.
---
---   1. The row is not there. The survey did not save.
---   2. The row is there and has no respondent_id, so nothing can join it to a
---      person and every chart about it is empty.
---   3. The row is there, joins fine, and the person is a demo account. Every
---      admin figure excludes demo accounts on purpose, so this would be the
---      admin working correctly and surprising her. If it is her own account
---      that is marked as a demo, that is the whole answer.
---
--- Run in the Supabase SQL Editor and click Run. One table comes back.
--- ============================================================================
-
-select 'total survey rows'                        as question,
-       count(*)::text                             as answer
-  from public.survey_responses
-union all
-select 'finished (completed_at set)',
-       count(*) filter (where completed_at is not null)::text
-  from public.survey_responses
-union all
-select 'rows with no respondent_id, so unjoinable',
-       count(*) filter (where respondent_id is null)::text
-  from public.survey_responses
-union all
-select 'rows whose respondent has no profile row',
-       count(*)::text
-  from public.survey_responses s
-  left join public.profiles p on p.id = s.respondent_id
- where s.respondent_id is not null and p.id is null
-union all
-select 'rows EXCLUDED because the person is a demo account',
-       count(*)::text
-  from public.survey_responses s
-  join public.profiles p on p.id = s.respondent_id
- where coalesce(p.is_demo, false) = true
-union all
-select 'rows the admin should therefore be showing',
-       count(*)::text
-  from public.survey_responses s
-  join public.profiles p on p.id = s.respondent_id
- where coalesce(p.is_demo, false) = false
-union all
--- Who they are, so she can see whether her own account is one of the demos.
-select 'demo accounts with a survey row: ' || coalesce(u.email, '(no email)'),
-       'is_demo = true'
-  from public.survey_responses s
-  join public.profiles p on p.id = s.respondent_id
-  join auth.users u on u.id = p.id
- where coalesce(p.is_demo, false) = true;
-```
-<!-- /SQL -->
-
-**A64.** This writes nothing either. It says whether `page_events` has any rows,
-how recent they are, and which kinds are being written, so an empty Engagement
-page can be told from a broken one.
-
-<!-- SQL 096_engagement_data.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 096: is the Engagement page empty because it is broken, or because nothing
--- has been recorded? READ ONLY. Writes nothing.
---
--- Ellie: "Go on to this page and rebuild in the way you think makes the most
--- sense, Currently a lot of it isn't readable."
---
--- Before rebuilding it I drew the page against a full set of made-up data and
--- every tile on it worked: the funnel, the visits line, all five time-per-page
--- charts and the detailed pages picker. So the page is not broken.
---
--- Every one of those tiles is gated on one thing: `page_events` having any
--- rows at all. With none, each tile says "Nothing recorded yet" and the page
--- is a column of grey boxes, which is exactly what "a lot of it isn't
--- readable" would look like. A rebuild cannot fix that; only data can.
---
--- This says which it is, and if there IS data, where it stops.
---
--- Run in the Supabase SQL Editor and click Run. One table comes back.
--- ============================================================================
-
-select 'page_events rows in total'                        as question,
-       count(*)::text                                     as answer
-  from public.page_events
-union all
-select 'rows in the last 30 days (what the page shows)',
-       count(*) filter (where created_at > now() - interval '30 days')::text
-  from public.page_events
-union all
-select 'rows in the 30 days before that (the comparison)',
-       count(*) filter (where created_at > now() - interval '60 days'
-                          and created_at <= now() - interval '30 days')::text
-  from public.page_events
-union all
-select 'distinct kinds of event recorded',
-       count(distinct kind)::text
-  from public.page_events
-union all
-select 'page_time rows, which every time-per-page chart needs',
-       count(*) filter (where kind = 'page_time')::text
-  from public.page_events
-union all
-select 'rows with no owner, counted as anonymous visits',
-       count(*) filter (where owner_id is null)::text
-  from public.page_events
-union all
--- The most recent event, so "nothing is being recorded any more" can be told
--- from "nothing ever was".
-select 'most recent event',
-       coalesce(to_char(max(created_at), 'YYYY-MM-DD HH24:MI'), 'never')
-  from public.page_events
-union all
--- And what is being recorded, so a chart drawing nothing can be matched to a
--- key nobody writes.
-select 'kind: ' || kind,
-       count(*)::text
-  from public.page_events
- group by kind
- order by question;
-```
-<!-- /SQL -->
 
 ---
 
@@ -227,8 +45,6 @@ select 'kind: ' || kind,
 
 | # | What I am doing |
 |--|--|
-| A66 | **The ghost tile needs its own colour and a gap under it.** The shell is the page ground, so it reads as nothing. A shade off the background and a buffer before the next tile, everywhere a shell is used: Dashboard, Order Details, Package Mix, Comms, Expectations, Rel Reflection. |
-| A65 | **2000 seconds on app highlights looks wrong and I am treating it as a bug until proven otherwise.** Checking what the clock actually measures, whether it stops on background, and whether two surfaces write the same key. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -282,6 +98,8 @@ section 3 explaining things, just include the context I need in section 3."
 | A62 | **A chart above the count, with its type chosen from the shape of the cut**, and the tile says why in words. Dropdown to override. It refuses to draw averages across two fields as a trend, and refuses past 40 cells. |
 | A63 | **Seven coloured sections in the row and column pickers**, each with a high-level half and every question under it. The slicers use the same sections and the high-level half only, one row per option, with the field name above its options. |
 | A69 | **Explore defaulted to nothing if one group were renamed.** It looked for a group starting "Ex1" and did nothing when there was none, so the page opened on "— none —" and read as broken. Falls back to the first field now. |
+| A66 | **Every page with top tiles is in the shaded shell now.** Engagement was the last one loose on the background; its heading and slicer moved into the shell head where every other page keeps them. |
+| A65 | **The screen-time fix is published.** It was committed after the last update, so your phone still had the old clock. Two launches to pick it up: the first downloads, the second runs it. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
