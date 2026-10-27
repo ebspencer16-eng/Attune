@@ -140,7 +140,7 @@ export default function Survey({ onDone }: { onDone: () => void }) {
             marginTop: Spacing.xl, backgroundColor: c.textStrong, borderRadius: Radius.md,
             paddingVertical: Spacing.md, alignItems: 'center',
           }}>
-          <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>Done</Text>
+          <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>{form.copy.thanksAction ?? 'Back to dashboard'}</Text>
         </Pressable>
       </View>
     );

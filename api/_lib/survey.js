@@ -60,6 +60,11 @@ export const SURVEY_COPY = {
   submitting: 'Sending',
   thanksTitle: 'Thank you',
   thanks: 'Your feedback helps us shape the Attune experience!',
+  /* Ellie: "After I finish, the completion screen should have a 'back to
+     dashboard' button." It had one and it said "Done", which does not say
+     where it goes. Her words, and here rather than in the component so an
+     edit of hers reaches it. */
+  thanksAction: 'Back to dashboard',
   saved: 'Saved',
 };
 

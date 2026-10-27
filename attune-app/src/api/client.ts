@@ -1908,7 +1908,7 @@ export type SurveyForm = {
   finished?: boolean;
   copy: {
     title: string; submit: string; submitting: string;
-    thanksTitle: string; thanks: string; saved: string;
+    thanksTitle: string; thanks: string; thanksAction?: string; saved: string;
   };
   notice: string;
   questions: SurveyQuestion[];

@@ -1401,7 +1401,19 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
                  which measure this is, because the word on its own cannot. -->
             <div class="chart-subtitle">Across the couples who have both halves &middot; aligned here means their expectations answers are close, not the communication figure on the dashboard</div>
           </div>
-          <select class="tile-slicer" id="slz-expsum" title="Cut this tile by a segment" aria-label="Slz expsum"><option value="">Everyone</option></select>
+          <!-- Ellie: "Timeframe slicer missing from expectations at a glance."
+               The same pair Communication carries, in the same order. -->
+          <div class="tile-slicers">
+            <select class="tile-slicer" id="slz-expsum-period" title="Limit this tile to a period" aria-label="Period">
+              <option value="">All time</option>
+              <option value="365">Past 12 months</option>
+              <option value="182">Past 6 months</option>
+              <option value="90">Past 90 days</option>
+              <option value="30">Past month</option>
+              <option value="7">Past week</option>
+            </select>
+            <select class="tile-slicer" id="slz-expsum" title="Cut this tile by a segment" aria-label="Slz expsum"><option value="">Everyone</option></select>
+          </div>
         </div>
         <div class="chart-body">
           <div class="kpi-grid" id="expsum-tiles" style="grid-template-columns:repeat(4,1fr);margin:0;">
@@ -3624,15 +3636,12 @@ async function renderPromosPage(force) {
   // Add-on attachment by package: % of each package's orders carrying each add-on
   const pkgs = ['core', 'newlywed', 'anniversary', 'premium'];
   const pkgLabels = { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' };
-  const addons = [
-    { key: o => !!o.addon_workbook, label: 'Workbook',   color: '#5C6DDA' },
-    { key: o => !!o.addon_reflection, label: 'Reflection', color: '#F4B860' },
-    { key: o => !!o.addon_budget,   label: 'Budget',     color: '#E36BAE' },
-    { key: o => !!o.addon_intimacy, label: 'Intimacy',   color: '#B5546E' },
-  ];
-  const byPkg = {};
-  pkgs.forEach(k => { byPkg[k] = orders.filter(o => o.pkg_key === k); });
-  const presentPkgs = pkgs.filter(k => byPkg[k].length > 0);
+  /* A second copy of the add-on list, its package grouping and its
+     present-packages filter stood here, read by nothing: the attachment chart
+     moved to renderAddonAttachment and this half was left behind, the same
+     way the discount buckets were. Two lists of what a package can carry is
+     how one of them ends up missing Conflict Patterns, which both of these
+     did. */
   // Code usage table: most used to least used. Configured uses = beta_codes
   // counter; orders matched = real order rows carrying the code; revenue =
   // sum of those orders' totals.
@@ -4410,6 +4419,7 @@ function showPage(id) {
   if (id==='feedback') renderFeedback();
   if (id==='testimonials') renderTestimonials();
   if (id==='types') loadTypesData();
+  if (id==='responses') resetResponsesTab();
   if (id==='beta-codes') loadBetaCodes();
   /* 'promos' is not a page any more: Order Details draws everything it held,
      and showPage('orders') calls renderPromosPage itself. */
@@ -5206,6 +5216,27 @@ async function renderTestimonials() {
  * anything without disappearing, and a sixth tab works by carrying the class
  * rather than by being named correctly.
  */
+/**
+ * Put the Responses page back on its first tab.
+ *
+ * Ellie: "I was in conflict patterns then went somewhere else, it should
+ * bring me back to comms when I navigate back but it left me in comms."
+ *
+ * The two halves of that sentence disagree and the code settles it: setTab
+ * only toggles display and nothing reset it, so leaving the page and coming
+ * back left her on Conflict Patterns. Resetting is also what she asked for
+ * and approved one page over, on Explore: "the cut, the filters and the
+ * measure used to survive leaving, so a filter set twenty minutes ago was
+ * still on and every figure was about a subset you had forgotten choosing."
+ * The same argument applies to a tab.
+ */
+function resetResponsesTab() {
+  const page = document.getElementById('page-responses');
+  if (!page) return;
+  const first = page.querySelector('.tabs .tab');
+  if (first) first.click();
+}
+
 function setTab(el, targetId) {
   el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
@@ -5875,11 +5906,25 @@ function renderAddonAttachment() {
   if (!canvas || typeof Chart === 'undefined') return;
   const pkgs = ['core', 'newlywed', 'anniversary', 'premium'];
   const pkgLabels = { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' };
+  /* ── ALL SIX, IN HER ORDER, AND COLOURED BY WHAT THEY ARE ─────────────
+     Ellie: "Reorder add-on category list, should be Reflection, Intimacy,
+     Conflict, Workbook, Budget, Checklist." And: "Make the 3 exercise columns
+     in the add-on attachment chart hues of blue/indigo and make the 3
+     resources different colors."
+
+     Her order is the three exercises and then the three resources, which is
+     what the colours now say as well. Two of the six were missing entirely:
+     Conflict Patterns is a $40 exercise and the Merging Lives Checklist is a
+     resource, and neither appeared in a chart about which add-ons attach to
+     which package. api/_lib/order-addons.js has listed all six the whole
+     time; this was a hand-typed four beside it. */
   const addons = [
-    { key: o => !!o.addon_workbook,   label: 'Workbook',   color: '#5C6DDA' },
-    { key: o => !!o.addon_reflection, label: 'Reflection', color: '#F4B860' },
-    { key: o => !!o.addon_budget,     label: 'Budget',     color: '#E36BAE' },
-    { key: o => !!o.addon_intimacy,   label: 'Intimacy',   color: '#B5546E' },
+    { key: o => !!o.addon_reflection, label: 'Reflection', color: '#2E3FA8' },
+    { key: o => !!o.addon_intimacy,   label: 'Intimacy',   color: '#5C6DDA' },
+    { key: o => !!o.addon_conflict,   label: 'Conflict',   color: '#8E9BEA' },
+    { key: o => !!o.addon_workbook,   label: 'Workbook',   color: '#C55329' },
+    { key: o => !!o.addon_budget,     label: 'Budget',     color: '#E5578C' },
+    { key: o => !!o.addon_checklist,  label: 'Checklist',  color: '#34D399' },
   ];
   const src = (typeof ORDERS !== 'undefined' ? ORDERS : []);
   const byPkg = {}; pkgs.forEach(k => { byPkg[k] = src.filter(o => (o._raw?.pkg_key || o.pkgKey) === k); });
@@ -6211,8 +6256,27 @@ function renderSortableTable(id, cols, rows, opts) {
       if (av == null && bv == null) return 0;
       if (av == null) return 1;
       if (bv == null) return -1;
-      const r = typeof av === 'number' && typeof bv === 'number'
-        ? av - bv : String(av).localeCompare(String(bv), 'en', { numeric: true });
+      /* ── A DATE IS NOT A NUMBER, AND typeof SAYS SO ────────────────────
+         Ellie: "Just sorted the order column by date and it seems wrong."
+
+         It was. The Date column's sort key returns a Date OBJECT, and
+         `typeof aDate` is 'object', so this fell through to comparing
+         String(date) with localeCompare: "Fri Oct 02 2026..." against "Mon
+         Sep 28 2026...". That sorts by the WEEKDAY NAME, alphabetically, Fri
+         Mon Sat Sun Thu Tue Wed. Every row was in a strict, repeatable,
+         meaningless order, which is the kind of wrong that looks like a bug
+         in the data rather than in the sort.
+
+         Anything that carries a number inside it is compared as that number.
+         A Date is the case that bit, and it is not the only object whose
+         ordering is numeric. */
+      const num = (v) => (v instanceof Date ? v.getTime()
+        : typeof v === 'number' ? v
+        : (v && typeof v.valueOf === 'function' && typeof v.valueOf() === 'number') ? v.valueOf()
+        : null);
+      const an = num(av), bn = num(bv);
+      const r = an != null && bn != null
+        ? an - bn : String(av).localeCompare(String(bv), 'en', { numeric: true });
       return r * st.dir;
     });
   }
@@ -6763,12 +6827,27 @@ async function renderExpSummary() {
   const data = await fetchAdminData();
   const sel = document.getElementById('slz-expsum');
   await wireSummarySlicer('slz-expsum', renderExpSummary);
+  /* The period control. Each couple's distances now carry `at`, the later of
+     the two partners' Expectations completion dates, because a dropdown that
+     changes nothing is worse than no dropdown. A row with no date is left in
+     whatever the period: dropping it would quietly shrink the denominator. */
+  const per = document.getElementById('slz-expsum-period');
+  if (per && !per.dataset.wired) {
+    per.dataset.wired = '1';
+    per.onchange = () => { per.classList.toggle('on', !!per.value); renderExpSummary(); };
+  }
+  if (per) per.classList.toggle('on', !!per.value);
+  const days = per && per.value ? Number(per.value) : 0;
   /* One bundle, read once, so the four tiles cannot end up describing two
      different populations: the distances and the threshold have to come from
      the same cut or the "aligned" and "misaligned" groups are split by a line
      computed somewhere else. */
   const bundle = respSegOf(data, sel ? sel.value : '');
-  const couples = Array.isArray(bundle.expCoupleDistances) ? bundle.expCoupleDistances : [];
+  const couplesAll = Array.isArray(bundle.expCoupleDistances) ? bundle.expCoupleDistances : [];
+  const since = days ? Date.now() - days * 86400000 : 0;
+  const couples = since
+    ? couplesAll.filter(c => !c.at || Date.parse(c.at) >= since)
+    : couplesAll;
   setTileN(host, couples.length);
 
   const mean = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
@@ -7810,7 +7889,15 @@ function ensureQxTooltip(){
 async function renderSelfPartnerGap(containerId){
   const el=document.getElementById(containerId); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
-  const rows=cube.rows||[];
+  /* ── ITS OWN SLICER ────────────────────────────────────────────────────
+     Ellie: "Self v partner view gap missing slicer." Every other tile on this
+     page carries one; this tile builds its own head rather than using a
+     chart-head, which is why it never got one. The select lives in the head
+     string below and is wired after the tile is written, because writing the
+     tile replaces the element the handler was on. */
+  const sel = document.getElementById('slz-svp');
+  const cut = sel ? sel.value : '';
+  const rows = sliceFilter(cube.rows || [], cut);
   // Part 2 of the comms exercise asks every question about the partner, so the
   // partner-view score exists for all ten dimensions as pvdim_<dim>. The old
   // four dimension-level pv_<dim> fields are gone, as is the stress dimension.
@@ -7826,7 +7913,7 @@ async function renderSelfPartnerGap(containerId){
     return { l:LBL[dim], gap: n?sum/n:null, n };
   });
   const withData=stats.filter(x=>x.n>0);
-  const head='<div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:0 0 .3rem;">Self vs partner-view gap</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:.8rem;">Average distance between how people rate themselves and how their partner rates them, per dimension (0\u20134 scale). Largest first.</div>';
+  const head='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;"><div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:0 0 .3rem;">Self vs partner-view gap</div><select class="tile-slicer" id="slz-svp" title="Cut this tile by a segment" aria-label="Slz svp"><option value="">Everyone</option></select></div><div style="font-size:.7rem;color:var(--muted);margin-bottom:.8rem;">Average distance between how people rate themselves and how their partner rates them, per dimension (0\u20134 scale). Largest first.</div>';
   const card=(inner)=>'<div class="chart-card" style="padding:1.1rem 1.25rem;margin-bottom:1rem;">'+head+inner+'</div>';
   if(!withData.length){ el.innerHTML=card('<div style="color:var(--dim);font-size:.78rem;padding:.5rem 0;line-height:1.6;">No partner-view answers yet. This fills in as couples complete the updated communication exercise.</div>'); return; }
   // A column chart rather than ten stacked HTML rows: same information, a
@@ -7836,6 +7923,17 @@ async function renderSelfPartnerGap(containerId){
   const peak = Math.max(...sorted.map(x => x.gap), 0.2);
   const yMax = Math.ceil(peak * 4) / 4;  // nearest 0.25 above the largest gap
   el.innerHTML = card('<div style="height:170px"><canvas id="' + containerId + '-canvas"></canvas></div>');
+  /* The select is inside the markup just written, so the old element is gone:
+     find it again, fill it, and re-render on a change. */
+  {
+    const sv = document.getElementById('slz-svp');
+    if (sv) {
+      sv.value = cut;
+      sv.classList.toggle('on', !!cut);
+      try { populateSlicer(sv, null, cube.rows || [], RESP_SLICE_DIMS); } catch (e) {}
+      sv.onchange = () => renderSelfPartnerGap(containerId);
+    }
+  }
   const cv = document.getElementById(containerId + '-canvas');
   mkChart(cv, {
     type: 'bar',

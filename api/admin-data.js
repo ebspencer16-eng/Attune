@@ -252,9 +252,17 @@ function buildResponseAggregates(profiles, sessions) {
        than contributing a zero that would read as perfect agreement. */
     if (!respD.length && !lifeD.length) return;
     const mean = (arr) => arr.length ? arr.reduce((x, y) => x + y, 0) / arr.length : null;
+    /* ── WHEN, SO A PERIOD CAN MEAN SOMETHING ──────────────────────────
+       Ellie: "Timeframe slicer missing from expectations at a glance." These
+       rows carried no date, so a period control over them would have been a
+       dropdown that changed nothing, which is worse than not having one. The
+       later of the two partners is when the COUPLE finished, since a couple's
+       distance does not exist until both halves are in. */
+    const at = [a.ex2_completed_at, b.ex2_completed_at].filter(Boolean).sort();
     expCoupleDistances.push({
       life: lifeD.length ? Number(mean(lifeD).toFixed(4)) : null,
       resp: respD.length ? Number(mean(respD).toFixed(4)) : null,
+      at: at.length ? at[at.length - 1] : null,
     });
   });
 
@@ -650,7 +658,7 @@ export default async function handler(req) {
     const [ordersQ, codesQ, profQ, psQ] = await Promise.all([
       admin.from('orders').select('*').order('created_at', { ascending: false }).limit(1000),
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
-      selectProfiles(admin, (q) => q.select('id, partner_profile_id, invite_code, name, partner_name, age_range, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data')),
+      selectProfiles(admin, (q) => q.select('id, partner_profile_id, invite_code, ex2_completed_at, name, partner_name, age_range, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data')),
       /* Legacy. Nothing has written a row to partner_sessions since the
          invited partner got a profile of their own, so this comes back empty;
          it is kept only as a fallback for any couple whose rows predate that.

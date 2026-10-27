@@ -447,6 +447,7 @@ const server = createServer((req, res) => {
        have couples in them: a stub where everyone falls on one side draws an
        em dash and looks like the tile is broken. */
     const expCoupleDistances = Array.from({ length: 18 }, (_, k) => ({
+      at: new Date(Date.now() - k * 9 * 864e5).toISOString(),
       life: Number((((k * 7) % 11) / 20).toFixed(4)),
       resp: Number((((k * 5) % 9) / 20).toFixed(4)),
     }));
@@ -1129,6 +1130,26 @@ if (process.env.PICKER) {
     }, id);
     console.log('  picker ' + JSON.stringify(out));
   }
+}
+
+if (process.env.SORTPROBE) {
+  /* Click a sortable header and read the column back, because a comparator
+     can be read as correct and still order by the weekday name. */
+  const [tableId, colIdx] = process.env.SORTPROBE.split(':');
+  const out = await page.evaluate(([id, i]) => {
+    const t = document.getElementById(id);
+    if (!t) return { err: 'no table ' + id };
+    const th = t.querySelector('[data-sort-col="' + i + '"]');
+    if (!th) return { err: 'column ' + i + ' is not sortable' };
+    const col = () => [...t.querySelectorAll('tbody tr')].map((r) => (r.children[i]?.textContent || '').trim()).filter(Boolean);
+    const r = th.getBoundingClientRect();
+    const click = () => th.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+      clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
+    click(); const asc = col();
+    click(); const desc = col();
+    return { asc: asc.slice(0, 5), descFirst: desc.slice(0, 2), n: asc.length };
+  }, [tableId, Number(colIdx)]);
+  console.log('  sort ' + process.env.SORTPROBE + ': ' + JSON.stringify(out));
 }
 
 if (process.env.CARDS) {
