@@ -14,7 +14,20 @@
  */
 
 // Constant-time compare. A plain === leaks how many leading characters matched.
-function timingSafeEqual(a, b) {
+/**
+ * A comparison whose running time does not depend on where two strings first
+ * differ, so an attacker cannot learn a secret one character at a time.
+ *
+ * Exported because api/admin-login.js had a byte-for-byte copy of it. The two
+ * agreed, which is why nobody had looked: a security primitive maintained in
+ * two places is this codebase's signature failure wearing its worst hat, since
+ * the copy that drifts is still a function that returns true and false and
+ * nothing about it looks wrong.
+ *
+ * The length check leaks the length of the secret, which is deliberate and
+ * standard: the caller compares hashes of a fixed width.
+ */
+export function timingSafeEqual(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
   let mismatch = 0;
   for (let i = 0; i < a.length; i++) mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);

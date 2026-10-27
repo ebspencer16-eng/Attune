@@ -11,6 +11,9 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 
 | Sweep | What it measures | What it found |
 |--|--|--|
+| sweep-missing-ids | every element id the admin reaches for, against every id that exists | 22. The Explore page's "could not read" banner anchored to three ids that are not on it, so it had never drawn; the rest were two deleted pages' leftovers |
+| sweep-dead-admin-functions | every function in admin.html, against everything that could call it | 14, all real. Two mint admin tokens with Math.random, two export names and addresses. One known false positive: `$`, because `\b` has no boundary beside a dollar sign |
+| sweep-undefined-classes | every class used on an element, against every class styled | 9. Five pages built with names nothing styled, and one KPI card asking for a colour that is not one of the five, so it alone had no coloured bar |
 | `sweep-endpoints.sh` | every endpoint answered from outside with no sign-in | nothing: 60 proper refusals, no 500s |
 | `sweep-scorers.mjs` | the three `calcDimScores` over 400 answer sets | nothing: 4,000 scores, all agreeing |
 | `sweep-role-tokens.mjs` | both `resolveRoleTokens` over every couple-type string | a hazard, now held by check-role-tokens |

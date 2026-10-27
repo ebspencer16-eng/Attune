@@ -75,6 +75,33 @@
      A class with no stylesheet behind it looks exactly like a styling choice,
      which is why it survived. Same rule as .export-btn, which is the shape
      every other button on these pages already has. */
+    /* ── CLASSES TWO PAGES WERE BUILT WITH AND NEVER GIVEN A RULE ─────────
+     Found by sweeping every class used on an element against every class
+     styled. `.btn` was the first; these are the rest of the same shape.
+
+     `btn-secondary` is twelve buttons on In Practice, `page-head` and
+     `page-sub` are that page's heading and standfirst, and `card` and `tbl`
+     are the Environment page's panel and table. Every one rendered as a bare
+     browser default in a product where every other page has a bordered pill
+     and a monospaced eyebrow. Nothing is broken, which is exactly why it
+     lasted: an unstyled element looks like a styling decision.
+
+     `card` and `tbl` are scoped to the page that uses them, because those two
+     names are generic enough to catch something else later. */
+  /* The seven export menu rows carry their layout inline, so they had no way
+     to show a hover: a menu that does not light up under the pointer reads as
+     a list rather than as something to click. */
+  .export-menu-item:hover{background:var(--surface);color:var(--accent,#5C6DDA);}
+  .btn-secondary{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.45rem .9rem;font-size:.74rem;color:var(--text);cursor:pointer;font-family:var(--bfont);transition:all .15s;}
+  .btn-secondary:hover{border-color:var(--accent,#5C6DDA);color:var(--accent,#5C6DDA);}
+  .page-head{margin-bottom:1.25rem;}
+  .page-head h1{font-family:var(--hfont);font-size:1.6rem;color:var(--text);margin:0 0 .35rem;}
+  .page-sub{font-size:.8rem;color:var(--muted);margin:0;line-height:1.55;}
+  #page-env .card{background:var(--card);border:1px solid var(--border);border-radius:14px;}
+  #page-env .tbl{width:100%;border-collapse:collapse;font-size:.76rem;}
+  #page-env .tbl th{text-align:left;padding:.6rem 1rem;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700;border-bottom:1px solid var(--border);}
+  #page-env .tbl td{padding:.55rem 1rem;border-bottom:1px solid var(--border);color:var(--text);}
+  #page-env .tbl tr:last-child td{border-bottom:0;}
   .btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;font-size:.72rem;color:var(--text);cursor:pointer;font-family:var(--bfont);transition:all .15s;}
   .btn:hover{border-color:var(--accent,#5C6DDA);color:var(--accent,#5C6DDA);}
   .export-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;font-size:.72rem;color:var(--text);cursor:pointer;font-family:var(--bfont);transition:all .15s;display:flex;align-items:center;gap:.4rem}
@@ -819,7 +846,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
           <!-- Every sub-line is id'd `<val>-sub`, which is the convention putKpi
                reads. Two of these were not: one had no id and one was called
                pr-code-n, so the comparison line had nowhere to go on either. -->
-          <div class="kpi-card blue"><div class="kpi-label">Avg order value</div><div class="kpi-val" id="pr-aov">—</div><div class="kpi-sub" id="pr-aov-sub">Per order</div></div>
+          <div class="kpi-card indigo"><div class="kpi-label">Avg order value</div><div class="kpi-val" id="pr-aov">—</div><div class="kpi-sub" id="pr-aov-sub">Per order</div></div>
           <div class="kpi-card orange"><div class="kpi-label">% orders with a code</div><div class="kpi-val" id="pr-code-pct">—</div><div class="kpi-sub" id="pr-code-pct-sub">—</div></div>
         </div>
       </div>
@@ -2617,7 +2644,18 @@ window.adminAuthHeaders = function(extra){
       CUBE = data; FIELDS = {}; data.fields.forEach(f => FIELDS[f.key] = f); loaded = true;
       /* Before anything is drawn from it. */
       const _cnr = explorerCouldNotRead(data);
-      if (_cnr) { const host = $('xp-result') || $('xp-table') || document.getElementById('explore'); if (host) host.insertAdjacentHTML('beforebegin', _cnr); }
+      /* ── THE WARNING HAD NOWHERE TO GO ────────────────────────────────
+         This looked for xp-result, then xp-table, then explore. None of the
+         three is an id on this page: the real ones are xp-title, xp-output
+         and page-explore. So `host` was always null, the `if (host)` guard
+         did its job, and the banner saying which measures the server could
+         not read has never once drawn.
+
+         That is the worst shape a warning can have. It exists, it is built
+         correctly, and it is silent, so a page quietly missing half its
+         numbers looks like a page with those numbers at zero. Anchored to
+         xp-title, which is the first thing above the result. */
+      if (_cnr) { const host = $('xp-title') || $('xp-output'); if (host && !host.previousElementSibling?.hasAttribute?.('data-could-not-read')) host.insertAdjacentHTML('beforebegin', _cnr); }
       fillFieldSelect($('xp-row-field'), true);
       fillFieldSelect($('xp-col-field'), true);
       fillScaleSelect($('xp-measure-field'));
@@ -2977,10 +3015,7 @@ window.adminAuthHeaders = function(extra){
 // hashes used to live here, which meant anyone could download admin.html and
 // brute-force an unsalted SHA-256 offline to obtain the admin token.
 
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
+
 
 // ── SHARED ADMIN DATA ─────────────────────────────────────────────────────────
 // One service-role payload (orders, beta codes, feedback,
@@ -4075,8 +4110,17 @@ async function toggleBetaCode(code, active) {
     // Upsert covers both existing rows and seeded codes never redeemed
     const res = await adminAction({ action: 'beta_upsert', row: { code, package_key: pkgMap[code] || '*', active } });
     if (res.error) throw new Error(res.error);
-    fetchAdminData(true); // bust the cache so the table re-reads fresh state
-    loadBetaCodes();
+    /* ── REDRAW THE TABLE THE TOGGLE LIVES IN ─────────────────────────────
+       This busted the cache and then called loadBetaCodes, which belongs to
+       the Beta Codes page. That page was removed in 92b3e2fb, so the function
+       returns on its first line and the promo code table was never redrawn:
+       the write landed, the row kept its old Status, and the toggle looked
+       like it did nothing. Ellie approved that toggle as A26 the same week.
+
+       renderPromosPage owns the table on Order Details and reads the payload
+       itself, so it is awaited with force rather than fired alongside a cache
+       bust and hoped for. */
+    await renderPromosPage(true);
   } catch (e) {
     console.error('[beta codes] toggle failed:', e);
     alert('Could not update code. Check console for details.');
@@ -4114,28 +4158,7 @@ function exportAdminCSV(type) {
   if (menu) menu.style.display = 'none';
 }
 
-function exportOrdersCSV() {
-  const headers = ['Order','Date','Package','Partner 1','Partner 2','Email','Total','Physical','Gift','Workbook','Status'];
-  const rows = ORDERS.map(o => [
-    o.id || '',
-    o.dateStr || '',
-    o.pkg || '',
-    o.partner1Name || o.shipTo || '',
-    o.partner2Name || '',
-    o.buyerEmail || '',
-    o.price || '',
-    o.physical ? 'Yes' : 'No',
-    o.giftNote ? 'Yes' : 'No',
-    o.addonWorkbook || '',
-    o.fulfillStatus || '',
-  ]);
-  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type: 'text/csv'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `Attune_Orders_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-}
+
 
 function toggleNav(){ document.body.classList.toggle('nav-open'); }
 function closeNav(){ document.body.classList.remove('nav-open'); }
@@ -5103,27 +5126,11 @@ async function renderTestimonials() {
   }).join('');
 }
 
-function renderBar(label, val, max, color, subLabel='') {
-  const pct = Math.round((val / max) * 100);
-  return `<div class="insight-row">
-    <div class="insight-label">${label}</div>
-    <div class="insight-bar-wrap"><div class="insight-bar" style="width:${pct}%;background:${color};transition:width .8s cubic-bezier(.16,1,.3,1)"></div></div>
-    <div class="insight-pct">${subLabel || val}</div>
-  </div>`;
-}
 
-function renderScoreBar(label, score, color='#5C6DDA') {
-  if (score == null) return renderBar(label, 0, 5, color, '—');
-  return renderBar(label, score, 5, color, score.toFixed(1));
-}
 
-function renderQuoteCard(text, name, score, color='') {
-  const scoreColor = score >= 4 ? '#10B981' : score <= 2 ? '#F87171' : '#F59E0B';
-  return `<div style="padding:.9rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-    <p style="font-size:.82rem;color:var(--text);line-height:1.65;margin:0 0 .5rem">"${text}"</p>
-    ${name ? `<div style="font-size:.68rem;color:var(--muted);font-weight:600">${name}</div>` : ''}
-  </div>`;
-}
+
+
+
 
 /**
  * Switch tabs by hiding the panels, not by hiding everything named like one.
@@ -5239,14 +5246,8 @@ function renderBars(containerId, items, color='#5C6DDA') {
 }
 
 // ── Token helpers ──────────────────────────────────────
-function genAdminToken() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({length:32}, ()=>chars[Math.floor(Math.random()*chars.length)]).join('');
-}
-function genAdminShortCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return 'SPK-'+Array.from({length:3},()=>chars[Math.floor(Math.random()*chars.length)]).join('')+'-'+Array.from({length:3},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
-}
+
+
 
 // ── Orders table ──────────────────────────────────────
 /**
@@ -6279,7 +6280,7 @@ function discountOf(o) {
 
 /* promoCell was here. The table has a Promo column and a Discount column
    now, and `discountOf` above is the one reading of what came off. */
-function filterOrders(sel) { applyOrderFilters(); }
+
 
 // ── Physical Intimacy responses aggregation ──────────────────────────────────
 // Reads real intimacy alignment from the analytics feed. No fabricated numbers:
@@ -6912,7 +6913,20 @@ async function renderIntimacyResponses(){
 function explorerCouldNotRead(data) {
   const list = (data && data.couldNotRead) || [];
   if (!list.length) return '';
-  return '<div style="background:rgba(232,103,58,.10);border:1px solid rgba(232,103,58,.35);'
+  /* ── ONCE PER PLACE IT IS SHOWN ───────────────────────────────────────
+     Two paths build this from the same cube: the Explore page's own init and
+     ensureCube, which every tile slicer goes through. With the host ids fixed
+     so it could finally draw, it drew twice on Explore, one under the other,
+     saying the same sentence.
+
+     The first fix was a global "has one already been drawn" test, and it was
+     worse: ensureCube runs first and its host is on the Responses page, which
+     is in the DOM and hidden, so the banner was claimed by a page nobody was
+     looking at and Explore showed none at all. A warning drawn somewhere
+     invisible is the bug this whole fix is about, made again one line later.
+
+     So the marker is checked against the HOST, by the caller that owns it. */
+  return '<div data-could-not-read="1" style="background:rgba(232,103,58,.10);border:1px solid rgba(232,103,58,.35);'
     + 'border-radius:8px;padding:.6rem .8rem;margin-bottom:.9rem;font-size:.7rem;'
     + 'font-family:var(--mono);color:#E8673A;">'
     + 'Some of this could not be read, so the counts below are low: '
@@ -6936,7 +6950,10 @@ async function ensureCube() {
      cache, against a dozen signatures. */
   window.__CUBE_FOR_SLICERS = j;
   const _cnr = explorerCouldNotRead(j);
-  if (_cnr) { const host = document.getElementById('qx-root') || document.getElementById('questions'); if (host) host.insertAdjacentHTML('afterbegin', _cnr); }
+  /* Same fault as the Explore banner: qx-root and questions are not ids on
+     this page. The question explorer's own containers are qx-comm and its
+     four siblings, and the first of them is where this belongs. */
+  if (_cnr) { const host = document.getElementById('qx-comm') || document.getElementById('page-responses'); if (host && !host.firstElementChild?.hasAttribute?.('data-could-not-read')) host.insertAdjacentHTML('afterbegin', _cnr); }
   return j;
 }
 const QX_ESC = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
@@ -8173,23 +8190,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
 // ── Couple type distribution (MECE): counts of each of the 10 couple types ──
 // Replaces the old ad-hoc "communication type" buckets with the real type
 // system so the distribution maps to what we actually track.
-async function renderCoupleTypeDist(containerId) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  if (!TYPES_DATA) { try { await loadTypesData(); } catch (e) {} }
-  const couples = (TYPES_DATA && TYPES_DATA.couples) || [];
-  const counts = {};
-  couples.forEach(c => { if (c.coupleType) counts[c.coupleType] = (counts[c.coupleType] || 0) + 1; });
-  const items = Object.entries(counts).map(([id, v]) => ({ id, label: (CT_NAMES[id] || id), v })).sort((a, b) => b.v - a.v);
-  if (!items.length) { el.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;">No typed couples yet.</div>'; return; }
-  const max = Math.max(...items.map(i => i.v)) || 1;
-  el.innerHTML = items.map(it => `
-    <div class="insight-row">
-      <div class="insight-label">${it.label} <span style="color:var(--dim);font-family:var(--mono);font-size:.68rem">${it.id}</span></div>
-      <div class="insight-bar-wrap"><div class="insight-bar" style="width:${Math.round(it.v/max*100)}%;background:#5C6DDA"></div></div>
-      <div class="insight-pct">${it.v}</div>
-    </div>`).join('');
-}
+
 
 // "NY 10025" or "New York 10025" -> "NY" / "New York". The checkout State/ZIP
 // field is a single input, so older rows stored the ZIP alongside the state.
@@ -8400,27 +8401,9 @@ async function generateWorkbookForOrder(orderId) {
 }
 
 // ── Fulfillment CSV export ────────────────────────────
-function clearLiveSession() {
-  try { localStorage.removeItem('attune_live_session'); } catch {}
-  // Remove live order from ORDERS array
-  const idx = ORDERS.findIndex(o => o.isLiveSession);
-  if (idx >= 0) ORDERS.splice(idx, 1);
-  renderFulfillmentTable();
-  alert('Live session cleared.');
-}
 
-function exportFulfillmentCSV() {
-  const physical = ORDERS.filter(o=>o.physical);
-  const rows = [
-    ['OrderID','OrderDate','Package','ShipTo','Address','GiftMessage','RecipientPhone','ShipSpeed','Status','DaysToShip','Token'],
-    ...physical.map(o=>[o.id,o.dateStr,o.pkg,o.shipTo||'',`"${(o.address||'').replace(/"/g,"'")}"`,`"${(o.giftMsg||'').replace(/"/g,"'")}"`,o.recipientPhone?'(···)···-'+o.recipientPhone.slice(-4):'',o.shipSpeed,o.fulfillStatus,o.daysToShip||'',o.token||''])
-  ];
-  const csv = rows.map(r=>r.join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download = 'unison-fulfillment-'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click();
-}
+
+
 
 // ── Chart initializers ────────────────────────────────
 // Build a chart, replacing whatever was on that canvas. Chart.js throws
@@ -9092,22 +9075,8 @@ function renderTypes() {
   refreshSandbox();
 }
 
-function drawDoughnut(id, labels, data, colors) {
-  const el = document.getElementById(id); if(!el) return;
-  const ex = Chart.getChart(el); if(ex) ex.destroy();
-  mkChart(el, { type:'doughnut', data:{ labels, datasets:[{data, backgroundColor:colors, borderColor:'#FFFFFF', borderWidth:3}] },
-    options:{ plugins:{ legend:{ position:'right', labels:{color:'#586187',font:{size:12},boxWidth:12} } }, cutout:'62%' } });
-}
-function drawHist(id, bins, data, color) {
-  const el = document.getElementById(id); if(!el) return;
-  const ex = Chart.getChart(el); if(ex) ex.destroy();
-  const labels = bins.map(b=>b.toFixed(1));
-  const splitIdx = bins.findIndex(b=>b>=3) ;
-  mkChart(el, { type:'bar', data:{ labels, datasets:[{data, backgroundColor:color, borderRadius:3}] },
-    options:{ plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`score ${i[0].label}`}} },
-      scales:{ x:{grid:{display:false},ticks:{color:'#6B7280',font:{size:9},maxRotation:0,callback:(v,i)=>i%2===0?labels[i]:''}},
-               y:{grid:{color:'#E6ECF6'},ticks:{color:'#6B7280',precision:0}} } } });
-}
+
+
 
 // ── Data quality / time / construct validity ──────────────────────────────
 function renderDataQuality() {
@@ -9291,9 +9260,7 @@ function refreshSandbox() {
 }
 
 
-function escHtml(str) {
-  return str ? str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
-}
+
 
 window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overview');updateDashboardFulfillmentKPIs();restorePageFromHash();if(typeof initAllSlicers==='function')initAllSlicers();});
 

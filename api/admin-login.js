@@ -1,5 +1,7 @@
 import { jsonBody } from './_lib/http.js';
 import { adminTicketValid } from './_lib/admin-ticket.js';
+/* The one constant-time comparison. This file had a byte-identical copy. */
+import { timingSafeEqual } from './_lib/admin-auth.js';
 /**
  * /api/admin-login
  *
@@ -28,13 +30,6 @@ const PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 
 // Constant-time string compare: a plain === leaks how many leading characters
 // matched, which is enough to reconstruct a hash byte by byte.
-function timingSafeEqual(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
-  let mismatch = 0;
-  for (let i = 0; i < a.length; i++) mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return mismatch === 0;
-}
-
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
