@@ -11,6 +11,8 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 
 | Sweep | What it measures | What it found |
 |--|--|--|
+| sweep-silent-read-failures | every catch round a database or network read outside the admin | Nothing. 56 such catches, 10 with an empty body, and 9 of those 10 carry a written reason for being empty |
+| sweep-missing-styles | every `styles.x` the app reads, against the keys its StyleSheet defines | Nothing, and the figure is small for a reason: this app styles with 1400 inline objects and uses StyleSheet.create in four files |
 | sweep-missing-ids | every element id the admin reaches for, against every id that exists | 22. The Explore page's "could not read" banner anchored to three ids that are not on it, so it had never drawn; the rest were two deleted pages' leftovers |
 | sweep-dead-admin-functions | every function in admin.html, against everything that could call it | 14, all real. Two mint admin tokens with Math.random, two export names and addresses. One known false positive: `$`, because `\b` has no boundary beside a dollar sign |
 | sweep-undefined-classes | every class used on an element, against every class styled | 9. Five pages built with names nothing styled, and one KPI card asking for a colour that is not one of the five, so it alone had no coloured bar |
