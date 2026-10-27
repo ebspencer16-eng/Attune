@@ -74,7 +74,13 @@ const problems = [];
 const start = tileBlocks(read('public/start.html'),
   /<div class="pkg-tile[^"]*" id="tile-(?<key>core|newlywed|anniversary|premium)"/g);
 const offerings = tileBlocks(read('public/offerings.html'),
-  /<div class="pov-tile[^"]*" onclick="scrollToPkg\('#pkg-(?<key>core|newlywed|anniversary|premium)'\)/g);
+  /* `[^>]*` between the class and the onclick: this required the two to be
+     adjacent, so adding an id to the tiles made the gate report all four
+     packages missing from a page that still has all four. Matching attribute
+     ORDER rather than the attributes themselves, which is the same family as
+     a pattern satisfied by the wrong filename. What this is about is that
+     each package has a tile naming it, and that is what it asks now. */
+  /<div class="pov-tile[^"]*"[^>]*onclick="scrollToPkg\('#pkg-(?<key>core|newlywed|anniversary|premium)'\)/g);
 
 for (const key of PACKAGES) {
   if (!start[key]) problems.push(`/start has no tile for ${key}. Refusing to pass: a gate that has lost its subject must never report success.`);

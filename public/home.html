@@ -109,9 +109,6 @@
   .hero-sub{font-size:1.02rem;color:var(--muted);line-height:1.78;max-width:430px;margin-bottom:1.75rem;font-weight:300}
   /* for-you / gift toggle */
   .use-toggle{display:flex;gap:var(--s-sm);margin-bottom:var(--s-3xl)}
-  .use-btn{padding:.55rem 1.1rem;border-radius:10px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid var(--stone);background:white;color:var(--muted);font-family:var(--bfont);transition:all .15s;display:flex;align-items:center;gap:.45rem}
-  .use-btn.active{background:var(--ink);color:white;border-color:var(--ink)}
-  .use-btn svg{width:14px;height:14px;flex-shrink:0}
   .use-desc{font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:2.25rem;min-height:2.5rem;transition:opacity .2s}
   .hero-actions{display:flex;align-items:center;gap:var(--s-lg)}
   .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;transition:transform .18s}
@@ -408,7 +405,7 @@
   .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
   .mm-sub:last-child{border-bottom:none}
 
-  @media(max-width:640px){.use-toggle{flex-wrap:wrap}.use-btn{flex:1;justify-content:center}.cta-wrap{padding:1.75rem 1.25rem!important}
+  @media(max-width:640px){.use-toggle{flex-wrap:wrap}.cta-wrap{padding:1.75rem 1.25rem!important}
     .hero-left p{font-size:.92rem!important}
     [style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr!important}
     [style*="grid-template-columns: repeat(3, 1fr)"]{grid-template-columns:1fr!important}
@@ -1013,25 +1010,12 @@ function toggleMenu() {
   const m = document.getElementById('mobile-menu');
   m.classList.toggle('open');
 }
-const descs = {
-  foryou: "Each of you answers on your own. Identify who you are individually and as a couple, and learn how to work and grow together.",
-  gift: "Purchase Attune for a couple you love. They'll each complete the exercises on their own, and build a joint understanding of themselves and each other that most couples never find."
-};
-const ctas = {
-  foryou: "Start your exercises →",
-  gift: "Browse gifts & packages →"
-};
-const ctaLinks = {
-  foryou: "/offerings",
-  gift: "/offerings"
-};
-function setUse(mode) {
-  document.getElementById('btn-foryou').className = 'use-btn' + (mode==='foryou'?' active':'');
-  document.getElementById('btn-gift').className = 'use-btn' + (mode==='gift'?' active':'');
-  document.getElementById('use-desc').textContent = descs[mode];
-  document.getElementById('hero-cta').textContent = ctas[mode];
-  document.getElementById('hero-cta').href = ctaLinks[mode];
-}
+/* ── THE FOR YOU / AS A GIFT TOGGLE WENT, AND ITS CODE STAYED ─────────────
+   setUse and the three objects it read were removed. Nothing called it, and
+   none of the four ids it writes to is on this page: the toggle was taken out
+   of the markup and its CSS, its copy and its function stayed behind. Found
+   by sweeping every element id this page reaches for against every id it
+   has. */
 
   // Close mobile menu on outside tap
   document.addEventListener('click', function(e) {

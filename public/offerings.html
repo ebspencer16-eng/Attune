@@ -123,8 +123,6 @@
 
   /* format toggle (physical/virtual) */
   .format-toggle{display:flex;gap:var(--s-xs);margin-bottom:var(--s-xl);padding:0 2.25rem}
-  .fmt-btn{padding:.45rem .9rem;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;border:1.5px solid var(--stone);background:var(--warm);color:var(--muted);font-family:var(--bfont);transition:all .15s}
-  .fmt-btn.active{background:var(--ink);color:white;border-color:var(--ink)}
 
   /* includes block */
   .inc-block{background:var(--warm);border:1px solid var(--stone);border-radius:14px;padding:var(--s-lg)}
@@ -710,8 +708,28 @@
 
      The Gift box line carries `gift-feat`, which the flag block at the foot of
      this page hides while physical is off, exactly as /start does. -->
+<!-- ── THE IDS TWO FEATURES ALREADY NAME ────────────────────────────────────
+     Each tile carries the id its own code looks for. Neither feature that
+     needs them had one, and both failed silently:
+
+     The sticky bar at the foot of this page is meant to follow whichever
+     package you have scrolled to, and it finds each one with
+     getElementById(pkg.id). None of those four ids existed, so `active` stayed
+     on the first entry for the whole page: a reader at Attune Premium saw
+     "$89 · The Attune Assessment" at the bottom of the screen, and the button
+     beside it added the Assessment to their cart. Measured by scrolling the
+     page in five steps and reading the bar at each: it said the same thing at
+     0, 25, 50, 75 and 95 per cent.
+
+     And each tile's own click calls scrollToPkg with the same id, which found
+     nothing, so a tile styled cursor:pointer did nothing at all when clicked
+     anywhere but its button.
+
+     These four sections used to be long detailed blocks further down the page.
+     The tiles replaced them and both features went on looking for the old
+     markup. -->
 <div class="pkg-overview" id="gift">
-  <div class="pov-tile" onclick="scrollToPkg('#pkg-core')" style="cursor:pointer">
+  <div class="pov-tile" id="pkg-core" onclick="scrollToPkg('#pkg-core')" style="cursor:pointer">
     <span class="pov-badge" style="background:#FFF0EB;color:#8A4A22;">The Foundation</span>
     <div class="pov-name">The Attune Assessment</div>
     <div class="pov-price">$89</div>
@@ -724,7 +742,7 @@
     </ul>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('core')">Add to cart →</div>
   </div>
-  <div class="pov-tile pov-orange" onclick="scrollToPkg('#pkg-newlywed')" style="cursor:pointer">
+  <div class="pov-tile pov-orange" id="pkg-newlywed" onclick="scrollToPkg('#pkg-newlywed')" style="cursor:pointer">
     <span class="pov-badge" style="background:#FFF0EB;color:#8A4A22;">Wedding gift</span>
     <div class="pov-name">Starting Out Collection</div>
     <div class="pov-price">$139</div>
@@ -739,7 +757,7 @@
       <a href="/wedding-registry" onclick="event.stopPropagation()" class="pov-cta">Add to registry →</a>
     </div>
   </div>
-  <div class="pov-tile pov-indigo" onclick="scrollToPkg('#pkg-anniversary')" style="cursor:pointer">
+  <div class="pov-tile pov-indigo" id="pkg-anniversary" onclick="scrollToPkg('#pkg-anniversary')" style="cursor:pointer">
     <span class="pov-badge" style="background:#EEEFFF;color:#3B49B0;">Anniversary</span>
     <div class="pov-name">Relationship Reflection</div>
     <div class="pov-price">$139</div>
@@ -750,7 +768,7 @@
     </ul>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('anniversary')">Add to cart →</div>
   </div>
-  <div class="pov-tile pov-premium" onclick="scrollToPkg('#pkg-premium')" style="cursor:pointer">
+  <div class="pov-tile pov-premium" id="pkg-premium" onclick="scrollToPkg('#pkg-premium')" style="cursor:pointer">
     <span class="pov-badge" style="background:rgba(91,109,248,.18);color:#C7CEFF;">Most Complete</span>
     <div class="pov-name">Attune Premium</div>
     <div class="pov-price">$198</div>
@@ -923,83 +941,29 @@ function toggleFaq(item){
   t.textContent=open?'+':'−';
 }
 
-function setFormat(pkg,format){
-  // Phase-1: force digital when physical is disabled (flag in /_flags.js), so the
-  // DOMContentLoaded defaults and any toggle both resolve to digital.
-  if (!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED)) format = 'digital';
-  // Map offerings-card pkg id to cart pkg id (the card uses 'ann' but cart uses 'anniversary')
-  const cartKey = pkg === 'ann' ? 'anniversary' : pkg;
-  const isDigital = format === 'virtual' || format === 'digital';
-  _currentFormats[cartKey] = isDigital ? 'digital' : 'physical';
+/* ── THE FORMAT TOGGLE WENT, AND ITS CODE STAYED ──────────────────────────
+   `setFormat` and `submitAnnualNotify` were removed here. Between them they
+   looked up twenty element ids, and not one of those ids is on this page any
+   more: no `#pkg-core`, no `core-price`, no `.fmt-btn` button, no
+   `annual-email`. The digital-or-physical toggle and the annual notify box
+   were taken out of the markup and their JavaScript was left behind.
 
-  if(pkg==='core'){
-    const physical=format==='physical';
-    const priceEl = document.getElementById('core-price');
-    const subEl   = document.getElementById('core-price-sub');
-    if (priceEl) priceEl.textContent = physical ? '$124' : '$89';
-    if (subEl)   subEl.textContent   = physical
-      ? 'Physical gift box (+$35) · ships in 5-7 days'
-      : 'Digital · instant access · yours to keep';
-    const coreCta = document.getElementById('core-cta');
-    if (coreCta) coreCta.textContent = 'Add to cart →';
-    const physicalCol = document.getElementById('core-physical-col');
-    if (physicalCol) physicalCol.style.display = physical ? 'block' : 'none';
-    document.querySelectorAll('#pkg-core .fmt-btn').forEach((b,i)=>{
-      // Button 0 is Digital, 1 is Physical (matches HTML order)
-      b.className = 'fmt-btn' + (i === (physical ? 1 : 0) ? ' active' : '');
-    });
-  } else if(pkg==='newlywed'){
-    const physical=format==='physical';
-    document.getElementById('newlywed-price').textContent=physical?'$174':'$139';
-    document.getElementById('newlywed-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5-7 days':'Digital · instant access · yours to keep';
-    document.getElementById('newlywed-cta').textContent='Add to cart →';
-    document.getElementById('newlywed-physical-col').style.display=physical?'block':'none';
-    document.querySelectorAll('#pkg-newlywed .fmt-btn').forEach((b,i)=>{
-      b.className='fmt-btn'+(i===(physical?0:1)?' active':'');
-    });
-    document.querySelector('#pkg-newlywed .pkg-note').textContent=physical?'Ships within 3-5 business days':'Access delivered by email immediately';
-  } else if(pkg==='ann'){
-    const physical=format==='physical';
-    document.getElementById('ann-price').textContent=physical?'$174':'$139';
-    document.getElementById('ann-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5-7 days':'Digital · instant access · yours to keep';
-    document.getElementById('ann-cta').textContent='Add to cart →';
-    document.getElementById('ann-physical-col').style.display=physical?'block':'none';
-    document.querySelectorAll('#pkg-anniversary .fmt-btn').forEach((b,i)=>{
-      b.className='fmt-btn'+(i===(physical?0:1)?' active':'');
-    });
-    document.querySelector('#pkg-anniversary .pkg-note').textContent=physical?'Ships within 3-5 business days':'Access delivered by email immediately';
-  } else if(pkg==='premium'){
-    const physical=format==='physical';
-    document.getElementById('premium-price').textContent=physical?'$233':'$198';
-    document.getElementById('premium-price-sub').textContent=physical?'Physical gift box (+$35) · ships in 5-7 days':'Digital · instant access · yours to keep';
-    document.getElementById('premium-cta').textContent='Add to cart →';
-    document.getElementById('premium-physical-col').style.display=physical?'block':'none';
-    document.querySelectorAll('#pkg-premium .fmt-btn').forEach((b,i)=>{
-      b.className='fmt-btn'+(i===(physical?1:0)?' active':'');
-    });
-    document.getElementById('premium-note').textContent=physical?'Ships within 3-5 business days':'Digital · access delivered by email immediately';
-  }
-}
-function submitAnnualNotify() {
-  const email = document.getElementById('annual-email').value.trim();
-  if (!email || !email.includes('@')) {
-    document.getElementById('annual-email').style.borderColor='rgba(232,103,58,.8)';
-    return;
-  }
-  document.getElementById('annual-btn').style.display='none';
-  document.getElementById('annual-email').style.display='none';
-  document.getElementById('annual-confirm').style.display='block';
-}
+   It was not inert. A DOMContentLoaded handler called setFormat four times,
+   and the second call dereferenced a missing element, so every load of this
+   page threw into a catch whose comment said "elements may not all exist on
+   every render" and the two calls after it never ran. Nothing reached the
+   console, because the catch swallowed it. Found by sweeping every element id
+   the page reaches for against every id it has.
+
+   Two other things went with it, both worth naming. setFormat held four
+   hardcoded prices, which check-prices-on-page was holding to the catalogue,
+   so a price change meant editing code that does nothing. And
+   submitAnnualNotify hid the button and showed a confirmation without sending
+   anything anywhere, so had it been reachable it would have told somebody
+   they were signed up for a thing nobody had recorded. */
 
   // Initialize all packages to physical (default) on page load so prices match the active toggle
   document.addEventListener('DOMContentLoaded', function(){
-    try {
-      setFormat('core','virtual');     // core defaults to digital; hides physical col
-      setFormat('newlywed','physical');
-      setFormat('ann','physical');
-      setFormat('premium','physical');
-    } catch(e) { /* elements may not all exist on every render */ }
-
     // ── Registry arrivals ──────────────────────────────────────────────
     // When someone arrives via a wedding registry link (Zola, Joy, etc.),
     // they clicked "Attune" on a couple's registry. They need to (a) know
@@ -1045,12 +1009,34 @@ const pkgSections = [
   {id:'pkg-anniversary', cart:'anniversary', label:'Relationship Reflection', price:'$139', cta:'Add to cart →'},
   {id:'pkg-premium', cart:'premium', label:'Attune Premium', price:'$198', cta:'Get Attune Premium →'},
 ];
+/* ── THE BAR NAMES A PACKAGE ONLY WHILE THAT PACKAGE IS ON SCREEN ─────────
+   This took "the last section whose top is above 40% of the viewport", which
+   is the right rule for four long sections stacked down a page. That is what
+   this page used to be. The sections are four tiles in one ROW now, so their
+   tops are within a few points of each other and the old rule resolves to
+   whichever tile is last in the markup for the whole page below them: it said
+   "$198 · Attune Premium" at 25, 50, 75 and 95 per cent down, including over
+   the comparison table and the FAQ.
+
+   Before the tiles were given their ids it was worse in the other direction
+   and said "$89 · The Attune Assessment" everywhere, including beside Premium.
+
+   So the rule is the one the bar can actually keep: the tile nearest the
+   middle of the viewport, out of the tiles currently IN the viewport, and the
+   page's default entry package when none of them is. A bar that advertises a
+   price for a package the reader cannot see is the version of this that costs
+   money, and both previous behaviours did it. */
 function updateStickyFromScroll() {
-  const scrollY = window.scrollY + window.innerHeight * 0.4;
+  const mid = window.innerHeight / 2;
   let active = pkgSections[0];
+  let best = Infinity;
   for (const pkg of pkgSections) {
     const el = document.getElementById(pkg.id);
-    if (el && el.getBoundingClientRect().top + window.scrollY <= scrollY) active = pkg;
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (r.bottom <= 0 || r.top >= window.innerHeight) continue;   // not on screen
+    const d = Math.abs((r.top + r.bottom) / 2 - mid);
+    if (d < best) { best = d; active = pkg; }
   }
   const btn = document.getElementById('sticky-btn');
   const note = document.getElementById('sticky-note');
