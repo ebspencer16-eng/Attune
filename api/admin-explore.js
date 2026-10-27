@@ -35,6 +35,7 @@ import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILIT
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 import { withEffectivePromoCodes } from './_lib/order-promo.js';
+import { categoryAlignment } from './_lib/resp-agreement.js';
 import { genericLabel } from './_lib/generic-label.js';
 import { DIM_META, DIM_SCALE_POLES } from './_lib/dimensions.js';
 import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS } from './_conflict-questions.js';
@@ -417,14 +418,37 @@ function buildCatalog(fbCatOptions) {
   for (const k of DEMO_KEYS) f.push({ key: k, label: DEMO_LABELS[k], group: 'Demographics', kind: 'cat', partnerable: true });
   for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'dim_' + dim, label: DIM_LABELS[dim] || dim, group: 'Dimensions (score 1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) f.push({ key: 'q_' + q.id, label: q.text, group: 'Ex1 · Communication (1–5)', kind: 'scale', poleLow: shortPole(q.a), poleHigh: shortPole(q.b), partnerable: true });
-  for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'readerr_' + dim, label: (DIM_LABELS[dim] || dim) + ' read error', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'scale', partnerable: true });
+  /* ── A ROW HAS TO SAY WHAT IT IS ──────────────────────────────────────────
+     Ellie, of the field picker: "what are all of the 'read error' lines under
+     comms styles?"
+
+     Fair question, and the label was the whole of the answer: ten rows saying
+     "Energy & Recharge read error" and nothing else. What they measure is how
+     far this person's guess about their partner was from what the partner
+     actually said, signed, so nought is a perfect read. That used to be
+     carried by the GROUP name, "Ex1 . Understanding (0 = read exactly right)",
+     and the picker groups by section now, so the group never reaches the
+     screen and the explanation went with it.
+
+     The group stays, because a grouping can still use it. The label is what
+     she reads. */
+  for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'readerr_' + dim, label: 'How far their guess was off: ' + (DIM_LABELS[dim] || dim), group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'scale', partnerable: true });
   f.push({ key: 'read_error_mean', label: 'Mean read error', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'scale', partnerable: true });
   f.push({ key: 'reads_partner', label: 'Reads partner', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat', partnerable: true });
   f.push({ key: 'understanding', label: 'Couple understanding', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat' });
   f.push({ key: 'alignment_group', label: 'Aligned / Misaligned', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat' });
   f.push({ key: 'understanding_group', label: 'In tune / Misunderstood', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat' });
   f.push({ key: 'worst_misread_dim', label: 'Most misread dimension', group: 'Ex1 . Understanding (0 = read exactly right)', kind: 'cat', partnerable: true });
-  for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'pvdim_' + dim, label: (DIM_LABELS[dim] || dim) + ' (as read by partner)', group: 'Ex1 · Partner-view dimensions (1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
+  /* ── IT SAID THE OPPOSITE OF WHAT IT HOLDS ────────────────────────────────
+     Ellie: "as read by partner doesn't make sense." It did not, and the
+     reason is that it was backwards. This field is built eight lines up from
+     `pvScores`, which the comment there calls "how this person reads their
+     PARTNER": it is the row's own guess about the other person, on the same
+     one-to-five scale. The label said somebody else had read them.
+
+     So anyone cutting by it was reading the wrong person's answer, and the
+     only clue was a label that already did not make sense. */
+  for (const dim of Object.keys(DIM_KEYS)) f.push({ key: 'pvdim_' + dim, label: 'Their guess about their partner: ' + (DIM_LABELS[dim] || dim), group: 'Ex1 · Their read of their partner (1–5)', kind: 'scale', poleLow: (DIM_POLES[dim]||[])[0], poleHigh: (DIM_POLES[dim]||[])[1], partnerable: true });
   for (const q of PERSONALITY_QUESTIONS) {
     const pvt = PARTNER_VIEW_TEXT[q.id] || {};
     f.push({ key: 'pv_' + q.id, label: pvt.text || q.text, group: 'Ex1 · Partner-view (1–5)', kind: 'scale', poleLow: shortPole(pvt.a || q.a), poleHigh: shortPole(pvt.b || q.b), partnerable: true });
@@ -480,6 +504,19 @@ function buildCatalog(fbCatOptions) {
         poleLow: 'Myself', poleHigh: 'My partner',
         options: RESP_OPTS.map((v) => ({ v, label: v, val: RESP_POSITION[v] })), partnerable: true });
     });
+  }
+  /* ── THE EXERCISE'S OWN SUMMARY ROWS ──────────────────────────────────
+     Six: one for the exercise and one per category. A percentage, so the
+     poles are named rather than left to "low" and "high", and `scale` so the
+     All questions block draws them as a slider with a mean like every other
+     measure on these pages. */
+  f.push({ key: 'expalign_overall', label: 'Alignment across categories',
+    group: 'Ex2 · Alignment across categories', kind: 'scale',
+    poleLow: 'Different answers', poleHigh: 'Same answers', partnerable: false });
+  for (const cat of RESPONSIBILITY_CATEGORIES) {
+    f.push({ key: 'expalign_' + cat.id, label: cat.label + ' alignment',
+      group: 'Ex2 · Alignment across categories', kind: 'scale',
+      poleLow: 'Different answers', poleHigh: 'Same answers', partnerable: false });
   }
   /* One field per horseman, so the Explore page can cut by it too and every
      slicer has a label and an option list to draw from. */
@@ -802,6 +839,28 @@ export default async function handler(req) {
         || (p.invite_code && sessByInvite.get(p.invite_code)?.ex1_answers)
         || null;
       const _u = {};
+      /* ── ALIGNMENT ACROSS CATEGORIES, PER COUPLE ────────────────────────
+         Ellie: "Expectations should have a high-level for 'alignment across
+         categories' that shows avg alignment across each category."
+
+         A separate block from the Ex1 one below, because this needs ex2
+         answers and that needs ex1, and a couple can have finished one and
+         not the other. Folding them together would have made every
+         Expectations figure depend on Communication being done.
+
+         The rule is api/_lib/resp-agreement.js, which api/admin-data.js also
+         calls: "did these two name the same person" is one rule and resolving
+         an answer to a side of the couple is the whole of it. */
+      if (partnerRaw && p.ex2_answers && partnerRaw.ex2_answers) {
+        const _ca = categoryAlignment(p, partnerRaw);
+        /* Null rather than nought where nothing could be counted. A couple who
+           skipped a category have no alignment in it, which is not the same
+           fact as disagreeing about all of it. */
+        _u.expalign_overall = _ca.overall;
+        for (const cat of RESPONSIBILITY_CATEGORIES) {
+          _u['expalign_' + cat.id] = _ca.byCategory[cat.id] ? _ca.byCategory[cat.id].pct : null;
+        }
+      }
       if (_partnerAns && p.ex1_answers) {
         // Same thresholds as the dashboard cuts, so a slice in the explorer
         // matches the same slice elsewhere.

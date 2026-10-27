@@ -49,7 +49,9 @@ export const EXPLORE_SECTIONS = [
  * derived yes or no. "Detail" means one row per question. The split is what
  * lets the slicers offer the first without drowning in the second.
  */
-const GROUP_MAP = {
+/* Exported so a gate can check the other direction: a key here that no field
+   declares is a rename that moved the fields and left this behind. */
+export const GROUP_MAP = {
   'Type & axes':                                { section: 'demographic', tier: 'high' },
   'Demographics':                               { section: 'demographic', tier: 'high' },
   'Package & cohort':                           { section: 'demographic', tier: 'high' },
@@ -57,10 +59,22 @@ const GROUP_MAP = {
 
   'Dimensions (score 1–5)':                     { section: 'comms', tier: 'high' },
   'Ex1 . Understanding (0 = read exactly right)': { section: 'comms', tier: 'high' },
-  'Ex1 · Partner-view dimensions (1–5)':        { section: 'comms', tier: 'high' },
+  /* Renamed with the fields it maps. "Partner-view" read as somebody else's
+     view of this person, and it is the opposite: this person's read of their
+     partner. The key here IS the group string, so renaming the group without
+     this line sent all ten fields to Demographic as unmapped detail rows, and
+     the only symptom was a section count changing. Caught by rebuilding the
+     real catalogue and reading the numbers. */
+  'Ex1 · Their read of their partner (1–5)':    { section: 'comms', tier: 'high' },
   'Ex1 · Communication (1–5)':                  { section: 'comms', tier: 'detail' },
   'Ex1 · Partner-view (1–5)':                   { section: 'comms', tier: 'detail' },
 
+  /* The one high-level group this exercise has. Ellie: "Expectations should
+     have a high-level for 'alignment across categories' that shows avg
+     alignment across each category." Every other section had a High level
+     block in the field picker and Expectations had none: 32 rows, all of them
+     single questions, with nothing summarising the exercise. */
+  'Ex2 · Alignment across categories':          { section: 'expectations', tier: 'high' },
   'Ex2 · Life & values':                        { section: 'expectations', tier: 'detail' },
   'Ex2 · Who does what':                        { section: 'expectations', tier: 'detail' },
 

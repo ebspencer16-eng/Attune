@@ -10,7 +10,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A81 | **Explore should load again. Hard refresh it and tell me which of two things you see.** The picker can no longer stop that page: if it fails it puts the old grey dropdown back and the page works. So either you see the coloured banners, and it was a stale file, or you see a plain dropdown with a small grey line under it reading "the coloured picker could not start", which tells me it is throwing and I will have the cause from that. I could not reproduce it here: the page drives correctly against test data and the file on the server is identical to mine. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -42,8 +41,7 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.** Everything you sent is built and sitting in section 3, and
-the one thing that was waiting on you, the survey migration, is run.
+**Nothing open.** Everything you sent is built and in section 3.
 
 ## 3. For you to review
 
@@ -52,16 +50,11 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A91 | **The bar at the bottom of the pricing page named the wrong package, all the way down.** It follows whichever package you have scrolled to, by looking for four element ids that are not on that page any more. So it said "$89 - The Attune Assessment" beside Attune Premium, and its button added the Assessment to the cart. Measured by scrolling in five steps: identical text at 0, 25, 50, 75 and 95 per cent. On a phone it now names the package you are actually looking at. |
-| A92 | **The four package tiles were clickable and went nowhere.** Each one scrolls to a detailed section that was replaced by the tile itself, so a tile with a pointer cursor did nothing unless you hit its button. They have their ids now. **Your call:** clicking a tile currently just centres it. Tell me if it should do something else. |
-| A93 | **Dead code removed from the home and pricing pages.** A For you / As a gift toggle, a digital-or-physical toggle and an annual notify box were all taken out of the markup and their JavaScript stayed. One of them threw on every load of the pricing page into a catch that explained it away. Another held four hardcoded prices, so a price change meant editing code that does nothing. A third showed a "you are signed up" confirmation and sent nothing anywhere. |
-| A86 | **The promo code Status toggle looked like it did nothing.** It wrote the change and then refreshed a page that was deleted months ago, so the row kept its old status until you reloaded. You approved that toggle as A26 the same week. It redraws its own table now. |
-| A87 | **The Explore page had a warning it could never show.** It looks for three element ids, none of which is on that page, so the banner saying which measures the server could not read has never once drawn. A page quietly missing half its numbers looked like a page whose numbers were zero. |
-| A88 | **Fourteen dead functions removed from the admin**, including two that mint admin tokens with a random number generator that is not safe for credentials, and the two CSV exports that carried names and addresses. None had a caller. They survived because a definition reads like a feature. |
-| A89 | **Five pages were built with class names nothing styled.** In Practice's buttons and heading, the Environment page's panel and table, and one KPI card asking for a colour that is not one of the five, so it alone had no coloured bar. All bare browser defaults in a product where every other page is styled. |
-| A90 | **One constant-time password comparison, not two.** Two auth files held byte-identical copies. They agreed, which is why nobody had looked, and a security primitive maintained in two places is the worst version of this codebase's usual bug. |
+| A94 | **The "read error" rows say what they measure now.** Ten rows that read "Energy & Recharge read error" and nothing else. They are how far a person's guess about their partner was from what the partner actually said, nought being a perfect read. That sentence used to live in the group name, and the picker groups by section now, so it never reached the screen. |
+| A95 | **"as read by partner" was backwards, not just unclear.** That field is a person's own guess about their partner, on the same 1-5 scale, not anyone's read of them. Anyone cutting by it was reading the wrong person's answer. It says "Their guess about their partner: Energy & Recharge" now. |
+| A96 | **Expectations has a High level block for the first time**: Alignment across categories, then one row per category. It had 32 rows and every one was a single question. The "did these two name the same person" rule now lives in one module that both admin endpoints call, checked against the old code over 400 generated couples before switching. |
+| A92 | **The four package tiles are the row under the hero on Browse**: The Attune Assessment, Starting Out, Relationship Reflection, Attune Premium. Sorry, I named them without saying where. Clicking one now centres it; its Add to cart button is unchanged. **Still your call:** should clicking the tile itself do something else? |
 | A85 | **097 is run, so the survey can save now. The proof is one number.** Finish a survey, then open the Feedback page: the line under the title counts responses and has read 0 since the day the feature shipped. If it still reads 0 after you finish one, tell me and I will chase the write itself. |
-| P10 | **The admin was sending names, emails and shipping addresses to your browser that nothing drew.** Found while answering P9. Stripped on the way out, and a gate fills one order with every identifying column and proves not one of those values survives. |
 | A72 | **Engagement is not broken, and I was about to rebuild it on a stale note.** The "not readable" round turned out to be my own test harness, and you have approved two things on that page since. What I did find by looking: Refresh was an unstyled browser button, the Exercises chart was silently drawing three of five names, and the downloads caveat sat as a loose line outside its tile. All three fixed. The funnel and acquisition lines are your own spec from R9, so they stay. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
@@ -74,6 +67,14 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| P10 | **The admin was sending names, emails and shipping addresses to the browser that nothing drew.** Stripped, and a gate proves no identifying value survives. |
+| A90 | **One constant-time password comparison, not two byte-identical copies.** They agreed, which is why nobody had looked. |
+| A89 | **Five pages were built with class names nothing styled**, so their buttons and tables were bare browser defaults. One KPI card asked for a colour that is not one of the five. |
+| A88 | **Fourteen dead admin functions removed**, including two that mint admin tokens with Math.random and the two CSV exports that carried names and addresses. |
+| A87 | **The Explore page had a warning it could never show**, anchored to three ids that are not on it. A page missing half its numbers looked like a page whose numbers were zero. |
+| A86 | **The promo Status toggle refreshed a page deleted months ago**, so the row kept its old status until a reload. It redraws its own table now. |
+| A93 | **Dead code removed from the home and pricing pages**: three features whose markup went and whose JavaScript stayed. One threw on every pricing-page load into a catch that explained it away. |
+| A91 | **The sticky bar on the pricing page named the wrong package all the way down.** It tracked four ids that are not on that page, so a reader at Premium saw "$89 - The Attune Assessment" and the button added that. |
 | P9 | **No physical box, so nothing needs a name or an address.** The admin was sending them to your browser anyway, for readers deleted months ago. Stripped, and the banner is true as written. |
 | S59 | **The payment path writes a row, and something proves it every build.** A signed Stripe event goes through the real handler; an unsigned one, one with the wrong secret and one six minutes old each write nothing. |
 | A70 | **Seven pages of missing figures were one key read one level too high.** The server builds those measures in a helper and sends them under `responses`; the page read them off the top. Every tile drew its empty state. |

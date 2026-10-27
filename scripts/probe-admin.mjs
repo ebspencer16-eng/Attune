@@ -1131,6 +1131,17 @@ if (process.env.PICKER) {
   }
 }
 
+if (process.env.PANEL) {
+  const out = await page.evaluate(() => {
+    const b = document.querySelector('.fp-btn'); if (!b) return 'no picker';
+    const r = b.getBoundingClientRect();
+    b.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: Math.round(r.left+r.width/2), clientY: Math.round(r.top+r.height/2) }));
+    const p = document.querySelector('.fp-panel');
+    return [...p.children].map((el) => (el.className.includes('band') ? '## ' : el.className.includes('sub') ? '  # ' : el.tagName === 'INPUT' ? '[search] ' : '    ') + (el.textContent || '').trim()).join('\n');
+  });
+  console.log(out);
+}
+
 if (process.env.CLICK) {
   for (const q of process.env.CLICK.split('|').map((x) => x.trim()).filter(Boolean)) {
     const out = await page.evaluate((sel) => {

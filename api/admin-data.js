@@ -50,6 +50,7 @@ import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
 import { withEffectivePromoCodes, coupleKeyFromProfiles } from './_lib/order-promo.js';
 import { genericLabel } from './_lib/generic-label.js';
+import { itemAgreement } from './_lib/resp-agreement.js';
 import { ordersWithoutIdentifying } from './_lib/admin-order-privacy.js';
 import { DIM_META } from './_lib/dimensions.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
@@ -170,36 +171,25 @@ function buildResponseAggregates(profiles, sessions) {
   let expAlign = RESPONSIBILITY_CATEGORIES.map(c =>
     catTotal[c.id] ? Math.round(100 * catAgree[c.id] / catTotal[c.id]) : 0);
 
-  // ── Per-question couple agreement (directional "who does X" items) ──────────
-  // Two answers AGREE when they point to the SAME person: one "Me" + one
-  // "Partner" is agreement (both name the same person), which plain string
-  // equality misses. Resolve each answer perspective-aware to a couple side
-  // (A/B) using names. A session partner (b) has no name columns, so derive them
-  // from a (a.partner_name is b's name).
-  const resolveSide = (v, selfName, partnerName, selfTok, partnerTok) => {
-    if (v == null || v === '') return null;
-    if (v === 'Both of us' || v === 'Balanced') return 'both';
-    if (v === "Doesn't apply to us" || v === "Doesn't apply") return 'na';
-    if (v === 'Primarily mine' || (selfName && v === selfName)) return selfTok;
-    if (v === "Primarily my partner's" || (partnerName && v === partnerName)) return partnerTok;
-    return null;
-  };
+  /* ── ONE RULE FOR "DID THESE TWO NAME THE SAME PERSON" ─────────────────
+     The resolve-to-a-side rule and the mirrored-key read were written out
+     here. api/admin-explore.js needs the same answer for the high-level
+     Expectations fields Ellie asked for, so it is api/_lib/resp-agreement.js
+     now and both call it.
+
+     Checked before switching: the extracted rule and the lines it replaces
+     were run over 400 generated couples covering every branch, including the
+     perspective pair that plain equality gets wrong and the session partner
+     with no name columns, and every one of the twenty items agreed on both
+     its numerator and its denominator. An extraction that only looks the same
+     is not one. */
   const raCount = {}, raTotal = {};
   RESPONSIBILITY_CATEGORIES.forEach(c => c.items.forEach(item => { const k = c.id + '__' + item; raCount[k] = 0; raTotal[k] = 0; }));
   pairs.forEach(([a, b]) => {
-    const ra = a.ex2_answers?.responsibilities, rb = b.ex2_answers?.responsibilities;
-    if (!ra || !rb) return;
-    const aName = (a.name || '').trim(), aPartner = (a.partner_name || '').trim();
-    const bName = (b.name || '').trim() || aPartner, bPartner = (b.partner_name || '').trim() || aName;
-    RESPONSIBILITY_CATEGORIES.forEach(cat => cat.items.forEach(item => {
-      const key = cat.id + '__' + item;
-      const ares = resolveSide(ra[key], aName, aPartner, 'A', 'B');
-      const bres = resolveSide(rb[mirrorRespKey(key)], bName, bPartner, 'B', 'A');
-      if (ares == null || bres == null || ares === 'na' || bres === 'na') return;
-      raTotal[key]++;
-      if (ares === bres) raCount[key]++;
-    }));
+    const { byItem } = itemAgreement(a, b);
+    for (const [k, same] of Object.entries(byItem)) { raTotal[k]++; if (same) raCount[k]++; }
   });
+
   /**
    * How many couples could be counted at all.
    *
