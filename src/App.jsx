@@ -20,6 +20,7 @@ import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NE
 // reason api/_couple-types.js moved out of this file.
 import { contentFor, CURRENT_CONTENT_VERSION } from "../api/_content/index.js";
 import { alignedAdvice, getDimShift } from "../api/_lib/dimension-copy.js";
+import { CONVO_PROMPTS, CONVO_FALLBACK } from "../api/_lib/convo-copy.js";
 // The two item scorers this file used to alias out of here are gone. They
 // were a second rule for how close two answers are, beside the one the results
 // rows use, and they knew three positions where the exercise offers five: a
@@ -11766,17 +11767,14 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   const stressMismatch = (mySeeks && theyWithdraws) || (myWithdraws && theySeeks);
 
   const topConvo = sortedFeedback.filter(f => f.gap > 1.5).slice(0, 1)[0];
-  const convoPrompt = topConvo ? {
-    energy: "When one of us needs time alone and the other wants to connect, how do we handle that?",
-    expression: "Is there something you've been sitting with that you haven't found the right moment to bring up?",
-    needs: "What's something you need from me that you usually don't ask for directly?",
-    bids: "What's something small I do that makes you feel noticed?",
-    conflict: "After a disagreement, what does 'okay again' actually feel like for you?",
-    repair: "What do you need from me in the hours after a hard conversation?",
-    listening: "When you bring something to me, do you want me to listen, or do you want me to respond and ask questions?",
-    love: "What's something I do that makes you feel genuinely loved?",
-    feedback: "Is there something I do that bothers you that you haven't found the right way to bring up?",
-  }[topConvo.dim] : "What do you each need that you haven't fully said out loud yet?";
+  /* ── THE SAME NINE SENTENCES THE SERVER SENDS, AND THE SAME FALLBACK ──
+     These were typed out here as well as in api/_lib/highlight-cards.js,
+     whose comment said they matched the website exactly. They did, to the
+     character, which is why nobody had looked: values that agree today are
+     the ones nothing watches, and a comment asserting agreement is not a
+     check. api/_lib/convo-copy.js is the one copy, and it has no imports
+     of its own so sharing it costs the bundle nothing. */
+  const convoPrompt = topConvo ? (CONVO_PROMPTS[topConvo.dim] || CONVO_FALLBACK) : CONVO_FALLBACK;
 
   const strengthMeta = DIM_META[topStrength?.dim];
   const gapMeta = DIM_META[topGap?.dim];

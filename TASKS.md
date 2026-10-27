@@ -10,6 +10,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| C34 | **Reassurance needs a pair of slider labels in your voice.** The other nine read like "Independent / Togetherness" and "Keeps it in / Shares openly". Reassurance had none at all, so it was showing "1 - low / 5 - high". It is borrowing "Voiced / Assumed" from the results pages, which is correct but shorter than its neighbours. Two phrases and I will put them in. |
+| P9 | **The admin banner says there are no email addresses on the page, and the Orders table holds them.** It needs them, to ship a box. So either the banner narrows to the analytics pages, which is what it is true of, or the fulfilment view says plainly that it is the one place with names on it. Your call on which, and the sentence is yours either way. |
 | A71 | **The survey has never saved one answer, and the fix is a migration you run.** Your 095 output was right: zero rows. The upsert points at an index migration 079 created as a partial one, and PostgreSQL will not use a partial index to resolve a conflict unless the statement repeats its condition, which the library does not send. So every save failed with an error nobody saw. Run the block below. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
@@ -115,17 +117,10 @@ Complete a survey after running it and it will say 1, which is the proof.
 
 | # | What I am doing |
 |--|--|
-| A73 | Checking whether the promo code table’s 0 uses is true or is counting the wrong column. |
-| A74 | Reading a discount from the partner’s order when an order carries no code of its own. |
 | A75 | Moving the Type Analytics and Feedback filters into the shell head. |
-| A76 | The dimension-results tile: slicer, poles in line with the title, no scrollbar, Reassurance capitalised. |
 | A77 | Slicers on the Expectations, Physical Intimacy and Conflict at-a-glance tiles. |
-| A78 | Physical Intimacy All questions: drop the category prefix, keep the question. |
-| A79 | One-word horseman labels on the tile and the chart. |
 | A80 | Explore chart: "[x] × [y]" title, clustered column default, the dropdown naming the chart type. |
 | A81 | Explore pickers: draw the seven section colours, indent the options under their field. |
-| A82 | All questions row layout, on every page that has one. |
-| A83 | Who does what agreement as a 5×4 grid of mini tiles. |
 | A72 | Making Engagement readable. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
@@ -136,6 +131,14 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A76 | **The dimension tile: slicer, poles in line, no scrollbar, Reassurance capitalised.** Ten rows measured 289 points in a 255 point box and now measure 209, so nothing scrolls. It has its own slicer and reports its own n. |
+| A73 | **The promo table was showing two answers to one question.** A counter column and the real order count, side by side. One figure now, from the orders, which you can check against the table on the same page. Most codes really are at nought: the beta bought on two. |
+| A74 | **A couple buys once, so the partner who did not pay now takes their code.** On the test data that resolves 24 of 48 orders, and the tile says how many came that way rather than folding them in quietly. |
+| A78 | **Physical Intimacy All questions shows the question and nothing before it.** The topic is still a field you can group by; it is just not printed on every line. |
+| A79 | **"Criticism", not the paragraph.** The tile and the chart both asked for the one-word name and both fell back to the full question, because the word was being glued into the label and never sent on its own. |
+| A82 | **All questions rows restructured, on every page.** Question right-aligned on the left, poles and bar to its right, all on one line. Three renderers now share one row shape instead of three copies of it. |
+| A83 | **Who-does-what agreement is a 5x4 grid of tiles**, responsibility small, percentage large below it, centred, least aligned first. Twenty responsibilities is what makes five by four the right grid. |
+| A84 | **Nine conversation prompts were typed out twice**, in the server and in the website, under a comment saying they matched. They did, which is why nobody had looked. One copy now, and the gate that owns this rule covers it. |
 | A70 | **Seven pages of missing figures were one bug, now fixed.** `api/admin-data.js` builds those measures inside its response-aggregates helper, so it sends them one level down, and the admin was reading them off the top level. Every tile drew its empty state. On the stub, avg intimacy alignment goes from a dash to 78% and five canvases that drew nothing now draw. |
 | A24 | **Order Details is in and approved. Your question about the promo table is the next thing I check**: 0 uses on most codes is either true, because the beta bought on two codes, or the table is counting redemptions from the wrong column. A73. |
 | A28 | **Still Unknown, and you are right about the fix.** An order with no code of its own gets its partner’s, because a couple buys once. Doing that now as A74. |

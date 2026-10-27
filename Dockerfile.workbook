@@ -79,6 +79,18 @@ COPY api/_type-engine.js           /app/api/_type-engine.js
 # Its own module precisely so this line is one file rather than five: see the
 # note at the top of it.
 COPY api/_lib/resp-distance.js     /app/api/_lib/resp-distance.js
+# The ten dimensions: their order, their names and their poles. They were
+# written out inside _workbook-content.js, and four maps in the admin had been
+# copied from them, disagreeing about both the words and the set. Moving them
+# into their own module is what lets the admin read them, and it is a module
+# with no imports for the same reason resp-distance.js is: so this stays one
+# COPY line rather than dragging the workbook prose in behind it.
+#
+# check-workbook-image caught this the moment the move landed, which is the
+# gate doing exactly what it was written for: a file the service reaches and
+# the image does not carry crashes on the first line that needs it, and from
+# outside that is indistinguishable from the service being down.
+COPY api/_lib/dimensions.js        /app/api/_lib/dimensions.js
 
 # Bake the Git commit into the image at build time so the /version
 # endpoint can return it. Render exposes the deployed commit via the

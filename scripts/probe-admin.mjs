@@ -59,6 +59,8 @@ const { withEffectivePromoCodes, coupleKeyFromProfiles } = await import(`${ROOT}
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
 const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_questions.js`);
 const { genericLabel } = await import(`${ROOT}api/_lib/generic-label.js`);
+const { DIM_META, DIM_SCALE_POLES: DIM_SCALE_POLES_STUB } = await import(`${ROOT}api/_lib/dimensions.js`);
+const DIM_NAMES_STUB = Object.fromEntries(Object.entries(DIM_META).map(([k, v]) => [k, v.label]));
 const { REFLECTION_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
 const { ANNIVERSARY_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
 const { REFLECTION_CODES, tallyCodes } = await import(`${ROOT}api/_lib/reflection-codes.js`);
@@ -81,7 +83,14 @@ const fields = [
   { key: 'guardian_mom', label: 'Had a mom', group: 'Growing up', kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true },
   { key: 'guardian_dad', label: 'Had a dad', group: 'Growing up', kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true },
   { key: 'couple_type', label: 'Couple type', group: 'Type & axes', kind: 'cat' },
-  ...DIMS.map((d) => ({ key: `dim_${d}`, label: d, group: 'Dimensions (score 1–5)', kind: 'scale', partnerable: true })),
+  /* The label and the poles as api/admin-explore.js sends them, not the raw
+     key. This sent `label: d` and no poles at all, so the dimension tile drew
+     ten rows called "energy", "expression" and so on in lower case, each ending
+     "1 · low" and "5 · high". I read that as the product being wrong and went
+     looking for it twice. A stub is a claim about the server. */
+  ...DIMS.map((d) => ({ key: `dim_${d}`, label: (DIM_META[d] && DIM_META[d].label) || d,
+    group: 'Dimensions (score 1–5)', kind: 'scale', partnerable: true,
+    poleLow: (DIM_SCALE_POLES_STUB[d] || [])[0], poleHigh: (DIM_SCALE_POLES_STUB[d] || [])[1] })),
   /* A handful of real Ex1 questions, because the Explore page defaults its
      Rows picker to the first group beginning "Ex1" and the stub had none, so
      the page opened on "— none —" and drew an empty table. */
@@ -315,7 +324,7 @@ withEffectivePromoCodes(orders, (o) => o.couple_id || null);
    invented them would be testing my guess rather than the mapping. */
 const { EXPLORE_SECTIONS, placeAll } = await import(`${ROOT}api/_lib/explore-sections.js`);
 const _placed = placeAll(fields);
-const CUBE = { ok: true, fields: _placed.fields, sections: EXPLORE_SECTIONS,
+const CUBE = { ok: true, fields: _placed.fields, dimNames: DIM_NAMES_STUB, sections: EXPLORE_SECTIONS,
   unmappedGroups: _placed.unmapped, rows, orders, demoFilterApplied: true };
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
@@ -370,6 +379,8 @@ const server = createServer((req, res) => {
          harness is the first thing to suspect. */
       pairs: Math.floor(rows.length / 2),
       dimLabels: DIMS,
+      /* The names beside the keys, as api/admin-data.js now sends them. */
+      dimNames: DIM_NAMES_STUB,
       dimScores: DIMS.map((d, k) => 45 + (k * 6) % 50),
       expLabels: ['Household', 'Financial', 'Career', 'Extended family', 'Emotional'],
       expAlign: [72, 58, 81, 64, 49],

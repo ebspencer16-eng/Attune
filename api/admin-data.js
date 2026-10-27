@@ -50,6 +50,7 @@ import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
 import { withEffectivePromoCodes, coupleKeyFromProfiles } from './_lib/order-promo.js';
 import { genericLabel } from './_lib/generic-label.js';
+import { DIM_META } from './_lib/dimensions.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
 import { REFLECTION_CODES, tallyCodes } from './_lib/reflection-codes.js';
@@ -597,6 +598,12 @@ function buildResponseAggregates(profiles, sessions) {
       threshold: { gap: GAP, dims: CUTOFF },
     },
     dimLabels: dimKeys,
+    /* The same ten keys, in the product's own words. `dimLabels` is the key
+       order and has to stay that, because the page indexes dimScores by it.
+       The names ride alongside so public/admin.html does not restate them: it
+       cannot import from api/, and the three maps it kept instead disagreed
+       about both the words and the set. */
+    dimNames: Object.fromEntries(dimKeys.map((k) => [k, DIM_META[k]?.label || k])),
     dimScores,
     expLabels: RESPONSIBILITY_CATEGORIES.map(c => c.label),
     expAlign,

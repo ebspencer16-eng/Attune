@@ -16,20 +16,12 @@ import { respDistance } from './_lib/resp-distance.js';
 // Shared content for the personalized workbook generator.
 // Underscore prefix = not an API route (Vercel ignores it).
 
-export const DIMS = ['energy','expression','reassurance','needs','bids','conflict','repair','listening','love','feedback'];
-
-export const DIM_META = {
-  energy:      { label: 'Energy & Recharge',              left: 'Inward',     right: 'Outward',    color: '9B5DE5' },
-  expression:  { label: 'Emotional Expression',           left: 'Internal',   right: 'External',   color: '9B5DE5' },
-  reassurance: { label: 'Reassurance',                    left: 'Voiced',     right: 'Assumed',    color: '9B5DE5' },
-  needs:       { label: 'Communicating Needs',            left: 'Direct',     right: 'Indirect',   color: 'E8673A' },
-  bids:        { label: 'Bids for Connection',            left: 'Subtle',     right: 'Expressive', color: 'E8673A' },
-  conflict:    { label: 'Conflict Style',                 left: 'Engage',     right: 'Withdraw',   color: '1B5FE8' },
-  repair:      { label: 'Repairing',                      left: 'Formal',     right: 'Informal',   color: '1B5FE8' },
-  listening:   { label: 'Listening',                      left: 'Reflective', right: 'Responsive', color: 'E8673A' },
-  love:        { label: 'Emotional Intimacy',             left: 'Words',      right: 'Actions',    color: 'E8673A' },
-  feedback:    { label: 'Feedback',  left: 'Guarded',    right: 'Open',       color: '1B5FE8' },
-};
+/* DIMS and DIM_META moved to ./_lib/dimensions.js, which has no imports, so
+   the admin can read the dimension names without pulling the workbook prose in
+   behind them. Re-exported because every existing caller reads them from here
+   and one implementation with two addresses is fine; two implementations are
+   not. */
+export { DIMS, DIM_META } from './_lib/dimensions.js';
 
 // Returns dimension-level close/gap text and a weekly practice.
 // All strings support {U} and {P} substitution (caller handles).

@@ -36,6 +36,7 @@ import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 import { withEffectivePromoCodes } from './_lib/order-promo.js';
 import { genericLabel } from './_lib/generic-label.js';
+import { DIM_META, DIM_SCALE_POLES } from './_lib/dimensions.js';
 import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS } from './_conflict-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
@@ -73,23 +74,26 @@ const json = (obj, status = 200) =>
     headers: corsHeaders(),
   });
 
-const DIM_POLES = {
-  energy:     ['Independent', 'Togetherness'],
-  expression: ['Keeps it in', 'Shares openly'],
-  love:       ['Words', 'Acts & presence'],
-  listening:  ['Sits with it', 'Engages & reflects'],
-  bids:       ["Doesn't track bids", 'Small moments matter'],
-  needs:      ['Names needs directly', 'Wants to be noticed'],
-  conflict:   ['Address right away', 'Needs space first'],
-  stress:     ['Pulls inward', 'Leans on partner'],
-  repair:     ['Repairs quickly', 'Repairs when ready'],
-  feedback:   ['Gentle approach', 'Direct & specific'],
-};
-const DIM_LABELS = {
-  energy: 'Energy', expression: 'Expression', love: 'Love', listening: 'Listening',
-  bids: 'Bids', needs: 'Needs', conflict: 'Conflict', stress: 'Stress',
-  repair: 'Repair', feedback: 'Feedback',
-};
+/* DIM_POLES moved to ./_lib/dimensions.js as DIM_SCALE_POLES, beside the
+   labels, because it had exactly the same two faults as the label map and
+   made independently: a `stress` entry that is not a dimension, and no
+   `reassurance`, which is one. Every caller reads `(DIM_POLES[dim] || [])[0]`,
+   so the Reassurance slider fell back to "1 · low" and "5 · high" while the
+   other nine named their ends. The module now fails to load if the two maps
+   ever cover different dimensions. */
+const DIM_POLES = DIM_SCALE_POLES;
+/* ── THE PRODUCT'S OWN NAMES, NOT A SECOND SET ─────────────────────────────
+   This was a map typed here. It carried `stress`, which has not been a
+   dimension for a long time, and it had no `reassurance`, which is one. Every
+   caller reads `DIM_LABELS[dim] || dim`, so that field fell through to its own
+   key and Ellie read a row called "reassurance" in lower case among nine
+   capitalised ones: "Reassurance is the only dimension not capitalized."
+
+   A fallback that fires for exactly one of ten entries is the hardest kind to
+   see, because nine rows prove the mechanism works. The names come from
+   api/_lib/dimensions.js now, which is what the results pages and the workbook
+   print, so there is nothing left to drift. */
+const DIM_LABELS = Object.fromEntries(Object.entries(DIM_META).map(([k, v]) => [k, v.label]));
 const TYPE_LABELS = { W: 'W · Initiator', X: 'X · Anchor', Y: 'Y · Feeler', Z: 'Z · Protector' };
 const DEMO_LABELS = {
   /* Labelled Gender at Ellie's ask, converted from the pronoun that was
@@ -1056,6 +1060,24 @@ export default async function handler(req) {
        * disagreed one would offer a cut the other refused.
        */
       fields: placed.fields,
+      /**
+       * The ten dimensions, in the product's own words, so public/admin.html
+       * does not have to restate them. It cannot import from api/, which is
+       * why it had three separate maps of these names: a seed array, a PRETTY
+       * map and an LBL map, disagreeing about both the words and the set. Two
+       * of the three named `stress`, which is not a dimension, and omitted
+       * `reassurance`, which is.
+       *
+       * Sent rather than solved on the page, because the page has no access to
+       * the list and a list it cannot see is a list it will get wrong.
+       *
+       * Called dimNames and not dimLabels: the responses payload already sends
+       * `dimLabels`, and there it is the array of KEYS in score order. Two
+       * payloads carrying one name for two different things is how a reader
+       * takes the wrong one, which this codebase did with notes and
+       * annotations and has not forgotten.
+       */
+      dimNames: DIM_LABELS,
       sections: EXPLORE_SECTIONS,
       /* A group nobody mapped lands in Demographic as a detail row and is
          named here, so a new exercise turns up in the wrong place rather than

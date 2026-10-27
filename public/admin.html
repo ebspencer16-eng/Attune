@@ -442,6 +442,38 @@
    grouped. "Slightly" is the whole instruction: a shade off the ground, a
    hairline border and the page's own shadow, which is enough to read as one
    object without competing with the cards inside it. */
+/* ── ONE ALL QUESTIONS ROW ─────────────────────────────────────────────────
+   The shape is here rather than inline because a tile has to be able to
+   override it. Inline styles beat a class, so while this lived in the markup
+   the only way to tighten a row was !important or a second row builder, and a
+   second builder is a second answer to what a row looks like.
+
+   Ellie: "I want the Q text to be on the left and right-aligned, and I want
+   the bars with pole labels to the right of that content. Pole labels and
+   question text can wrap, but rows should be clear." */
+.qrow{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;}
+.qrow-label{flex:0 0 30%;min-width:96px;max-width:300px;font-size:.74rem;color:var(--text);text-align:right;line-height:1.35;overflow-wrap:anywhere;}
+.qrow-body{flex:1 1 auto;min-width:0;}
+.qrow-track{display:flex;align-items:center;gap:.5rem;}
+.qrow-pole{flex:0 0 22%;min-width:62px;font-size:.6rem;font-style:italic;color:var(--dim);line-height:1.3;overflow-wrap:anywhere;}
+.qrow-pole.lo{text-align:right;}
+.qrow-pole.hi{text-align:left;}
+    /* ── THE DIMENSION TILE, WHICH CANNOT GROW ─────────────────────────────────
+   Ellie: "want this to fit in the tile height without a scolling bar." Its
+   body is locked to the radar beside it, at her earlier ask "Please keep the
+   height of the tile the same", so the height is fixed and the rows have to
+   fit inside it.
+
+   Ten rows at the default shape measured 289 points in a 255 point box, and
+   the overflow was entirely wrapping: the dimension names are short but the
+   pole phrases are not, and "Doesn't track bids" took two lines. Everything
+   here exists to keep every row one line tall. Measured rather than
+   calculated, and 211 is what they come to.
+
+   Scoped to this one tile because it is the only one with a fixed height. */
+#qx-comm-high .qrow{margin-bottom:.38rem;}
+#qx-comm-high .qrow-label{flex:0 0 118px;max-width:118px;font-size:.66rem;}
+#qx-comm-high .qrow-pole{flex:0 0 104px;min-width:104px;font-size:.55rem;}
 .kpi-shell{background:var(--surface);border:1px solid var(--border);margin-bottom:1.5rem;}
 .kpi-shell .chart-head{border-bottom:1px solid var(--border);}
 .kpi-shell .kpi-card{box-shadow:none;}
@@ -1241,7 +1273,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
              it, because ten sliders do not fit in the height of a radar and
              making the tile taller would break the row she asked to keep. -->
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Avg individual dimension results</div><div class="chart-subtitle">Where people place themselves, across all ten</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Avg individual dimension results</div><div class="chart-subtitle">Where people place themselves, across all ten &middot; <span id="qx-comm-highn">n=0</span></div></div><select class="tile-slicer" id="qx-comm-highslz" title="Cut this tile by a segment" aria-label="Slz dimensions"><option value="">Everyone</option></select></div>
           <!-- Ellie: "Please keep the height of the tile the same." Ten
                sliders are about twice the height of the radar beside them, so
                the body is capped at the radar's and scrolls. Growing the tile
@@ -4793,7 +4825,12 @@ const ageData = {labels:['18–24','25–34','35–44','45–54','55+'],data:[0,
 const genderData = {labels:['Woman','Man','Non-binary','Other'],data:[0,0,0,0]};
 const relStatusData = {labels:['Dating','Engaged','Married','Remarried','Partnership'],data:[0,0,0,0,0]};
 const childrenData = {labels:['None','1','2','3+','Expecting'],data:[0,0,0,0,0]};
-let dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[0,0,0,0,0,0,0,0,0,0]};
+/* The seed the chart holds before any data arrives. It listed Stress, which
+   is not a dimension, and omitted Reassurance, which is: the same two faults
+   as the map in api/admin-explore.js, made independently. It carries no names
+   at all now, because a placeholder that names the wrong things is worse than
+   an empty one, and the real labels arrive with the data. */
+let dimScores = {labels:[],data:[]};
 const commTypes = [{l:'Balanced pair',v:0},{l:'Expressive + Reserved',v:0},{l:'Both expressive',v:0},{l:'Thinker + Feeler',v:0},{l:'Planner + Spontaneous',v:0},{l:'Other',v:0}];
 let expAlign = {labels:['Household','Financial','Career','Extended family','Emotional'],data:[0,0,0,0,0]};
 let relFeel = [0,0,0,0,0];
@@ -5197,9 +5234,13 @@ function shapeResponses(r){
   // send falls to 0, so the chart showed Stress at 0% alignment forever and
   // omitted Reassurance entirely. A restated list is how this drifts; reading
   // the server's own labels is how it cannot.
-  const PRETTY = { energy:'Energy', expression:'Expression', reassurance:'Reassurance',
-    needs:'Needs', bids:'Bids', listening:'Listening', conflict:'Conflict',
-    repair:'Repair', love:'Love', feedback:'Feedback' };
+  /* The comment above says reading the server's own labels is how this cannot
+     drift, and then a list was restated here anyway. api/admin-explore.js
+     sends `dimNames` now, the product's own words from
+     api/_lib/dimensions.js, which is what the results pages and the workbook
+     print. The key itself is the fallback, so a dimension added tomorrow
+     appears under its id rather than disappearing. */
+  const PRETTY = (r && r.dimNames) || {};
   const dimKeys = (r && r.dimLabels) || [];
   const idx=Object.fromEntries(dimKeys.map((k,i)=>[k,i]));
   return {
@@ -7273,7 +7314,12 @@ async function renderSelfPartnerGap(containerId){
   // Part 2 of the comms exercise asks every question about the partner, so the
   // partner-view score exists for all ten dimensions as pvdim_<dim>. The old
   // four dimension-level pv_<dim> fields are gone, as is the stress dimension.
-  const LBL={energy:'Energy & recharge',expression:'Expression',reassurance:'Reassurance',love:'Emotional intimacy',needs:'Communicating needs',bids:'Bids for connection',listening:'Listening',conflict:'Conflict',repair:'Repairing',feedback:'Feedback'};
+  /* A third copy of the dimension names lived here, with its own wording:
+     "Energy & recharge" against the product's "Energy & Recharge",
+     "Expression" against "Emotional Expression", "Conflict" against "Conflict
+     Style". Nothing was wrong enough to report, which is why it survived.
+     The cube sends them now. */
+  const LBL=(cube&&cube.dimNames)||{};
   const stats=Object.keys(LBL).map(dim=>{
     let n=0,sum=0;
     rows.forEach(r=>{ const self=r['dim_'+dim], pview=r['p_pvdim_'+dim]; if(self==null||pview==null||isNaN(self)||isNaN(pview)) return; n++; sum+=Math.abs(Number(self)-Number(pview)); });
@@ -7449,10 +7495,8 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
    * tiles are drawn at full width, half width and inside the Explore page.
    */
   const qRow = (labelHtml, contentHtml) =>
-    '<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;">' +
-      '<div style="flex:0 0 30%;min-width:96px;max-width:300px;font-size:.74rem;color:var(--text);text-align:right;line-height:1.35;overflow-wrap:anywhere;">' + labelHtml + '</div>' +
-      '<div style="flex:1 1 auto;min-width:0;">' + contentHtml + '</div>' +
-    '</div>';
+    '<div class="qrow"><div class="qrow-label">' + labelHtml + '</div>' +
+      '<div class="qrow-body">' + contentHtml + '</div></div>';
   const barFor = (f, drows) => {
     const counts = {}; let n = 0;
     drows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
@@ -7499,10 +7543,10 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
       // Pole labels either side of the bar (what 1 and 5 mean for THIS question).
       const lo = QX_ESC(f.poleLow || 'low'), hi = QX_ESC(f.poleHigh || 'high');
       return qRow(header,
-        '<div style="display:flex;align-items:center;gap:.5rem;">' +
-          '<span style="flex:0 0 22%;min-width:62px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;overflow-wrap:anywhere;">1 · ' + lo + '</span>' +
+        '<div class="qrow-track">' +
+          '<span class="qrow-pole lo">1 · ' + lo + '</span>' +
           '<div style="flex:1 1 auto;min-width:0;">' + barRow + '</div>' +
-          '<span style="flex:0 0 22%;min-width:62px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.2;overflow-wrap:anywhere;">5 · ' + hi + '</span>' +
+          '<span class="qrow-pole hi">5 · ' + hi + '</span>' +
         '</div>');
     }
 
@@ -7592,20 +7636,25 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
       dot(mean, theme, 2, (sliced ? 'Selected view: ' : 'Mean: ') + score(mean) + ' (n=' + n + ')', 14) + '</div>';
     // Score readout removed from the row; the dot's hover shows the exact mean.
     return qRow(header,
-      '<div style="display:flex;align-items:center;gap:.5rem;">' +
-        '<span style="flex:0 0 22%;min-width:62px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.3;overflow-wrap:anywhere;">' + loPre + lo + '</span>' +
-        track +
-        '<span style="flex:0 0 22%;min-width:62px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.3;overflow-wrap:anywhere;">' + hiPre + hi + '</span>' +
+      '<div class="qrow-track">' +
+        '<span class="qrow-pole lo">' + loPre + lo + '</span>' + track +
+        '<span class="qrow-pole hi">' + hiPre + hi + '</span>' +
       '</div>');
   };
   const measureBar = (f, drows, sliced) => (QX_MODE[containerId] === 'mean' && (f.kind === 'scale' || f.ordinal)) ? meanBar(f, drows, sliced) : barFor(f, drows);
-  const renderDist = (drows, sliced) => {
-    const meanKey = (QX_MODE[containerId] === 'mean' && sliced)
+  /* The two-dot key, which depends only on whether a cut is on. It was a
+     const inside renderDist, so the high block's own draw could not reach
+     it and threw ReferenceError the moment that tile got its own slicer.
+     Lifted rather than copied: two keys is two answers to which dot is
+     which. */
+  const meanKeyFor = (sliced) => (QX_MODE[containerId] === 'mean' && sliced)
       ? '<div style="display:flex;gap:1.1rem;align-items:center;margin:0 0 .8rem;font-size:.62rem;color:var(--muted);">' +
           '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:9px;height:9px;border-radius:50%;background:#9AA3B2;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Mean (everyone)</span>' +
           '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:13px;height:13px;border-radius:50%;background:' + theme + ';border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Selected view</span>' +
         '</div>'
       : '';
+  const renderDist = (drows, sliced) => {
+    const meanKey = meanKeyFor(sliced);
     /* ── ONE RENDERER, SOMETIMES TWO DESTINATIONS ─────────────────────
        Ellie: "Replace couple type distribution chart with 'Avg individual
        dimension results' and show the 10 slider bars with pole labels and mean
@@ -7623,10 +7672,18 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
        disagree the first time one of them was touched. A page with no such box
        is unchanged. */
     const highBox = document.getElementById(containerId + '-high');
-    const highHtml = highFields.length
-      ? meanKey + highFields.map(f => measureBar(f, drows, sliced)).join('')
-      : '';
-    if (highBox) highBox.innerHTML = highHtml;
+    /* ── WHO OWNS THE HIGH BLOCK ──────────────────────────────────────────
+       Ellie, of the dimension results tile: "need slicer". Every other tile
+       on these pages carries its own, and this one was being cut by the
+       All questions slicer in the tile below it, which is a control in one
+       box changing the numbers in another.
+
+       So when the page gives that tile a slicer of its own, the tile owns its
+       own cut and renderDist leaves it alone. When it does not, nothing
+       changes: the high block is drawn here from the same slice as the rest,
+       which is every other page that uses this explorer. One function, one
+       extra question asked of the DOM, rather than a second renderer. */
+    if (highBox && !document.getElementById(containerId + '-highslz')) highBox.innerHTML = renderHighHtml(drows, sliced);
 
     distEl.innerHTML =
       (QX_MODE[containerId] === 'mean' ? '' : scaleLegend) + (highBox ? '' : meanKey) +
@@ -7640,12 +7697,35 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
          drawing that title twice, once as a tile and once as a section. */
       (highBox || !highFields.length ? '' : sectionHead('All questions')) + detailFields.map(f => measureBar(f, drows, sliced)).join('');
   };
+  /* The high-level block's markup, built once and drawn by whichever of the
+     two slicers owns it. A second copy of this would be a second answer to
+     where the mean sits, which is the thing meanBar exists to settle. */
+  function renderHighHtml(drows, sliced) {
+    return highFields.length ? meanKeyFor(sliced) + highFields.map(f => measureBar(f, drows, sliced)).join('') : '';
+  }
   QX_REPAINT[containerId] = () => renderDist(curSlice, curSliced);
   renderDist(rows, false);
   const distModeSel = document.getElementById(containerId + '-distmode');
   if (distModeSel) {
     distModeSel.value = QX_MODE[containerId];
     distModeSel.onchange = () => { QX_MODE[containerId] = distModeSel.value; distModeSel.classList.toggle('on', distModeSel.value !== 'mean'); renderDist(curSlice, curSliced); };
+  }
+  /* The dimension tile's own slicer, when the page gives it one. It cuts the
+     high block and nothing else, and reports its own n, because a tile that
+     says "n=20" while showing a cut of four is a tile that lies quietly. */
+  const highSlz = document.getElementById(containerId + '-highslz');
+  const highBoxEl = document.getElementById(containerId + '-high');
+  if (highSlz && highBoxEl) {
+    populateSlicer(highSlz, null, rows);
+    const drawHigh = () => {
+      const fr = sliceFilter(rows, highSlz.value);
+      highSlz.classList.toggle('on', !!highSlz.value);
+      highBoxEl.innerHTML = renderHighHtml(fr, !!highSlz.value);
+      const nEl = document.getElementById(containerId + '-highn');
+      if (nEl) nEl.textContent = 'n=' + fr.length;
+    };
+    highSlz.onchange = drawHigh;
+    drawHigh();
   }
   const distSlz = document.getElementById(containerId + '-distslz');
   if (distSlz) {
