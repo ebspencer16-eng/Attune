@@ -3830,3 +3830,40 @@ walked straight through every other check in that file.
 
 **Open for Ellie:** the twelve rewrites, and whether to publish the two new
 Methodology drafts. Nothing is blocked on me.
+
+---
+
+## 2026-10-26: the admin round, and six stub faults
+
+**Where it stopped:** every item on Ellie's list is built and pushed. Three
+things are hers: A71 (run migration 097, the block is in TASKS.md), C34 (two
+slider labels for Reassurance), P9 (the admin banner overclaims about emails).
+
+**The one that mattered.** Seven "missing data" reports were a single bug.
+`api/admin-data.js` builds seven measures inside `buildResponseAggregates`, so
+it sends them under `responses`, and seven renderers in `public/admin.html`
+read them off the top level. Every tile drew its empty state. `respOf()` and
+`respSegOf()` are the two accessors now, and `check-admin-payload-keys`
+resolves each read to its binding so an aliased copy cannot slip past.
+
+**The survey has never saved an answer.** Migration 079 created the upsert's
+arbiter as a PARTIAL unique index, and PostgreSQL will not infer one without
+the statement repeating its predicate, which supabase-js does not emit. Every
+save raised 42P10 and the endpoint answered 500. 097 makes it plain.
+`check-upsert-arbiters` holds all three `onConflict` arbiters in `api/`.
+
+**What to be careful of next session.** Six probe-stub faults cost more than
+every product bug in this round. One reported seven broken tiles as working;
+five reported working features as broken and each sent me hunting a bug that
+was not there. CLAUDE.md now carries the rule: build a stub from the server's
+own return statement, and where the server imports a module to shape a value,
+import the same module and call it. The probe does that for
+`withEffectivePromoCodes`, `genericLabel` and `DIM_META` now.
+
+**Also worth knowing.** Type Analytics had three filter dropdowns that the
+code read and the markup never contained, so every figure on that page had
+always been the whole population. `api/_lib/dimensions.js` is now the one home
+for the ten dimensions; there were four maps, disagreeing about the words and
+the set. `api/_lib/convo-copy.js` holds nine sentences that were typed out
+twice. And `check-workbook-image` caught the dimensions move the moment it
+landed, which is what it exists for.
