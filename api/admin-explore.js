@@ -34,7 +34,7 @@ import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILIT
   CHILDHOOD_ROLES, guardiansOf } from './_questions.js';
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
-import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS } from './_conflict-questions.js';
+import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS } from './_conflict-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
 // other admin endpoints. Without this, Vercel's Node runtime can't invoke it
@@ -278,16 +278,50 @@ function ownFields(p) {
       r['cq_' + q.id] = (typeof raw === 'string' && raw) ? raw : null;
     }
   }
+  /* The four yes/no fields the slicer offers. Null rather than "No" when the
+     question is unanswered: a slicer that counts somebody who never took the
+     exercise as "does not show contempt" is reporting about people who are
+     not there. */
+  for (const h of HORSEMAN_KEYS) {
+    const v = r['cq_' + h.id];
+    r[h.key] = v == null ? null : (HORSEMAN_PRESENT.includes(v) ? 'Yes' : 'No');
+  }
   return r;
 }
 
 // Fields whose partner-equivalent (p_<key>) is meaningful to segment by.
+/**
+ * Whether somebody shows each of the four horsemen, as a sliceable yes or no.
+ *
+ * ── WHY IT IS DERIVED AND NOT THE ANSWER ──────────────────────────────────
+ * Ellie: "Add to slicer 'exhibits [horseman]', add 4 rows, one for each. Also
+ * add 'partner exhibits [horseman]', 4 more rows."
+ *
+ * The stored answer is a frequency, one of Never, Rarely, Sometimes, Often. A
+ * slicer over four frequencies for four horsemen is sixteen rows, and the cut
+ * anybody actually wants is "the people this shows up for". So each one
+ * becomes a yes or no at the same line the Risk patterns chart already draws:
+ * Sometimes or Often.
+ *
+ * That line is written once, here, and read by both. It was previously typed
+ * into the chart alone, so moving it would have moved the chart and left the
+ * slicer cutting at the old place, which is two answers to "does this show up
+ * for them".
+ */
+const HORSEMAN_PRESENT = ['Sometimes', 'Often'];
+const HORSEMAN_KEYS = RISK_QUESTIONS.map((q) => ({ key: 'horse_' + q.id.replace(/^c_/, ''), id: q.id, label: q.riskLabel || q.id }));
+
 const PARTNERABLE = [
   'type', 'axisEngage', 'axisOpen', ...DEMO_KEYS,
   /* Who raised each of them, which is the pair of questions you would
      most want side by side: a mom-and-dad household beside a
      grandparent one. */
   'guardian_a', 'guardian_b', 'guardian_pair', 'guardian_count', 'guardian_mom', 'guardian_dad',
+  /* The partner half of Ellie's eight rows. Marked partnerable rather than
+     computed twice: the denormaliser already copies every partnerable key onto
+     the row as p_<key>, so "partner exhibits Contempt" is the same derivation
+     read from the other side. */
+  ...HORSEMAN_KEYS.map((h) => h.key),
   ...Object.keys(DIM_KEYS).map((d) => 'dim_' + d),
   ...PERSONALITY_QUESTIONS.map((q) => 'q_' + q.id),
   ...LIFE_QUESTIONS.map((lq) => lq.id),
@@ -432,6 +466,12 @@ function buildCatalog(fbCatOptions) {
         options: RESP_OPTS.map((v) => ({ v, label: v, val: RESP_POSITION[v] })), partnerable: true });
     });
   }
+  /* One field per horseman, so the Explore page can cut by it too and every
+     slicer has a label and an option list to draw from. */
+  for (const h of HORSEMAN_KEYS) {
+    f.push({ key: h.key, label: 'Shows ' + h.label, group: 'Conflict Patterns', kind: 'cat',
+      options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true });
+  }
   for (const q of REFLECTION_QUESTIONS) {
     const isPick = q.kind === 'pick';
     const opts = (isPick ? q.options : q.labels) || [];
@@ -448,6 +488,25 @@ function buildCatalog(fbCatOptions) {
     if (q.kind === 'multi') continue;
     const valid = (q.options || []).filter((o) => o.value != null);
     const fld = { key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true, dim: q.dimension, dimLabel: IDIM_LABEL[q.dimension] || q.dimension };
+    /* ── THIS LOOP USED TO RUN OFF THE END OF ITSELF ────────────────────
+       The Conflict Patterns block below was INSIDE this loop: the intimacy
+       loop opened here, the conflict loop opened and closed in the middle of
+       it, and this loop's own tail sat after it. So every conflict field was
+       defined once per intimacy question, fourteen times each, 126 fields
+       where there should be nine.
+
+       It was invisible from the outside. The Explore page builds its lists
+       from the field array, and a duplicate field has the same key, the same
+       label and the same options as the original, so the lists looked right
+       and every dropdown carried the same entry fourteen times without saying
+       so. Closing the loop where it belongs is the whole fix. */
+    if (valid.length >= 2) {
+      const lo = valid.reduce((a, b) => (b.value < a.value ? b : a));
+      const hi = valid.reduce((a, b) => (b.value > a.value ? b : a));
+      fld.ordinal = true; fld.poleLow = lo.label; fld.poleHigh = hi.label;
+    }
+    f.push(fld);
+  }
 
   /**
    * ── CONFLICT PATTERNS, AS EXPLORABLE FIELDS ────────────────────────────
@@ -477,14 +536,33 @@ function buildCatalog(fbCatOptions) {
       partnerable: true,
       section: q.section,
       sectionLabel: CSECTION_LABEL[q.section] || q.section,
+      /**
+       * ── POLES, WHERE THE ANSWERS ARE AN ORDER ─────────────────────────
+       * Ellie: "All questions should match setup of other pages' and should
+       * have pole labels."
+       *
+       * A scale and a frequency are ordered, so they get a slider with the
+       * ends named and a mean dot, the same as every other page. The ends come
+       * from the options' own `value`, lowest and highest, rather than from
+       * their position in the list: a question whose options are written
+       * best-first would otherwise show its poles the wrong way round.
+       *
+       * A forced A-or-B is deliberately left as a category. Two answers are a
+       * split, not a position, and a dot halfway along a two-point line says
+       * less than a pair of bars. Same line this file already draws for a life
+       * question with fewer than three options.
+       *
+       * pickOne is a list of unrelated things with no order at all.
+       */
+      ...(() => {
+        if (q.kind !== 'scale' && q.kind !== 'frequency') return {};
+        const withVal = options.filter((o) => typeof o.val === 'number');
+        if (withVal.length < 2) return {};
+        const lo = withVal.reduce((a, b) => (b.val < a.val ? b : a));
+        const hi = withVal.reduce((a, b) => (b.val > a.val ? b : a));
+        return { ordinal: true, poleLow: lo.label, poleHigh: hi.label };
+      })(),
     });
-  }
-    if (valid.length >= 2) {
-      const lo = valid.reduce((a, b) => (b.value < a.value ? b : a));
-      const hi = valid.reduce((a, b) => (b.value > a.value ? b : a));
-      fld.ordinal = true; fld.poleLow = lo.label; fld.poleHigh = hi.label;
-    }
-    f.push(fld);
   }
   for (const fb of FB_FIELDS) {
     f.push({

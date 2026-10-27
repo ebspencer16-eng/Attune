@@ -165,8 +165,6 @@ select 'demo accounts with a survey row: ' || coalesce(u.email, '(no email)'),
 | A46 | **Column chart of "what it is for" picks**, above All questions. It is a multi-select, so the bars count picks and the subtitle carries how many people. |
 | A47 | **All questions uses the married wording**, not the premarital wording. Every question stores both and the admin was drawing one of them without saying which. |
 | A48 | **Chart comparing pre-intimate and intimate couples' average placement per aspect.** Needs a way to tell the two groups apart; checking what the exercise stores before building. |
-| A54 | **Eight new slicer rows**: exhibits each of the four horsemen, and partner exhibits each. |
-| A56 | **Conflict All questions** matching the other pages, with pole labels. |
 | A57 | **Type Analytics overview tile**: E:W ratio, O:G ratio, top individual type, top couple type. |
 | A58 | **Swap the individual and couple distribution charts.** |
 | A59 | **Those two tiles stop being squares**: smaller pie, tile height follows. |
@@ -212,6 +210,9 @@ section 3 explaining things, just include the context I need in section 3."
 | A52 | **"In the middle of a disagreement" and "when it touches something old"**, side by side. |
 | A53 | **What lands best from a partner, and what people do to reset.** The first is a ranking, so the bars are flipped to make taller mean better and the hover carries the real average place. |
 | A55 | **Both written conflict answers coded**, through the same frame as the reflection ones, with the uncoded share drawn. That share matters more here: the frame was written for the other page. |
+| A54 | **Eight slicer rows: shows each horseman, and partner shows each.** Derived at the same line the chart draws, so the two cannot come to mean different things by "shows". Unanswered stays blank rather than becoming No. |
+| A56 | **Conflict All questions has poles**, taken from each option's own value so a question written best-first does not show its ends backwards. The two forced choices stay as bars: two answers are a split, not a position. |
+| A67 | **Every conflict field was being defined 14 times.** The conflict loop sat inside the intimacy loop: 126 fields where there should be 9. Invisible from outside, because a duplicate has the same key and label, so every dropdown carried each entry fourteen times. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

@@ -6151,6 +6151,23 @@ const SLICE_DIMS = [
      the Explore page and every slicer read the same respondent. Nothing anyone
      wrote is in them; the query behind them asks for owner_id and created_at. */
   { key:'journal_use', label:'Journal use' }, { key:'journal_entries', label:'Journal entries' },
+  /* Ellie: "Add to slicer 'exhibits [horseman]', add 4 rows, one for each.
+     Also add 'partner exhibits [horseman]', 4 more rows."
+
+     Eight rows, four of them the partner's. The server derives each one at the
+     same line the Risk patterns chart draws, Sometimes or Often, so the chart
+     and the slicer cannot come to mean different things by the word "shows".
+     Unanswered stays null rather than becoming "No": counting somebody who
+     never took the exercise as not showing contempt reports about people who
+     are not there. */
+  { key:'horse_crit',    label:'Shows Criticism' },
+  { key:'horse_cont',    label:'Shows Contempt' },
+  { key:'horse_def',     label:'Shows Defensiveness' },
+  { key:'horse_stone',   label:'Shows Stonewalling' },
+  { key:'p_horse_crit',  label:'Partner shows Criticism' },
+  { key:'p_horse_cont',  label:'Partner shows Contempt' },
+  { key:'p_horse_def',   label:'Partner shows Defensiveness' },
+  { key:'p_horse_stone', label:'Partner shows Stonewalling' },
 ];
 const SLICE_ORDER = {
   age_range:['18-24','25-34','35-44','45-54','55+'],
