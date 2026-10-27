@@ -51,7 +51,7 @@ const { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS } = await import(`${ROOT}api/_conf
    axis_o and no pronouns. Seven tiles said "Loading" or "No data yet" and the
    probe reported no error, which is a harness saying nothing about a third of
    the page. */
-const { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } = await import(`${ROOT}api/_type-engine.js`);
+const { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS, AXIS_CONFIG, QUESTION_WEIGHTS } = await import(`${ROOT}api/_type-engine.js`);
 const { COMPILED_BETA_CODES: COMPILED_CODES } = await import(`${ROOT}api/_lib/beta-codes.js`);
 const { PERSONALITY_QUESTIONS } = await import(`${ROOT}api/_questions.js`);
 const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
@@ -455,6 +455,17 @@ const server = createServer((req, res) => {
       relLength: ['< 1 year', '1-3 years', '3+ years'][i % 3],
       relStatus: ['Engaged', 'Married', 'Dating'][i % 3],
       withdrawScore: 2 + (i % 3), openScore: 2 + ((i + 1) % 3),
+      /* ── THE PER-DIMENSION SCORES ──────────────────────────────────────
+         profileToRecord sends `scores`, one blended value per dimension, and
+         the per-dimension table on this page reads r.scores[d] for every
+         dimension in the config. Without it the page threw on every load, and
+         because an async renderer that throws logs nothing, the probe had been
+         reporting no errors about a page that never finished drawing.
+
+         Keyed off DIM_KEYS rather than a list here, so a new dimension cannot
+         leave a hole. */
+      scores: Object.fromEntries(Object.keys(DIM_KEYS).map((d, k) => [d, 2 + ((i + k) % 3)])),
+      lowConf: i % 7 === 0,
     }));
     const couples = [];
     for (let i = 0; i + 1 < rows.length; i += 2) {
@@ -462,7 +473,18 @@ const server = createServer((req, res) => {
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, individuals, couples, generatedAt: new Date().toISOString(),
-      config: { axisConfig: {}, weights: {}, flipped: [] } }));
+      /* ── THE SHAPE THE ENDPOINT ACTUALLY SENDS ────────────────────────
+         This invented a `config: { axisConfig, weights, flipped }` wrapper.
+         api/admin-typing.js sends `config: AXIS_CONFIG` directly, with
+         questionWeights, dimKeys, flipped and dims as siblings. So the page
+         read config.conflict.axis off an object that had no dimensions in it
+         and threw on every load of Type Analytics, silently, because an async
+         renderer that throws logs nothing.
+
+         Taken from the modules rather than typed, so a reweighting cannot
+         leave this behind. */
+      config: AXIS_CONFIG, questionWeights: QUESTION_WEIGHTS, dimKeys: DIM_KEYS,
+      flipped: [], blend: 0.5, dims: Object.keys(DIM_KEYS) }));
     return;
   }
   if (url.pathname.startsWith('/api/')) {

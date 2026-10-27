@@ -160,9 +160,6 @@ select 'demo accounts with a survey row: ' || coalesce(u.email, '(no email)'),
 |--|--|
 | A66 | **The ghost tile needs its own colour and a gap under it.** The shell is the page ground, so it reads as nothing. A shade off the background and a buffer before the next tile, everywhere a shell is used: Dashboard, Order Details, Package Mix, Comms, Expectations, Rel Reflection. |
 | A65 | **2000 seconds on app highlights looks wrong and I am treating it as a bug until proven otherwise.** Checking what the clock actually measures, whether it stops on background, and whether two surfaces write the same key. |
-| A57 | **Type Analytics overview tile**: E:W ratio, O:G ratio, top individual type, top couple type. |
-| A58 | **Swap the individual and couple distribution charts.** |
-| A59 | **Those two tiles stop being squares**: smaller pie, tile height follows. |
 | A61 | **Explore resets when you leave the page.** |
 | A62 | **A chart above the count on Explore**, type chosen from the shape of the cut, with a dropdown to override. |
 | A63 | **Explore rows and columns reorganised** into seven coloured sections: Demographic, Communication Styles, Expectations, Relationship Reflection, Physical Intimacy, Conflict Patterns, Engagement. Each exercise gets a high-level block then one row per question. The slicers use the same sections but only the high-level block, with one row per option. |
@@ -212,6 +209,10 @@ section 3 explaining things, just include the context I need in section 3."
 | A46 | **What it is for as a column chart.** It is select-up-to-two, so the subtitle says the bars add up to more than the people who answered. |
 | A47 | **All questions uses the married wording now.** It was drawing "how often do you imagine wanting" about people who had answered "how often do you want". |
 | A48 | **Not-yet against regularly-intimate, per aspect**, grouped by the wording each person answered under, which is the only thing in the product that separates the two. Also a new slicer: Intimacy stage. |
+| A57 | **Type Analytics tiles: E:W, O:G, top individual type, top couple type.** Reduced to whole numbers, with the real counts underneath, because a ratio with no denominator has no size. |
+| A58 | **Individual and couple distributions swapped**, individual first. |
+| A59 | **Both pies are smaller and the tiles are shorter.** They were locked to a square. |
+| A68 | **Type Analytics threw on every load and nothing said so.** The probe stub sent a config shape the real endpoint does not use, and the rows had no per-dimension scores. Pre-existing; found because the probe now reports silent rejections. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

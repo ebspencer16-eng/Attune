@@ -191,7 +191,21 @@
      wide empty margin either side, and at some widths the two tiles started
      at different heights. Measured at 1500, 1280 and 1100: the canvas read
      280x280 at all three. A square box that tracks its card fixes both. */
-  .doughnut-box{width:100%;max-width:340px;aspect-ratio:1/1;margin:0 auto}
+  /* ── NOT A SQUARE ────────────────────────────────────────────────────────
+     Ellie: "Those two chart tiles don't have to be squares, make the pie chart
+     smaller and shrink the tile height accordingly."
+
+     It was `aspect-ratio: 1/1` at 340 wide, so each tile was 340 tall plus its
+     header whatever the pie needed. A doughnut only needs to be as tall as it
+     is round; the box is shorter and the circle sizes to the smaller of the
+     two, so the pie shrinks and the tile follows rather than leaving a band of
+     white under it.
+
+     The max-height on the canvas stays off. A max-height lets Chart.js size
+     its bitmap to the full container and then CSS scales that image down,
+     which drew 260x260 of chart squeezed into a quarter of it and read as a
+     chart that had failed rather than one that had been shrunk. */
+  .doughnut-box{width:100%;max-width:260px;height:200px;margin:0 auto}
   .doughnut-box canvas{max-height:none}
   /* Unless the tile has been given a height of its own. A survey question with
      eleven answers needs a taller box than a doughnut, and this cap was
@@ -2146,20 +2160,28 @@ window.adminAuthHeaders = function(extra){
       </div>
       <div class="chart-body">
     <div class="kpi-grid" id="typesum-tiles" style="grid-template-columns:repeat(4,1fr);">
+      <!-- Ellie: "4 overview tiles should be E:W ratio, O:G ratio, Top
+           individual type, Top couple type."
+
+           A ratio rather than a percentage because that is what she asked for
+           and because it reads better at a glance: 3:2 says more about a
+           lopsided sample than 60% does. The count each side is in the
+           sub-line, since a ratio with no denominator is a shape with no
+           size. -->
       <div class="kpi-card orange">
-        <div class="kpi-label">Individuals typed</div>
-        <div class="kpi-val" id="types-n-indiv">—</div>
-        <div class="kpi-sub">With Exercise 1 answers</div>
+        <div class="kpi-label">Engage : Withdraw</div>
+        <div class="kpi-val" id="types-ew">—</div>
+        <div class="kpi-sub" id="types-ew-sub">Across typed individuals</div>
       </div>
       <div class="kpi-card indigo">
-        <div class="kpi-label">Couples typed</div>
-        <div class="kpi-val" id="types-n-couples">—</div>
-        <div class="kpi-sub">Both partners answered</div>
+        <div class="kpi-label">Open : Guarded</div>
+        <div class="kpi-val" id="types-og">—</div>
+        <div class="kpi-sub" id="types-og-sub">Across typed individuals</div>
       </div>
       <div class="kpi-card amber">
-        <div class="kpi-label">Low-confidence</div>
-        <div class="kpi-val" id="types-lowconf">—</div>
-        <div class="kpi-sub">Answers near midpoint</div>
+        <div class="kpi-label">Top individual type</div>
+        <div class="kpi-val" id="types-topind" style="font-size:1.15rem">—</div>
+        <div class="kpi-sub" id="types-topind-sub">Most common of the four</div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-label">Top couple type</div>
@@ -2173,18 +2195,6 @@ window.adminAuthHeaders = function(extra){
     <!-- Couple type distribution -->
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type distribution</div><div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div></div><select class="tile-slicer" id="slz-tcouple" title="Cut this tile by a segment" aria-label="Slz tcouple"><option value="">Everyone</option></select></div>
-        <!-- A canvas, because this is the same doughnut as the tile beside it
-             now. It was a div of HTML bars, and handing a div to Chart.js
-             throws: the tile sat on "Loading" for ever and nothing said why. -->
-        <!-- The BOX is the size, not the canvas. A max-width on the canvas lets
-             Chart.js size its bitmap to the full container and then CSS scales
-             that image down: measured 260x260 of drawing squeezed into a
-             quarter of it, which reads as a chart that failed rather than one
-             that was shrunk. -->
-        <div style="padding:.25rem 1.4rem 1rem;"><div class="doughnut-box"><canvas id="types-ct-bars"></canvas></div></div>
-      </div>
-      <div class="chart-card">
         <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Individual type distribution</div><div class="chart-card-sub">W / X / Y / Z across all typed individuals</div></div><select class="tile-slicer" id="slz-tindiv" title="Cut this tile by a segment" aria-label="Slz tindiv"><option value="">Everyone</option></select></div>
         <!-- In a box with a height, like the tile above it. A responsive chart
              with no height to fill collapses: this drew a sliver a few pixels
@@ -2195,6 +2205,18 @@ window.adminAuthHeaders = function(extra){
              quarter of it, which reads as a chart that failed rather than one
              that was shrunk. -->
         <div style="padding:.25rem 1.4rem 1rem;"><div class="doughnut-box"><canvas id="types-indiv-chart"></canvas></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type distribution</div><div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div></div><select class="tile-slicer" id="slz-tcouple" title="Cut this tile by a segment" aria-label="Slz tcouple"><option value="">Everyone</option></select></div>
+        <!-- A canvas, because this is the same doughnut as the tile beside it
+             now. It was a div of HTML bars, and handing a div to Chart.js
+             throws: the tile sat on "Loading" for ever and nothing said why. -->
+        <!-- The BOX is the size, not the canvas. A max-width on the canvas lets
+             Chart.js size its bitmap to the full container and then CSS scales
+             that image down: measured 260x260 of drawing squeezed into a
+             quarter of it, which reads as a chart that failed rather than one
+             that was shrunk. -->
+        <div style="padding:.25rem 1.4rem 1rem;"><div class="doughnut-box"><canvas id="types-ct-bars"></canvas></div></div>
       </div>
     </div>
 
@@ -8069,9 +8091,33 @@ function renderTypes() {
   // KPIs
   const tCounts = { W:0,X:0,Y:0,Z:0 }; let lowc = 0;
   indiv.forEach(r => { tCounts[r.type]++; if (r.lowConf) lowc++; });
-  document.getElementById('types-n-indiv').textContent = indiv.length || '0';
-  document.getElementById('types-n-couples').textContent = couples.length || '0';
-  document.getElementById('types-lowconf').textContent = indiv.length ? Math.round(100*lowc/indiv.length)+'%' : '—';
+  /* ── THE THREE NEW TILES ───────────────────────────────────────────────
+     Ellie: "4 overview tiles should be E:W ratio, O:G ratio, Top individual
+     type, Top couple type."
+
+     W and X are the Engage side, Y and Z the Withdraw side; W and Y are Open,
+     X and Z are Guarded. That mapping is the type engine's own and is read off
+     the letters rather than restated as a list, which is how it stays right if
+     a fifth letter ever appears.
+
+     Reduced to its simplest whole-number form, because 3:2 is a shape anybody
+     can hold and 147:98 is not. The real counts are in the sub-line, since a
+     ratio with no denominator has no size. */
+  const ratio = (a, b) => {
+    if (!a && !b) return '\u2014';
+    const g = (x, y) => y ? g(y, x % y) : x;
+    const d = g(Math.max(a, b), Math.min(a, b)) || 1;
+    return (a / d) + ':' + (b / d);
+  };
+  const engage = tCounts.W + tCounts.X, withdraw = tCounts.Y + tCounts.Z;
+  const open_ = tCounts.W + tCounts.Y, guarded = tCounts.X + tCounts.Z;
+  const put3 = (id, v, sub) => { const e = document.getElementById(id); if (e) e.textContent = v;
+    const sb = document.getElementById(id + '-sub'); if (sb) sb.textContent = sub; };
+  put3('types-ew', ratio(engage, withdraw), engage + ' engage, ' + withdraw + ' withdraw');
+  put3('types-og', ratio(open_, guarded), open_ + ' open, ' + guarded + ' guarded');
+  const topInd = Object.entries(tCounts).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1])[0];
+  put3('types-topind', topInd ? (TYPE_SLICE_LABELS[topInd[0]] || topInd[0]) : '\u2014',
+    topInd ? topInd[1] + ' of ' + indiv.length + ' individuals' : 'Nobody is typed yet');
   const ctCounts = {}; couples.forEach(c => ctCounts[c.coupleType] = (ctCounts[c.coupleType]||0)+1);
   const ctSorted = Object.entries(ctCounts).sort((a,b)=>b[1]-a[1]);
   const maxShare = couples.length ? Math.round(100*(ctSorted[0]?.[1]||0)/couples.length) : 0;
