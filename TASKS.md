@@ -41,7 +41,7 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.** Everything you sent is built and in section 3.
+**Nothing open.**
 
 ## 3. For you to review
 
@@ -50,14 +50,11 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A97 | **"Profile complete" was still half-trusting a column nothing writes.** The website modal that set `profile_setup_complete` was removed; its writer stayed in the code with no caller. The rule was "that flag OR the real fields", so the flag half was dead. It is the field test alone now, which is what you approved as S80. **Worth knowing:** anyone who passed the old modal and still has a blank field will now be asked to finish it. That is what S80 was for, but it is a behaviour change. |
-| A98 | **Seven dead functions removed from the website renderer.** One was a second copy of the Physical Intimacy prose rule that ignored the skip case the server handles, sitting next to a comment saying that section must not tell. Nothing called it, which is the only reason it was not a privacy problem. |
-| A94 | **The "read error" rows say what they measure now.** Ten rows that read "Energy & Recharge read error" and nothing else. They are how far a person's guess about their partner was from what the partner actually said, nought being a perfect read. That sentence used to live in the group name, and the picker groups by section now, so it never reached the screen. |
+| V1 | **Site and app match, and here is what that rests on.** Both are current: the app bundle on production was published after the last app commit with nothing since, and the live website bundle contains the newest commit, checked with a string that commit removed and a control string that stayed. Scoring is identical over 400 answer sets. All 29 results sections render on the site and all 29 have an app screen. Every sentence in the site's results is reachable by the app. Plans, next steps, budget, section names, category colours and 1,138 links are each held by a gate. |
+| V2 | **Four sentences are on the site and deliberately not in the app**, and I read all four: the two that explain the inline storycard reel, the couple-type fallback, and the download fallback. Each describes something the app does a different way, so copying them over would describe a mechanism that is not there. |
+| V3 | **What I did not prove.** Nothing renders the same couple on both surfaces and compares the result. Every check above compares a rule or a list, not two pictures. Building that needs the app served through its web build, which is a real piece of work. Say the word if you want it. |
 | A95 | **"as read by partner" was backwards, not just unclear.** That field is a person's own guess about their partner, on the same 1-5 scale, not anyone's read of them. Anyone cutting by it was reading the wrong person's answer. It says "Their guess about their partner: Energy & Recharge" now. |
-| A96 | **Expectations has a High level block for the first time**: Alignment across categories, then one row per category. It had 32 rows and every one was a single question. The "did these two name the same person" rule now lives in one module that both admin endpoints call, checked against the old code over 400 generated couples before switching. |
-| A92 | **The four package tiles are the row under the hero on Browse**: The Attune Assessment, Starting Out, Relationship Reflection, Attune Premium. Sorry, I named them without saying where. Clicking one now centres it; its Add to cart button is unchanged. **Still your call:** should clicking the tile itself do something else? |
 | A85 | **097 is run, so the survey can save now. The proof is one number.** Finish a survey, then open the Feedback page: the line under the title counts responses and has read 0 since the day the feature shipped. If it still reads 0 after you finish one, tell me and I will chase the write itself. |
-| A72 | **Engagement is not broken, and I was about to rebuild it on a stale note.** The "not readable" round turned out to be my own test harness, and you have approved two things on that page since. What I did find by looking: Refresh was an unstyled browser button, the Exercises chart was silently drawing three of five names, and the downloads caveat sat as a loose line outside its tile. All three fixed. The funnel and acquisition lines are your own spec from R9, so they stay. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -69,6 +66,12 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A72 | **Engagement: Refresh was an unstyled browser button, the Exercises chart drew three of five names, and the downloads caveat sat outside its tile.** The funnel and acquisition lines are your R9 spec and stayed. |
+| A92 | **The package tiles stay as they are.** Your call: clicking one centres it, and the Add to cart button is unchanged. |
+| A96 | **Expectations has a High level block**: alignment across categories, then one per category. The agreement rule now lives in one module both admin endpoints call. |
+| A94 | **The "read error" rows say what they measure.** How far a person's guess about their partner was from what the partner said, nought being a perfect read. |
+| A98 | **Seven dead functions removed from the website renderer.** One was a second copy of the Physical Intimacy prose rule that ignored the skip case the server handles. |
+| A97 | **"Profile complete" half-trusted a column nothing writes.** The modal that set it went and its writer stayed. The rule is the field test alone now, S80, so anyone who passed that modal with a blank field gets asked. |
 | P10 | **The admin was sending names, emails and shipping addresses to the browser that nothing drew.** Stripped, and a gate proves no identifying value survives. |
 | A90 | **One constant-time password comparison, not two byte-identical copies.** They agreed, which is why nobody had looked. |
 | A89 | **Five pages were built with class names nothing styled**, so their buttons and tables were bare browser defaults. One KPI card asked for a colour that is not one of the five. |
