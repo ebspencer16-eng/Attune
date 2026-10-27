@@ -3957,3 +3957,34 @@ suspect the matcher before the markup.
 **Still open: A81**, unchanged. Ellie has not yet been able to look at Explore,
 and the fallback means it works either way. The question in TASKS.md A81 is one
 glance: coloured banners, or a grey line saying the picker could not start.
+
+## 2026-10-27, third round: the Explore labels and a dead writer
+
+**Ellie's three Explore items are done.** The "read error" rows now say what
+they measure; "(as read by partner)" was backwards and is "Their guess about
+their partner"; and Expectations has a High level block for the first time,
+six rows, built on `api/_lib/resp-agreement.js` which both admin endpoints now
+share. That extraction was checked against the old inline code over 400
+generated couples before switching.
+
+**Watch for this shape.** Renaming a field's `group` moved ten fields into
+Demographic, silently, because the group string is the key into GROUP_MAP.
+Nothing failed; the picker listed them under the wrong heading. There is a
+gate now, `check-explore-groups-mapped`, and its own first version was blind
+to all four plants: it asked each field for a `mapped` flag that `placeAll`
+does not copy onto it, and its other half read a constant that was not
+exported, so it skipped in silence.
+
+**A dead writer closed a loop.** `completeProfileSetup` in src/App.jsx had no
+caller and was the only thing that ever wrote `profile_setup_complete`.
+Removing it made `check-prompt-state-written` fail, correctly. The
+profileComplete rule is now the field test alone, which is S80.
+**Behaviour change worth watching:** anyone who passed the old setup modal and
+still has a blank demographic field will now be prompted to finish it.
+
+**Nine sweeps in `scripts/_sweeps/`.** Three found nothing and say why,
+including one whose first scope reported six false positives.
+
+**Still open: A92**, and it is a question for Ellie, not work. Clicking a
+package tile on Browse now centres it, because the detailed section it used to
+jump to no longer exists. She may want it to add to cart, or do nothing.
