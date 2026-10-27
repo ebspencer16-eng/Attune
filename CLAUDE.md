@@ -561,6 +561,46 @@ And when a figure looks wrong in the harness, the first question is the same one
 this file asks about sweeps: is the harness wrong? Five times out of six here,
 it was.
 
+**A native control is drawn by the operating system, and CSS is advice it
+may ignore.** Ellie asked three times for coloured section banners in the
+Explore field pickers. The first attempt set the colour on the `<optgroup>`;
+the second added a `\u2588` block character to stand in for it. Both were wrong
+in the same way and neither could have worked: a `<select>` popup on macOS is
+painted outside the page, so the colour never arrived, and a block character
+is one glyph in a line of text rather than a bar. Her third report named it
+exactly: "I'd like for it to be a full color banner not just a square."
+
+The answer is a list of our own, and the thing that makes it safe is that the
+`<select>` stays, hidden, and the picker RENDERS it. Eleven places read its
+`.value`, set it, or listen for `change`, and `fillFieldSelect` builds its
+options from the cube; a replacement control would have meant editing all
+eleven and holding the field list twice. Selecting writes to the select and
+dispatches `change`, so nothing downstream can tell.
+
+Two things that cost a run. A value assigned in code fires no event, and this
+page assigns `.value` in four places, so the button re-reads its select from
+`render()` rather than from a list of those four. And a band whose background
+resolves to transparent is indistinguishable in the markup from one that
+works, so `check-field-picker` opens the picker in a browser and reads the
+COMPUTED colour: six bands for six optgroups, 68 options for 68, every band
+painted, six distinct colours, full width.
+
+**A definition that reads like a feature is worth grepping for before trusting
+a sentence about it.** I told Ellie the admin's Orders table holds email
+addresses because shipping a box needs them. She asked the obvious question,
+"To ship a box? What do you need?", and the answer was nothing. The Fulfilment
+page was removed on purpose in 92b3e2fb and every reader went with it in all
+but name: `renderFulfillmentTable` writes to a tbody that is not in the
+markup, `markStatus` is called only from inside that table,
+`updateDashboardFulfillmentKPIs` writes to three ids that do not exist, and
+both identifying CSV exports are defined once and called by nothing.
+
+So the server was sending buyer name, buyer email, both partner names and the
+full shipping address into the browser on every admin load, for readers that
+no longer exist, under a banner promising none of it was there. The fix was
+the payload rather than the sentence. Before telling her a surface needs
+something, grep for the reader.
+
 **A fallback that always fires is the same as no fallback, and it reads like
 cover.** Three in one session, all of the form `MAP[key] || key`.
 

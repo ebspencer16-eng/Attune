@@ -7086,14 +7086,26 @@ function populateSlicer(sel, excludeKey, rows, onlyKeys){
     /* The section's own colour on the optgroup, the same as the row and
        column pickers. Whether a native popup paints it is the platform's
        call; the indenting above does not depend on it. */
-    if (body) html += '<optgroup style="color:' + (sec.color || 'inherit') + '" label="\u2588 ' + QX_ESC(sec.label) + '">' + body + '</optgroup>';
+    /* ── NO BLOCK CHARACTER HERE EITHER ──────────────────────────────────
+       The block was standing in for a colour a native <select> will not
+       paint, and now that the row and column pickers draw a real banner it
+       was the only black square left on the page. A glyph that stands for a
+       colour nobody can see is just a glyph. The colour stays on the optgroup
+       for the browsers that do honour it, and a browser that does not now
+       shows an ordinary group heading rather than a square with no meaning.
+
+       These are small controls in tile heads rather than the two big field
+       pickers, so they keep the native list for now. Say the word and
+       mountFieldPicker goes on them too: it renders whatever select it is
+       given. */
+    if (body) html += '<optgroup style="color:' + (sec.color || 'inherit') + '" label="' + QX_ESC(sec.label) + '">' + body + '</optgroup>';
   });
   /* Anything the cube does not place keeps working, in a group that says so
      rather than being dropped. */
   const leftovers = wanted.filter(d => !placed.has(d.key));
   let other = '';
   leftovers.forEach(d => { const r = rowsFor(d); if (r) other += '<option disabled>\u00a0\u00a0' + QX_ESC(d.label) + '</option>' + r; });
-  if (other) html += '<optgroup label="\u2588 Other">' + other + '</optgroup>';
+  if (other) html += '<optgroup label="Other">' + other + '</optgroup>';
 
   sel.innerHTML = html; sel.dataset.pop = '1';
 }

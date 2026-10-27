@@ -42,9 +42,8 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
+**Nothing open.** Everything you sent is built and sitting in section 3, and
+the one thing that was waiting on you, the survey migration, is run.
 
 ## 3. For you to review
 
@@ -53,6 +52,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| S59 | **The payment path writes a row, and now something proves it every build.** It had never once been executed: a signed Stripe event now goes through the real handler against a stubbed database, and the order comes out with its package, its total and its three add-ons. The other half matters more: an unsigned event, one signed with the wrong secret and one signed six minutes ago each write nothing. |
 | A85 | **097 is run, so the survey can save now. The proof is one number.** Finish a survey, then open the Feedback page: the line under the title counts responses and has read 0 since the day the feature shipped. If it still reads 0 after you finish one, tell me and I will chase the write itself. |
 | A81 | **A full-colour banner per section, in a picker of our own.** A browser dropdown is drawn by the operating system and ignores the page, which is why the colour never showed: no CSS could have fixed it. The list is ours now, with a search box, a coloured bar per section and the questions indented under it. It renders the old dropdown rather than holding a second copy of the field list. |
 | P10 | **The admin was sending names, emails and shipping addresses to your browser that nothing drew.** Found while answering P9. Stripped on the way out, and a gate fills one order with every identifying column and proves not one of those values survives. |
