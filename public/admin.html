@@ -1097,13 +1097,18 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
         </div>
       </div>
     </div>
-    <div class="chart-card">
-      <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div><select class="tile-slicer" id="slz-pkgtrend" title="Cut this tile by a segment" aria-label="Slz pkgtrend"><option value="">Everyone</option></select></div>
-      <div class="chart-body"><canvas id="chart-pkg-stacked"></canvas></div>
-    </div>
-    <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div><select class="tile-slicer" id="slz-revpkg" title="Cut this tile by a segment" aria-label="Slz revpkg"><option value="">Everyone</option></select></div>
-      <div class="chart-body"><canvas id="chart-rev-pkg"></canvas></div>
+    <!-- Ellie: "Package split over time and revenue contribution side by
+         side, both line charts with 4 lines." One grid, so the two read as
+         the same question asked in orders and in dollars. -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Orders per month, one line per package</div></div><select class="tile-slicer" id="slz-pkgtrend" title="Cut this tile by a segment" aria-label="Slz pkgtrend"><option value="">Everyone</option></select></div>
+        <div class="chart-body"><canvas id="chart-pkg-stacked"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Dollars per month, one line per package</div></div><select class="tile-slicer" id="slz-revpkg" title="Cut this tile by a segment" aria-label="Slz revpkg"><option value="">Everyone</option></select></div>
+        <div class="chart-body"><canvas id="chart-rev-pkg"></canvas></div>
+      </div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
       <div class="chart-head"><div><div class="chart-title">Add-on attachment by package</div><div class="chart-subtitle">Share of orders in each package that include each add-on</div></div><select class="tile-slicer" id="slz-addons" title="Cut this tile by a segment" aria-label="Slz addons"><option value="">Everyone</option></select></div>
@@ -7353,8 +7358,45 @@ function orderedCats(key, rows){
  * a field whose section is unknown keeps working in a section of its own
  * rather than disappearing.
  */
+/**
+ * ── ONLY THE OPTIONS THIS TILE HAS ────────────────────────────────────────
+ * Ellie: "Slicers should only offer options that have data for that tile, the
+ * way the testimonials filter does."
+ *
+ * The rule was already written: orderedCats drops a value nobody has, and a
+ * field with no values left draws no group. What defeated it was WHO CALLED
+ * FIRST. initAllSlicers fills every slicer on the page as soon as the cube
+ * arrives, from everybody, because an empty dropdown while a tile loads looks
+ * broken. It then set `dataset.pop`, and the first line of this function
+ * returned early for ever after, so the later call from the tile's own
+ * renderer, the one that knows which rows the tile actually draws, was thrown
+ * away every time.
+ *
+ * So the guard is a fingerprint of the list rather than a flag. The same rows
+ * rebuild nothing, which is what the flag was protecting; different rows
+ * replace the list. The current choice is kept when it survives, and dropped
+ * when the new rows have nobody in it, because a cut showing zero of zero is
+ * worse than no cut.
+ */
 function populateSlicer(sel, excludeKey, rows, onlyKeys){
-  if (!sel || sel.dataset.pop) return;
+  if (!sel) return;
+  /* A short, stable signature. The markup itself is the thing being compared
+     and is far too big to park in a DOM attribute. */
+  const sign = (t) => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return t.length + ':' + h; };
+  const apply = (markup) => {
+    const sig = sign(markup);
+    if (sel.dataset.sig === sig) return;
+    const keep = sel.value;
+    sel.innerHTML = markup;
+    sel.dataset.sig = sig;
+    /* `pop` is kept so anything still reading it sees a populated control. */
+    sel.dataset.pop = '1';
+    if (keep) {
+      const still = [...sel.options].some(o => o.value === keep && !o.disabled);
+      sel.value = still ? keep : '';
+      if (!still) sel.classList.remove('on');
+    }
+  };
   const cube = window.__CUBE_FOR_SLICERS || null;
   const sections = (cube && cube.sections) || null;
   /* The section for a slicer key, read off the field the server sent. A
@@ -7385,7 +7427,7 @@ function populateSlicer(sel, excludeKey, rows, onlyKeys){
   if (!sections) {
     /* No sections in the payload: the old flat list, which still works. */
     wanted.forEach(d => { const r = rowsFor(d); if (r) html += '<optgroup label="' + QX_ESC(d.label) + '">' + r + '</optgroup>'; });
-    sel.innerHTML = html; sel.dataset.pop = '1';
+    apply(html);
     return;
   }
 
@@ -7426,7 +7468,7 @@ function populateSlicer(sel, excludeKey, rows, onlyKeys){
   leftovers.forEach(d => { const r = rowsFor(d); if (r) other += '<option disabled>\u00a0\u00a0' + QX_ESC(d.label) + '</option>' + r; });
   if (other) html += '<optgroup label="Other">' + other + '</optgroup>';
 
-  sel.innerHTML = html; sel.dataset.pop = '1';
+  apply(html);
 }
 function sliceFilter(rows, val){
   if (!val) return rows;
@@ -7675,7 +7717,8 @@ async function renderOrderChart(opts){
     const months=_last12Months();
     const rev=opts.kind==='revpkg';
     const ds=PK.map(p=>{ const acc={}; orders.forEach(o=>{ if(o.order_pkg===p[0]&&o.month) acc[o.month]=(acc[o.month]||0)+(rev?(Number(o.amount)||0):1); });
-      return {label:p[1],data:months.map(m=>Math.round(acc[m.key]||0)),backgroundColor:rev?p[2]+'AA':p[2],borderRadius:4}; });
+      return {label:p[1],data:months.map(m=>Math.round(acc[m.key]||0)),
+        borderColor:p[2],backgroundColor:p[2],fill:false,tension:.35,borderWidth:2,pointRadius:2,pointHoverRadius:5}; });
     /* ── NO NUMBERS INSIDE THESE COLUMNS ──────────────────────────────
        Ellie: "I don't want labels inside of the columns on package split over
        time, just have the hover ability so if I hover it shows the count for
@@ -7693,14 +7736,25 @@ async function renderOrderChart(opts){
        the whole column, so the interaction is per segment: `mode: 'nearest'`
        with `intersect: true` answers for the band the pointer is actually
        over. The file's default is `mode: 'index'`, which lists all four. */
-    mkChart(el,{type:'bar',data:{labels:months.map(m=>m.label),datasets:ds},options:{
-      /* valueLabels is off by default now; left explicit because this tile is
-         the one she named, and because a stacked column must never carry them
-         however the default moves. */
-      plugins:{legend:{position:'bottom'},valueLabels:false,
+    /* ── FOUR LINES, NOT A STACK ──────────────────────────────────────
+       Ellie: "Package split over time and revenue contribution side by side,
+       both line charts with 4 lines."
+
+       That replaces the stacked column, and with it the reason for the note
+       above: a stack answers "how many altogether" and hides how any one
+       package is doing, which is the question a pair of tiles about the mix
+       is for. Four lines compare packages to each other; the total is not
+       drawn, deliberately, because revenue over time is its own tile.
+
+       The hover stays per month with all four named, which is what a reader
+       of two lines that cross actually wants, so `mode: 'index'` is the
+       file's own default here rather than the per-segment one a stack
+       needed. */
+    mkChart(el,{type:'line',data:{labels:months.map(m=>m.label),datasets:ds},options:{
+      maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom'},
         tooltip:{callbacks:{label:(ctx)=>ctx.dataset.label+': '+(rev?('$'+Number(ctx.parsed.y).toLocaleString()):(ctx.parsed.y+' order'+(ctx.parsed.y===1?'':'s')))}}},
-      interaction:{mode:'nearest',intersect:true},
-      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:rev?{callback:v=>'$'+Math.round(v/1000)+'k'}:{precision:0}}}}});
+      scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{display:false},ticks:rev?{callback:v=>'$'+Math.round(v/1000)+'k'}:{precision:0}}}}});
   } else if(opts.kind==='addons'){
     /* ── WHAT COUNTS AS HAVING AN ADD-ON ──────────────────────────────────
        Ellie: "Add conflict and starting out checklist to add on attachment by
@@ -8106,11 +8160,29 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
   el.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;">Loading question-level data…</div>';
   let cube;
   try { cube = await ensureCube(); } catch (e) { el.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;">Question-level data unavailable right now.</div>'; return; }
-  const rows = cube.rows || [];
+  const allRows = cube.rows || [];
   const highFields   = (highPrefixes || []).length ? cube.fields.filter(f => highPrefixes.some(g => (f.group || '').indexOf(g) === 0)) : [];
   const detailFields = cube.fields.filter(f => groupPrefixes.some(g => (f.group || '').indexOf(g) === 0));
   const qFields = [...highFields, ...detailFields];
   if (!qFields.length) { el.innerHTML = ''; return; }
+  /**
+   * ── WHO THIS TILE IS ABOUT ────────────────────────────────────────────
+   * Ellie: "Slicers should only offer options that have data for that tile."
+   *
+   * Every explorer started from the whole cube, so the Conflict tab counted
+   * people who have never opened Conflict Patterns: its n was everybody, and
+   * its slicer offered any segment anyone on the system belongs to, including
+   * cuts that draw an empty tile.
+   *
+   * The population is anyone with an answer to one of this tile's own
+   * questions. Derived from the fields rather than from a has_<exercise>
+   * flag, because Conflict has no such flag and a new exercise would need one
+   * adding in a second place. If nothing has been answered yet, everybody
+   * stays: an empty tile should say n=0 rather than lose its controls.
+   */
+  const qKeys = qFields.map((f) => f.key);
+  const answered = allRows.filter((r) => qKeys.some((k) => r[k] != null && r[k] !== ''));
+  const rows = answered.length ? answered : allRows;
   const _hasScale = qFields.some(f => f.kind === 'scale');
   const _hasSlider = qFields.some(f => f.kind === 'scale' || f.ordinal);
   el.dataset.rendered = '1';

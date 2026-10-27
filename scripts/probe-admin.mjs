@@ -252,12 +252,26 @@ for (let i = 0; i < 40; i++) {
     r['readerr_' + d] = Number((((i + k * 3) % 7) * 0.25).toFixed(2));
   });
   r.read_error_mean = Number((DIMS.reduce((a, d) => a + (r['readerr_' + d] || 0), 0) / DIMS.length).toFixed(3));
+  /* ── ONLY THE EXERCISES THIS PERSON DID ────────────────────────────────
+     Every row carried an answer to every question while its own has_ex2 and
+     has_intimacy flags said otherwise, so the stub was two things at once:
+     a cube where a third of people have not done Expectations, and a cube
+     where everybody has. Nothing on the page could tell the difference, which
+     is why a tile offering a cut with no rows in it looked the same as one
+     that had been narrowed properly.
+
+     Conflict has no has_ flag on the server either, so it is spelled the same
+     way the page now reads it: the answers are simply absent for people who
+     did not do it. */
+  const didConflict = i % 2 === 0;
+  const has = { cq_: didConflict, iq_: r.has_intimacy, resp_: r.has_ex2, lq_: r.has_ex2, ref_: r.has_ex3 };
   for (const f of fields) {
     if (!f.options || !f.options.length) continue;
-    if (f.key.startsWith('cq_') || f.key.startsWith('iq_') || f.key.startsWith('resp_') || f.key.startsWith('lq_') || f.key.startsWith('ref_')) {
-      r[f.key] = pick(f.options, i + f.key.length).v;
-      r['p_' + f.key] = pick(f.options, i + 1 + f.key.length).v;
-    }
+    const prefix = Object.keys(has).find((k) => f.key.startsWith(k));
+    if (!prefix) continue;
+    if (!has[prefix]) continue;
+    r[f.key] = pick(f.options, i + f.key.length).v;
+    r['p_' + f.key] = pick(f.options, i + 1 + f.key.length).v;
   }
   rows.push(r);
 }
@@ -1179,6 +1193,25 @@ if (process.env.TAB) {
   }, want);
   console.log('  tab: ' + got);
   await new Promise((r) => setTimeout(r, 1500));
+}
+
+/* ── OPTS= ─────────────────────────────────────────────────────────────────
+   What a dropdown actually offers. Ellie asked for slicers that only offer
+   options with data for their tile, and the thing to measure is the list
+   itself: a screenshot of a closed select says nothing, and a native popup is
+   painted outside the page. Prints the count and the values so two runs can
+   be compared. */
+if (process.env.OPTS) {
+  const ids = process.env.OPTS.split(',').map((x) => x.trim()).filter(Boolean);
+  const got = await page.evaluate((list) => list.map((id) => {
+    const el = document.getElementById(id);
+    if (!el) return id + ': no such control';
+    const opts = [...el.options];
+    const real = opts.filter((o) => o.value && !o.disabled);
+    return id + ': ' + real.length + ' choices  [' + real.slice(0, 6).map((o) => o.value).join(' | ')
+      + (real.length > 6 ? ' | …' : '') + ']';
+  }), ids);
+  for (const line of got) console.log('  opts ' + line);
 }
 
 if (process.env.SET) {
