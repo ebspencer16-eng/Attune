@@ -229,9 +229,6 @@ select 'kind: ' || kind,
 |--|--|
 | A66 | **The ghost tile needs its own colour and a gap under it.** The shell is the page ground, so it reads as nothing. A shade off the background and a buffer before the next tile, everywhere a shell is used: Dashboard, Order Details, Package Mix, Comms, Expectations, Rel Reflection. |
 | A65 | **2000 seconds on app highlights looks wrong and I am treating it as a bug until proven otherwise.** Checking what the clock actually measures, whether it stops on background, and whether two surfaces write the same key. |
-| A61 | **Explore resets when you leave the page.** |
-| A62 | **A chart above the count on Explore**, type chosen from the shape of the cut, with a dropdown to override. |
-| A63 | **Explore rows and columns reorganised** into seven coloured sections: Demographic, Communication Styles, Expectations, Relationship Reflection, Physical Intimacy, Conflict Patterns, Engagement. Each exercise gets a high-level block then one row per question. The slicers use the same sections but only the high-level block, with one row per option. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -281,6 +278,10 @@ section 3 explaining things, just include the context I need in section 3."
 | A58 | **Individual and couple distributions swapped**, individual first. |
 | A59 | **Both pies are smaller and the tiles are shorter.** They were locked to a square. |
 | A68 | **Type Analytics threw on every load and nothing said so.** The probe stub sent a config shape the real endpoint does not use, and the rows had no per-dimension scores. Pre-existing; found because the probe now reports silent rejections. |
+| A61 | **Explore resets when you come back to it.** The cut, the filters and the measure used to survive leaving, so a filter set twenty minutes ago was still on and every figure was about a subset you had forgotten choosing. |
+| A62 | **A chart above the count, with its type chosen from the shape of the cut**, and the tile says why in words. Dropdown to override. It refuses to draw averages across two fields as a trend, and refuses past 40 cells. |
+| A63 | **Seven coloured sections in the row and column pickers**, each with a high-level half and every question under it. The slicers use the same sections and the high-level half only, one row per option, with the field name above its options. |
+| A69 | **Explore defaulted to nothing if one group were renamed.** It looked for a group starting "Ex1" and did nothing when there was none, so the page opened on "— none —" and read as broken. Falls back to the first field now. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

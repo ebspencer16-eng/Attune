@@ -55,6 +55,7 @@ import { SURVEY_QUESTIONS } from './_lib/survey.js';
 import { demoOwners, ownedBy, selectProfiles, withoutDemoOrders } from './_lib/demo-accounts.js';
 import { addonsOnOrder, ORDER_ADDONS } from './_lib/order-addons.js';
 import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
+import { EXPLORE_SECTIONS, placeAll } from './_lib/explore-sections.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -1008,13 +1009,34 @@ export default async function handler(req) {
       surveysAnon.push(row);
     }
 
+    const placed = placeAll(buildCatalog(fbCatOpts));
     return json({
       generatedAt: new Date().toISOString(),
       /* False until migration 082 has run, and the page says so when it is. */
       demoFilterApplied,
       count: rows.length,
       paired: rows.filter((r) => r.couple_id).length,
-      fields: buildCatalog(fbCatOpts),
+      /**
+       * ── THE SEVEN SECTIONS ──────────────────────────────────────────────
+       * Ellie: "Row and column organization should be as follows: Section
+       * header (with colored row) for: Demographic, Communication Styles,
+       * Expectations, Relationship Reflection, Physical Intimacy
+       * Expectations, Conflict Patterns, Engagement."
+       *
+       * Each field carries its section and whether it is high-level, decided
+       * in api/_lib/explore-sections.js. The Explore pickers draw both halves
+       * and the slicers draw only the high-level one, which is the other half
+       * of her instruction. Deciding that on the page would give those two
+       * their own copies of which group is a roll-up, and the day they
+       * disagreed one would offer a cut the other refused.
+       */
+      fields: placed.fields,
+      sections: EXPLORE_SECTIONS,
+      /* A group nobody mapped lands in Demographic as a detail row and is
+         named here, so a new exercise turns up in the wrong place rather than
+         vanishing. A field nobody can find looks exactly like one that was
+         never built. */
+      unmappedGroups: placed.unmapped,
       rows,
       orders: orderRows,
       surveys: surveysAnon,

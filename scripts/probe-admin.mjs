@@ -79,6 +79,13 @@ const fields = [
   { key: 'guardian_dad', label: 'Had a dad', group: 'Growing up', kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true },
   { key: 'couple_type', label: 'Couple type', group: 'Type & axes', kind: 'cat' },
   ...DIMS.map((d) => ({ key: `dim_${d}`, label: d, group: 'Dimensions (score 1–5)', kind: 'scale', partnerable: true })),
+  /* A handful of real Ex1 questions, because the Explore page defaults its
+     Rows picker to the first group beginning "Ex1" and the stub had none, so
+     the page opened on "— none —" and drew an empty table. */
+  ...PERSONALITY_QUESTIONS.slice(0, 6).map((q) => ({
+    key: 'q_' + q.id, label: q.text || q.id, group: 'Ex1 · Communication (1–5)', kind: 'cat',
+    options: (q.options || []).map((o) => ({ v: o.label || o, label: o.label || o })), partnerable: true,
+  })),
   ...CONFLICT_QUESTIONS.flatMap((q) => {
     let options = null;
     if (q.kind === 'scale') options = (q.options || []).map((o) => ({ v: o.label, label: o.label }));
@@ -270,7 +277,13 @@ for (let i = 0; i < 48; i++) {
     addons: addonsOnOrder(row, promo ? STUB_CODE : null),
   });
 }
-const CUBE = { ok: true, fields, rows, orders, demoFilterApplied: true };
+/* ── SECTIONS AND TIERS, FROM THE MODULE THAT DECIDES THEM ───────────────
+   The Explore pickers group by `section` and `tier` now, and a stub that
+   invented them would be testing my guess rather than the mapping. */
+const { EXPLORE_SECTIONS, placeAll } = await import(`${ROOT}api/_lib/explore-sections.js`);
+const _placed = placeAll(fields);
+const CUBE = { ok: true, fields: _placed.fields, sections: EXPLORE_SECTIONS,
+  unmappedGroups: _placed.unmapped, rows, orders, demoFilterApplied: true };
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 const server = createServer((req, res) => {

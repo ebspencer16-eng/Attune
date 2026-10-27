@@ -465,6 +465,16 @@
 .promo-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
 .promo-toggle[data-on="1"]{color:var(--text);}
 .promo-toggle[data-on="1"] .promo-dot{background:#34D399;}
+/* ── THE EXPLORE CHART ─────────────────────────────────────────────────────
+   Above the count, as asked. Fixed height so a cut with forty rows does not
+   push the table off the screen: a chart that has to be scrolled past every
+   time is a chart that gets in the way. */
+.xp-viz{background:var(--card);border:1px solid var(--border);border-radius:12px;margin:0 0 1rem;overflow:hidden;}
+.xp-viz[hidden]{display:none;}
+.xp-viz-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+  padding:.6rem .9rem;border-bottom:1px solid var(--border);}
+.xp-viz-label{font-size:.7rem;color:var(--muted);}
+.xp-viz-body{height:260px;padding:.6rem .9rem .9rem;}
 /* ── THE NEW CODE DIALOG ───────────────────────────────────────────────────
    A <dialog>, so focus, Escape and stacking are the browser's job. */
 .admin-dialog{border:none;border-radius:14px;padding:0;background:var(--card);color:var(--text);max-width:460px;width:calc(100% - 2rem);
@@ -1811,6 +1821,23 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
 
   <div class="xp-filters" id="xp-filters"></div>
   <div class="xp-title" id="xp-title"></div>
+  <!-- Ellie: "Above count section should be data visualization section. Use
+       logic to determine what type of chart you build for the cut you make,
+       and have a dropdown so the user can change chart type." -->
+  <div class="xp-viz" id="xp-viz">
+    <div class="xp-viz-head">
+      <span class="xp-viz-label" id="xp-viz-why">Chart</span>
+      <select id="xp-viz-type" aria-label="Chart type">
+        <option value="auto">Chosen for this cut</option>
+        <option value="bar">Grouped columns</option>
+        <option value="stacked">Stacked columns</option>
+        <option value="line">Lines</option>
+        <option value="pie">Pie</option>
+        <option value="none">No chart</option>
+      </select>
+    </div>
+    <div class="xp-viz-body"><canvas id="xp-viz-canvas"></canvas></div>
+  </div>
   <div class="xp-meta" id="xp-meta">Loading…</div>
   <div class="xp-tablewrap"><div id="xp-output"><div class="xp-empty">Loading individual data…</div></div></div>
 </div>
@@ -1843,16 +1870,70 @@ window.adminAuthHeaders = function(extra){
 <script>
 (function(){
   let CUBE = null, FIELDS = {}, loaded = false, FILTERS = [];
+  /* The last cut, so the chart-type dropdown can redraw without re-querying. */
+  let VIZ_CTX = null;
   const $ = (id) => document.getElementById(id);
   const adminSecret = () => window.adminApiSecret();
 
+  /**
+   * The row and column pickers, in Ellie's seven sections.
+   *
+   * ── WHAT CHANGED ────────────────────────────────────────────────────────
+   * "Row and column organization should be as follows: Section header (with
+   * colored row) for: Demographic, Communication Styles, Expectations,
+   * Relationship Reflection, Physical Intimacy Expectations, Conflict
+   * Patterns, Engagement. Each exercise section should include a high-level
+   * section (dimensions, alignment) then a detailed section with one row per
+   * question."
+   *
+   * It grouped by `f.group`, which was sixteen names in whatever order they
+   * had been added, so "Ex1 . Understanding (0 = read exactly right)" sat
+   * between two unrelated things. The section and the tier come from the
+   * server now, so this draws rather than decides.
+   *
+   * ── A COLOURED ROW, INSIDE A SELECT ─────────────────────────────────────
+   * A native <select> will not take a background on an optgroup in every
+   * browser, and this one has to work in hers rather than in principle. The
+   * section's colour goes on its label as a leading block character, which
+   * renders everywhere and survives the browser's own styling. The
+   * high-level and detailed halves are nested labels under it.
+   */
   function fillFieldSelect(sel, includeNone){
-    const groups = {};
-    CUBE.fields.forEach(f => { (groups[f.group] = groups[f.group] || []).push(f); });
+    const sections = (CUBE.sections && CUBE.sections.length) ? CUBE.sections : null;
     let html = includeNone ? '<option value="">\u2014 none \u2014</option>' : '';
-    Object.keys(groups).forEach(g => {
-      html += '<optgroup label="' + g + '">';
-      groups[g].forEach(f => { html += '<option value="' + f.key + '">' + f.label.replace(/</g,'&lt;') + '</option>'; });
+    const opt = (f) => '<option value="' + f.key + '">' + f.label.replace(/</g,'&lt;') + '</option>';
+
+    if (!sections) {
+      /* An older payload has no sections. Falling back to the flat list keeps
+         the page usable rather than empty, which is the difference between an
+         out-of-date server and a broken page. */
+      const groups = {};
+      CUBE.fields.forEach(f => { (groups[f.group] = groups[f.group] || []).push(f); });
+      Object.keys(groups).forEach(g => {
+        html += '<optgroup label="' + g + '">';
+        groups[g].forEach(f => { html += opt(f); });
+        html += '</optgroup>';
+      });
+      sel.innerHTML = html;
+      return;
+    }
+
+    sections.forEach(sec => {
+      const mine = CUBE.fields.filter(f => f.section === sec.id);
+      if (!mine.length) return;
+      const high = mine.filter(f => f.tier === 'high');
+      const detail = mine.filter(f => f.tier !== 'high');
+      /* The block is the coloured row: a select cannot be told to paint one,
+         so the colour is drawn as a character the browser will render. */
+      html += '<optgroup label="\u2588 ' + sec.label.replace(/</g,'&lt;') + '">';
+      if (high.length) {
+        html += '<option disabled>\u00a0\u00a0High level</option>';
+        high.forEach(f => { html += opt(f); });
+      }
+      if (detail.length) {
+        html += '<option disabled>\u00a0\u00a0Every question</option>';
+        detail.forEach(f => { html += opt(f); });
+      }
       html += '</optgroup>';
     });
     sel.innerHTML = html;
@@ -1981,6 +2062,99 @@ window.adminAuthHeaders = function(extra){
     $('xp-output').innerHTML = h;
     LAST = csv;
     updateTitle(rowField,rowSide,colField,colSide,cellMode,grand.n);
+    drawViz({ rLabels, cLabels, matrix, rowTot, cellMode, rowField, rowSide, colField, colSide, grand });
+  }
+
+  /**
+   * The chart above the count.
+   *
+   * ── CHOOSING THE TYPE ───────────────────────────────────────────────────
+   * Ellie: "Use logic to determine what type of chart you build for the cut
+   * you make, and have a dropdown so the user can change chart type."
+   *
+   * The shape of the cut decides it, and the tile says WHY in words, because a
+   * chart that silently changes type is one nobody trusts:
+   *
+   *   no column, few rows, counting   a pie, since it is parts of one whole
+   *   no column, many rows            columns, because a pie with fifteen
+   *                                   slices is a colour-matching exercise
+   *   a column, and the rows are an   lines, so the shape across an ordered
+   *   ordered scale                   axis is visible
+   *   a column, percentages of a row  stacked, because each row sums to 100
+   *   a column, anything else         grouped columns
+   *
+   * ── AND WHEN NOT TO DRAW ONE ────────────────────────────────────────────
+   * Averages across a two-way cut are a surface, not a series, and a line
+   * through them implies a trend between categories that have no order. Past
+   * about forty bars a chart is less readable than the table under it. Both
+   * say so rather than drawing something misleading.
+   */
+  function vizChoice(ctx){
+    const rows = ctx.rLabels.length, cols = ctx.cLabels.length;
+    const rowField = FIELDS[ctx.rowField] || {};
+    const ordered = rowField.kind === 'scale' || rowField.ordinal;
+    if (rows * Math.max(cols, 1) > 40) return { type: 'none', why: 'Too many cells to chart; the table reads better.' };
+    if (!cols) {
+      if (ctx.cellMode === 'mean') return { type: 'bar', why: 'Averages, one per row.' };
+      return rows <= 6
+        ? { type: 'pie', why: 'One field, few values: parts of a whole.' }
+        : { type: 'bar', why: 'One field, several values: columns.' };
+    }
+    if (ctx.cellMode === 'mean') return { type: 'bar', why: 'Averages across two fields: grouped columns, not a trend.' };
+    if (ctx.cellMode === 'pctRow') return { type: 'stacked', why: 'Each row is 100%, so the bars stack.' };
+    if (ordered) return { type: 'line', why: 'The rows are an ordered scale, so the shape across them matters.' };
+    return { type: 'bar', why: 'Two fields, no order: grouped columns.' };
+  }
+
+  function drawViz(ctx){
+    const box = $('xp-viz'), canvas = $('xp-viz-canvas'), why = $('xp-viz-why'), sel = $('xp-viz-type');
+    if (!box || !canvas || !sel) return;
+    if (!sel.dataset.wired) { sel.dataset.wired = '1'; sel.addEventListener('change', () => drawViz(VIZ_CTX)); }
+    VIZ_CTX = ctx;
+
+    const auto = vizChoice(ctx);
+    const picked = sel.value && sel.value !== 'auto' ? sel.value : auto.type;
+    why.textContent = sel.value && sel.value !== 'auto' ? 'Your choice' : auto.why;
+    if (picked === 'none') { box.hidden = true; return; }
+    box.hidden = false;
+
+    const PAL = ['#5C6DDA','#C55329','#34D399','#FBBF24','#9B5DE5','#E5578C','#22A5C4','#B5546E'];
+    /* The number in a cell, read the same way the table reads it, so the chart
+       and the table under it can never disagree about a value. */
+    const valueAt = (r, c) => {
+      const cell = ctx.matrix[r + '\u0000' + c];
+      if (!cell) return 0;
+      if (ctx.cellMode === 'mean') return cell.sumN ? Number((cell.sum / cell.sumN).toFixed(2)) : null;
+      if (ctx.cellMode === 'count') return cell.n || 0;
+      const base = ctx.cellMode === 'pctRow' ? (ctx.rowTot[r] || {}).n : ctx.grand.n;
+      return base ? Number((100 * (cell.n || 0) / base).toFixed(1)) : 0;
+    };
+
+    let cfg;
+    if (!ctx.cLabels.length) {
+      const data = ctx.rLabels.map(r => valueAt(r, ''));
+      cfg = picked === 'pie'
+        ? { type: 'pie', data: { labels: ctx.rLabels, datasets: [{ data, backgroundColor: PAL, borderColor: '#fff', borderWidth: 3 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } } }
+        : { type: picked === 'line' ? 'line' : 'bar',
+            data: { labels: ctx.rLabels, datasets: [{ data, backgroundColor: PAL[0], borderColor: PAL[0], borderRadius: 4, maxBarThickness: 46, tension: .3 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 10 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 } } } } };
+    } else {
+      const sets = ctx.cLabels.map((c, i) => ({
+        label: c, data: ctx.rLabels.map(r => valueAt(r, c)),
+        backgroundColor: PAL[i % PAL.length], borderColor: PAL[i % PAL.length],
+        borderRadius: 4, maxBarThickness: 34, tension: .3, fill: false,
+      }));
+      const stacked = picked === 'stacked';
+      cfg = { type: picked === 'line' ? 'line' : 'bar',
+        data: { labels: ctx.rLabels, datasets: sets },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+          scales: { y: { beginAtZero: true, stacked, grid: { display: false }, ticks: { font: { size: 10 } } },
+                    x: { stacked, grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 } } } } };
+    }
+    mkChart(canvas, cfg);
   }
 
   function labelFor(fieldKey, side){
@@ -2027,8 +2201,37 @@ window.adminAuthHeaders = function(extra){
     a.download = 'attune-explore.csv'; a.click(); URL.revokeObjectURL(a.href);
   }
 
+  /**
+   * Put the page back to how it opens.
+   *
+   * ── WHY ─────────────────────────────────────────────────────────────────
+   * Ellie: "Should reset every time I leave the page."
+   *
+   * The cut, the filters and the measure survived leaving and coming back,
+   * because `loaded` guards the whole of init and nothing cleared them. So a
+   * filter set twenty minutes ago was still on, silently, and every figure on
+   * the page was about a subset she had forgotten choosing. That is worse than
+   * a stale chart: the numbers look like the whole set.
+   *
+   * The CUBE is deliberately kept. Reloading it would be a fetch every time
+   * she passes through, and the data is not what went stale, the question was.
+   */
+  window.__resetExplore = function(){
+    if (!loaded) return;
+    FILTERS = [];
+    const firstQ = (CUBE.fields || []).find(f => f.group && f.group.indexOf('Ex1') === 0) || (CUBE.fields || [])[0];
+    if ($('xp-row-field') && firstQ) $('xp-row-field').value = firstQ.key;
+    if ($('xp-col-field')) $('xp-col-field').value = 'type';
+    if ($('xp-cell')) $('xp-cell').selectedIndex = 0;
+    const m = $('xp-measure-field'); if (m) m.selectedIndex = 0;
+    if (typeof renderFilters === 'function') renderFilters();
+    if (typeof render === 'function') render();
+  };
+
   window.__initExplore = async function(){
-    if (loaded) return;
+    /* Back on a page that is already loaded: put the question back rather than
+       fetching again. */
+    if (loaded) { window.__resetExplore(); return; }
     try {
       const s = adminSecret();
       const res = await fetch('/api/admin-explore', { headers: window.adminAuthHeaders() });
@@ -2042,7 +2245,12 @@ window.adminAuthHeaders = function(extra){
       fillFieldSelect($('xp-col-field'), true);
       fillScaleSelect($('xp-measure-field'));
       // sensible defaults: ex1 first question by individual type
-      const firstQ = data.fields.find(f => f.group && f.group.indexOf('Ex1') === 0);
+      /* ── A DEFAULT THAT CANNOT BE NOTHING ──────────────────────────────
+         This looked for a group beginning "Ex1" and did nothing when there was
+         none, leaving Rows on "— none —" and the page on "No data for this cut
+         yet": an empty page that looks broken because one group was renamed.
+         Falls back to the first field there is, which is always something. */
+      const firstQ = data.fields.find(f => f.group && f.group.indexOf('Ex1') === 0) || data.fields[0];
       if (firstQ) $('xp-row-field').value = firstQ.key;
       $('xp-col-field').value = 'type';
       ['xp-row-field','xp-col-field','xp-cell','xp-measure-field'].forEach(id => { const el = $(id); if (el) el.addEventListener('change', render); });
@@ -3733,6 +3941,10 @@ function showPage(id) {
   /* 'promos' is not a page any more: Order Details draws everything it held,
      and showPage('orders') calls renderPromosPage itself. */
   if (id==='engagement') renderEngagementPage();
+  /* Ellie: "Should reset every time I leave the page." Arriving is the moment
+     that can be acted on: leaving has no single handler, and a page that
+     resets on arrival is indistinguishable from one that reset on the way
+     out. */
   if (id==='explore' && window.__initExplore) window.__initExplore();
   if (typeof initAllSlicers === 'function') initAllSlicers();
 }
@@ -6211,6 +6423,11 @@ async function ensureCube() {
   const j = noteDemoFilter(await res.json());
   if (j.error) throw new Error(j.error);
   __cubeCache = j;
+  /* populateSlicer needs the field catalogue to know which section a cut
+     belongs to, and it is called from places that have no cube in hand. Put
+     here rather than threaded through every caller: one assignment beside the
+     cache, against a dozen signatures. */
+  window.__CUBE_FOR_SLICERS = j;
   const _cnr = explorerCouldNotRead(j);
   if (_cnr) { const host = document.getElementById('qx-root') || document.getElementById('questions'); if (host) host.insertAdjacentHTML('afterbegin', _cnr); }
   return j;
@@ -6333,16 +6550,79 @@ function orderedCats(key, rows){
   Object.keys(present).forEach(v=>{ if(base.indexOf(v)<0) base.push(v); });
   return base;
 }
+/**
+ * Every tile slicer, in the same seven sections as the Explore pickers.
+ *
+ * ── WHY IT IS GROUPED AT ALL ──────────────────────────────────────────────
+ * Ellie: "This setup should also be used for the slicers, but should not
+ * include the every-question rows, only the high-level section for the
+ * exercises. The slicer does have to include the options for each (ie.
+ * Expression - keeps it in, and Expression - Shares openly should be 2 rows.)"
+ *
+ * A slicer is one row per OPTION, not per field, so twenty-odd fields is a
+ * hundred-odd rows. Flat, that is a list nobody can find anything in. Grouped
+ * by section, with the detailed questions left out, it is navigable.
+ *
+ * ── WHICH FIELDS ARE OFFERED ──────────────────────────────────────────────
+ * SLICE_DIMS is still the list: those are the cuts that make sense over a
+ * whole tile. The section each one belongs to comes from the cube, so this and
+ * the Explore pickers cannot come to disagree about where something lives, and
+ * a field whose section is unknown keeps working in a section of its own
+ * rather than disappearing.
+ */
 function populateSlicer(sel, excludeKey, rows, onlyKeys){
   if (!sel || sel.dataset.pop) return;
-  let html='<option value="">Everyone</option>';
-  SLICE_DIMS.forEach(d=>{
-    if (d.key===excludeKey) return;
-    if (onlyKeys && onlyKeys.indexOf(d.key)<0) return;
-    const cats=orderedCats(d.key, rows); if(!cats.length) return;
-    html+='<optgroup label="'+QX_ESC(d.label)+'">'+cats.map(v=>'<option value="'+d.key+'::'+QX_ESC(v)+'">'+QX_ESC(sliceLabel(d.key,v))+'</option>').join('')+'</optgroup>';
+  const cube = window.__CUBE_FOR_SLICERS || null;
+  const sections = (cube && cube.sections) || null;
+  /* The section for a slicer key, read off the field the server sent. A
+     partner key is p_<key>, and the partner's copy of a field sits in the same
+     section as the field itself. */
+  const sectionOf = (key) => {
+    if (!cube || !cube.fields) return null;
+    const bare = key.indexOf('p_') === 0 ? key.slice(2) : key;
+    const f = cube.fields.find(x => x.key === bare);
+    return f ? f.section : null;
+  };
+  const rowsFor = (d) => {
+    const cats = orderedCats(d.key, rows);
+    if (!cats.length) return '';
+    return cats.map(v => '<option value="' + d.key + '::' + QX_ESC(v) + '">'
+      + QX_ESC(sliceLabel(d.key, v)) + '</option>').join('');
+  };
+
+  let html = '<option value="">Everyone</option>';
+  const wanted = SLICE_DIMS.filter(d => d.key !== excludeKey && (!onlyKeys || onlyKeys.indexOf(d.key) >= 0));
+
+  if (!sections) {
+    /* No sections in the payload: the old flat list, which still works. */
+    wanted.forEach(d => { const r = rowsFor(d); if (r) html += '<optgroup label="' + QX_ESC(d.label) + '">' + r + '</optgroup>'; });
+    sel.innerHTML = html; sel.dataset.pop = '1';
+    return;
+  }
+
+  const placed = new Set();
+  sections.forEach(sec => {
+    const mine = wanted.filter(d => sectionOf(d.key) === sec.id);
+    if (!mine.length) return;
+    let body = '';
+    mine.forEach(d => {
+      const r = rowsFor(d);
+      if (!r) return;
+      placed.add(d.key);
+      /* The field's own name above its options, because "Shares openly" on its
+         own does not say which dimension it belongs to. */
+      body += '<option disabled>\u00a0\u00a0' + QX_ESC(d.label) + '</option>' + r;
+    });
+    if (body) html += '<optgroup label="\u2588 ' + QX_ESC(sec.label) + '">' + body + '</optgroup>';
   });
-  sel.innerHTML=html; sel.dataset.pop='1';
+  /* Anything the cube does not place keeps working, in a group that says so
+     rather than being dropped. */
+  const leftovers = wanted.filter(d => !placed.has(d.key));
+  let other = '';
+  leftovers.forEach(d => { const r = rowsFor(d); if (r) other += '<option disabled>\u00a0\u00a0' + QX_ESC(d.label) + '</option>' + r; });
+  if (other) html += '<optgroup label="\u2588 Other">' + other + '</optgroup>';
+
+  sel.innerHTML = html; sel.dataset.pop = '1';
 }
 function sliceFilter(rows, val){
   if (!val) return rows;
