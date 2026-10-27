@@ -5184,6 +5184,24 @@ async function loadRealFunnel(orders) {
 // /api/admin-data (raw answers never reach the browser) and simply mapped onto
 // the existing chart shapes here.
 // Shape a raw responses aggregate into the client chart structures.
+/**
+ * Every figure on the Responses pages comes from buildResponseAggregates in
+ * api/admin-data.js, and the payload carries that bundle at `responses`, plus
+ * once per segment value at `responsesBySegment`. Seven renderers here read
+ * `data.inheritance`, `data.intimacyStats` and five more off the TOP level,
+ * which is a key nothing sets, so every one of those tiles drew its empty
+ * state. Ellie reported it seven times in one message as missing data.
+ *
+ * The probe agreed with the mistake rather than with the server: its stub put
+ * those keys at the top level beside `responses`, so the harness rendered
+ * every tile correctly while production rendered none of them. A stub that is
+ * wrong about the shape reports a broken feature as working, which is the
+ * mirror of the Engagement round where it reported a working one as broken.
+ *
+ * One accessor, so the path is written once and a move is one edit.
+ */
+function respOf(d){ return (d && d.responses) || {}; }
+
 function shapeResponses(r){
   // Dimensions come from the server rather than being restated here. The old
   // hardcoded list still had 'stress', a dimension folded into Conflict Style
@@ -5892,7 +5910,7 @@ async function renderIntimacySummary() {
   const host = document.getElementById('pisum-tiles');
   if (!host) return;
   const data = await fetchAdminData();
-  const st = data && data.intimacyStats;
+  const st = respOf(data).intimacyStats;
   const put = (id, v, sub) => { const e = document.getElementById(id); if (e) e.textContent = v;
     const sb = document.getElementById(id + '-sub'); if (sb) sb.textContent = sub; };
   if (!st) {
@@ -5977,7 +5995,7 @@ async function renderConflictExtras() {
      hover carries the real place, which is the number anybody would quote. */
   {
     const el = document.getElementById('chart-crepair');
-    const rows = (data && data.repairRank) || [];
+    const rows = respOf(data).repairRank || [];
     if (el && rows.length) {
       const worst = Math.max(...rows.map(r => r.place));
       mkChart(el, { type: 'bar',
@@ -5992,7 +6010,7 @@ async function renderConflictExtras() {
   }
 
   /* ── THE TWO CODED TEXT CHARTS ──────────────────────────────────────── */
-  const cc = data && data.conflictCodes;
+  const cc = respOf(data).conflictCodes;
   if (!cc || !cc.questions) return;
   const byId = Object.fromEntries((cc.frame || []).map(c => [c.id, c.label]));
   for (const q of cc.questions) {
@@ -6131,7 +6149,7 @@ async function renderReflectionCodes() {
   const sub = document.getElementById('refcode-sub');
   if (!el || !sel) return;
   const data = await fetchAdminData();
-  const rc = data && data.reflectionCodes;
+  const rc = respOf(data).reflectionCodes;
   if (!rc || !rc.questions || !rc.questions.length) {
     if (el.parentElement) el.parentElement.innerHTML =
       '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">No written answers have been coded yet.</div>';
@@ -6176,7 +6194,7 @@ async function renderInheritance() {
   const genEl = document.getElementById('chart-inherit-gender');
   if (!shapeEl && !genEl) return;
   const data = await fetchAdminData();
-  const inh = data && data.inheritance;
+  const inh = respOf(data).inheritance;
   if (!inh) {
     for (const el of [shapeEl, genEl]) {
       if (el && el.parentElement) el.parentElement.innerHTML =
@@ -6220,7 +6238,7 @@ async function renderExpSummary() {
   const host = document.getElementById('expsum-tiles');
   if (!host) return;
   const data = await fetchAdminData();
-  const couples = (data && Array.isArray(data.expCoupleDistances)) ? data.expCoupleDistances : [];
+  const couples = Array.isArray(respOf(data).expCoupleDistances) ? respOf(data).expCoupleDistances : [];
   setTileN(host, couples.length);
 
   const mean = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
@@ -6248,7 +6266,7 @@ async function renderExpSummary() {
      notices has drifted because both halves keep producing figures. If the
      server did not send it, these two tiles say so rather than quietly
      splitting the couples at a guess. */
-  const line = (data && typeof data.alignedBand === 'number') ? data.alignedBand : null;
+  const line = (typeof respOf(data).alignedBand === 'number') ? respOf(data).alignedBand : null;
   if (line == null) {
     put('es-gap-mis', '\u2014', 'The alignment threshold was not sent');
     put('es-gap-al', '\u2014', 'The alignment threshold was not sent');

@@ -10,8 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A60 | **095 is run: paste me the table.** It says whether the survey row is missing, unjoinable, or being excluded as a demo account. I cannot act on it without seeing which. |
-| A64 | **096 is run: paste me that table too.** It says whether `page_events` has any rows. If it does and Engagement still looks wrong, tell me what you see and I will chase it. |
+| A71 | **The survey has never saved one answer, and the fix is a migration you run.** Your 095 output was right: zero rows. The upsert points at an index migration 079 created as a partial one, and PostgreSQL will not use a partial index to resolve a conflict unless the statement repeats its condition, which the library does not send. So every save failed with an error nobody saw. Run the block below. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -41,10 +40,93 @@ Every code block says which window it goes in, above the block.
 
 ---
 
+### A71: run this
+
+Paste this into the **Supabase SQL Editor**, not Terminal.
+
+<!-- SQL 097_survey_upsert_arbiter.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 097: the survey has never saved a single answer, and this is why.
+--
+-- ── WHAT ELLIE SAW ──────────────────────────────────────────────────────────
+-- She completed a survey. 095 then reported zero rows in survey_responses:
+-- not an unjoinable row, not a row excluded as a demo account, no row at all.
+-- Nothing has saved an answer since the survey shipped.
+--
+-- ── WHY ─────────────────────────────────────────────────────────────────────
+-- api/survey.js saves a signed-in person's answers with
+--
+--   .upsert(row, { onConflict: 'respondent_id' })
+--
+-- and 079 created the index that is supposed to arbitrate that conflict as a
+-- PARTIAL one:
+--
+--   create unique index survey_responses_respondent_idx
+--     on survey_responses (respondent_id) where respondent_id is not null;
+--
+-- PostgreSQL will not infer a partial index as an ON CONFLICT arbiter unless
+-- the statement repeats the index's own predicate, and supabase-js emits only
+-- the column list. So every save raised 42P10, "there is no unique or
+-- exclusion constraint matching the ON CONFLICT specification". The endpoint
+-- caught it, found nothing in the message matching its "storage is not set up"
+-- test, and answered 500 "Could not save".
+--
+-- Three things hid it. The anonymous path is a plain insert and works, so the
+-- code is not uniformly broken. supabase-js RETURNS its error rather than
+-- throwing, so nothing crashed. And the table exists and answers queries, so
+-- every check that asked whether survey storage was ready got yes: an empty
+-- table answers like a working one, which this repo has written down before.
+--
+-- ── THE FIX ─────────────────────────────────────────────────────────────────
+-- A plain unique index instead. The predicate was never doing any work:
+-- PostgreSQL treats NULLs as distinct in a unique index by default, so a plain
+-- unique index on respondent_id already permits unlimited anonymous rows,
+-- which is the only thing `where respondent_id is not null` was there for.
+-- Same constraint, same behaviour, and inferrable.
+--
+-- ── SAFE TO RUN TWICE ───────────────────────────────────────────────────────
+-- Both statements are conditional. Running this on a database that has already
+-- had it does nothing.
+-- ============================================================================
+
+drop index if exists public.survey_responses_respondent_idx;
+
+create unique index if not exists survey_responses_respondent_key
+  on public.survey_responses (respondent_id);
+
+comment on index public.survey_responses_respondent_key is
+  'One row per person. Plain rather than partial so ON CONFLICT (respondent_id) '
+  'can infer it: a partial index needs its predicate repeated in the statement, '
+  'which supabase-js does not emit. NULLs are distinct in a unique index, so '
+  'anonymous responses are still unlimited.';
+
+-- What the fix is for: this should be 0 before the next survey is saved and
+-- rise afterwards. If it is still 0 after somebody completes one, the write is
+-- failing somewhere else and the endpoint is the place to look, not the index.
+select count(*) as survey_rows_now from public.survey_responses;
+```
+<!-- /SQL -->
+
+It prints one number at the end, the survey rows you have now. It will say 0.
+Complete a survey after running it and it will say 1, which is the proof.
+
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
+| A73 | Checking whether the promo code table’s 0 uses is true or is counting the wrong column. |
+| A74 | Reading a discount from the partner’s order when an order carries no code of its own. |
+| A75 | Moving the Type Analytics and Feedback filters into the shell head. |
+| A76 | The dimension-results tile: slicer, poles in line with the title, no scrollbar, Reassurance capitalised. |
+| A77 | Slicers on the Expectations, Physical Intimacy and Conflict at-a-glance tiles. |
+| A78 | Physical Intimacy All questions: drop the category prefix, keep the question. |
+| A79 | One-word horseman labels on the tile and the chart. |
+| A80 | Explore chart: "[x] × [y]" title, clustered column default, the dropdown naming the chart type. |
+| A81 | Explore pickers: draw the seven section colours, indent the options under their field. |
+| A82 | All questions row layout, on every page that has one. |
+| A83 | Who does what agreement as a 5×4 grid of mini tiles. |
+| A72 | Making Engagement readable. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -54,53 +136,18 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A24 | **Order Details replaces Orders and Promo Analytics**, above Package Mix. Three tiles in a shaded shell with both slicers, orders table at 8 rows with sort carats and Promo split from Discount, discount distribution, then the promo code table. |
-| A25 | **The + button creates a live code.** No migration: the admin could already write the row and nothing had ever called it. Name, discount, package, which add-ons it gives free, max uses. It also could not write four of the five add-on columns the checkout honours; it can now. |
-| A26 | **Status column with an on/off toggle** on every code, including the ones never redeemed. A compiled code reads "Always on" rather than drawing a switch that cannot do anything. |
-| A27 | **The funnel counted orders at the first bar and couples at the rest.** A couple who bought twice stood taller than a couple who had started. Couples all the way across now. |
-| A28 | **Discount distribution had 9 of 18 as Unknown.** Codes come from two places and the admin was sent one of them, so every order on a compiled code looked up to nothing. |
-| A29 | **Every page with top tiles is in the shaded shell now.** Dashboard, Order Details, Package Mix and Responses carry both slicers. Feedback and Type Analytics carry the shell but keep their own existing filters: giving them a second set would be two ways to filter one tile. Moving their controls into the shell head is the one thing left. |
-| S78 | **Press Send invite on Order Details and Abram gets his.** New tile, "Waiting on a partner": anyone with a partner email, a code and nobody joined. Rebecca is A878FBAD. It lists codes only, never names or addresses, because that page promises it holds none. |
-| S74 | **Rebecca did finish her setup and her first exercise. My SQL said otherwise and was wrong.** 50 answers IS all of Communication: 25 about herself, 25 about Abram. Expectations is 6 answers in. Her profile is complete by the product's own rule. The only thing missing was Abram's invite. |
-| A30 | **Data labels gone, everywhere.** There were two renderers and I had turned off one; svBarChart had its own. Those tiles now have no axis and no number, so hover is the readout. Say if they read too bare and I will put the axis back. |
-| A31 | **Avg individual dimension results** replaces couple type distribution: ten sliders, pole labels, mean placement, same tile height. The ten are the block that was at the foot of that page, moved rather than rebuilt. |
-| A32 | **Pole labels wrap in full** instead of stopping at sixteen characters, and the comparison dot is the right way round everywhere: small grey for everyone, large coloured for your cut. |
-| A39 | **Every overview tile shows the uncut figure** under the stat when a slicer is on. Dashboard, Order Details and Package Mix, driven and photographed with a period selected. |
-| S79 | **The back door was that "Prefer not to say" was stored as empty, and was the default.** Identical to never answering, and pre-selected on all five questions. It has a value of its own now, nothing is pre-selected, and declining is still one click. |
-| S80 | **Rebecca will be prompted, and so will anyone else who skipped.** Profile complete now means both names, pronouns and the five questions. The columns were not even being selected, so adding the rule without that would have told every account its profile was unfinished. |
-| C33 | **Belonging** reads your line, and WORDS-REVIEW.md is regenerated from the module. |
-| A36 | **I was wrong about why that chart was empty, and the real cause is worse.** It held five rows of real data and `display:none`. The tab switcher hid every element whose id starts with `resp-`, and the chart is called `resp-agree-bars`. It draws now. |
-| A33 | **Bottom sections are called All questions**, and the comparison mark is in: small grey for everyone, large coloured for your cut, on every slider in admin. |
-| A34 | **Communication at a glance**: alignment, understanding, and the two you agreed to. On the stub they name different dimensions, conflict and love, which is the whole argument that they are not inverses. |
-| A38 | **Expectations at a glance**: life & values, responsibilities, and the gap among misaligned couples against the gap among aligned ones. If the aligned group sits just under the line and the misaligned just over it, the label is doing more work than the distance. |
-| A37 | **Responsibilities read Myself to My partner with a mean dot**, and the life questions are sliders with their own first and last options as poles. "N/A" is off the axis rather than parked at the far end, where it would have read as the strongest possible "my partner". Order already matched the exercise. |
-| A40 | **Qualities most admired is a column chart above All questions**, and reflection rows no longer carry the section name: four of the five said "How We're Doing", so the useful half of each row started a third of the way in. |
-| A42 | **Expected against experienced, both halves, on the Expectations tab.** The shape reading needs no inference. The gendered one reads pronouns and role names and says so on the tile. Everything it cannot place is a grey bar, not a dropped row. Deleting api/_lib/inherited-roles.js and two callers undoes it. |
-| A43 | **Ten themes, one frame across all eight written questions, with a picker.** Yours to move: `api/_lib/reflection-codes.js`, one file. Every chart shows how many answers matched no theme, in grey, because that share is the measure of whether the frame is any good. |
-| A49 | **Conflict at a glance**: avg self assessment out of 5, % who speak up right away, most common horseman, most common reset. One slicer over the whole page. |
-| A50 | **The four horsemen as a column chart**, counting people who said sometimes or often. |
-| A51 | **"When a disagreement starts" as a pie**, beside it. |
-| A52 | **"In the middle of a disagreement" and "when it touches something old"**, side by side. |
-| A53 | **What lands best from a partner, and what people do to reset.** The first is a ranking, so the bars are flipped to make taller mean better and the hover carries the real average place. |
-| A55 | **Both written conflict answers coded**, through the same frame as the reflection ones, with the uncoded share drawn. That share matters more here: the frame was written for the other page. |
-| A54 | **Eight slicer rows: shows each horseman, and partner shows each.** Derived at the same line the chart draws, so the two cannot come to mean different things by "shows". Unanswered stays blank rather than becoming No. |
-| A56 | **Conflict All questions has poles**, taken from each option's own value so a question written best-first does not show its ends backwards. The two forced choices stay as bars: two answers are a split, not a position. |
-| A67 | **Every conflict field was being defined 14 times.** The conflict loop sat inside the intimacy loop: 126 fields where there should be 9. Invisible from outside, because a duplicate has the same key and label, so every dropdown carried each entry fourteen times. |
-| A44 | **Physical Intimacy at a glance**: avg alignment, most-picked "what it is for", % who say their partner initiates, and appetite-for-novelty shown as closeness so it reads the same way as every other alignment figure. |
-| A46 | **What it is for as a column chart.** It is select-up-to-two, so the subtitle says the bars add up to more than the people who answered. |
-| A47 | **All questions uses the married wording now.** It was drawing "how often do you imagine wanting" about people who had answered "how often do you want". |
-| A48 | **Not-yet against regularly-intimate, per aspect**, grouped by the wording each person answered under, which is the only thing in the product that separates the two. Also a new slicer: Intimacy stage. |
-| A57 | **Type Analytics tiles: E:W, O:G, top individual type, top couple type.** Reduced to whole numbers, with the real counts underneath, because a ratio with no denominator has no size. |
-| A58 | **Individual and couple distributions swapped**, individual first. |
-| A59 | **Both pies are smaller and the tiles are shorter.** They were locked to a square. |
-| A68 | **Type Analytics threw on every load and nothing said so.** The probe stub sent a config shape the real endpoint does not use, and the rows had no per-dimension scores. Pre-existing; found because the probe now reports silent rejections. |
-| A61 | **Explore resets when you come back to it.** The cut, the filters and the measure used to survive leaving, so a filter set twenty minutes ago was still on and every figure was about a subset you had forgotten choosing. |
-| A62 | **A chart above the count, with its type chosen from the shape of the cut**, and the tile says why in words. Dropdown to override. It refuses to draw averages across two fields as a trend, and refuses past 40 cells. |
-| A63 | **Seven coloured sections in the row and column pickers**, each with a high-level half and every question under it. The slicers use the same sections and the high-level half only, one row per option, with the field name above its options. |
-| A69 | **Explore defaulted to nothing if one group were renamed.** It looked for a group starting "Ex1" and did nothing when there was none, so the page opened on "— none —" and read as broken. Falls back to the first field now. |
-| A66 | **Every page with top tiles is in the shaded shell now.** Engagement was the last one loose on the background; its heading and slicer moved into the shell head where every other page keeps them. |
-| A65 | **The screen-time fix is published.** It was committed after the last update, so your phone still had the old clock. Two launches to pick it up: the first downloads, the second runs it. |
-| W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
+| A70 | **Seven pages of missing figures were one bug, now fixed.** `api/admin-data.js` builds those measures inside its response-aggregates helper, so it sends them one level down, and the admin was reading them off the top level. Every tile drew its empty state. On the stub, avg intimacy alignment goes from a dash to 78% and five canvases that drew nothing now draw. |
+| A24 | **Order Details is in and approved. Your question about the promo table is the next thing I check**: 0 uses on most codes is either true, because the beta bought on two codes, or the table is counting redemptions from the wrong column. A73. |
+| A28 | **Still Unknown, and you are right about the fix.** An order with no code of its own gets its partner’s, because a couple buys once. Doing that now as A74. |
+| A29 | **Approved. The last piece is moving the Type Analytics and Feedback filters up into the shell head**, where every other page keeps them. A75. |
+| A31 | **Four changes going in**: a slicer, poles and bar on the same line as the dimension name, the whole thing inside the tile with no scrollbar, and Reassurance capitalised. A76. |
+| A38 | **The figures are in and were never reaching the page.** Three tiles plus the two gap measures all draw now; see A70 for why. The slicers are the remaining half, A77. |
+| A49 | **Two things**: the horseman tile prints the whole question where it should say one word, and "speak up right away" had no figure because of A70. The word is A79. |
+| A51 | **The pie has its data back through A70. Its column labels are the whole question text** and should be one word each: Criticism, Defensiveness, Contempt, Stonewalling. A79. |
+| A44 | **The four figures are in and were never reaching the page.** Avg alignment reads 78% on the stub where it read a dash. See A70. The slicers are the remaining half, A77. |
+| A47 | **Married wording is approved. The All questions rows still print the category before the question**, and you only want the question. A78. |
+| A62 | **Three changes**: the title reads "[x] × [y]" with "Count of" gone, the default example is a clustered column, and the dropdown names the chart type rather than saying "Chosen for this cut". A80. |
+| A63 | **The seven section colours are not drawing and the lists need indenting** so an option reads as sitting under its field. A81. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -112,6 +159,42 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A25 | **The + button creates a live code**: name, discount, package, free add-ons, max uses. The admin could already write the row and nothing called it, and it could not write four of the five add-on columns. |
+| A26 | **Status column with an on/off toggle** on every code, including ones never redeemed. A compiled code reads "Always on" rather than drawing a switch that cannot do anything. |
+| A27 | **The funnel counted orders at the first bar and couples at the rest**, so a couple who bought twice stood taller than a couple who had started. Couples all the way across now. |
+| S78 | **Abram’s invite is sent.** You pressed it on the new "Waiting on a partner" tile, which lists codes only, never names or addresses. |
+| S74 | **Rebecca did finish her setup and her first exercise. My SQL said otherwise and was wrong.** 50 answers IS all of Communication: 25 about herself, 25 about Abram. The only thing missing was Abram’s invite. |
+| A30 | **Data labels gone, everywhere.** There were two renderers and I had turned off one; svBarChart had its own. Hover is the readout now. |
+| A32 | **Pole labels wrap in full** instead of stopping at sixteen characters, and the comparison dot is the right way round everywhere. |
+| A39 | **Every overview tile shows the uncut figure** under the stat when a slicer is on. Dashboard, Order Details and Package Mix. |
+| S79 | **The back door was "Prefer not to say" stored as empty, and pre-selected.** It has a value of its own now, nothing is pre-selected, and declining is still one click. |
+| S80 | **Profile complete now means both names, pronouns and the five questions.** The columns were not even being selected, so adding the rule without that would have told every account its profile was unfinished. |
+| C33 | **Belonging** reads your line, and WORDS-REVIEW.md is regenerated from the module. |
+| A36 | **Five rows of real data behind `display:none`.** The tab switcher hid every element whose id starts with `resp-`, and the chart is called `resp-agree-bars`. |
+| A34 | **Communication at a glance**: alignment, understanding, and the two you agreed to. |
+| A37 | **Responsibilities read Myself to My partner with a mean dot**, and the life questions are sliders with their own first and last options as poles. "N/A" is off the axis. |
+| A40 | **Qualities most admired is a column chart above All questions**, and reflection rows no longer carry the section name: four of five said "How We’re Doing". |
+| A43 | **Ten themes, one frame across all eight written questions, with a picker.** Yours to move: `api/_lib/reflection-codes.js`. Every chart draws the no-theme share in grey. |
+| A54 | **Eight slicer rows: shows each horseman, and partner shows each.** Derived at the line the chart draws, so the two cannot drift. Unanswered stays blank rather than becoming No. |
+| A56 | **Conflict All questions has poles**, taken from each option’s own value so a question written best-first does not show its ends backwards. The two forced choices stay as bars. |
+| A67 | **Every conflict field was being defined 14 times.** The conflict loop sat inside the intimacy loop: 126 fields where there should be 9. Every dropdown carried each entry fourteen times. |
+| A57 | **Type Analytics tiles: E:W, O:G, top individual type, top couple type.** Whole numbers with the real counts underneath, because a ratio with no denominator has no size. |
+| A58 | **Individual and couple distributions swapped**, individual first. |
+| A59 | **Both pies are smaller and the tiles are shorter.** They were locked to a square. |
+| A68 | **Type Analytics threw on every load and nothing said so.** The probe stub sent a config shape the real endpoint does not use. Pre-existing; found because the probe now reports silent rejections. |
+| A61 | **Explore resets when you come back to it.** The cut, filters and measure used to survive leaving, so a filter set twenty minutes ago was still on. |
+| A69 | **Explore defaulted to nothing if one group were renamed.** It looked for a group starting "Ex1" and opened on "— none —" when there was none. Falls back to the first field now. |
+| A66 | **Engagement is in the shaded shell**, the last page loose on the background; its heading and slicer moved into the shell head. |
+| A65 | **The screen-time fix is published.** It was committed after the last update, so your phone had the old clock. |
+| W103 | **Every column keeps its name**, at any width. All ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
+| A46 | **What it is for as a column chart**, with a subtitle saying the bars add up to more than the people who answered, because it is select-up-to-two. Its missing figures were the payload bug in A70. |
+| A48 | **Not-yet against regularly-intimate, per aspect**, grouped by the wording each person answered under, plus an Intimacy stage slicer. Its missing figures were the payload bug in A70. |
+| A42 | **Expected against experienced, both halves, on the Expectations tab.** Both measures were being sent and neither was reaching the page: that was the payload bug in A70, now fixed. |
+| A53 | **What lands best from a partner, and what people do to reset.** The ranking bars are flipped so taller means better and the hover carries the real average place. Its missing figures were the payload bug in A70. |
+| A55 | **Both written conflict answers coded**, through the same frame as the reflection ones, with the uncoded share drawn. Its missing figures were the payload bug in A70. |
+| A52 | **"In the middle of a disagreement" and "when it touches something old"**, side by side. Their missing figures were the payload bug in A70. |
+| A50 | **The four horsemen as a column chart**, counting people who said sometimes or often. |
+| A33 | **Bottom sections are called All questions**, and the comparison mark is in: small grey for everyone, large coloured for your cut. |
 | A35 | **Responsibilities and Life & Values are a matched pair at half width**, both column charts. Responsibilities had been a radar. |
 | S75 | **094 ran: everybody who can invite a partner now has a code.** The server mints one for any surface now, so a profile can no longer be saved without one. |
 | S77 | **You were right, this was already done.** It was the same fix as S75, listed twice by me. |

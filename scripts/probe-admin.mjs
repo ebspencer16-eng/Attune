@@ -459,7 +459,23 @@ const server = createServer((req, res) => {
       { code: 'SPRING25', package_key: 'core', discount_mode: 'percent', discount_value: 25, active: true, uses_count: 3, max_uses: 50, source: 'issued' },
       { code: 'FRIENDS10', package_key: '*', discount_mode: 'fixed', discount_value: 10, active: false, uses_count: 0, max_uses: null, source: 'issued' },
     ];
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, reflectionCodes, conflictCodes, repairRank, intimacyStats, responses: payload }));
+    /* ── THE AGGREGATES NEST UNDER `responses`, AS THE SERVER NESTS THEM ──
+       These eight were listed at the TOP level here, beside `responses`,
+       while api/admin-data.js returns every one of them from
+       buildResponseAggregates and therefore sends them inside `responses`.
+       So the probe rendered seven tiles correctly that production drew empty,
+       and the stub was the only thing claiming they worked.
+
+       A stub is a claim about the server. When it is wrong about the shape it
+       reports a broken feature as working, which is how this shipped; the
+       Engagement round was the same mistake in the other direction, reporting
+       a working page as broken. Build the stub from the server's own return
+       statement rather than from what the client happens to read. */
+    const responses = Object.assign({}, payload, {
+      expCoupleDistances, alignedBand: 0.2, inheritance,
+      reflectionCodes, conflictCodes, repairRank, intimacyStats,
+    });
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, responses, responsesBySegment: { '': responses } }));
     return;
   }
   /* ── ENGAGEMENT ─────────────────────────────────────────────────────────
