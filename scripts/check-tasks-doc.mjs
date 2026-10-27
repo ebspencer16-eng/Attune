@@ -65,6 +65,59 @@ for (const sec of sections) {
   }
 }
 
+// ── 1b. a review row does not point at another row ────────────────────────
+/**
+ * Ellie: "lots of these are half-open still even though they're not listed in
+ * sec2."
+ *
+ * She was reading section 3 and finding each thing twice. A row would say what
+ * was left to do and name the id doing it, "the one word became A79", and then
+ * A79 would be in the same section saying it was built. Eleven of those. The
+ * pointer is written at the moment the work moves on and is correct for about
+ * an hour; once its successor is done, it is a second row about one thing, and
+ * she has to read both to find out the first is stale.
+ *
+ * So: a row in "For you to review" may not name another row that is itself in
+ * review or already done. Either the work is still live, in which case the
+ * successor belongs in section 2 and this row can point at it, or it is
+ * finished and both rows belong in section 4.
+ *
+ * Pointing FORWARD is fine and is the whole reason a pointer gets written: a
+ * section 3 row may name something in section 1 or 2, which is work that has
+ * not happened yet.
+ *
+ * ── A CITATION IS NOT A POINTER ───────────────────────────────────────────
+ * The first version flagged any mention and reported one finding, which was
+ * wrong: A72 says the funnel lines are "your own spec from R9", and naming
+ * where an instruction came from is worth doing. A gate that matches too much
+ * is not the safe direction; it gets loosened until it matches nothing.
+ *
+ * What the eleven stale rows had in common is where the id SITS. A pointer is
+ * the last thing in the row, because the row has handed the work over and has
+ * nothing further to say: "...and you only want the question. A78." A
+ * citation sits mid-sentence with the point of the sentence after it. So the
+ * rule is the id in the final position, plus the explicit "became X", and
+ * nothing else.
+ */
+{
+  const review = sections[2];
+  const place = new Map();
+  for (const sec of sections) for (const id of sec.ids) place.set(id, sec.name);
+  const closed = (ref) => place.get(ref) === review.name || place.get(ref) === sections[3].name;
+  for (const m of review.text.matchAll(/^\| ([A-Z]+\d+) \|(.*)\|\s*$/gm)) {
+    const [, id, body] = m;
+    const refs = new Set();
+    const tail = body.trim().match(/\b([A-Z]+\d+)\.?\s*$/);
+    if (tail) refs.add(tail[1]);
+    for (const b of body.matchAll(/\bbecame ([A-Z]+\d+)\b/g)) refs.add(b[1]);
+    for (const ref of refs) {
+      if (ref === id || !closed(ref)) continue;
+      fails.push(`${id} in "${review.name}" hands its work to ${ref}, which is already in "${place.get(ref)}".`
+        + ' That is one thing written as two rows, and she reads both to find out the first is stale.');
+    }
+  }
+}
+
 // ── 2. section 2 says what it holds ───────────────────────────────────────
 const open = sections[1];
 const claimsEmpty = /\*\*Nothing open\.\*\*/.test(open.text);

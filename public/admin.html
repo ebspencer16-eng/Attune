@@ -483,6 +483,34 @@
 #qx-comm-high .qrow{margin-bottom:.38rem;}
 #qx-comm-high .qrow-label{flex:0 0 118px;max-width:118px;font-size:.66rem;}
 #qx-comm-high .qrow-pole{flex:0 0 104px;min-width:104px;font-size:.55rem;}
+/* ── THE FIELD PICKER ──────────────────────────────────────────────────────
+   Ellie: "This is good, but I can't see the color yet, I'd like for it to be a
+   full color banner not just a square."
+
+   She is right twice over. A native <select> popup is drawn by the operating
+   system, not by the page, so the colour set on an optgroup is advice the list
+   is free to ignore, and on macOS it does. The block character was a way round
+   that and it was never going to be a banner: it is one glyph in a line of
+   text. Nothing written in CSS can make a <select> paint a bar.
+
+   So this is a list of our own. The <select> is still there, hidden, and is
+   still what every other piece of code on this page reads and writes: the
+   picker renders it rather than holding a second copy of the field list, which
+   is the only way the two cannot drift. */
+.fp{position:relative;display:inline-block;}
+.fp-btn{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;min-width:260px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;font:inherit;font-size:.78rem;color:var(--text);cursor:pointer;text-align:left;}
+.fp-btn:hover,.fp-btn[aria-expanded="true"]{border-color:var(--accent,#5C6DDA);}
+.fp-btn .fp-caret{color:var(--dim);font-size:.6rem;flex:0 0 auto;}
+.fp-panel{position:absolute;z-index:40;top:calc(100% + 4px);left:0;min-width:320px;max-width:420px;max-height:min(60vh,420px);overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 28px rgba(16,24,48,.16);padding:.4rem;}
+.fp-search{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:7px;padding:.42rem .6rem;font:inherit;font-size:.76rem;margin-bottom:.4rem;}
+/* The banner she asked for: a full-width bar in the section's own colour. */
+.fp-band{display:block;padding:.34rem .6rem;margin:.5rem 0 .25rem;border-radius:6px;font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;}
+.fp-band:first-child{margin-top:.1rem;}
+.fp-sub{display:block;padding:.3rem .6rem .12rem 1.1rem;font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);}
+.fp-opt{display:block;width:100%;box-sizing:border-box;text-align:left;background:transparent;border:0;border-radius:6px;padding:.34rem .6rem .34rem 1.9rem;font:inherit;font-size:.76rem;color:var(--text);cursor:pointer;line-height:1.35;}
+.fp-opt:hover,.fp-opt.fp-cursor{background:var(--surface);}
+.fp-opt[aria-selected="true"]{color:var(--accent,#5C6DDA);font-weight:600;}
+.fp-none{padding:.6rem;font-size:.74rem;color:var(--dim);}
 .kpi-shell{background:var(--surface);border:1px solid var(--border);margin-bottom:1.5rem;}
 .kpi-shell .chart-head{border-bottom:1px solid var(--border);}
 .kpi-shell .kpi-card{box-shadow:none;}
@@ -1958,6 +1986,198 @@ window.adminAuthHeaders = function(extra){
    * renders everywhere and survives the browser's own styling. The
    * high-level and detailed halves are nested labels under it.
    */
+
+  /**
+   * A field picker that renders a <select>, so the two cannot disagree.
+   *
+   * ── WHY THE SELECT IS STILL THERE ─────────────────────────────────────
+   * Eleven places on this page read `$('xp-row-field').value`, set it, or
+   * listen for its change event, and `fillFieldSelect` builds the option list
+   * from the cube. Replacing the control would have meant changing all of
+   * them and holding the field list in a second place. The select stays, with
+   * `hidden` on it, and this draws what is inside it: the section colours come
+   * off the optgroups the server's sections produced, so a section added
+   * tomorrow gets a banner without anything here being told about it.
+   *
+   * Every selection writes to the select and dispatches `change`, which is the
+   * same event the native control sent, so nothing downstream can tell.
+   */
+  function mountFieldPicker(sel) {
+    if (!sel || sel.dataset.fp) return;
+    sel.dataset.fp = '1';
+    const wrap = document.createElement('div');
+    wrap.className = 'fp';
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+    sel.hidden = true;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'fp-btn';
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.setAttribute('aria-expanded', 'false');
+    if (sel.getAttribute('aria-label')) btn.setAttribute('aria-label', sel.getAttribute('aria-label'));
+    wrap.appendChild(btn);
+
+    const panel = document.createElement('div');
+    panel.className = 'fp-panel';
+    panel.setAttribute('role', 'listbox');
+    panel.hidden = true;
+    wrap.appendChild(panel);
+
+    /* Black or white on the band, whichever can be read on it. The seven
+       section colours run from a deep rose to a light green, and white on the
+       light ones is the kind of thing a contrast sweep finds later. */
+    const ink = (hex) => {
+      const h = String(hex || '').trim();
+      const m = /^#?([0-9a-f]{6})$/i.exec(h.startsWith('rgb') ? '' : h);
+      let r, g, b;
+      if (m) { const n = parseInt(m[1], 16); r = n >> 16 & 255; g = n >> 8 & 255; b = n & 255; }
+      else { const p = h.match(/\d+/g); if (!p || p.length < 3) return '#fff'; r = +p[0]; g = +p[1]; b = +p[2]; }
+      const lin = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
+      const L = .2126 * lin(r) + .7152 * lin(g) + .0722 * lin(b);
+      return (L + .05) / .05 > 21 / ((L + .05) / .05) ? '#1B2547' : '#fff';
+    };
+    const trim = (t) => String(t == null ? '' : t).replace(/ /g, ' ').trim();
+
+    const label = () => {
+      const o = sel.selectedOptions && sel.selectedOptions[0];
+      btn.innerHTML = '';
+      const t = document.createElement('span');
+      t.textContent = trim(o ? o.textContent : '') || 'Choose a field';
+      const c = document.createElement('span');
+      c.className = 'fp-caret'; c.textContent = '▾';
+      btn.appendChild(t); btn.appendChild(c);
+    };
+
+    let cursor = -1;
+    const draw = (q) => {
+      const needle = trim(q).toLowerCase();
+      panel.innerHTML = '';
+      const search = document.createElement('input');
+      search.className = 'fp-search';
+      search.type = 'search';
+      search.placeholder = 'Search ' + sel.options.length + ' fields';
+      search.value = q || '';
+      search.addEventListener('input', () => { draw(search.value); });
+      /* Typing must not close the panel or re-enter the page's own keyboard
+         handling, and Escape here closes the picker rather than only clearing
+         the field, which is what a search input does by itself. */
+      search.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); close(); btn.focus(); }
+        if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); move(e.key === 'Enter' ? 0 : 1, e.key === 'Enter'); }
+      });
+      panel.appendChild(search);
+
+      let shown = 0;
+      const addOpt = (o) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'fp-opt';
+        b.setAttribute('role', 'option');
+        b.setAttribute('aria-selected', String(o.value === sel.value));
+        b.dataset.value = o.value;
+        b.textContent = trim(o.textContent);
+        b.addEventListener('click', () => { pick(o.value); });
+        panel.appendChild(b);
+        shown++;
+      };
+      const matches = (o) => !needle || trim(o.textContent).toLowerCase().indexOf(needle) >= 0;
+
+      for (const node of sel.children) {
+        if (node.tagName === 'OPTION') { if (matches(node)) addOpt(node); continue; }
+        if (node.tagName !== 'OPTGROUP') continue;
+        const opts = [...node.children].filter((o) => !o.disabled && matches(o));
+        if (!opts.length) continue;
+        const band = document.createElement('span');
+        band.className = 'fp-band';
+        /* The colour the server gave this section, and the banner she asked
+           for rather than a block character standing in for one. */
+        const colour = node.style.color || 'var(--surface)';
+        band.style.background = colour;
+        band.style.color = ink(colour);
+        band.textContent = trim(node.label).replace(/^█\s*/, '');
+        panel.appendChild(band);
+        /* The sub-heads are disabled options in the select. Drawn where they
+           fall, so "High level" and "Every question" keep their questions
+           under them, and dropped when a search has emptied them. */
+        for (const o of node.children) {
+          if (o.disabled) {
+            const next = [...node.children].slice([...node.children].indexOf(o) + 1);
+            const any = next.slice(0, next.findIndex((x) => x.disabled) === -1 ? next.length : next.findIndex((x) => x.disabled));
+            if (!any.some(matches)) continue;
+            const h = document.createElement('span');
+            h.className = 'fp-sub';
+            h.textContent = trim(o.textContent);
+            panel.appendChild(h);
+            continue;
+          }
+          if (matches(o)) addOpt(o);
+        }
+      }
+      if (!shown) {
+        const n = document.createElement('div');
+        n.className = 'fp-none';
+        n.textContent = 'No field matches that.';
+        panel.appendChild(n);
+      }
+      cursor = -1;
+      return search;
+    };
+
+    const opts = () => [...panel.querySelectorAll('.fp-opt')];
+    const move = (d, takeFirst) => {
+      const list = opts();
+      if (!list.length) return;
+      if (takeFirst) { pick(list[0].dataset.value); return; }
+      cursor = Math.max(0, Math.min(list.length - 1, cursor + d));
+      list.forEach((el, i) => el.classList.toggle('fp-cursor', i === cursor));
+      list[cursor].scrollIntoView({ block: 'nearest' });
+    };
+
+    const pick = (v) => {
+      sel.value = v;
+      label();
+      close();
+      btn.focus();
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const close = () => {
+      panel.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('mousedown', onAway, true);
+      document.removeEventListener('keydown', onKey, true);
+    };
+    const onAway = (e) => { if (!wrap.contains(e.target)) close(); };
+    const onKey = (e) => {
+      if (e.key === 'Escape') { close(); btn.focus(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+      else if (e.key === 'Enter' && cursor >= 0) { e.preventDefault(); pick(opts()[cursor].dataset.value); }
+    };
+    const open = () => {
+      const search = draw('');
+      panel.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      document.addEventListener('mousedown', onAway, true);
+      document.addEventListener('keydown', onKey, true);
+      search.focus();
+    };
+    btn.addEventListener('click', () => { panel.hidden ? open() : close(); });
+
+    /* The button follows the select, so code that sets `.value` directly,
+       which this page does in four places, still shows the right thing. */
+    sel.addEventListener('change', label);
+    /* Four places on this page assign `.value` straight onto the select and do
+       not dispatch an event, which a native control redraws from and this one
+       cannot see. Rather than finding all four and hoping there is no fifth,
+       the button re-reads the select whenever the page renders: `render()` is
+       the one function every one of those paths ends in. */
+    label();
+    sel.__fpLabel = label;
+  }
+
   function fillFieldSelect(sel, includeNone){
     const sections = (CUBE.sections && CUBE.sections.length) ? CUBE.sections : null;
     let html = includeNone ? '<option value="">\u2014 none \u2014</option>' : '';
@@ -2055,6 +2275,11 @@ window.adminAuthHeaders = function(extra){
   let LAST = null; // for CSV export
 
   function render(){
+    /* Keep each picker's button showing what its select actually holds. See
+       the note in mountFieldPicker: a value assigned in code fires no event. */
+    for (const id of ['xp-row-field', 'xp-col-field']) {
+      const el = $(id); if (el && el.__fpLabel) el.__fpLabel();
+    }
     if (!loaded) return;
     const rowField = $('xp-row-field').value, rowSide = 'self';
     const colField = $('xp-col-field').value, colSide = 'self';
@@ -2362,6 +2587,11 @@ window.adminAuthHeaders = function(extra){
       const firstQ = data.fields.find(f => f.group && f.group.indexOf('Ex1') === 0) || data.fields[0];
       if (firstQ) $('xp-row-field').value = firstQ.key;
       $('xp-col-field').value = 'type';
+      /* The coloured picker goes on after the options exist and after the
+         default is set, because it draws what the select holds. Mounting it
+         first would have given a button labelled from an empty list. */
+      mountFieldPicker($('xp-row-field'));
+      mountFieldPicker($('xp-col-field'));
       ['xp-row-field','xp-col-field','xp-cell','xp-measure-field'].forEach(id => { const el = $(id); if (el) el.addEventListener('change', render); });
       $('xp-add-filter').onclick = () => { FILTERS.push({ field:'', value:'', side:'self' }); renderFilters(); };
       $('xp-export').onclick = exportCSV;

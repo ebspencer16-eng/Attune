@@ -50,6 +50,7 @@ import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
 import { withEffectivePromoCodes, coupleKeyFromProfiles } from './_lib/order-promo.js';
 import { genericLabel } from './_lib/generic-label.js';
+import { ordersWithoutIdentifying } from './_lib/admin-order-privacy.js';
 import { DIM_META } from './_lib/dimensions.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
@@ -875,7 +876,18 @@ export default async function handler(req) {
       demoFilterApplied,
       responses,
       responsesBySegment,
-      orders,
+      /**
+       * Stripped of everything that names a person. Ellie: "To ship a box?
+       * What do you need?" Nothing: the Fulfilment page went in 92b3e2fb and
+       * every reader of those columns went with it, so the buyer's name,
+       * their email and the full shipping address were crossing the wire for
+       * nobody. The page's own banner promises they are not here.
+       *
+       * Done on the way out rather than in the select, because the read above
+       * is also what withoutDemoOrders and the promo link are computed from,
+       * and narrowing the query is a change to what those can see.
+       */
+      orders: ordersWithoutIdentifying(orders),
       /**
        * How many of those orders got their code from their partner, and how
        * many stand alone with no partner linked. Sent so the discount chart

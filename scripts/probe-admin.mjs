@@ -1070,6 +1070,85 @@ if (process.env.SET) {
  * and a label beside its bar look similar at a glance and differ by eight
  * points. So it is measured. `sameLine` is the whole assertion.
  */
+/**
+ * CLICK=.fp-btn — press something before the picture is taken.
+ *
+ * A control that only exists once opened cannot be photographed otherwise,
+ * and the field picker's panel is exactly that. Clicks carry coordinates in
+ * the middle of the element: a dispatched click with none is a click at x=0,
+ * which this repo has already been caught by once, in the one gate written to
+ * prove a tap works.
+ */
+/**
+ * PICKER=xp-row-field — what the coloured field picker is actually showing.
+ *
+ * The picker renders a hidden <select> rather than holding its own copy of the
+ * field list, so the thing worth measuring is whether the two agree: a band
+ * per optgroup, an option per option, and a real colour on every band. A
+ * screenshot shows bands; only a count shows a missing one.
+ *
+ * Printed as one machine-readable line per picker so check-field-picker can
+ * assert on it without a second fixture of its own.
+ */
+if (process.env.PICKER) {
+  for (const id of process.env.PICKER.split(',').map((x) => x.trim()).filter(Boolean)) {
+    const out = await page.evaluate((selId) => {
+      const sel = document.getElementById(selId);
+      if (!sel) return { id: selId, err: 'no such select' };
+      const wrap = sel.closest('.fp');
+      if (!wrap) return { id: selId, err: 'the select was never mounted in a picker' };
+      const btn = wrap.querySelector('.fp-btn');
+      if (!btn) return { id: selId, err: 'no button' };
+      const r = btn.getBoundingClientRect();
+      btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+        clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
+      const panel = wrap.querySelector('.fp-panel');
+      const bands = [...panel.querySelectorAll('.fp-band')];
+      /* The painted colour, not the declared one: a band whose background
+         resolved to nothing is the bug she reported, a banner that is not
+         there. */
+      const colours = bands.map((b) => getComputedStyle(b).backgroundColor);
+      const res = {
+        id: selId,
+        open: !panel.hidden,
+        bands: bands.length,
+        groups: sel.querySelectorAll('optgroup').length,
+        opts: panel.querySelectorAll('.fp-opt').length,
+        selOpts: [...sel.querySelectorAll('option')].filter((o) => !o.disabled).length,
+        flat: colours.filter((c) => !c || c === 'transparent' || c === 'rgba(0, 0, 0, 0)').length,
+        /* Every band is its own colour, or two sections look like one. */
+        distinct: new Set(colours).size,
+        wide: bands.length ? Math.round(bands[0].getBoundingClientRect().width) : 0,
+        panelWide: Math.round(panel.getBoundingClientRect().width),
+        btnText: (btn.textContent || '').replace(/\u25be/g, '').trim().slice(0, 40),
+      };
+      btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+        clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
+      res.closes = !!panel.hidden;
+      return res;
+    }, id);
+    console.log('  picker ' + JSON.stringify(out));
+  }
+}
+
+if (process.env.CLICK) {
+  for (const q of process.env.CLICK.split('|').map((x) => x.trim()).filter(Boolean)) {
+    const out = await page.evaluate((sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return 'no such element';
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return 'element has no box, so a click would land nowhere';
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+        clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
+      return 'clicked at ' + Math.round(r.left + r.width / 2) + ',' + Math.round(r.top + r.height / 2);
+    }, q);
+    console.log(`  click ${q}: ${out}`);
+  }
+  /* React is not on screen when dispatchEvent returns, and nor is anything
+     else that redraws. Click, wait, then read. */
+  await new Promise((r) => setTimeout(r, 600));
+}
+
 if (process.env.ROWS) {
   for (const id of process.env.ROWS.split(',').map((x) => x.trim()).filter(Boolean)) {
     const out = await page.evaluate((cid) => {

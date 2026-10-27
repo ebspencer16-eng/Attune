@@ -10,9 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| C34 | **Reassurance needs a pair of slider labels in your voice.** The other nine read like "Independent / Togetherness" and "Keeps it in / Shares openly". Reassurance had none at all, so it was showing "1 - low / 5 - high". It is borrowing "Voiced / Assumed" from the results pages, which is correct but shorter than its neighbours. Two phrases and I will put them in. |
-| P9 | **The admin banner says there are no email addresses on the page, and the Orders table holds them.** It needs them, to ship a box. So either the banner narrows to the analytics pages, which is what it is true of, or the fulfilment view says plainly that it is the one place with names on it. Your call on which, and the sentence is yours either way. |
-| A71 | **The survey has never saved one answer, and the fix is a migration you run.** Your 095 output was right: zero rows. The upsert points at an index migration 079 created as a partial one, and PostgreSQL will not use a partial index to resolve a conflict unless the statement repeats its condition, which the library does not send. So every save failed with an error nobody saw. Run the block below. |
+| P9 | **Nothing. You asked what shipping a box needs and the answer is that nothing in the admin uses those fields any more.** The Fulfilment page was removed on purpose in 92b3e2fb, and its table, its status buttons and both CSV exports that carried a name or an address are still in the file called by nobody. The server was sending buyer name, email and full address to your browser on every load for readers that no longer exist. Stripped now, so the banner is true as written and you change nothing. **The thing to decide:** if you ever ship a physical box, there is currently no way to get the address out. Say the word and I build that deliberately. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -42,77 +40,6 @@ Every code block says which window it goes in, above the block.
 
 ---
 
-### A71: run this
-
-Paste this into the **Supabase SQL Editor**, not Terminal.
-
-<!-- SQL 097_survey_upsert_arbiter.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 097: the survey has never saved a single answer, and this is why.
---
--- ── WHAT ELLIE SAW ──────────────────────────────────────────────────────────
--- She completed a survey. 095 then reported zero rows in survey_responses:
--- not an unjoinable row, not a row excluded as a demo account, no row at all.
--- Nothing has saved an answer since the survey shipped.
---
--- ── WHY ─────────────────────────────────────────────────────────────────────
--- api/survey.js saves a signed-in person's answers with
---
---   .upsert(row, { onConflict: 'respondent_id' })
---
--- and 079 created the index that is supposed to arbitrate that conflict as a
--- PARTIAL one:
---
---   create unique index survey_responses_respondent_idx
---     on survey_responses (respondent_id) where respondent_id is not null;
---
--- PostgreSQL will not infer a partial index as an ON CONFLICT arbiter unless
--- the statement repeats the index's own predicate, and supabase-js emits only
--- the column list. So every save raised 42P10, "there is no unique or
--- exclusion constraint matching the ON CONFLICT specification". The endpoint
--- caught it, found nothing in the message matching its "storage is not set up"
--- test, and answered 500 "Could not save".
---
--- Three things hid it. The anonymous path is a plain insert and works, so the
--- code is not uniformly broken. supabase-js RETURNS its error rather than
--- throwing, so nothing crashed. And the table exists and answers queries, so
--- every check that asked whether survey storage was ready got yes: an empty
--- table answers like a working one, which this repo has written down before.
---
--- ── THE FIX ─────────────────────────────────────────────────────────────────
--- A plain unique index instead. The predicate was never doing any work:
--- PostgreSQL treats NULLs as distinct in a unique index by default, so a plain
--- unique index on respondent_id already permits unlimited anonymous rows,
--- which is the only thing `where respondent_id is not null` was there for.
--- Same constraint, same behaviour, and inferrable.
---
--- ── SAFE TO RUN TWICE ───────────────────────────────────────────────────────
--- Both statements are conditional. Running this on a database that has already
--- had it does nothing.
--- ============================================================================
-
-drop index if exists public.survey_responses_respondent_idx;
-
-create unique index if not exists survey_responses_respondent_key
-  on public.survey_responses (respondent_id);
-
-comment on index public.survey_responses_respondent_key is
-  'One row per person. Plain rather than partial so ON CONFLICT (respondent_id) '
-  'can infer it: a partial index needs its predicate repeated in the statement, '
-  'which supabase-js does not emit. NULLs are distinct in a unique index, so '
-  'anonymous responses are still unlimited.';
-
--- What the fix is for: this should be 0 before the next survey is saved and
--- rise afterwards. If it is still 0 after somebody completes one, the write is
--- failing somewhere else and the endpoint is the place to look, not the index.
-select count(*) as survey_rows_now from public.survey_responses;
-```
-<!-- /SQL -->
-
-It prints one number at the end, the survey rows you have now. It will say 0.
-Complete a survey after running it and it will say 1, which is the proof.
-
 ## 2. Open
 
 | # | What I am doing |
@@ -126,31 +53,10 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A85 | **097 is run, so the survey can save now. The proof is one number.** Finish a survey, then open the Feedback page: the line under the title counts responses and has read 0 since the day the feature shipped. If it still reads 0 after you finish one, tell me and I will chase the write itself. |
+| A81 | **A full-colour banner per section, in a picker of our own.** A browser dropdown is drawn by the operating system and ignores the page, which is why the colour never showed: no CSS could have fixed it. The list is ours now, with a search box, a coloured bar per section and the questions indented under it. It renders the old dropdown rather than holding a second copy of the field list. |
+| P10 | **The admin was sending names, emails and shipping addresses to your browser that nothing drew.** Found while answering P9. Stripped on the way out, and a gate fills one order with every identifying column and proves not one of those values survives. |
 | A72 | **Engagement is not broken, and I was about to rebuild it on a stale note.** The "not readable" round turned out to be my own test harness, and you have approved two things on that page since. What I did find by looking: Refresh was an unstyled browser button, the Exercises chart was silently drawing three of five names, and the downloads caveat sat as a loose line outside its tile. All three fixed. The funnel and acquisition lines are your own spec from R9, so they stay. |
-| A77 | **The three at-a-glance tiles have slicers now.** They could not have worked before the payload fix either: the cut of every one of those measures has always been sent and the page read none of it. Cutting Physical Intimacy to Married moves alignment 78 to 75. |
-| A75 | **Type Analytics had no filters at all, and said it did.** Three dropdowns were being read by the code and existed nowhere in the markup, so every figure on that page has always been the whole population. They are in the top tile now and they cut it: the E:W ratio goes 2:3 to 6:7. Feedback's period control moved into its tile. |
-| A80 | **Explore: the title is just the two fields, the default is a clustered column, and the dropdown names the chart.** The measure moved to the line underneath rather than being dropped. It also said "undefined total" in my harness, which was the harness. |
-| A81 | **The picker lists are indented a step per level.** Your questions were less indented than the heading above them, which is the opposite of differentiation. The section colour is now set on the group; whether a dropdown paints it is the browser's call, so tell me if it still reads black and I will build a real picker. |
-| A76 | **The dimension tile: slicer, poles in line, no scrollbar, Reassurance capitalised.** Ten rows measured 289 points in a 255 point box and now measure 209, so nothing scrolls. It has its own slicer and reports its own n. |
-| A73 | **The promo table was showing two answers to one question.** A counter column and the real order count, side by side. One figure now, from the orders, which you can check against the table on the same page. Most codes really are at nought: the beta bought on two. |
-| A74 | **A couple buys once, so the partner who did not pay now takes their code.** On the test data that resolves 24 of 48 orders, and the tile says how many came that way rather than folding them in quietly. |
-| A78 | **Physical Intimacy All questions shows the question and nothing before it.** The topic is still a field you can group by; it is just not printed on every line. |
-| A79 | **"Criticism", not the paragraph.** The tile and the chart both asked for the one-word name and both fell back to the full question, because the word was being glued into the label and never sent on its own. |
-| A82 | **All questions rows restructured, on every page.** Question right-aligned on the left, poles and bar to its right, all on one line. Three renderers now share one row shape instead of three copies of it. |
-| A83 | **Who-does-what agreement is a 5x4 grid of tiles**, responsibility small, percentage large below it, centred, least aligned first. Twenty responsibilities is what makes five by four the right grid. |
-| A84 | **Nine conversation prompts were typed out twice**, in the server and in the website, under a comment saying they matched. They did, which is why nobody had looked. One copy now, and the gate that owns this rule covers it. |
-| A70 | **Seven pages of missing figures were one bug, now fixed.** `api/admin-data.js` builds those measures inside its response-aggregates helper, so it sends them one level down, and the admin was reading them off the top level. Every tile drew its empty state. On the stub, avg intimacy alignment goes from a dash to 78% and five canvases that drew nothing now draw. |
-| A24 | **Order Details is in and approved. Your question about the promo table is the next thing I check**: 0 uses on most codes is either true, because the beta bought on two codes, or the table is counting redemptions from the wrong column. A73. |
-| A28 | **Still Unknown, and you are right about the fix.** An order with no code of its own gets its partner’s, because a couple buys once. Doing that now as A74. |
-| A29 | **Approved. The last piece is moving the Type Analytics and Feedback filters up into the shell head**, where every other page keeps them. A75. |
-| A31 | **Four changes going in**: a slicer, poles and bar on the same line as the dimension name, the whole thing inside the tile with no scrollbar, and Reassurance capitalised. A76. |
-| A38 | **The figures are in and were never reaching the page.** Three tiles plus the two gap measures all draw now; see A70 for why. The slicers are the remaining half, A77. |
-| A49 | **Two things**: the horseman tile prints the whole question where it should say one word, and "speak up right away" had no figure because of A70. The word is A79. |
-| A51 | **The pie has its data back through A70. Its column labels are the whole question text** and should be one word each: Criticism, Defensiveness, Contempt, Stonewalling. A79. |
-| A44 | **The four figures are in and were never reaching the page.** Avg alignment reads 78% on the stub where it read a dash. See A70. The slicers are the remaining half, A77. |
-| A47 | **Married wording is approved. The All questions rows still print the category before the question**, and you only want the question. A78. |
-| A62 | **Three changes**: the title reads "[x] × [y]" with "Count of" gone, the default example is a clustered column, and the dropdown names the chart type rather than saying "Chosen for this cut". A80. |
-| A63 | **The seven section colours are not drawing and the lists need indenting** so an option reads as sitting under its field. A81. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -162,6 +68,29 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A70 | **Seven pages of missing figures were one key read one level too high.** The server builds those measures in a helper and sends them under `responses`; the page read them off the top. Every tile drew its empty state. |
+| A73 | **The promo table showed two answers to one question**, a counter column and the real order count. One figure now, from the orders, checkable against the table on the same page. |
+| A74 | **A couple buys once, so the partner who did not pay takes their code.** On test data that resolves 24 of 48 orders, and the tile says how many came that way. |
+| A75 | **Type Analytics had no filters and said it did.** Three dropdowns read by the code and in no markup, so every figure was the whole population. In the top tile now; E:W moves 2:3 to 6:7. Feedback's period moved too. |
+| A76 | **The dimension tile: slicer, poles in line, no scrollbar, Reassurance capitalised.** Ten rows went from 289 points in a 255 point box to 209. |
+| A77 | **Slicers on the three at-a-glance tiles.** Cutting Physical Intimacy to Married moves alignment 78 to 75. |
+| A78 | **Physical Intimacy All questions shows the question and nothing before it.** The topic is still a field you can group by. |
+| A79 | **"Criticism", not the paragraph.** Both the tile and the chart asked for the one-word name and both fell back, because it was glued into the label and never sent on its own. |
+| A80 | **Explore: title is the two fields, default is a clustered column, dropdown names the chart.** The measure moved to the line underneath. |
+| A82 | **All questions rows restructured on every page.** Question right-aligned left, poles and bar to its right, one line. Three renderers share one row shape. |
+| A83 | **Who-does-what is a 5x4 grid of tiles**, responsibility small, percentage large below, centred, least aligned first. |
+| A84 | **Nine conversation prompts were typed out twice**, server and website, under a comment saying they matched. One copy now, and the gate that owns that rule covers it. |
+| C34 | **Reassurance keeps "Voiced / Assumed."** Your word. It is the pair the results pages already use, so the admin and the results now say the same thing. |
+| A24 | **Order Details replaced Orders and Promo Analytics.** The promo table question became A73. |
+| A28 | **Discount Unknown rows.** Closed by A74: an order with no code takes its partner's. |
+| A29 | **Every page with top tiles is in the shaded shell.** The last piece, Type and Feedback, became A75. |
+| A31 | **Avg individual dimension results replaced couple type distribution.** The four changes you asked for became A76. |
+| A38 | **Expectations at a glance.** Its figures were A70 and its slicer was A77. |
+| A44 | **Physical Intimacy at a glance.** Its figures were A70 and its slicer was A77. |
+| A47 | **Physical Intimacy uses the married wording.** The category prefix became A78. |
+| A49 | **Conflict at a glance.** The one-word horseman became A79, the missing figure was A70. |
+| A51 | **"When a disagreement starts" as a pie.** Its data was A70, its one-word labels A79. |
+| A62 | **A chart above the count, typed from the shape of the cut.** Your three changes became A80. |
 | A25 | **The + button creates a live code**: name, discount, package, free add-ons, max uses. The admin could already write the row and nothing called it, and it could not write four of the five add-on columns. |
 | A26 | **Status column with an on/off toggle** on every code, including ones never redeemed. A compiled code reads "Always on" rather than drawing a switch that cannot do anything. |
 | A27 | **The funnel counted orders at the first bar and couples at the rest**, so a couple who bought twice stood taller than a couple who had started. Couples all the way across now. |
