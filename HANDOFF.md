@@ -3898,3 +3898,33 @@ section 3 and found everything twice. `check-tasks-doc` now fails on a review
 row that hands its work to a row already closed; the distinction it draws is
 the id in the final position, which is a pointer, against an id mid-sentence,
 which is a citation and fine.
+
+## 2026-10-27: five sweeps, five bugs, and Explore still undiagnosed
+
+Ellie: "I can't engage, scan for bugs."
+
+**Found and fixed.** The promo code Status toggle wrote its change and then
+refreshed a page deleted in 92b3e2fb, so the row kept its old status until a
+reload: she approved that toggle as A26 the same week. The Explore page's
+"could not read" banner anchored to three ids that are not on that page, so it
+had never once drawn. Fourteen dead functions, two of them minting admin
+tokens with `Math.random`. Five pages built with class names nothing styles.
+Two byte-identical copies of a constant-time password comparison.
+
+**Three sweeps are in `scripts/_sweeps/`**: missing ids, dead admin functions,
+undefined classes. Two more found nothing and say so, including why the styles
+one is a small figure. Re-running any of them is cheap.
+
+**Still open: A81.** Ellie reported "Explore page isn't loading" after the
+field picker shipped. I could not reproduce it and still cannot. Removed every
+difference I control: the live admin.html is byte-identical to local once
+credentials are substituted, all three admin endpoints answer 401 from outside
+rather than 500, and driving the page with the REAL 175-field catalogue (built
+by appending one export to a copy of admin-explore.js) renders 7 bands, 176
+options and no errors.
+
+What shipped instead is a fallback: the mount cannot take the page down any
+more, and if it fails it restores the plain dropdown and draws one grey line
+saying "the coloured picker could not start." So the next datum is one glance
+from her: coloured banners means it was a stale file; that grey line means it
+is throwing and the cause follows from it. The question is in TASKS.md A81.
