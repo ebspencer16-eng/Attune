@@ -3867,3 +3867,34 @@ for the ten dimensions; there were four maps, disagreeing about the words and
 the set. `api/_lib/convo-copy.js` holds nine sentences that were typed out
 twice. And `check-workbook-image` caught the dimensions move the moment it
 landed, which is what it exists for.
+
+## 2026-10-26, later: the picker, the privacy strip, and the payment path
+
+Section 2 is empty. Everything Ellie sent is built; section 3 holds what needs
+her eye and section 1 holds only things genuinely waiting on her or on launch.
+
+**Three findings worth knowing.**
+
+`api/admin-data.js` was sending buyer name, email, both partner names and the
+full shipping address into the browser on every load, under a banner promising
+none of it was there. Nothing drew them: the Fulfilment page went in 92b3e2fb
+and every reader went with it in all but name. `api/_lib/admin-order-privacy.js`
+strips them on the way out; `check-admin-order-privacy` fills one order with
+every identifying column and searches the answer for those VALUES.
+
+The Explore field pickers are a control of our own now. A `<select>` popup is
+drawn by the operating system and ignores the page, which is why Ellie could
+never see the section colours. The select is still there, hidden, and the
+picker renders it, so the field list stays in one place. `check-field-picker`
+drives it and reads computed colours.
+
+The payment path had never been executed. `check-payment-writes-order` signs a
+Stripe event, runs the real handler against a stubbed fetch, and asserts one
+order row out of a signed event and none out of a forged or stale one.
+
+**What to watch.** TASKS.md grew eleven pointer rows this round, each written
+when work moved on and left behind once its successor was done. Ellie read
+section 3 and found everything twice. `check-tasks-doc` now fails on a review
+row that hands its work to a row already closed; the distinction it draws is
+the id in the final position, which is a pointer, against an id mid-sentence,
+which is a citation and fine.
