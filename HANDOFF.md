@@ -3988,3 +3988,30 @@ including one whose first scope reported six false positives.
 **Still open: A92**, and it is a question for Ellie, not work. Clicking a
 package tile on Browse now centres it, because the detailed section it used to
 jump to no longer exists. She may want it to add to cart, or do nothing.
+
+## 2026-10-27, fourth round: site and app parity
+
+Asked to confirm the site and the app match. They do, and the evidence is in
+TASKS.md V1 with the gap named in V3.
+
+**Both surfaces are current.** Production's app bundle was published
+2026-10-27T01:44:59Z, after the last commit touching attune-app/src, with
+nothing since. The live website bundle is HEAD, verified with a string the
+newest commit removed plus a control string it left alone.
+
+**Content parity is held by eighteen gates and the smoke run.** Scoring
+identical over 400 answer sets; 29 of 29 sections render on the site and all
+29 have an app screen; every results sentence reachable by the app with four
+chrome exemptions; plans, budget, nav names, colours and links each gated.
+
+**The gap, if anyone wants to close it:** nothing renders the same couple on
+both surfaces and diffs the output. Every check compares a rule or a list.
+Doing it needs the app served through its web build, which probe-notes-screen
+already demonstrates the shape of.
+
+**Two sweeps this round were the harness, not the product**, which is worth
+repeating because it is now the usual ratio. Matching sections by literal id
+missed that both surfaces handle covers and conversations by pattern. And
+`understanding.asymmetry` looked website-only until the matches turned out to
+be a comment and a line of copy. The `understanding` block itself was already
+stripped before sending, by the same audit, recorded in api/results.js.
