@@ -35,6 +35,7 @@ import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILIT
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 import { withEffectivePromoCodes } from './_lib/order-promo.js';
+import { genericLabel } from './_lib/generic-label.js';
 import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS } from './_conflict-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
@@ -121,14 +122,6 @@ const shortPole = (t) => {
   return c.length > 30 ? c.slice(0, 28) + '…' : c;
 };
 // Strip the {userName}/{partnerName} templates to a neutral, name-free label.
-const genericLabel = (t) =>
-  String(t || '')
-    .replace(/\{userName\}'s family/g, "one's own family")
-    .replace(/\{partnerName\}'s family/g, "other partner's family")
-    .replace(/\{userName\}'s/g, 'your')
-    .replace(/\{partnerName\}'s/g, "partner's")
-    .replace(/\{userName\}/g, 'you')
-    .replace(/\{partnerName\}/g, 'partner');
 
 // Tiny non-reversible hash of the sorted id pair → anonymous couple key.
 const coupleHash = (a, b) => {

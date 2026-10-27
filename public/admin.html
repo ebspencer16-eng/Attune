@@ -5281,7 +5281,45 @@ async function renderResponseTile(opts){
     }
   } else if(opts.kind==='respagree'){
     const items=(a.respAgreement||[]).slice().sort((x,y)=>x.v-y.v);
-    if(items.length){ renderBars(opts.target, items, '#34D399'); return; }
+    /* ── A GRID OF TILES, NOT A STACK OF BARS ──────────────────────────
+       Ellie: "I want the who-does-what agreement by question to be a unique
+       setup - I want it to be a tile with mini tiles in it, a 5x4 grid with
+       responsibilities listed with small text and the percentage aligned
+       listed larger below it. Tiles should be organized by least to most
+       aligned, and text should be centered in each tile."
+
+       There are exactly twenty responsibilities, which is what makes five by
+       four the right grid rather than a number picked to look tidy: seven
+       household, four financial, three career, two emotional, four extended
+       family. The columns are fixed at five so the shape she asked for holds;
+       if the exercise ever gains a twenty-first item the grid grows a row
+       rather than reflowing into something else.
+
+       Sorted ascending, so reading order IS least to most aligned. That is
+       why there is no colour scale here: the ordering already carries it, and
+       a second encoding of one fact is the thing this codebase keeps getting
+       wrong. The count behind each figure is in the hover.
+
+       The category is in the hover too rather than on the tile. "Groceries"
+       and "Planning holidays" do not need "Household ·" in front of them in a
+       box this size, and she has twice asked for the category prefix to come
+       off a row. */
+    if(items.length){
+      const host=document.getElementById(opts.target);
+      if(!host) return;
+      host.innerHTML='<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem;margin-top:.35rem;">'
+        + items.map((it)=>{
+            const pct=(it.v==null?null:Math.round(it.v));
+            const tip=(it.cat?it.cat+' \u00b7 ':'')+it.l+(it.n!=null?' \u2014 '+it.n+' couple'+(it.n===1?'':'s'):'');
+            return '<div data-tip="'+QX_ESC(tip)+'" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.6rem .4rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:.35rem;min-height:84px;cursor:default;">'
+              + '<div style="font-size:.6rem;line-height:1.25;color:var(--muted);overflow-wrap:anywhere;">'+QX_ESC(it.l)+'</div>'
+              + '<div style="font-family:var(--display,inherit);font-size:1.3rem;font-weight:700;line-height:1;color:var(--text);">'
+                + (pct==null?'\u2014':pct+'<span style="font-size:.7rem;font-weight:600;">%</span>')
+              + '</div></div>';
+          }).join('')
+        + '</div>';
+      return;
+    }
     /* ── EMPTY, AND WHY ───────────────────────────────────────────────
        Ellie: "Who does what agreement by question chart is empty so I don't
        know if I have changes."
@@ -7387,6 +7425,34 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
   // directly below the bar — grey, italic, truncated with a full-text tooltip.
   const TRUNC = (t, n) => (t && t.length > n) ? t.slice(0, n - 1) + '…' : (t || '');
   const SCALE_RAMP = hexRamp(QX_THEME[containerId] || '#5C6DDA', 5);
+  /**
+   * One row shape for every All questions line.
+   *
+   * ── WHAT SHE ASKED FOR ────────────────────────────────────────────────
+   * Ellie: "All questions sections are hard to read. I want the row with pole
+   * labels in line with the row label rather than below it. I want the Q text
+   * to be on the left and right-aligned, and I want the bars with pole labels
+   * to the right of that content. Pole labels and question text can wrap, but
+   * rows should be clear. Apply that to all all questions sections."
+   *
+   * ── WHY ONE FUNCTION AND NOT THREE EDITS ──────────────────────────────
+   * There are three row renderers: a scale bar, a categorical bar with its
+   * colour key, and the mean dot on a poled track. All three had the question
+   * on its own line with the bar under it, and "apply that to all all
+   * questions sections" is an instruction about every one of them. Making the
+   * same edit three times is three copies of a layout rule that would then
+   * drift, which is the failure this codebase is organised against. The shape
+   * is here and each renderer passes its own two halves.
+   *
+   * The label column is a percentage with a floor and a ceiling: a fixed
+   * width looks right at one tile size and wrong at the other two, and these
+   * tiles are drawn at full width, half width and inside the Explore page.
+   */
+  const qRow = (labelHtml, contentHtml) =>
+    '<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;">' +
+      '<div style="flex:0 0 30%;min-width:96px;max-width:300px;font-size:.74rem;color:var(--text);text-align:right;line-height:1.35;overflow-wrap:anywhere;">' + labelHtml + '</div>' +
+      '<div style="flex:1 1 auto;min-width:0;">' + contentHtml + '</div>' +
+    '</div>';
   const barFor = (f, drows) => {
     const counts = {}; let n = 0;
     drows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
@@ -7418,21 +7484,26 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
       }
     }
 
+    /* The label column's contents. No block margin and no font size of its
+       own: qRow owns the column, so a size set here would be a second
+       answer to how big a question reads. The responsibilities page keeps its
+       category eyebrow above the question, which is information the question
+       text does not carry. */
     const header = (containerId === 'qx-exp' && f.label.indexOf(' · ') > -1)
       ? (function(){ const parts = f.label.split(' · '); const cat = parts.shift(); const q = parts.join(' · ');
-          return '<div style="margin-bottom:.3rem;line-height:1.3;"><div style="font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.08rem;">' + QX_ESC(cat) + '</div><div style="font-size:.74rem;color:var(--text);">' + QX_ESC(q) + '</div></div>'; })()
-      : '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + '</div>';
+          return '<div style="font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.08rem;">' + QX_ESC(cat) + '</div>' + QX_ESC(q); })()
+      : QX_ESC(f.label);
     const barRow = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + naSeg + '</div>';
 
     if (f.kind === 'scale') {
       // Pole labels either side of the bar (what 1 and 5 mean for THIS question).
       const lo = QX_ESC(f.poleLow || 'low'), hi = QX_ESC(f.poleHigh || 'high');
-      return '<div style="margin-bottom:.95rem;">' + header +
-        '<div style="display:flex;align-items:center;gap:.6rem;">' +
-          '<span style="flex:0 0 122px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;">1 · ' + lo + '</span>' +
+      return qRow(header,
+        '<div style="display:flex;align-items:center;gap:.5rem;">' +
+          '<span style="flex:0 0 22%;min-width:62px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.2;overflow-wrap:anywhere;">1 · ' + lo + '</span>' +
           '<div style="flex:1 1 auto;min-width:0;">' + barRow + '</div>' +
-          '<span style="flex:0 0 122px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.2;">5 · ' + hi + '</span>' +
-        '</div></div>';
+          '<span style="flex:0 0 22%;min-width:62px;font-size:.62rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.2;overflow-wrap:anywhere;">5 · ' + hi + '</span>' +
+        '</div>');
     }
 
     // Categorical: inline key on one line just under the bar. Full text on hover.
@@ -7448,7 +7519,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
         TRUNC(QX_ESC(optLabel[c] || c), 22) + '</span>';
     }).join('<span style="color:var(--border);margin:0 .1rem;">·</span>');
     const keyRow = '<div title="' + QX_ESC(fullKey) + '" style="display:flex;gap:.35rem;align-items:center;margin-top:.18rem;font-size:.62rem;font-style:italic;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + keyInline + '</div>';
-    return '<div style="margin-bottom:.95rem;">' + header + barRow + keyRow + '</div>';
+    return qRow(header, barRow + keyRow);
   };
   const sectionHead = (t) => '<div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700;margin:0 0 .7rem;padding-bottom:.35rem;border-bottom:1px solid var(--border);">' + t + '</div>';
   const scaleLegend = _hasScale
@@ -7503,7 +7574,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
        the column has a fixed width and the text wraps inside it. */
     const lo = QX_ESC(loFull), hi = QX_ESC(hiFull);
     const loPre = isScale ? '1 \u00b7 ' : '', hiPre = isScale ? '5 \u00b7 ' : '';
-    const header = '<div style="font-size:.74rem;color:var(--text);margin-bottom:.3rem;line-height:1.35;">' + QX_ESC(f.label) + '</div>';
+    const header = QX_ESC(f.label);
     /* ── WHICH DOT IS WHICH ────────────────────────────────────────────
        Ellie: "when the user selects a different demo from the slicer, include
        a small grey dot indicating the mean and then the larger, colored dot
@@ -7520,12 +7591,12 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
       (sliced ? dot(omean, '#9AA3B2', 1, 'Mean (everyone): ' + score(omean) + ' (n=' + on + ')', 9) : '') +
       dot(mean, theme, 2, (sliced ? 'Selected view: ' : 'Mean: ') + score(mean) + ' (n=' + n + ')', 14) + '</div>';
     // Score readout removed from the row; the dot's hover shows the exact mean.
-    return '<div style="margin-bottom:.95rem;">' + header +
+    return qRow(header,
       '<div style="display:flex;align-items:center;gap:.5rem;">' +
-        '<span style="flex:0 0 112px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.3;overflow-wrap:anywhere;">' + loPre + lo + '</span>' +
+        '<span style="flex:0 0 22%;min-width:62px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:right;line-height:1.3;overflow-wrap:anywhere;">' + loPre + lo + '</span>' +
         track +
-        '<span style="flex:0 0 112px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.3;overflow-wrap:anywhere;">' + hiPre + hi + '</span>' +
-      '</div></div>';
+        '<span style="flex:0 0 22%;min-width:62px;font-size:.6rem;font-style:italic;color:var(--dim);text-align:left;line-height:1.3;overflow-wrap:anywhere;">' + hiPre + hi + '</span>' +
+      '</div>');
   };
   const measureBar = (f, drows, sliced) => (QX_MODE[containerId] === 'mean' && (f.kind === 'scale' || f.ordinal)) ? meanBar(f, drows, sliced) : barFor(f, drows);
   const renderDist = (drows, sliced) => {

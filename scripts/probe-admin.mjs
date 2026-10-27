@@ -58,10 +58,12 @@ const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
 const { withEffectivePromoCodes, coupleKeyFromProfiles } = await import(`${ROOT}api/_lib/order-promo.js`);
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
 const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_questions.js`);
+const { genericLabel } = await import(`${ROOT}api/_lib/generic-label.js`);
 const { REFLECTION_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
 const { ANNIVERSARY_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
 const { REFLECTION_CODES, tallyCodes } = await import(`${ROOT}api/_lib/reflection-codes.js`);
 const { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } = await import(`${ROOT}api/_intimacy-questions.js`);
+const IDIM_LABEL_STUB = Object.fromEntries((INTIMACY_DIMENSIONS || []).map((d) => [d.id, d.label]));
 
 const DIMS = ['energy', 'expression', 'reassurance', 'love', 'needs', 'bids', 'listening', 'conflict', 'repair', 'feedback'];
 const TYPES = ['W', 'X', 'Y', 'Z'];
@@ -134,10 +136,22 @@ const fields = [
       options: opts.map((v) => ({ v, label: v })), partnerable: true,
     };
   }),
-  ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').slice(0, 6).map((q) => ({
+  /* ── EVERY DIMENSION, AND ITS REAL NAME ────────────────────────────────
+     This was `.slice(0, 6)` with `dimLabel: q.dimension`, and both halves
+     were wrong in the same direction: the first six questions belong to two
+     dimensions, so the alignment-by-dimension chart drew a two-point radar,
+     which Chart.js renders as a line with a dot on it. And the id was being
+     sent where the server sends the label, so the two points were captioned
+     "frequency" and "initiating" in lower case.
+
+     The real endpoint maps q.dimension through INTIMACY_DIMENSIONS, so this
+     does too rather than restating the pairs. A stub that is wrong about the
+     shape reports a working feature as broken, which is exactly what I
+     started to chase here before reading this line. */
+  ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').map((q) => ({
     key: `iq_${q.id}`, label: q.premarital || q.id, group: 'Physical Intimacy', kind: 'cat',
-    options: (q.options || []).map((o) => ({ v: o.label, label: o.label })), partnerable: true,
-    dim: q.dimension, dimLabel: q.dimension,
+    options: (q.options || []).map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true,
+    dim: q.dimension, dimLabel: IDIM_LABEL_STUB[q.dimension] || q.dimension,
   })),
 ];
 
@@ -365,8 +379,23 @@ const server = createServer((req, res) => {
         { label: 'Where to live', pct: 28 }, { label: 'Money', pct: 22 },
         { label: 'Social life', pct: 17 },
       ],
-      respAgreement: ['Cooking', 'Bills', 'Planning visits', 'Mental load', 'Savings']
-        .map((l, k) => ({ label: l, pct: 40 + (k * 9) % 50, category: 'Household', n: 20 })),
+      /* ── ALL TWENTY, FROM THE EXERCISE ITSELF ──────────────────────────
+         Five labels typed by hand, all of them filed under Household. Ellie
+         asked for this tile to become "a 5x4 grid", and five items cannot
+         show whether a five by four grid works: it drew one row 90 points
+         tall and looked finished. A hand-typed answer set is a guess about
+         what the product stores, and the guess here was a quarter of it.
+
+         RESPONSIBILITY_CATEGORIES is what the exercise asks, so the count and
+         the categories come from there and cannot drift from the real twenty. */
+      respAgreement: RESPONSIBILITY_CATEGORIES.flatMap((cat) => (cat.items || []).map((item) => ({ item, category: cat.label })))
+        /* Through the real genericLabel, because the server sends these
+           already converted and the raw item still says {userName}. The first
+           version of this stub skipped that and the grid drew "Planning
+           visits with {userName}'s family" in a tile, which is a stub
+           disagreeing with its server about what a label even is. */
+        .map((x, k) => ({ label: genericLabel(typeof x.item === 'string' ? x.item : (x.item.label || x.item.id)),
+                          pct: 32 + (k * 13) % 62, category: x.category, n: 20 })),
     };
     res.writeHead(200, { 'Content-Type': 'application/json' });
     /* Orders too. The page only reaches loadRealResponses from the branch
@@ -992,6 +1021,46 @@ if (process.env.SET) {
  * an empty string, rendered white text, or never ran at all. Three different
  * bugs, one picture. This prints the markup so the three can be told apart.
  */
+/**
+ * ROWS=qx-comm — the geometry of the first All questions rows.
+ *
+ * Ellie asked for the question text and the pole labels to sit on ONE line:
+ * "I want the row with pole labels in line with the row label rather than
+ * below it." Whether that happened is a question about two boxes' tops and
+ * lefts, and a screenshot cannot answer it: a label one line above its bar
+ * and a label beside its bar look similar at a glance and differ by eight
+ * points. So it is measured. `sameLine` is the whole assertion.
+ */
+if (process.env.ROWS) {
+  for (const id of process.env.ROWS.split(',').map((x) => x.trim()).filter(Boolean)) {
+    const out = await page.evaluate((cid) => {
+      const host = document.getElementById(cid);
+      if (!host) return { id: cid, err: 'NO SUCH ELEMENT' };
+      /* A row is a flex box whose first child is the label column and whose
+         second is the content. Found by that shape rather than by a class,
+         because these rows are built as inline styles. */
+      const rows = [...host.querySelectorAll('div')].filter((d) => {
+        const cs = getComputedStyle(d);
+        return cs.display === 'flex' && d.children.length === 2
+          && getComputedStyle(d.children[0]).textAlign === 'right';
+      }).slice(0, 4);
+      return { id: cid, found: rows.length, rows: rows.map((r) => {
+        const L = r.children[0].getBoundingClientRect();
+        const C = r.children[1].getBoundingClientRect();
+        const txt = (r.children[0].textContent || '').trim().slice(0, 34);
+        return { txt, labelW: Math.round(L.width), labelTop: Math.round(L.top), contentTop: Math.round(C.top),
+                 labelRight: Math.round(L.right), contentLeft: Math.round(C.left),
+                 sameLine: Math.abs(L.top - C.top) < 14 && L.right <= C.left + 1 };
+      }) };
+    }, id);
+    if (out.err) { console.log(`  rows #${out.id}: ${out.err}`); continue; }
+    console.log(`  rows #${out.id}: ${out.found} measured`);
+    for (const r of out.rows) {
+      console.log(`    ${r.sameLine ? 'SAME LINE' : 'STACKED  '}  label ${r.labelW}px right@${r.labelRight} | content left@${r.contentLeft}  "${r.txt}"`);
+    }
+  }
+}
+
 if (process.env.READ) {
   for (const id of process.env.READ.split(',').map((x) => x.trim()).filter(Boolean)) {
     const out = await page.evaluate((i) => {

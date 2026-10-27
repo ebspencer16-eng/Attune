@@ -49,6 +49,7 @@ import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understa
 import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
 import { withEffectivePromoCodes, coupleKeyFromProfiles } from './_lib/order-promo.js';
+import { genericLabel } from './_lib/generic-label.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
 import { REFLECTION_CODES, tallyCodes } from './_lib/reflection-codes.js';
@@ -112,13 +113,6 @@ function buildResponseAggregates(profiles, sessions) {
      this is not the cause of anything, and that is exactly when a second copy
      is worth deleting. Waiting until they disagree means finding out from a
      chart. */
-  const famLabel = (t) => String(t || '')
-    .replace(/\{userName\}'s family/g, "one's own family")
-    .replace(/\{partnerName\}'s family/g, "other partner's family")
-    .replace(/\{userName\}'s/g, "one's own")
-    .replace(/\{partnerName\}'s/g, "the other partner's")
-    .replace(/\{userName\}/g, 'one')
-    .replace(/\{partnerName\}/g, 'the partner');
   // Pair each profile with its partner. partner_sessions rows are keyed by
   // invite_code, which is how an invited partner's answers are stored.
   const byInvite = new Map();
@@ -481,7 +475,7 @@ function buildResponseAggregates(profiles, sessions) {
   const respAgreement = [];
   RESPONSIBILITY_CATEGORIES.forEach(c => c.items.forEach(item => {
     const key = c.id + '__' + item;
-    if (raTotal[key] > 0) respAgreement.push({ category: c.label, label: famLabel(item), pct: Math.round(100 * raCount[key] / raTotal[key]), n: raTotal[key] });
+    if (raTotal[key] > 0) respAgreement.push({ category: c.label, label: genericLabel(item), pct: Math.round(100 * raCount[key] / raTotal[key]), n: raTotal[key] });
   }));
   // Category radar uses the same perspective-aware agreement (naive string
   // equality undercounts complementary "Me"/"Partner" answers).
@@ -509,7 +503,7 @@ function buildResponseAggregates(profiles, sessions) {
   const lifeGaps = LIFE_QUESTIONS
     // Neutral, name-free phrasing for the family questions (and any other
     // {userName}/{partnerName} templates) so the overview reads clearly.
-    .map(q => ({ label: famLabel(q.topic || q.text), pct: lifeTotal[q.id] ? Math.round(100 * (lifeTotal[q.id] - lifeAgree[q.id]) / lifeTotal[q.id]) : 0, n: lifeTotal[q.id] }))
+    .map(q => ({ label: genericLabel(q.topic || q.text), pct: lifeTotal[q.id] ? Math.round(100 * (lifeTotal[q.id] - lifeAgree[q.id]) / lifeTotal[q.id]) : 0, n: lifeTotal[q.id] }))
     .filter(g => g.n > 0)
     .sort((x, y) => y.pct - x.pct);
 
