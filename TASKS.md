@@ -160,11 +160,6 @@ select 'demo accounts with a survey row: ' || coalesce(u.email, '(no email)'),
 |--|--|
 | A66 | **The ghost tile needs its own colour and a gap under it.** The shell is the page ground, so it reads as nothing. A shade off the background and a buffer before the next tile, everywhere a shell is used: Dashboard, Order Details, Package Mix, Comms, Expectations, Rel Reflection. |
 | A65 | **2000 seconds on app highlights looks wrong and I am treating it as a bug until proven otherwise.** Checking what the clock actually measures, whether it stops on background, and whether two surfaces write the same key. |
-| A44 | **Phys. Int. overview tile**: avg alignment across all aspects, most-picked "what it is for" option, % who expect their partner to initiate, avg gap on appetite for novelty. |
-| A45 | **Phys. Int. bottom section renamed All questions**, same as every other page. |
-| A46 | **Column chart of "what it is for" picks**, above All questions. It is a multi-select, so the bars count picks and the subtitle carries how many people. |
-| A47 | **All questions uses the married wording**, not the premarital wording. Every question stores both and the admin was drawing one of them without saying which. |
-| A48 | **Chart comparing pre-intimate and intimate couples' average placement per aspect.** Needs a way to tell the two groups apart; checking what the exercise stores before building. |
 | A57 | **Type Analytics overview tile**: E:W ratio, O:G ratio, top individual type, top couple type. |
 | A58 | **Swap the individual and couple distribution charts.** |
 | A59 | **Those two tiles stop being squares**: smaller pie, tile height follows. |
@@ -213,6 +208,10 @@ section 3 explaining things, just include the context I need in section 3."
 | A54 | **Eight slicer rows: shows each horseman, and partner shows each.** Derived at the same line the chart draws, so the two cannot come to mean different things by "shows". Unanswered stays blank rather than becoming No. |
 | A56 | **Conflict All questions has poles**, taken from each option's own value so a question written best-first does not show its ends backwards. The two forced choices stay as bars: two answers are a split, not a position. |
 | A67 | **Every conflict field was being defined 14 times.** The conflict loop sat inside the intimacy loop: 126 fields where there should be 9. Invisible from outside, because a duplicate has the same key and label, so every dropdown carried each entry fourteen times. |
+| A44 | **Physical Intimacy at a glance**: avg alignment, most-picked "what it is for", % who say their partner initiates, and appetite-for-novelty shown as closeness so it reads the same way as every other alignment figure. |
+| A46 | **What it is for as a column chart.** It is select-up-to-two, so the subtitle says the bars add up to more than the people who answered. |
+| A47 | **All questions uses the married wording now.** It was drawing "how often do you imagine wanting" about people who had answered "how often do you want". |
+| A48 | **Not-yet against regularly-intimate, per aspect**, grouped by the wording each person answered under, which is the only thing in the product that separates the two. Also a new slicer: Intimacy stage. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

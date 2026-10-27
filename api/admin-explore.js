@@ -243,6 +243,21 @@ function ownFields(p) {
     r['iq_' + q.id] = (typeof raw === 'string' && raw) ? raw : null;
   }
   /**
+   * Which wording this person answered under.
+   *
+   * Ellie: "I want a chart above all questions that shows pre-intimate vs
+   * intimate couples' avg placement on each dimension."
+   *
+   * Every intimacy question carries two wordings and the record says which was
+   * shown: `premarital` imagines it, `married` describes it. That is the only
+   * thing in the product that separates the two groups she is asking about, so
+   * it is the thing to group by. Null for somebody who has not taken it, which
+   * keeps them out of both columns rather than defaulting them into one.
+   */
+  r.intimacy_variant = p.intimacy_data?.variant === 'married' ? 'Regularly intimate'
+    : p.intimacy_data?.variant === 'premarital' ? 'Not yet'
+    : null;
+  /**
    * ── CONFLICT PATTERNS ───────────────────────────────────────────────────
    * Ellie: "Need a responses page in admin for conflict exercise."
    *
@@ -328,6 +343,7 @@ const PARTNERABLE = [
   ...RESPONSIBILITY_CATEGORIES.flatMap((c) => c.items.map((_, i) => 'resp_' + c.id + '_' + i)),
   ...REFLECTION_QUESTIONS.map((q) => 'ref_' + q.id),
   ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').map((q) => 'iq_' + q.id),
+  'intimacy_variant',
   ...CONFLICT_QUESTIONS.filter((q) => ['scale', 'frequency', 'forcedAB', 'pickOne'].includes(q.kind)).map((q) => 'cq_' + q.id),
   ...PERSONALITY_QUESTIONS.map((q) => 'pv_' + q.id),
   ...Object.keys(DIM_KEYS).map((d) => 'pvdim_' + d),
@@ -472,6 +488,11 @@ function buildCatalog(fbCatOptions) {
     f.push({ key: h.key, label: 'Shows ' + h.label, group: 'Conflict Patterns', kind: 'cat',
       options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true });
   }
+  /* The wording someone answered under, as something to cut by. Two groups and
+     no order, so a plain category. */
+  f.push({ key: 'intimacy_variant', label: 'Intimacy stage', group: 'Physical Intimacy', kind: 'cat',
+    options: [{ v: 'Not yet', label: 'Not yet' }, { v: 'Regularly intimate', label: 'Regularly intimate' }],
+    partnerable: true });
   for (const q of REFLECTION_QUESTIONS) {
     const isPick = q.kind === 'pick';
     const opts = (isPick ? q.options : q.labels) || [];
@@ -487,7 +508,12 @@ function buildCatalog(fbCatOptions) {
   for (const q of INTIMACY_QUESTIONS) {
     if (q.kind === 'multi') continue;
     const valid = (q.options || []).filter((o) => o.value != null);
-    const fld = { key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true, dim: q.dimension, dimLabel: IDIM_LABEL[q.dimension] || q.dimension };
+    /* Ellie: "All questions at the bottom should use the framing for couples
+       who are regularly physically intimate." Every question stores both
+       wordings and this was drawing the premarital one without saying so, so
+       the admin asked "how often do you imagine wanting" about people who had
+       answered "how often do you want". */
+    const fld = { key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.married || q.premarital || q.id), group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true, dim: q.dimension, dimLabel: IDIM_LABEL[q.dimension] || q.dimension };
     /* ── THIS LOOP USED TO RUN OFF THE END OF ITSELF ────────────────────
        The Conflict Patterns block below was INSIDE this loop: the intimacy
        loop opened here, the conflict loop opened and closed in the middle of

@@ -1362,10 +1362,40 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
     </div>
 
     <div id="resp-intimacy" class="tab-panel" style="display:none">
+      <!-- Ellie: "Overview tile should have: Avg alignment (aggregate),
+           Most-selected 'what it is for' option, % of people who expect their
+           partner to initiate, Avg gap in appetite for novelty." -->
+      <div class="chart-card kpi-shell">
+        <div class="chart-head">
+          <div><div class="chart-title">Physical Intimacy at a glance</div><div class="chart-subtitle">Across everyone who has answered</div></div>
+        </div>
+        <div class="chart-body">
+          <div class="kpi-grid" id="pisum-tiles" style="grid-template-columns:repeat(4,1fr);margin:0;">
+            <div class="kpi-card indigo"><div class="kpi-label">Avg alignment</div><div class="kpi-val" id="pi-align">—</div><div class="kpi-sub" id="pi-align-sub"></div></div>
+            <div class="kpi-card green"><div class="kpi-label">Most picked "what it is for"</div><div class="kpi-val" id="pi-for" style="font-size:1.1rem">—</div><div class="kpi-sub" id="pi-for-sub"></div></div>
+            <div class="kpi-card orange"><div class="kpi-label">Expect their partner to initiate</div><div class="kpi-val" id="pi-init">—</div><div class="kpi-sub" id="pi-init-sub"></div></div>
+            <div class="kpi-card amber"><div class="kpi-label">Appetite for novelty, aligned</div><div class="kpi-val" id="pi-novel">—</div><div class="kpi-sub" id="pi-novel-sub"></div></div>
+          </div>
+        </div>
+      </div>
       <div class="chart-grid full">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Alignment by intimacy dimension</div><div class="chart-subtitle">Average alignment across dimensions</div></div><select class="tile-slicer" id="slz-intim" title="Cut this tile by a segment" aria-label="Slz intim"><option value="">Everyone</option></select></div>
           <div class="chart-body"><div class="insight-list" id="intimacy-dim-bars" style="margin-top:.5rem;"></div></div>
+        </div>
+      </div>
+      <!-- Ellie: "Above all questions, there should be a column chart showing
+           instances of 'what it is for' choices." And: "I want a chart above
+           all questions that shows pre-intimate vs intimate couples' avg
+           placement on each dimension." -->
+      <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.25rem">
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">What it is for</div><div class="chart-subtitle" id="pi-meanfor-sub">Picked, up to two each</div></div></div>
+          <div class="chart-body"><canvas id="chart-pi-meanfor"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">Where each group places itself</div><div class="chart-subtitle" id="pi-stage-sub">Couples who are not yet physically intimate, against those who are</div></div></div>
+          <div class="chart-body"><canvas id="chart-pi-stage"></canvas></div>
         </div>
       </div>
       <div class="qx-section" id="qx-intimacy" style="margin-top:1.25rem"></div>
@@ -5601,6 +5631,95 @@ function filterOrders(sel) { applyOrderFilters(); }
  * rather than the cube, and a function awaiting both would make the six
  * cube-backed charts wait on a payload they do not need.
  */
+/**
+ * The Physical Intimacy glance tile and its two charts.
+ *
+ * ── EVERY FIGURE IS THE SERVER'S ──────────────────────────────────────────
+ * The alignment, the picks, who initiates and the novelty gap all come from
+ * api/admin-data.js, which runs the shared intimacy scorer. Working any of
+ * them out from the cube's per-question values would be a second
+ * implementation of how far apart two answers are, which is the one thing this
+ * codebase keeps getting wrong.
+ */
+async function renderIntimacySummary() {
+  const host = document.getElementById('pisum-tiles');
+  if (!host) return;
+  const data = await fetchAdminData();
+  const st = data && data.intimacyStats;
+  const put = (id, v, sub) => { const e = document.getElementById(id); if (e) e.textContent = v;
+    const sb = document.getElementById(id + '-sub'); if (sb) sb.textContent = sub; };
+  if (!st) {
+    for (const id of ['pi-align', 'pi-for', 'pi-init', 'pi-novel']) put(id, '\u2014', 'Not sent');
+    return;
+  }
+  setTileN(host, st.couples || 0);
+
+  put('pi-align', st.avgAlignment == null ? '\u2014' : st.avgAlignment + '%',
+    st.couples ? st.couples + ' couple' + (st.couples === 1 ? '' : 's') : 'No couple has both halves yet');
+
+  /* Most picked, and by how many. A winner with two picks out of three people
+     is a different fact from one with two hundred, so the count goes with it. */
+  const forEntries = Object.entries(st.meanFor || {}).sort((a, b) => b[1] - a[1]);
+  const top = forEntries.find(([, n]) => n > 0);
+  put('pi-for', top ? top[0] : '\u2014',
+    top ? top[1] + ' of ' + (st.meanForPeople || 0) + ' people picked it' : 'Nobody has answered this yet');
+
+  put('pi-init', st.partnerInitiates == null ? '\u2014' : st.partnerInitiates + '%',
+    st.partnerInitiates == null ? 'Nobody has answered this yet' : 'Say their partner initiates more');
+
+  /* Shown as closeness, not as a gap, because every other alignment figure in
+     this product reads that way and one tile reading backwards is one tile
+     somebody misreads once. The label says "aligned" so the direction is on
+     the card rather than only in this comment. */
+  put('pi-novel', st.noveltyCloseness == null ? '\u2014' : st.noveltyCloseness + '%',
+    st.noveltyCloseness == null ? 'No couple has both halves yet' : 'Higher is closer together');
+
+  /* ── WHAT IT IS FOR ─────────────────────────────────────────────────── */
+  {
+    const el = document.getElementById('chart-pi-meanfor');
+    const sub = document.getElementById('pi-meanfor-sub');
+    const rows = forEntries.filter(([, n]) => n > 0);
+    if (sub) sub.textContent = 'Select up to two, so the bars add up to more than the '
+      + (st.meanForPeople || 0) + ' people who answered';
+    if (el && rows.length) {
+      mkChart(el, { type: 'bar',
+        data: { labels: rows.map(r => r[0]), datasets: [{ data: rows.map(r => r[1]), backgroundColor: '#B5546E', borderRadius: 4, maxBarThickness: 46 }] },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + c.parsed.y + ' of ' + (st.meanForPeople || 0) + ' people' } } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } },
+                    x: { ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 }, grid: { display: false } } } } });
+    } else if (el && el.parentElement) {
+      el.parentElement.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">Nobody has answered this yet.</div>';
+    }
+  }
+
+  /* ── THE TWO GROUPS, PER ASPECT ─────────────────────────────────────── */
+  {
+    const el = document.getElementById('chart-pi-stage');
+    const sub = document.getElementById('pi-stage-sub');
+    const rows = (st.stageRows || []).filter(r => r.notYet != null || r.intimate != null);
+    const n = st.stageN || {};
+    if (sub) sub.textContent = (n['Not yet'] || 0) + ' not yet, ' + (n['Regularly intimate'] || 0) + ' regularly intimate';
+    if (el && rows.length) {
+      /* A position is 0 to 1; shown as a percentage along each aspect's own
+         axis, which is what the sliders at the foot of this page draw. */
+      const pct = (v) => v == null ? null : Math.round(v * 100);
+      mkChart(el, { type: 'bar',
+        data: { labels: rows.map(r => r.label), datasets: [
+          { label: 'Not yet', data: rows.map(r => pct(r.notYet)), backgroundColor: '#9AA3B2', borderRadius: 4, maxBarThickness: 22 },
+          { label: 'Regularly intimate', data: rows.map(r => pct(r.intimate)), backgroundColor: '#B5546E', borderRadius: 4, maxBarThickness: 22 },
+        ] },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } },
+            tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + c.parsed.y + '% along' } } },
+          scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { display: false } },
+                    x: { ticks: { font: { size: 9 } }, grid: { display: false } } } } });
+    } else if (el && el.parentElement) {
+      el.parentElement.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">Nobody has answered this yet.</div>';
+    }
+  }
+}
+
 async function renderConflictExtras() {
   const data = await fetchAdminData();
 
@@ -7813,6 +7932,7 @@ function initCharts(page) {
     renderRelReflTiles();
     renderReflectionCodes();
     renderIntimacyResponses();
+    renderIntimacySummary();
     renderSelfPartnerGap('svp-gap');
     renderCommsSummary();
     renderQuestionExplorer('qx-comm', ['Ex1 · Communication'], ['Dimensions (score'], true);

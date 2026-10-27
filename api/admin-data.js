@@ -53,6 +53,8 @@ import { readInheritance } from './_lib/inherited-roles.js';
 import { REFLECTION_CODES, tallyCodes } from './_lib/reflection-codes.js';
 import { ANNIVERSARY_QUESTIONS } from './_anniversary-questions.js';
 import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, isAlignmentCategory, scoreIntimacyPair, intimacyDimensionPositions } from './_intimacy-questions.js';
+import { closenessPct, meanPct } from './_lib/alignment.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -375,6 +377,104 @@ function buildResponseAggregates(profiles, sessions) {
       .sort((a, b) => a.place - b.place);
   })();
 
+  /**
+   * The Physical Intimacy page's aggregates.
+   *
+   * ── WHY THE ALIGNMENT IS COMPUTED HERE AND NOT ON THE PAGE ────────────
+   * Ellie: "Overview tile should have: Avg alignment (aggregate)..."
+   *
+   * How far apart two intimacy answers are is decided by
+   * `summarizeIntimacy`, which applies the question weights and the two bands.
+   * Working it out from the cube's per-question values would be a second
+   * implementation of that, and this codebase's whole failure mode is two
+   * copies of one rule. So the couples are paired here, the shared scorer
+   * runs, and the page draws the answer.
+   *
+   * ── AND WHAT IT IS FOR, WHICH IS A MULTI-SELECT ───────────────────────
+   * Ellie: "Above all questions, there should be a column chart showing
+   * instances of 'what it is for' choices." It is "select up to two", so the
+   * bars count PICKS and people are counted separately, because a chart whose
+   * bars sum to more than its denominator has to say so.
+   */
+  const intimacyStats = (() => {
+    const bothDone = pairs.filter(([a, b]) => a.intimacy_data?.answers && b.intimacy_data?.answers);
+    const pcts = [];
+    for (const [a, b] of bothDone) {
+      const sum = summarizeIntimacy(a.intimacy_data.answers, b.intimacy_data.answers);
+      const rows = (sum.dimSummary || []).filter((d) => d.avgGap != null && isAlignmentCategory(d.id));
+      if (!rows.length) continue;
+      pcts.push(meanPct(rows.map((d) => closenessPct(d.avgGap))));
+    }
+    const avgAlignment = pcts.length ? Math.round(pcts.reduce((x, y) => x + y, 0) / pcts.length) : null;
+
+    /* The multi question, counted by pick. */
+    const multi = INTIMACY_QUESTIONS.find((q) => q.id === 'iq_mean_for');
+    const meanFor = {};
+    let meanForPeople = 0;
+    if (multi) {
+      const byValue = Object.fromEntries((multi.options || []).filter((o) => o.value != null).map((o) => [o.value, o.label]));
+      for (const o of Object.values(byValue)) meanFor[o] = 0;
+      for (const p of profiles || []) {
+        const picks = p.intimacy_data?.answers?.[multi.id];
+        if (!Array.isArray(picks)) continue;
+        const real = picks.filter((v) => v != null && byValue[v]);
+        if (!real.length) continue;
+        meanForPeople++;
+        for (const v of real) meanFor[byValue[v]]++;
+      }
+    }
+
+    /* Who people expect to initiate. `iq_init_who` is self-referential, so an
+       answer names a side; the share that names the partner is the figure. */
+    const initQ = INTIMACY_QUESTIONS.find((q) => q.id === 'iq_init_who');
+    let partnerInitiates = null;
+    if (initQ) {
+      const vals = (profiles || []).map((p) => p.intimacy_data?.answers?.[initQ.id]).filter(Boolean);
+      const partnerSide = (initQ.options || []).filter((o) => o.side === 'partner').map((o) => o.label);
+      if (vals.length && partnerSide.length) {
+        partnerInitiates = Math.round(100 * vals.filter((v) => partnerSide.includes(v)).length / vals.length);
+      }
+    }
+
+    /* The appetite gap, as a closeness percentage so it reads the same way as
+       every other alignment figure here. */
+    const advQ = INTIMACY_QUESTIONS.find((q) => q.id === 'iq_adv_appetite');
+    let noveltyCloseness = null;
+    if (advQ) {
+      const gaps = [];
+      for (const [a, b] of bothDone) {
+        const r = scoreIntimacyPair(advQ, a.intimacy_data.answers[advQ.id], b.intimacy_data.answers[advQ.id]);
+        if (r.gap != null) gaps.push(r.gap);
+      }
+      if (gaps.length) noveltyCloseness = closenessPct(gaps.reduce((x, y) => x + y, 0) / gaps.length);
+    }
+
+    /* Average placement per aspect, split by which wording they answered
+       under. Positions come from intimacyDimensionPositions, which is what the
+       results pages use, rather than being averaged again here. */
+    const byStage = { 'Not yet': {}, 'Regularly intimate': {} };
+    const stageN = { 'Not yet': 0, 'Regularly intimate': 0 };
+    for (const p of profiles || []) {
+      const ans = p.intimacy_data?.answers;
+      const stage = p.intimacy_data?.variant === 'married' ? 'Regularly intimate'
+        : p.intimacy_data?.variant === 'premarital' ? 'Not yet' : null;
+      if (!ans || !stage) continue;
+      stageN[stage]++;
+      const pos = intimacyDimensionPositions(ans, ans);
+      for (const [dim, v] of Object.entries(pos || {})) {
+        const mine = v?.mine ?? v?.you ?? null;
+        if (mine == null) continue;
+        (byStage[stage][dim] = byStage[stage][dim] || []).push(mine);
+      }
+    }
+    const stageRows = INTIMACY_DIMENSIONS.map((d) => {
+      const avg = (arr) => (arr && arr.length) ? Number((arr.reduce((x, y) => x + y, 0) / arr.length).toFixed(3)) : null;
+      return { id: d.id, label: d.label, notYet: avg(byStage['Not yet'][d.id]), intimate: avg(byStage['Regularly intimate'][d.id]) };
+    });
+
+    return { avgAlignment, couples: pcts.length, meanFor, meanForPeople, partnerInitiates, noveltyCloseness, stageRows, stageN };
+  })();
+
   const respPairs = pairs.filter(([a, b]) =>
     a.ex2_answers?.responsibilities && b.ex2_answers?.responsibilities).length;
   const respAgreement = [];
@@ -514,6 +614,7 @@ function buildResponseAggregates(profiles, sessions) {
     reflectionCodes,
     conflictCodes,
     repairRank,
+    intimacyStats,
     /* The line between aligned and not, from api/_lib/alignment.js, which is
        the only thing allowed to turn a distance into a judgement. Sent rather
        than typed into the admin, because a threshold written in two places is

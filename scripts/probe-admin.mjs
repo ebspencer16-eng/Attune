@@ -60,7 +60,7 @@ const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_
 const { REFLECTION_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
 const { ANNIVERSARY_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
 const { REFLECTION_CODES, tallyCodes } = await import(`${ROOT}api/_lib/reflection-codes.js`);
-const { INTIMACY_QUESTIONS } = await import(`${ROOT}api/_intimacy-questions.js`);
+const { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } = await import(`${ROOT}api/_intimacy-questions.js`);
 
 const DIMS = ['energy', 'expression', 'reassurance', 'love', 'needs', 'bids', 'listening', 'conflict', 'repair', 'feedback'];
 const TYPES = ['W', 'X', 'Y', 'Z'];
@@ -416,6 +416,26 @@ const server = createServer((req, res) => {
       return opts.map((label, i) => ({ label, place: Number((1 + ((i * 1.7) % 4)).toFixed(2)), n: 14 - i }))
         .sort((a, b) => a.place - b.place);
     })();
+    /* The Physical Intimacy page. The two groups are given different average
+       placements on purpose: a stub where both columns match would hide
+       whether the chart can show a difference at all. */
+    const intimacyStats = (() => {
+      const multi = INTIMACY_QUESTIONS.find((q) => q.id === 'iq_mean_for');
+      const labels = ((multi && multi.options) || []).filter((o) => o.value != null).map((o) => o.label);
+      const meanFor = {};
+      labels.forEach((l, i) => { meanFor[l] = 9 - i; });
+      return {
+        avgAlignment: 78, couples: 18,
+        meanFor, meanForPeople: 24,
+        partnerInitiates: 41, noveltyCloseness: 72,
+        stageN: { 'Not yet': 9, 'Regularly intimate': 15 },
+        stageRows: INTIMACY_DIMENSIONS.map((d, i) => ({
+          id: d.id, label: d.label,
+          notYet: Number((0.35 + (i % 4) * 0.08).toFixed(3)),
+          intimate: Number((0.52 + ((i + 2) % 4) * 0.09).toFixed(3)),
+        })),
+      };
+    })();
     const beta_codes = [
       ...Object.entries(COMPILED_CODES).map(([code, meta]) => {
         const m = (typeof meta === 'string') ? { pkg: meta, mode: 'free', amount: 0 } : (meta || {});
@@ -426,7 +446,7 @@ const server = createServer((req, res) => {
       { code: 'SPRING25', package_key: 'core', discount_mode: 'percent', discount_value: 25, active: true, uses_count: 3, max_uses: 50, source: 'issued' },
       { code: 'FRIENDS10', package_key: '*', discount_mode: 'fixed', discount_value: 10, active: false, uses_count: 0, max_uses: null, source: 'issued' },
     ];
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, reflectionCodes, conflictCodes, repairRank, responses: payload }));
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, reflectionCodes, conflictCodes, repairRank, intimacyStats, responses: payload }));
     return;
   }
   if (url.pathname.startsWith('/api/admin-typing')) {
