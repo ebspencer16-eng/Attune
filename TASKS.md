@@ -10,7 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| P9 | **Nothing. You asked what shipping a box needs and the answer is that nothing in the admin uses those fields any more.** The Fulfilment page was removed on purpose in 92b3e2fb, and its table, its status buttons and both CSV exports that carried a name or an address are still in the file called by nobody. The server was sending buyer name, email and full address to your browser on every load for readers that no longer exist. Stripped now, so the banner is true as written and you change nothing. **The thing to decide:** if you ever ship a physical box, there is currently no way to get the address out. Say the word and I build that deliberately. |
+| A81 | **Explore should load again. Hard refresh it and tell me which of two things you see.** The picker can no longer stop that page: if it fails it puts the old grey dropdown back and the page works. So either you see the coloured banners, and it was a stale file, or you see a plain dropdown with a small grey line under it reading "the coloured picker could not start", which tells me it is throwing and I will have the cause from that. I could not reproduce it here: the page drives correctly against test data and the file on the server is identical to mine. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -52,9 +52,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| S59 | **The payment path writes a row, and now something proves it every build.** It had never once been executed: a signed Stripe event now goes through the real handler against a stubbed database, and the order comes out with its package, its total and its three add-ons. The other half matters more: an unsigned event, one signed with the wrong secret and one signed six minutes ago each write nothing. |
 | A85 | **097 is run, so the survey can save now. The proof is one number.** Finish a survey, then open the Feedback page: the line under the title counts responses and has read 0 since the day the feature shipped. If it still reads 0 after you finish one, tell me and I will chase the write itself. |
-| A81 | **A full-colour banner per section, in a picker of our own.** A browser dropdown is drawn by the operating system and ignores the page, which is why the colour never showed: no CSS could have fixed it. The list is ours now, with a search box, a coloured bar per section and the questions indented under it. It renders the old dropdown rather than holding a second copy of the field list. |
 | P10 | **The admin was sending names, emails and shipping addresses to your browser that nothing drew.** Found while answering P9. Stripped on the way out, and a gate fills one order with every identifying column and proves not one of those values survives. |
 | A72 | **Engagement is not broken, and I was about to rebuild it on a stale note.** The "not readable" round turned out to be my own test harness, and you have approved two things on that page since. What I did find by looking: Refresh was an unstyled browser button, the Exercises chart was silently drawing three of five names, and the downloads caveat sat as a loose line outside its tile. All three fixed. The funnel and acquisition lines are your own spec from R9, so they stay. |
 | R10 | Privacy policy. |
@@ -68,6 +66,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| P9 | **No physical box, so nothing needs a name or an address.** The admin was sending them to your browser anyway, for readers deleted months ago. Stripped, and the banner is true as written. |
+| S59 | **The payment path writes a row, and something proves it every build.** A signed Stripe event goes through the real handler; an unsigned one, one with the wrong secret and one six minutes old each write nothing. |
 | A70 | **Seven pages of missing figures were one key read one level too high.** The server builds those measures in a helper and sends them under `responses`; the page read them off the top. Every tile drew its empty state. |
 | A73 | **The promo table showed two answers to one question**, a counter column and the real order count. One figure now, from the orders, checkable against the table on the same page. |
 | A74 | **A couple buys once, so the partner who did not pay takes their code.** On test data that resolves 24 of 48 orders, and the tile says how many came that way. |
