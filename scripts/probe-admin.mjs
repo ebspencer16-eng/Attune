@@ -55,6 +55,7 @@ const { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS, AXIS_CONFIG, QUES
 const { COMPILED_BETA_CODES: COMPILED_CODES } = await import(`${ROOT}api/_lib/beta-codes.js`);
 const { PERSONALITY_QUESTIONS } = await import(`${ROOT}api/_questions.js`);
 const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
+const { withEffectivePromoCodes, coupleKeyFromProfiles } = await import(`${ROOT}api/_lib/order-promo.js`);
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
 const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_questions.js`);
 const { REFLECTION_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
@@ -256,7 +257,15 @@ for (let i = 0; i < 48; i++) {
      the two issued ones, plus one that is in no list at all so the "Unknown"
      bucket is still exercised rather than being assumed empty. */
   const CODE_POOL = [...Object.keys(COMPILED_CODES).slice(0, 11), 'SPRING25', 'FRIENDS10', 'GONE-FROM-THE-TABLE'];
-  const promo = i % 2 === 0 ? CODE_POOL[i % CODE_POOL.length] : null;
+  /* ── THE UNKNOWN BUCKET HAS TO BE REACHABLE ─────────────────────────
+     This read `CODE_POOL[i % CODE_POOL.length]` under `i % 2 === 0`, and the
+     pool is fourteen long with the unmappable code last, at index 13. An even
+     i never lands on an odd index, so the one entry put there to exercise the
+     Unknown bucket was unreachable and the chart drew no Unknown bar at all.
+     The stub claimed a case it could not produce, which is the same shape as
+     sweeping a round grid over a rule made of thresholds. Halving the index
+     walks the whole pool. */
+  const promo = i % 2 === 0 ? CODE_POOL[(i / 2) % CODE_POOL.length] : null;
   const row = {
     pkg_key: pkg,
     addon_workbook: i % 7 === 0,
@@ -273,10 +282,20 @@ for (let i = 0; i < 48; i++) {
     order_pkg: pkg,
     is_physical: i % 9 === 0,
     promo_code: promo,
+    /* Two orders per couple, which is the shape that matters here: the
+       partner who paid carries the code and the other carries none. Without
+       it withEffectivePromoCodes has nothing to join on and the stub would
+       claim the rule does nothing. */
+    couple_id: 'oc' + Math.floor(i / 2),
     ...row,
     addons: addonsOnOrder(row, promo ? STUB_CODE : null),
   });
 }
+/* The real rule, not a restatement of it. api/admin-explore.js calls this
+   over its own order rows keyed on couple_id; so does this. A stub that
+   bucketed the codes itself would be a second implementation of the thing
+   under test. */
+withEffectivePromoCodes(orders, (o) => o.couple_id || null);
 /* ── SECTIONS AND TIERS, FROM THE MODULE THAT DECIDES THEM ───────────────
    The Explore pickers group by `section` and `tier` now, and a stub that
    invented them would be testing my guess rather than the mapping. */
@@ -361,7 +380,18 @@ const server = createServer((req, res) => {
       /* A code on half of them, so the table's Promo and Discount columns have
          something to draw and the empty case is still represented. */
       promo_code: i % 2 === 0 ? ['BETA-CORE', 'SPRING25', 'FRIENDS10', 'ATTUNE-BETA-01'][i % 4] : null,
+      /* An order carries user_id when the buyer had an account, and that id is
+         the profile id, which is how the server reaches the partner. */
+      user_id: r.id || null,
     }));
+    /* The same rule the endpoint applies, from the same module, keyed the way
+       api/admin-data.js keys it: profile id and partner_profile_id. */
+    const stubPartnerOf = new Map(rows.map((r) => [r.id, r.partner_profile_id || null]));
+    const stubPromoLink = withEffectivePromoCodes(orders, (o) => (
+      o.user_id && stubPartnerOf.has(o.user_id)
+        ? coupleKeyFromProfiles(o.user_id, stubPartnerOf.get(o.user_id))
+        : null
+    ));
     /* ── CODES ───────────────────────────────────────────────────────────
        The stub had none, so __codeByName was empty: every Discount cell was
        blank and the whole discount chart was one "Unknown" bar. That is the
@@ -475,7 +505,7 @@ const server = createServer((req, res) => {
       expCoupleDistances, alignedBand: 0.2, inheritance,
       reflectionCodes, conflictCodes, repairRank, intimacyStats,
     });
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, responses, responsesBySegment: { '': responses } }));
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, promoLink: { inherited: stubPromoLink.inherited, standalone: stubPromoLink.standalone }, responses, responsesBySegment: { '': responses } }));
     return;
   }
   /* ── ENGAGEMENT ─────────────────────────────────────────────────────────
@@ -726,6 +756,11 @@ const report = await page.evaluate(() => ({
       const ds = (ch.data && ch.data.datasets) || [];
       const pts = ds.reduce((n, d) => n + ((d.data || []).filter((v) => v != null).length), 0);
       const labels = ((ch.data && ch.data.labels) || []).length;
+      /* The label TEXT, not only how many. Ellie: "the column labels on the
+         horseman chart are weird, they should just be one word each." A count
+         cannot say that and neither can a screenshot I read rather than
+         measured. Capped so a forty-category cut does not fill the run. */
+      const labelText = ((ch.data && ch.data.labels) || []).slice(0, 8).map((x) => String(x).slice(0, 44));
       const vals = (ds[0] && ds[0].data || []).slice(0, 12).map((v) => (typeof v === 'number' ? Number(v.toFixed(2)) : v));
       const r = c.getBoundingClientRect();
       const box = c.parentElement ? c.parentElement.getBoundingClientRect() : r;
@@ -742,7 +777,7 @@ const report = await page.evaluate(() => ({
         const sc = ch.scales && ch.scales[catAxis];
         if (sc && sc.ticks) drawn = sc.ticks.filter((t) => t.label !== undefined && t.label !== '').length;
       } catch (e) {}
-      return { id: c.id, state: pts ? 'ok' : 'NO DATA POINTS', datasets: ds.length, points: pts, labels, drawn,
+      return { id: c.id, state: pts ? 'ok' : 'NO DATA POINTS', datasets: ds.length, points: pts, labels, labelText, drawn,
                type: ch.config && ch.config.type, vals,
                css: Math.round(r.width) + 'x' + Math.round(r.height),
                box: Math.round(box.width) + 'x' + Math.round(box.height) };
@@ -858,7 +893,7 @@ console.log('svp bars: ' + JSON.stringify(report.bars));
 console.log('charts: ' + report.charts.join('  '));
 for (const s of report.series) {
   console.log(`  series ${s.id}: ${s.state}` + (s.state === 'ok'
-    ? ` ${s.type} ${s.points}pts css ${s.css}` + (s.drawn == null ? '' : `  x-labels drawn ${s.drawn} of ${s.labels}${s.drawn < s.labels ? '  <- AUTOSKIP DROPPED ' + (s.labels - s.drawn) : ''}`)
+    ? ` ${s.type} ${s.points}pts css ${s.css}` + (s.drawn == null ? '' : `  x-labels drawn ${s.drawn} of ${s.labels}${s.drawn < s.labels ? '  <- AUTOSKIP DROPPED ' + (s.labels - s.drawn) : ''}`) + (s.labelText ? `  [${s.labelText.join(' | ')}]` : '')
     : ` <- a tile that looks finished and is not`));
 }
 if (report.spinners.length) console.log('spinners still turning: ' + report.spinners.join(', '));

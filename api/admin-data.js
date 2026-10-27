@@ -48,6 +48,7 @@ import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engine
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understandingBandFor } from './_lib/results.js';
 import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
+import { withEffectivePromoCodes, coupleKeyFromProfiles } from './_lib/order-promo.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
 import { REFLECTION_CODES, tallyCodes } from './_lib/reflection-codes.js';
@@ -704,6 +705,32 @@ export default async function handler(req) {
 
     const hasAnswers = v => v && typeof v === 'object' && Object.keys(v).length > 0;
     const started = profiles.filter(p => hasAnswers(p.ex1_answers) || hasAnswers(p.ex2_answers)).length;
+    /**
+     * Each order's discount code, including the one its partner used.
+     *
+     * Ellie: "Still listed as unknown, this should go off of their partner's
+     * order code." A couple buys once, so the partner who did not pay has an
+     * order with no code on it and looked like a full-price order.
+     *
+     * The rule is in api/_lib/order-promo.js because api/admin-explore.js
+     * needs it too and reaches a couple by a different route. This endpoint's
+     * route is partner_profile_id; that one has already worked out a
+     * couple_id. Only the route differs, so only the route is written twice.
+     *
+     * The join cannot be done on the page: the admin is sent no profile ids
+     * at all, deliberately, because it anonymises by design.
+     */
+    /* An order carries user_id when the buyer had an account, and that id is
+       the profile id. The Map is keyed on it rather than on the order, so an
+       order from a buyer with no account, or from an account that has since
+       gone, resolves to undefined and the key comes back null. */
+    const partnerOf = new Map(profiles.map((p) => [p.id, p.partner_profile_id || null]));
+    const promoLink = withEffectivePromoCodes(orders, (o) => (
+      o.user_id && partnerOf.has(o.user_id)
+        ? coupleKeyFromProfiles(o.user_id, partnerOf.get(o.user_id))
+        : null
+    ));
+
     const bothDoneIndividuals = profiles.filter(p => hasAnswers(p.ex1_answers) && hasAnswers(p.ex2_answers) && p.partner_profile_id).length;
     const invitedTotal = profiles.filter(p => p.invite_code).length;
     /**
@@ -848,6 +875,15 @@ export default async function handler(req) {
       responses,
       responsesBySegment,
       orders,
+      /**
+       * How many of those orders got their code from their partner, and how
+       * many stand alone with no partner linked. Sent so the discount chart
+       * can SAY that half its rows were resolved that way rather than quietly
+       * folding them in: a figure that changed because the rule changed should
+       * say so on the tile. A definition with no reader is not a feature, so
+       * this is read next to the chart it is about.
+       */
+      promoLink: { inherited: promoLink.inherited, standalone: promoLink.standalone },
       /**
        * Every code the product will accept, not just the issued ones.
        *

@@ -34,6 +34,7 @@ import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILIT
   CHILDHOOD_ROLES, guardiansOf } from './_questions.js';
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
+import { withEffectivePromoCodes } from './_lib/order-promo.js';
 import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS, RISK_QUESTIONS } from './_conflict-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
@@ -514,7 +515,14 @@ function buildCatalog(fbCatOptions) {
        wordings and this was drawing the premarital one without saying so, so
        the admin asked "how often do you imagine wanting" about people who had
        answered "how often do you want". */
-    const fld = { key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.married || q.premarital || q.id), group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true, dim: q.dimension, dimLabel: IDIM_LABEL[q.dimension] || q.dimension };
+    /* Ellie: "the all questions section rows on this page still have the
+       category text then the question, I only want the question."
+
+       The same edit the reflection questions got one round earlier, which is
+       the tell that the prefix was a habit rather than a decision. The topic
+       stays as a field of its own so a grouping can still use it; it is just
+       not printed on every line. */
+    const fld = { key: 'iq_' + q.id, label: (q.married || q.premarital || q.id), topic: q.topic || null, group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true, dim: q.dimension, dimLabel: IDIM_LABEL[q.dimension] || q.dimension };
     /* ── THIS LOOP USED TO RUN OFF THE END OF ITSELF ────────────────────
        The Conflict Patterns block below was INSIDE this loop: the intimacy
        loop opened here, the conflict loop opened and closed in the middle of
@@ -557,6 +565,24 @@ function buildCatalog(fbCatOptions) {
     f.push({
       key: 'cq_' + q.id,
       label: (q.riskLabel ? q.riskLabel + ' \u00B7 ' : '') + q.text,
+      /**
+       * ── THE ONE-WORD NAME, AS A FIELD OF ITS OWN ──────────────────────
+       * Ellie: "Horseman should just say criticism not the full paragraph",
+       * and of the chart beside it: "the column labels on the horseman chart
+       * are weird, they should just be one word each."
+       *
+       * Both the tile and the chart already asked for `riskLabel` and fell
+       * back to `label` when it was missing, and it was always missing: the
+       * one word was being CONCATENATED into `label` here and never sent as
+       * itself. So the fallback ran every time and the tile printed
+       * "Criticism \u00B7 <the whole question>".
+       *
+       * A fallback that always fires is the same as no fallback, and it reads
+       * like cover. The word comes from q.riskLabel in
+       * api/_conflict-questions.js, which is the only place the four
+       * horsemen are named, so this carries it rather than restating it.
+       */
+      riskLabel: q.riskLabel || null,
       group: 'Conflict Patterns',
       kind: 'cat',
       options,
@@ -967,6 +993,12 @@ export default async function handler(req) {
           ...merged,
         };
       });
+      /* Each order's code, including the one its partner used. Same rule as
+         api/admin-data.js, same module, and this endpoint's way of naming a
+         couple is the couple_id it has already worked out above. Ellie:
+         "Still listed as unknown, this should go off of their partner's order
+         code." */
+      withEffectivePromoCodes(orderRows, (o) => o.couple_id || null);
     } catch (e) { orderRows = []; }
 
     /**
