@@ -2003,6 +2003,49 @@ window.adminAuthHeaders = function(extra){
    * same event the native control sent, so nothing downstream can tell.
    */
   function mountFieldPicker(sel) {
+    /* ── IT MUST NOT BE ABLE TO TAKE THE PAGE DOWN ────────────────────────
+       Ellie, the morning after this shipped: "Explore page isn't loading."
+
+       I could not reproduce it: the probe drives this page against a stubbed
+       cube and the picker mounts, opens and selects. But the mount sits in the
+       middle of the Explore page's init, between the defaults being set and
+       the change listeners being attached, so ANY throw inside it takes the
+       rest of init with it and the page draws nothing. A control that only
+       changes how a list looks had been given the power to stop the page.
+
+       So the mount is wrapped, and a failure puts the native <select> back
+       rather than leaving a hidden control and no replacement. The page then
+       works the way it did last week, with an uglier dropdown, which is the
+       right thing to degrade to. The error goes to the console with a prefix
+       worth searching for.
+
+       This is not the diagnosis. It is the thing that should have been true
+       before the diagnosis was needed. */
+    try { mountFieldPickerUnsafe(sel); }
+    catch (e) {
+      console.error('[admin] field picker failed to mount, falling back to the plain dropdown:', e);
+      try {
+        sel.hidden = false;
+        const w = sel.closest('.fp');
+        if (w && w.parentNode) { w.parentNode.insertBefore(sel, w); w.remove(); }
+        /* ── A DEGRADED STATE THAT SAYS SO ────────────────────────────────
+           Without this the page comes back looking exactly like last week,
+           and the only way anyone learns the picker failed is by noticing the
+           colour is missing and remembering it used to be there. One line,
+           only ever drawn when something went wrong, so the fallback reports
+           itself instead of hiding inside a working page. */
+        if (sel.parentNode && !sel.parentNode.querySelector('[data-fp-fell-back]')) {
+          const n = document.createElement('div');
+          n.setAttribute('data-fp-fell-back', '1');
+          n.style.cssText = 'font-size:.6rem;color:var(--dim);margin-top:.2rem;line-height:1.3';
+          n.textContent = 'Plain list: the coloured picker could not start.';
+          sel.parentNode.insertBefore(n, sel.nextSibling);
+        }
+      } catch (e2) { console.error('[admin] and the fallback failed too:', e2); }
+    }
+  }
+
+  function mountFieldPickerUnsafe(sel) {
     if (!sel || sel.dataset.fp) return;
     sel.dataset.fp = '1';
     const wrap = document.createElement('div');
