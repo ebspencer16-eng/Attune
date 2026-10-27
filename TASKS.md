@@ -165,13 +165,7 @@ select 'demo accounts with a survey row: ' || coalesce(u.email, '(no email)'),
 | A46 | **Column chart of "what it is for" picks**, above All questions. It is a multi-select, so the bars count picks and the subtitle carries how many people. |
 | A47 | **All questions uses the married wording**, not the premarital wording. Every question stores both and the admin was drawing one of them without saying which. |
 | A48 | **Chart comparing pre-intimate and intimate couples' average placement per aspect.** Needs a way to tell the two groups apart; checking what the exercise stores before building. |
-| A49 | **Conflict overview tile**: avg self assessment out of 5, % who speak up right away, most common horseman, most common reset method. |
-| A50 | **Column chart of how often each horseman shows up**, one column each, counting people who said sometimes or often. |
-| A51 | **Pie chart of "when you notice something frustrating"**, beside it. |
-| A52 | **Two side by side**: "when you're in an argument" and "when the scope of the argument changes". |
-| A53 | **Two column charts**: what people want from their partner, and reset methods. |
 | A54 | **Eight new slicer rows**: exhibits each of the four horsemen, and partner exhibits each. |
-| A55 | **Two postcoded charts** on conflict: what makes disagreements go better than expected, and what people appreciate about how conflict is handled. Checking first whether those are free-text questions. |
 | A56 | **Conflict All questions** matching the other pages, with pole labels. |
 | A57 | **Type Analytics overview tile**: E:W ratio, O:G ratio, top individual type, top couple type. |
 | A58 | **Swap the individual and couple distribution charts.** |
@@ -212,6 +206,12 @@ section 3 explaining things, just include the context I need in section 3."
 | A40 | **Qualities most admired is a column chart above All questions**, and reflection rows no longer carry the section name: four of the five said "How We're Doing", so the useful half of each row started a third of the way in. |
 | A42 | **Expected against experienced, both halves, on the Expectations tab.** The shape reading needs no inference. The gendered one reads pronouns and role names and says so on the tile. Everything it cannot place is a grey bar, not a dropped row. Deleting api/_lib/inherited-roles.js and two callers undoes it. |
 | A43 | **Ten themes, one frame across all eight written questions, with a picker.** Yours to move: `api/_lib/reflection-codes.js`, one file. Every chart shows how many answers matched no theme, in grey, because that share is the measure of whether the frame is any good. |
+| A49 | **Conflict at a glance**: avg self assessment out of 5, % who speak up right away, most common horseman, most common reset. One slicer over the whole page. |
+| A50 | **The four horsemen as a column chart**, counting people who said sometimes or often. |
+| A51 | **"When a disagreement starts" as a pie**, beside it. |
+| A52 | **"In the middle of a disagreement" and "when it touches something old"**, side by side. |
+| A53 | **What lands best from a partner, and what people do to reset.** The first is a ranking, so the bars are flipped to make taller mean better and the hover carries the real average place. |
+| A55 | **Both written conflict answers coded**, through the same frame as the reflection ones, with the uncoded share drawn. That share matters more here: the frame was written for the other page. |
 | W103 |  **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

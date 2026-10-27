@@ -1383,12 +1383,90 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
          The tile is the four risk patterns, because those are the four the
          exercise is built around and the only ones scored the same way. -->
     <div id="resp-conflict" class="tab-panel" style="display:none">
-      <div class="chart-grid full">
-        <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Risk patterns</div><div class="chart-subtitle">How often each one shows up &middot; share of people answering Often or Sometimes</div></div><select class="tile-slicer" id="slz-conf" title="Cut this tile by a segment" aria-label="Slz conf"><option value="">Everyone</option></select></div>
-          <div class="chart-body"><div style="height:210px"><canvas id="chart-conflict-risk"></canvas></div></div>
+      <!-- Ellie: "Top 4 tiles in overview tile should be 'avg self assessment
+           (/5), % speaks up right away, Most common of 4 horsemen, most common
+           reset method'." -->
+      <div class="chart-card kpi-shell">
+        <div class="chart-head">
+          <div><div class="chart-title">Conflict at a glance</div><div class="chart-subtitle">Across the people in this cut</div></div>
+          <div class="tile-slicers">
+            <select class="tile-slicer" id="slz-confsum-period" title="Limit this tile to a period" aria-label="Period">
+              <option value="">All time</option>
+              <option value="365">Past 12 months</option>
+              <option value="182">Past 6 months</option>
+              <option value="90">Past 90 days</option>
+              <option value="30">Past month</option>
+              <option value="7">Past week</option>
+            </select>
+            <select class="tile-slicer" id="slz-confsum" title="Cut this tile by a segment" aria-label="Slz confsum"><option value="">Everyone</option></select>
+          </div>
+        </div>
+        <div class="chart-body">
+          <div class="kpi-grid" id="confsum-tiles" style="grid-template-columns:repeat(4,1fr);margin:0;">
+            <div class="kpi-card indigo"><div class="kpi-label">Avg self assessment</div><div class="kpi-val" id="cf-self">—</div><div class="kpi-sub" id="cf-self-sub">Out of 5</div></div>
+            <div class="kpi-card green"><div class="kpi-label">Speak up right away</div><div class="kpi-val" id="cf-speak">—</div><div class="kpi-sub" id="cf-speak-sub"></div></div>
+            <div class="kpi-card orange"><div class="kpi-label">Most common horseman</div><div class="kpi-val" id="cf-horse" style="font-size:1.15rem">—</div><div class="kpi-sub" id="cf-horse-sub"></div></div>
+            <div class="kpi-card amber"><div class="kpi-label">Most common reset</div><div class="kpi-val" id="cf-reset" style="font-size:1.15rem">—</div><div class="kpi-sub" id="cf-reset-sub"></div></div>
+          </div>
         </div>
       </div>
+
+      <!-- Ellie: "First tile should be column chart of how often each horseman
+           shows up. One column per horseman, count of who said sometimes or
+           often." And: "To the right of that should be a pie chart showing
+           'when you notice something frustrating' responses." -->
+      <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">The four horsemen</div><div class="chart-subtitle">People who said Sometimes or Often</div></div><select class="tile-slicer" id="slz-conf" title="Cut this tile by a segment" aria-label="Slz conf"><option value="">Everyone</option></select></div>
+          <div class="chart-body"><canvas id="chart-conflict-risk"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">When a disagreement starts</div><div class="chart-subtitle">Say it right away, or take some time first</div></div><select class="tile-slicer" id="slz-cq-c1" title="Cut this tile by a segment" aria-label="Slz c1"><option value="">Everyone</option></select></div>
+          <div class="chart-body"><canvas id="chart-cq-c1"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Ellie: "Next row should be 2 side by side, 'when you're in an
+           argument' and 'when the scope of the argument changes' responses." -->
+      <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.25rem">
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">In the middle of a disagreement</div><div class="chart-subtitle">Keep talking, or pause first</div></div><select class="tile-slicer" id="slz-cq-c2" title="Cut this tile by a segment" aria-label="Slz c2"><option value="">Everyone</option></select></div>
+          <div class="chart-body"><canvas id="chart-cq-c2"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">When it touches something old</div><div class="chart-subtitle">Stay with now, or name the pattern</div></div><select class="tile-slicer" id="slz-cq-c_topic" title="Cut this tile by a segment" aria-label="Slz ctopic"><option value="">Everyone</option></select></div>
+          <div class="chart-body"><canvas id="chart-cq-c_topic"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Ellie: "Next should be a row with 2 column charts, one for what
+           people want from their partner' and one for reset methods." -->
+      <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.25rem">
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">What lands best from a partner</div><div class="chart-subtitle">Average rank, best first</div></div><select class="tile-slicer" id="slz-crepair" title="Cut this tile by a segment" aria-label="Slz crepair"><option value="">Everyone</option></select></div>
+          <div class="chart-body"><canvas id="chart-crepair"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">What people do to reset</div><div class="chart-subtitle">Picked as the one that helps most</div></div><select class="tile-slicer" id="slz-cq-c8" title="Cut this tile by a segment" aria-label="Slz c8"><option value="">Everyone</option></select></div>
+          <div class="chart-body"><canvas id="chart-cq-c8"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Ellie: "Last charts before all questions should be 2 postcoded:
+           'what makes disagreements go better than expected' and 'what do
+           people appreciate about conflict handling'." Both are free text and
+           go through the same code frame as the reflection answers. -->
+      <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.25rem">
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">When it went better than expected</div><div class="chart-subtitle" id="cfcode-c9-sub">Themes in what people wrote</div></div></div>
+          <div class="chart-body"><canvas id="chart-cfcode-c9"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">What they appreciate about how it is handled</div><div class="chart-subtitle" id="cfcode-c_grat-sub">Themes in what people wrote</div></div></div>
+          <div class="chart-body"><canvas id="chart-cfcode-c_grat"></canvas></div>
+        </div>
+      </div>
+
       <div class="qx-section" id="qx-conflict" style="margin-top:1.25rem"></div>
     </div>
   </div>
@@ -5508,6 +5586,179 @@ function filterOrders(sel) { applyOrderFilters(); }
  * says how many answers there were and how many were coded, which is the one
  * place the reader can anchor the bars to something real.
  */
+/**
+ * The Conflict Patterns page: the glance tile and the six charts under it.
+ *
+ * ── ONE FUNCTION, BECAUSE THEY SHARE A DENOMINATOR ────────────────────────
+ * Every figure here is over the same set of people, cut the same two ways. Six
+ * renderers would be six places to apply the slicer and six chances for one of
+ * them to be answering about a different group than the tile above it.
+ */
+/**
+ * The ranking and the two coded text charts on the Conflict page.
+ *
+ * Separate from renderConflictPage because these come from fetchAdminData
+ * rather than the cube, and a function awaiting both would make the six
+ * cube-backed charts wait on a payload they do not need.
+ */
+async function renderConflictExtras() {
+  const data = await fetchAdminData();
+
+  /* ── WHAT LANDS BEST ────────────────────────────────────────────────────
+     A ranking, so the figure is the average place and LOWER is better. The
+     bars are flipped so taller means better, because a chart whose shortest
+     bar is the winner gets read backwards by everybody at least once. The
+     hover carries the real place, which is the number anybody would quote. */
+  {
+    const el = document.getElementById('chart-crepair');
+    const rows = (data && data.repairRank) || [];
+    if (el && rows.length) {
+      const worst = Math.max(...rows.map(r => r.place));
+      mkChart(el, { type: 'bar',
+        data: { labels: rows.map(r => r.label), datasets: [{ data: rows.map(r => Number((worst - r.place + 1).toFixed(2))), backgroundColor: '#5C6DDA', borderRadius: 4, maxBarThickness: 40 }] },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false },
+            tooltip: { callbacks: { label: c => ' average place ' + rows[c.dataIndex].place + ' of ' + rows.length + ', from ' + rows[c.dataIndex].n + ' people' } } },
+          scales: { y: { display: false, beginAtZero: true }, x: { ticks: { font: { size: 9 }, maxRotation: 40, minRotation: 40 }, grid: { display: false } } } } });
+    } else if (el && el.parentElement) {
+      el.parentElement.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">Nobody has ranked these yet.</div>';
+    }
+  }
+
+  /* ── THE TWO CODED TEXT CHARTS ──────────────────────────────────────── */
+  const cc = data && data.conflictCodes;
+  if (!cc || !cc.questions) return;
+  const byId = Object.fromEntries((cc.frame || []).map(c => [c.id, c.label]));
+  for (const q of cc.questions) {
+    const el = document.getElementById('chart-cfcode-' + q.id);
+    const sub = document.getElementById('cfcode-' + q.id + '-sub');
+    if (!el) continue;
+    const bars = (cc.frame || []).map(c => ({ label: byId[c.id], v: (q.counts || {})[c.id] || 0 }))
+      .sort((a, b) => b.v - a.v);
+    /* The uncoded share is drawn here too, and it matters more here than on
+       the reflection page: this frame was written for those answers and is
+       being reused on these. How much it fails to place is the evidence for
+       whether that reuse was right. */
+    bars.push({ label: 'No theme matched', v: q.uncoded || 0, grey: true });
+    if (sub) sub.textContent = (q.total || 0) + ' answer' + (q.total === 1 ? '' : 's') + ', ' + (q.coded || 0) + ' with a theme';
+    mkChart(el, { type: 'bar',
+      data: { labels: bars.map(b => b.label), datasets: [{ data: bars.map(b => b.v), backgroundColor: bars.map(b => b.grey ? '#9AA3B2' : '#C55329'), borderRadius: 4, maxBarThickness: 40 }] },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + c.parsed.y + ' answer' + (c.parsed.y === 1 ? '' : 's') } } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } },
+                  x: { ticks: { font: { size: 9 }, maxRotation: 40, minRotation: 40 }, grid: { display: false } } } } });
+  }
+}
+
+async function renderConflictPage() {
+  const host = document.getElementById('confsum-tiles');
+  if (!host) return;
+  let cube; try { cube = await ensureCube(); } catch (e) { return; }
+
+  const seg = document.getElementById('slz-confsum');
+  const per = document.getElementById('slz-confsum-period');
+  if (seg) { populateSlicer(seg, null, cube.rows || []); seg.classList.toggle('on', !!seg.value);
+    if (!seg.dataset.wired) { seg.dataset.wired = '1'; seg.onchange = () => renderConflictPage(); } }
+  if (per && !per.dataset.wired) { per.dataset.wired = '1'; per.onchange = () => { per.classList.toggle('on', !!per.value); renderConflictPage(); }; }
+
+  const all = cube.rows || [];
+  const rows = periodFilterRows(sliceFilter(all, seg ? seg.value : ''), per ? per.value : '');
+  const cut = !!(seg && seg.value) || !!(per && per.value);
+  setTileN(host, rows.length);
+
+  const fieldOf = (id) => (cube.fields || []).find(f => f.key === 'cq_' + id) || null;
+  const valuesOf = (set, id) => set.map(r => r['cq_' + id]).filter(v => v != null && v !== '');
+  const countBy = (vals) => vals.reduce((acc, v) => { acc[v] = (acc[v] || 0) + 1; return acc; }, {});
+  const topOf = (set, id) => {
+    const c = countBy(valuesOf(set, id));
+    const keys = Object.keys(c);
+    if (!keys.length) return null;
+    const best = keys.sort((a, b) => c[b] - c[a])[0];
+    return { label: best, n: c[best], of: valuesOf(set, id).length };
+  };
+
+  /* ── THE FOUR TILES ─────────────────────────────────────────────────── */
+  const SELF = 'c0', START = 'c1', RESET = 'c8';
+  const HORSEMEN = ['c_crit', 'c_cont', 'c_def', 'c_stone'];
+  const LOUD = ['Sometimes', 'Often'];
+
+  /* The self-assessment is a five-point scale stored as its label, so the
+     score is the option's place in its own list. Taken from the field the
+     server sent rather than from a list here, so a reworded option moves with
+     it. */
+  const selfScore = (set) => {
+    const f = fieldOf(SELF);
+    if (!f) return null;
+    const order = (f.options || []).map(o => o.v);
+    const nums = valuesOf(set, SELF).map(v => order.indexOf(v)).filter(i => i >= 0).map(i => i + 1);
+    return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+  };
+  const pctRightAway = (set) => {
+    const f = fieldOf(START);
+    const first = f && (f.options || [])[0];
+    if (!first) return null;
+    const vals = valuesOf(set, START);
+    return vals.length ? Math.round(100 * vals.filter(v => v === first.v).length / vals.length) : null;
+  };
+  const loudestHorseman = (set) => {
+    const scored = HORSEMEN.map(id => {
+      const f = fieldOf(id);
+      const vals = valuesOf(set, id);
+      const hit = vals.filter(v => LOUD.includes(v)).length;
+      return { label: (f && f.riskLabel) || (f && f.label) || id, n: hit, of: vals.length };
+    }).filter(x => x.of > 0);
+    return scored.length ? scored.sort((a, b) => b.n - a.n)[0] : null;
+  };
+
+  const sc = selfScore(rows), scAll = selfScore(all);
+  putKpi('cf-self', sc == null ? '\u2014' : sc.toFixed(1), cut && scAll != null ? scAll.toFixed(1) : null, 'Out of 5');
+  const pr = pctRightAway(rows), prAll = pctRightAway(all);
+  putKpi('cf-speak', pr == null ? '\u2014' : pr + '%', cut && prAll != null ? prAll + '%' : null, 'Rather than taking time first');
+  const lh = loudestHorseman(rows);
+  putKpi('cf-horse', lh ? lh.label : '\u2014', cut ? ((loudestHorseman(all) || {}).label || null) : null,
+    lh ? lh.n + ' of ' + lh.of + ' say sometimes or often' : 'Nobody has answered these yet');
+  const tr = topOf(rows, RESET);
+  putKpi('cf-reset', tr ? tr.label : '\u2014', cut ? ((topOf(all, RESET) || {}).label || null) : null,
+    tr ? tr.n + ' of ' + tr.of + ' picked it' : 'Nobody has answered this yet');
+
+  /* ── THE HORSEMEN COLUMN CHART ──────────────────────────────────────── */
+  {
+    const el = document.getElementById('chart-conflict-risk');
+    const bars = HORSEMEN.map(id => {
+      const f = fieldOf(id);
+      const vals = valuesOf(rows, id);
+      return { label: (f && f.riskLabel) || id, v: vals.filter(v => LOUD.includes(v)).length };
+    });
+    if (el) mkChart(el, { type: 'bar',
+      data: { labels: bars.map(b => b.label), datasets: [{ data: bars.map(b => b.v), backgroundColor: '#C55329', borderRadius: 4, maxBarThickness: 54 }] },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + c.parsed.y + ' of ' + rows.length + ' people' } } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } }, x: { grid: { display: false } } } } });
+  }
+
+  /* ── ONE QUESTION, ONE CHART ────────────────────────────────────────── */
+  const qChart = (id, type, palette) => {
+    const el = document.getElementById('chart-cq-' + id);
+    if (!el) return;
+    const f = fieldOf(id);
+    const order = f ? (f.options || []).map(o => o.v) : [];
+    const c = countBy(valuesOf(rows, id));
+    const labels = (order.length ? order : Object.keys(c)).filter(v => c[v]);
+    const data = labels.map(v => c[v]);
+    if (!labels.length) { if (el.parentElement) el.parentElement.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">Nobody has answered this yet.</div>'; return; }
+    mkChart(el, { type,
+      data: { labels, datasets: [{ data, backgroundColor: palette, borderColor: '#FFFFFF', borderWidth: type === 'pie' ? 3 : 0, borderRadius: type === 'bar' ? 4 : 0, maxBarThickness: 46 }] },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: type === 'pie' ? { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } : { display: false },
+          tooltip: { callbacks: { label: c2 => ' ' + c2.parsed + ' of ' + valuesOf(rows, id).length } } },
+        ...(type === 'bar' ? { scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } }, x: { ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 }, grid: { display: false } } } } : { cutout: 0 }) } });
+  };
+  qChart('c1', 'pie', CAT_PALETTE);
+  qChart('c2', 'bar', '#5C6DDA');
+  qChart('c_topic', 'bar', '#9B5DE5');
+  qChart('c8', 'bar', '#34D399');
+}
+
 async function renderReflectionCodes() {
   const el = document.getElementById('chart-refcodes');
   const sel = document.getElementById('refcode-q');
@@ -5744,56 +5995,9 @@ async function renderRelReflTiles(){
  * publishes a field per question. A column each, bare axes and the number on
  * the column, which is the treatment she asked for across the admin.
  */
-async function renderConflictResponses(){
-  const el=document.getElementById('chart-conflict-risk'); if(!el) return;
-  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
-  const sel=document.getElementById('slz-conf');
-  if(sel && !sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=renderConflictResponses; }
-  if(sel) sel.classList.toggle('on', !!sel.value);
-  const rows=sliceFilter(cube.rows||[], sel?sel.value:'');
-  /* The four, named by the field catalogue rather than typed here, so a
-     renamed pattern cannot leave this tile showing a stale word. */
-  const risks=(cube.fields||[]).filter(f=>f.key.indexOf('cq_')===0 && f.section==='risk');
-  const stats=risks.map(f=>{
-    let n=0, hit=0;
-    rows.forEach(r=>{ const v=r[f.key]; if(v==null||v==='') return; n++; if(v==='Often'||v==='Sometimes') hit++; });
-    return n? { l:(f.label||'').split(' \u00B7 ')[0], v:Math.round(100*hit/n), n } : null;
-  }).filter(Boolean);
-  const host=el.parentElement;
-  if(!stats.length){ if(host) host.innerHTML='<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;line-height:1.6">No conflict responses aggregated yet.</div>'; return; }
-  const sorted=stats.sort((a,b)=>b.v-a.v);
-  /* ── NAME THE BARS ────────────────────────────────────────────────────
-     Ellie: "fix the data views, make this page impactful and readable."
-
-     This drew four unlabelled columns, so the one thing it is for, which of
-     the four patterns is the common one, could not be read off it at all. The
-     names are back, the scale is a percentage, and each column carries its own
-     number the way every other column in the admin does now. Same height as
-     the gap charts, so the tab reads as one page. */
-  /* ── REBUILT, NOT ADJUSTED ────────────────────────────────────────────
-     Ellie: "Something is wrong with this chart. Try again."
-
-     She was right and the fault was the form, not a setting. Four columns
-     spread across eleven hundred points left four thin bars marooned in a
-     field of white, each one further from its own name than from its
-     neighbours, and the number on top read "50" while the axis beside it read
-     "50%", so the one figure on the tile disagreed with its own scale.
-
-     Four named things with one percentage each is a horizontal bar chart. The
-     name sits against its bar, the bars are long enough to compare by eye,
-     and the percentage reads as a percentage. Ordered worst first, which is
-     the question the tile is for. */
-  mkChart(el,{
-    type:'bar',
-    data:{labels:sorted.map(x=>x.l),datasets:[{data:sorted.map(x=>x.v),backgroundColor:'#1B5FE8',borderRadius:4,maxBarThickness:28}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      layout:{padding:{right:34}},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+sorted[c.dataIndex].l+': '+c.parsed.x+'% (n='+sorted[c.dataIndex].n+')'}}},
-      scales:{x:{beginAtZero:true,max:100,ticks:{stepSize:25,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
-              y:{ticks:{font:{size:11},autoSkip:false},grid:{display:false}}}}});
-}
-
-// Physical Intimacy: per-dimension alignment vs gap, computed from the cube.
+/* renderConflictResponses was here: it drew the horsemen chart alone, from
+   its own slicer. renderConflictPage draws it with the five charts beside it
+   and one slicer over all of them, so this had no caller left. */
 async function renderIntimacyResponses(){
   const dimEl=document.getElementById('intimacy-dim-bars');
   const empty='No physical intimacy responses aggregated yet.';
@@ -7602,7 +7806,12 @@ function initCharts(page) {
     renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection'], undefined, true);
     renderQuestionExplorer('qx-intimacy', ['Physical Intimacy'], undefined, true);
     renderQuestionExplorer('qx-conflict', ['Conflict Patterns'], undefined, true);
-    renderConflictResponses();
+    /* renderConflictResponses drew the horsemen chart on its own. The whole
+       page is one function now, because every figure on it is over the same
+       people cut the same two ways, and six renderers is six chances for one
+       of them to be answering about a different group than the tile above it. */
+    renderConflictPage();
+    renderConflictExtras();
     ['qx-comm','qx-exp','qx-story','qx-intimacy','qx-conflict'].forEach(id => { QX_MODE[id] = 'mean'; const t = document.getElementById(id + '-distmode'); if (t) { t.value = 'mean'; t.classList.remove('on'); } if (QX_REPAINT[id]) QX_REPAINT[id](); });
   }
 }

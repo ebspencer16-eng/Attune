@@ -86,7 +86,8 @@ const fields = [
     else if (q.kind === 'forcedAB') options = [{ v: q.a, label: q.a }, { v: q.b, label: q.b }];
     else if (q.kind === 'pickOne') options = (q.options || []).map((o) => ({ v: o.label || o, label: o.label || o }));
     if (!options) return [];
-    return [{ key: `cq_${q.id}`, label: (q.riskLabel ? `${q.riskLabel} · ` : '') + q.text, group: 'Conflict Patterns', kind: 'cat', options, partnerable: true, section: q.section }];
+    /* riskLabel travels with the field: the glance tile names the loudest horseman and the column chart labels its bars with it, and neither can work it out from the question text. */
+    return [{ key: `cq_${q.id}`, label: (q.riskLabel ? `${q.riskLabel} · ` : '') + q.text, riskLabel: q.riskLabel || null, group: 'Conflict Patterns', kind: 'cat', options, partnerable: true, section: q.section }];
   }),
   /* ── THE EXPECTATIONS QUESTIONS ────────────────────────────────────────
      The stub had neither the life questions nor the responsibilities, so the
@@ -400,6 +401,21 @@ const server = createServer((req, res) => {
         return { id: q.id, label: q.text, category: q.category || null, ...tallyCodes(answers) };
       }),
     };
+    /* The two written conflict answers and the repair ranking. Same real
+       sentences through the same real frame as the reflection ones. */
+    const conflictCodes = {
+      frame: REFLECTION_CODES.map((c) => ({ id: c.id, label: c.label })),
+      questions: CONFLICT_QUESTIONS.filter((q) => q.kind === 'openText').map((q, i) => ({
+        id: q.id, label: q.text,
+        ...tallyCodes(SAMPLE_WRITING.slice(i).concat(SAMPLE_WRITING.slice(0, i))),
+      })),
+    };
+    const repairRank = (() => {
+      const q = CONFLICT_QUESTIONS.find((x) => x.kind === 'rank');
+      const opts = ((q && q.options) || []).map((o) => (typeof o === 'string' ? o : o.label));
+      return opts.map((label, i) => ({ label, place: Number((1 + ((i * 1.7) % 4)).toFixed(2)), n: 14 - i }))
+        .sort((a, b) => a.place - b.place);
+    })();
     const beta_codes = [
       ...Object.entries(COMPILED_CODES).map(([code, meta]) => {
         const m = (typeof meta === 'string') ? { pkg: meta, mode: 'free', amount: 0 } : (meta || {});
@@ -410,7 +426,7 @@ const server = createServer((req, res) => {
       { code: 'SPRING25', package_key: 'core', discount_mode: 'percent', discount_value: 25, active: true, uses_count: 3, max_uses: 50, source: 'issued' },
       { code: 'FRIENDS10', package_key: '*', discount_mode: 'fixed', discount_value: 10, active: false, uses_count: 0, max_uses: null, source: 'issued' },
     ];
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, reflectionCodes, responses: payload }));
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, reflectionCodes, conflictCodes, repairRank, responses: payload }));
     return;
   }
   if (url.pathname.startsWith('/api/admin-typing')) {
@@ -466,6 +482,19 @@ await page.onNewDocument(`
   window.__probeErrors = [];
   const _ce = console.error;
   console.error = function () { try { window.__probeErrors.push([].slice.call(arguments).join(' ')); } catch (e) {} return _ce.apply(console, arguments); };
+  /* ── A RENDERER THAT THROWS SAYS NOTHING ────────────────────────────────
+     Every tile here is drawn by an async function, and one that throws
+     rejects its promise and logs nothing: no console.error, no red, just a
+     canvas that stays at its default 300x150. That is indistinguishable in a
+     screenshot from a tile with no data, and it cost a round of guessing
+     before this was added. Both hooks, because a throw inside an await lands
+     on unhandledrejection and one outside lands on error. */
+  window.addEventListener('unhandledrejection', (e) => {
+    try { window.__probeErrors.push('UNHANDLED REJECTION: ' + ((e.reason && (e.reason.stack || e.reason.message)) || e.reason)); } catch (x) {}
+  });
+  window.addEventListener('error', (e) => {
+    try { window.__probeErrors.push('UNCAUGHT: ' + ((e.error && (e.error.stack || e.error.message)) || e.message)); } catch (x) {}
+  });
 `);
 await page.goto(`http://127.0.0.1:${PORT}/`);
 await new Promise((r) => setTimeout(r, 2500));

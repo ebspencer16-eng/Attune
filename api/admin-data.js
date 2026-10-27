@@ -52,6 +52,7 @@ import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
 import { REFLECTION_CODES, tallyCodes } from './_lib/reflection-codes.js';
 import { ANNIVERSARY_QUESTIONS } from './_anniversary-questions.js';
+import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -329,6 +330,51 @@ function buildResponseAggregates(profiles, sessions) {
     }
   }
 
+  /**
+   * The two written conflict answers, coded, and the ranking.
+   *
+   * Ellie: "Last charts before all questions should be 2 postcoded: 'what
+   * makes disagreements go better than expected' and 'what do people
+   * appreciate about conflict handling'."
+   *
+   * Same frame as the reflection answers, deliberately. These are about the
+   * same subject from another angle, and the whole argument for one frame is
+   * that the themes can be compared across questions. "Talking and being
+   * heard" topping what makes a disagreement go well AND what people are
+   * grateful for is a sentence two frames could not produce.
+   *
+   * Counts only, as everywhere else: the text goes in, theme ids come back.
+   */
+  const conflictCodes = { frame: REFLECTION_CODES.map((c) => ({ id: c.id, label: c.label })), questions: [] };
+  for (const q of CONFLICT_QUESTIONS.filter((x) => x.kind === 'openText')) {
+    const answers = (profiles || []).map((p) => p.conflict_data?.answers?.[q.id]).filter((v) => typeof v === 'string' && v.trim());
+    conflictCodes.questions.push({ id: q.id, label: q.text, ...tallyCodes(answers) });
+  }
+
+  /**
+   * What lands best when a partner tries it.
+   *
+   * A ranking, so the useful figure is the average position rather than a
+   * count: an option ranked second by everybody beats one ranked first by a
+   * third and last by the rest. Reported as the mean place, lowest first, and
+   * the chart flips it so taller is better.
+   */
+  const repairRank = (() => {
+    const q = CONFLICT_QUESTIONS.find((x) => x.kind === 'rank');
+    if (!q) return [];
+    const opts = (q.options || []).map((o) => (typeof o === 'string' ? o : o.label));
+    const sum = {}, n = {};
+    for (const o of opts) { sum[o] = 0; n[o] = 0; }
+    for (const p of profiles || []) {
+      const order = p.conflict_data?.answers?.[q.id];
+      if (!Array.isArray(order) || !order.length) continue;
+      order.forEach((label, i) => { if (label in sum) { sum[label] += i + 1; n[label]++; } });
+    }
+    return opts.filter((o) => n[o] > 0)
+      .map((o) => ({ label: o, place: Number((sum[o] / n[o]).toFixed(2)), n: n[o] }))
+      .sort((a, b) => a.place - b.place);
+  })();
+
   const respPairs = pairs.filter(([a, b]) =>
     a.ex2_answers?.responsibilities && b.ex2_answers?.responsibilities).length;
   const respAgreement = [];
@@ -466,6 +512,8 @@ function buildResponseAggregates(profiles, sessions) {
     expCoupleDistances,
     inheritance,
     reflectionCodes,
+    conflictCodes,
+    repairRank,
     /* The line between aligned and not, from api/_lib/alignment.js, which is
        the only thing allowed to turn a distance into a judgement. Sent rather
        than typed into the admin, because a threshold written in two places is
