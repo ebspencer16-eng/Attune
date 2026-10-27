@@ -3928,3 +3928,32 @@ more, and if it fails it restores the plain dropdown and draws one grey line
 saying "the coloured picker could not start." So the next datum is one glance
 from her: coloured banners means it was a stale file; that grey line means it
 is throwing and the cause follows from it. The question is in TASKS.md A81.
+
+## 2026-10-27, later: the pricing page
+
+Seven sweeps now in `scripts/_sweeps/`. The one that mattered this round was
+`sweep-missing-ids` pointed at the static pages rather than the admin.
+
+**public/offerings.html had a sticky bar naming the wrong package.** It follows
+whichever package you have scrolled to, by `getElementById` on four ids that
+are not on the page: the long package sections were replaced by four tiles and
+both features that used them kept looking for the old markup. A reader at
+Attune Premium saw "$89 - The Attune Assessment" and the button added the
+Assessment. Fixed by giving the tiles their ids AND changing the rule, because
+the tiles are one row and the old rule then pinned it to Premium everywhere.
+The rule now is: the tile nearest the viewport centre, out of those in view,
+and the entry package when none is.
+
+**Three dead features' code removed** from home.html and offerings.html. One
+threw on every page load into a catch that explained it away, which is why
+`sweep-page-console` saw nothing: that sweep is honest about this limit in its
+own header.
+
+**Worth knowing for next time.** `check-package-tiles` matched a tile's class
+and onclick as adjacent, so adding an attribute between them reported all four
+packages missing. If a markup edit makes a gate report something implausible,
+suspect the matcher before the markup.
+
+**Still open: A81**, unchanged. Ellie has not yet been able to look at Explore,
+and the fallback means it works either way. The question in TASKS.md A81 is one
+glance: coloured banners, or a grey line saying the picker could not start.
