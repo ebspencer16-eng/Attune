@@ -563,6 +563,10 @@
 .fp-none{padding:.6rem;font-size:.74rem;color:var(--dim);}
 .kpi-shell{background:var(--surface);border:1px solid var(--border);margin-bottom:1.5rem;}
 .kpi-shell .chart-head{border-bottom:1px solid var(--border);}
+/* The orders head carries three controls rather than one slicer, so it wraps
+   instead of crushing the search field. */
+.ord-head{flex-wrap:wrap;gap:.6rem;}
+.ord-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-left:auto;}
 .kpi-shell .kpi-card{box-shadow:none;}
 .tile-slicers{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
 /* ── SHOW ALL ──────────────────────────────────────────────────────────────
@@ -886,30 +890,40 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       </div>
     </div>
 
-    <!-- The couple type filter is gone. Ellie: "Remove couple type filter from
-         order table." -->
-    <div class="filter-bar">
-      <span class="filter-label">Filter:</span>
-      <select class="filter-select" id="orders-pkg-filter" onchange="applyOrderFilters()" aria-label="Orders pkg filter">
-        <option value="">All packages</option>
-        <option value="core">Assessment</option>
-        <option value="newlywed">Starting Out</option>
-        <option value="anniversary">Anniversary</option>
-        <option value="premium">Premium</option>
-      </select>
-      <select class="filter-select" id="orders-date-filter" onchange="applyOrderFilters()" aria-label="Orders date filter">
-        <option value="">All time</option>
-        <option value="7">Last 7 days</option>
-        <option value="30">Last 30 days</option>
-        <option value="90">Last 90 days</option>
-      </select>
-      <input type="text" id="orders-search" placeholder="Search order ID or name…" oninput="applyOrderFilters()"
-        style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.45rem .85rem;font-size:.75rem;color:var(--text);font-family:var(--bfont);outline:none;min-width:200px;transition:border-color .15s"
-        onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'"/>
-      <span id="orders-count-label" style="font-size:.72rem;color:var(--muted);margin-left:auto;font-family:var(--mono);"></span>
-    </div>
+    <!-- ── THE ORDERS TABLE HAS A HEAD ───────────────────────────────────
+         Ellie: "The orders table gets the white header the promo table has,
+         titled All orders, with the filters in it."
 
+         The filters were a bare row floating between two tiles, which read as
+         page-level controls while every other control on this page sits in
+         the head of the thing it cuts. Same ids, so applyOrderFilters is
+         untouched; the couple type filter is still gone, at her earlier ask.
+    -->
     <div class="chart-card" style="margin-top:1.25rem">
+      <div class="chart-head ord-head">
+        <div>
+          <div class="chart-title">All orders</div>
+          <div class="chart-subtitle">Every order placed, with the code it used &middot;
+            <span id="orders-count-label" style="font-family:var(--mono);"></span></div>
+        </div>
+        <div class="ord-filters">
+          <select class="filter-select" id="orders-pkg-filter" onchange="applyOrderFilters()" aria-label="Orders pkg filter">
+            <option value="">All packages</option>
+            <option value="core">Assessment</option>
+            <option value="newlywed">Starting Out</option>
+            <option value="anniversary">Anniversary</option>
+            <option value="premium">Premium</option>
+          </select>
+          <select class="filter-select" id="orders-date-filter" onchange="applyOrderFilters()" aria-label="Orders date filter">
+            <option value="">All time</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+          <input type="text" id="orders-search" class="filter-select" placeholder="Search order ID&hellip;" oninput="applyOrderFilters()"
+            aria-label="Search orders" style="min-width:170px;cursor:text;" />
+        </div>
+      </div>
       <div class="table-wrap">
         <table class="response-table" id="orders-table"><thead></thead><tbody></tbody></table>
       </div>
@@ -1834,36 +1848,10 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
   </div>
 
   <div class="ux-cardlabel" style="margin-top:0;font-size:.62rem;">1 · Exercises — questioning + results</div>
-  <div class="ux-grid" style="margin-bottom:1.9rem;">
-      <div class="ux-card">
-        <div class="ux-cardhead"><span class="ux-dot" style="background:#9B5DE5"></span><span class="ux-name">Communication</span></div>
-        <div class="ux-row" style="margin-top:.6rem;">
-          <a class="ux-link" href="/app?demo=premium&fresh=1&view=exercise1" target="_blank" rel="noopener">Questioning (blank) ↗</a>
-          <a class="ux-link ux-link-primary" href="/app?demo=premium&view=results&sec=comm" target="_blank" rel="noopener">Results (demo) ↗</a>
-        </div>
-      </div>
-      <div class="ux-card">
-        <div class="ux-cardhead"><span class="ux-dot" style="background:#1B5FE8"></span><span class="ux-name">Expectations</span></div>
-        <div class="ux-row" style="margin-top:.6rem;">
-          <a class="ux-link" href="/app?demo=premium&fresh=1&view=exercise2" target="_blank" rel="noopener">Questioning (blank) ↗</a>
-          <a class="ux-link ux-link-primary" href="/app?demo=premium&view=results&sec=exp" target="_blank" rel="noopener">Results (demo) ↗</a>
-        </div>
-      </div>
-      <div class="ux-card">
-        <div class="ux-cardhead"><span class="ux-dot" style="background:#10b981"></span><span class="ux-name">Relationship Reflection</span></div>
-        <div class="ux-row" style="margin-top:.6rem;">
-          <a class="ux-link" href="/app?demo=anniversary&fresh=1&view=exercise3" target="_blank" rel="noopener">Questioning (blank) ↗</a>
-          <a class="ux-link ux-link-primary" href="/app?demo=anniversary&view=results&sec=reflection" target="_blank" rel="noopener">Results (demo) ↗</a>
-        </div>
-      </div>
-      <div class="ux-card">
-        <div class="ux-cardhead"><span class="ux-dot" style="background:#B5546E"></span><span class="ux-name">Physical Intimacy</span></div>
-        <div class="ux-row" style="margin-top:.6rem;">
-          <a class="ux-link" href="/app?demo=premium&intimacy=1&fresh=1&view=intimacy" target="_blank" rel="noopener">Questioning (blank) ↗</a>
-          <a class="ux-link ux-link-primary" href="/app?demo=premium&intimacy=1&view=results&sec=intimacy" target="_blank" rel="noopener">Results (demo) ↗</a>
-        </div>
-      </div>
-  </div>
+  <!-- Built from UX_EXERCISES rather than typed, because this was four cards
+       in the markup while the product has had five exercises for months, and
+       the one missing was the one Ellie went looking for. -->
+  <div class="ux-grid" id="ux-exercises" style="margin-bottom:1.9rem;"></div>
 
   <div class="ux-cardlabel" style="font-size:.62rem;">2 · Add-ons</div>
   <div class="ux-card" style="margin-bottom:1.9rem;">
@@ -3783,6 +3771,53 @@ async function renderWaitingOnPartner() {
   });
 }
 
+/**
+ * The exercise cards on UX Views.
+ *
+ * ── WHY IT IS A LOOP AND NOT MARKUP ───────────────────────────────────────
+ * Ellie: "The Conflict Patterns demo is missing from the exercises section."
+ * It was four cards typed into the page while api/_exercises.js has listed
+ * five for months, so the one exercise nobody had previewed was the newest
+ * one. Communication's dot had drifted to a purple as well: the registry says
+ * it is the brand orange, and that colour is the thing every other surface
+ * draws it in.
+ *
+ * admin.html is static and cannot import from api/, so this list is a copy,
+ * and check-ux-exercise-links.mjs holds it to the registry by key, name,
+ * colour and route. What the registry does NOT know is which demo package
+ * owns an exercise and what a demo needs in its query string to stand the
+ * results up, so those two live here and nowhere else.
+ */
+const UX_EXERCISES = [
+  { key: 'ex1', name: 'Communication', color: '#E8673A', view: 'exercise1', sec: 'comm', demo: 'premium', extra: '' },
+  { key: 'ex2', name: 'Expectations', color: '#1B5FE8', view: 'exercise2', sec: 'exp', demo: 'premium', extra: '' },
+  { key: 'ex3', name: 'Relationship Reflection', color: '#10B981', view: 'exercise3', sec: 'reflection', demo: 'anniversary', extra: '' },
+  /* intimacy is an add-on, so a demo has to be told it owns it. */
+  { key: 'intimacy', name: 'Physical Intimacy', color: '#B5546E', view: 'intimacy', sec: 'intimacy', demo: 'premium', extra: '&intimacy=1' },
+  /* Premium includes Conflict Patterns, so the questioning view needs
+     nothing; the RESULTS pages fetch /api/conflict-results, which a demo
+     skips unless conflict=1 asks for it. Without that the four conflict
+     pages sit on their waiting state, which is what plain demo mode shows
+     and reads exactly like a broken preview. */
+  { key: 'conflict', name: 'Conflict Patterns', color: '#1B5FE8', view: 'conflict', sec: 'conflict', demo: 'premium', extra: '&conflict=1' },
+];
+
+function renderUxExercises() {
+  const host = document.getElementById('ux-exercises');
+  if (!host) return;
+  host.innerHTML = UX_EXERCISES.map((e) => {
+    const ask = '/app?demo=' + e.demo + e.extra + '&fresh=1&view=' + e.view;
+    const res = '/app?demo=' + e.demo + e.extra + '&view=results&sec=' + e.sec;
+    return '<div class="ux-card">'
+      + '<div class="ux-cardhead"><span class="ux-dot" style="background:' + QX_ESC(e.color) + '"></span>'
+      + '<span class="ux-name">' + QX_ESC(e.name) + '</span></div>'
+      + '<div class="ux-row" style="margin-top:.6rem;">'
+      + '<a class="ux-link" href="' + QX_ESC(ask) + '" target="_blank" rel="noopener">Questioning (blank) &#8599;</a>'
+      + '<a class="ux-link ux-link-primary" href="' + QX_ESC(res) + '" target="_blank" rel="noopener">Results (demo) &#8599;</a>'
+      + '</div></div>';
+  }).join('');
+}
+
 function wirePromoForm() {
   const open = document.getElementById('promo-new-btn');
   const dlg = document.getElementById('promo-new');
@@ -4424,6 +4459,7 @@ function showPage(id) {
   /* 'promos' is not a page any more: Order Details draws everything it held,
      and showPage('orders') calls renderPromosPage itself. */
   if (id==='engagement') renderEngagementPage();
+  if (id==='ux-views') renderUxExercises();
   /* Ellie: "Should reset every time I leave the page." Arriving is the moment
      that can be acted on: leaving has no single handler, and a page that
      resets on arrival is indistinguishable from one that reset on the way
@@ -4682,7 +4718,12 @@ function svTileSpecs(questions) {
   const specs = [];
   for (const q of questions) {
     if (q.kind === 'text') specs.push({ kind: 'themes', q });
-    else specs.push({ kind: 'dist', q });
+    /* A ranking is the one question with eleven answers rather than five, and
+       every one of them is a phrase. Ellie: "Order the aspects should be a bar
+       chart, I can't read the labels." So that tile takes the whole row and
+       draws rows rather than columns; see svBarChart for the quote this
+       reverses and why it is scoped to this one question. */
+    else specs.push({ kind: 'dist', q, wide: q.kind === 'rank' });
     /* Two trends, beside the questions they belong to. There was a third, the
        ranking over time with one line per aspect; Ellie asked for it out. It
        was eleven lines on one chart, which is a legend rather than a finding. */
@@ -4813,13 +4854,31 @@ function svFit(chart) {
    be the same height." Two tiles differ only if their titles or their footers
    differ, and both of those are fixed now. */
 const SV_TILE_BODY = '210px';
-function svBarChart(labels, values, color, el, display) {
+function svBarChart(labels, values, color, el, display, opts) {
   /* Columns, always. Ellie: "You flipped x and y axis for a few views, I don't
      want that. Wrap labels, I want column charts." So a long answer wraps onto
      up to three lines under its bar, which flatTicks does for every chart in
      the admin, rather than the chart turning sideways. */
+  /* ── ROWS, FOR THE ONE QUESTION WITH ELEVEN ANSWERS ────────────────────
+     This reverses her earlier instruction, which is why both are here:
+
+       "You flipped x and y axis for a few views, I don't want that. Wrap
+        labels, I want column charts."
+
+     and, of this tile:
+
+       "Order the aspects becomes a bar chart so every label is readable."
+
+     What the first one was protecting is still true of the other tiles: five
+     short answers read best as columns. The ranking has eleven options, each
+     of them a phrase like "The merging lives checklist", and wrapping those
+     under a column in half a window gives three lines of six point type. So
+     the flip is scoped to that question rather than offered as a setting. */
+  const horizontal = !!(opts && opts.horizontal);
   const body = el && el.parentElement;
-  if (body) body.style.height = SV_TILE_BODY;
+  /* A row needs its own height; Chart.js otherwise fits eleven bars into the
+     fixed box and draws a stack of lines. Measured, not assumed: see svFit. */
+  if (body) body.style.height = horizontal ? Math.max(260, labels.length * 34 + 40) + 'px' : SV_TILE_BODY;
 
   /* ── NO NUMBERS ON THE BARS, AND NO AXIS EITHER ─────────────────────────
      Ellie, three times now, most recently: "No data labels above the columns
@@ -4848,7 +4907,7 @@ function svBarChart(labels, values, color, el, display) {
     callbacks: {
       label: (ctx) => {
         const i = ctx.dataIndex;
-        const shown = display && display[i] != null && display[i] !== '' ? display[i] : ctx.parsed.y;
+        const shown = display && display[i] != null && display[i] !== '' ? display[i] : (horizontal ? ctx.parsed.x : ctx.parsed.y);
         return ' ' + shown;
       },
     },
@@ -4862,7 +4921,7 @@ function svBarChart(labels, values, color, el, display) {
         data: values,
         backgroundColor: hexRamp(color, Math.max(labels.length, 2)),
         borderRadius: 6,
-        maxBarThickness: 54,
+        maxBarThickness: horizontal ? 22 : 54,
       }],
     },
     options: {
@@ -4871,10 +4930,29 @@ function svBarChart(labels, values, color, el, display) {
       /* A little room at the top so the tallest bar does not touch the tile's
          edge. It used to be room for the number that is no longer drawn. */
       layout: { padding: { top: 6 } },
-      scales: {
-        x: { grid: { display: false }, border: { display: false } },
-        y: { display: false, beginAtZero: true, grace: '12%' },
-      },
+      indexAxis: horizontal ? 'y' : 'x',
+      /* Hover along the axis the categories are on. mkChart's default is 'x',
+         which on a sideways bar is the value axis: the tooltip then follows
+         the pointer's distance from the bar's end rather than which row it is
+         over, and the top row answers for all eleven. */
+      interaction: horizontal ? { mode: 'index', intersect: false, axis: 'y' } : undefined,
+      /* ── THE AXIS LINE ─────────────────────────────────────────────────
+         Ellie: "Feedback charts need an x axis line." The value axis and the
+         gridlines came off every chart in the admin at her ask, and on these
+         tiles the baseline went with them, so a column sat on nothing. The
+         line that comes back is the CATEGORY axis's own border, which is the
+         one the labels hang from: under the columns here, and down the left
+         of the ranking's rows. The value axis stays gone. */
+      scales: horizontal
+        ? {
+            y: { grid: { display: false }, border: { display: true, color: '#D7DEEA' },
+                 ticks: { autoSkip: false, color: '#5A6478', font: { size: 11 } } },
+            x: { display: false, beginAtZero: true, grace: '8%' },
+          }
+        : {
+            x: { grid: { display: false }, border: { display: true, color: '#D7DEEA' } },
+            y: { display: false, beginAtZero: true, grace: '12%' },
+          },
     },
   };
 }
@@ -4895,7 +4973,8 @@ function svDrawTile(spec, idx, periodRows) {
   if (spec.kind === 'dist') {
     const d = svDistOf(spec.q, rows);
     setTileN(el, d.n);
-    svFit(mkChart(el, svBarChart(d.labels, d.values, SV_COLOR[spec.q.kind] || '#5C6DDA', el, d.display)));
+    svFit(mkChart(el, svBarChart(d.labels, d.values, SV_COLOR[spec.q.kind] || '#5C6DDA', el, d.display,
+      { horizontal: spec.q.kind === 'rank' })));
     return;
   }
 
@@ -6327,7 +6406,11 @@ function applyOrderFilters() {
     if (pkg && !o.pkg.startsWith(pkg)) return false;
     if (cutoff && o.date < cutoff) return false;
 
-    if (search && !o.id.toLowerCase().includes(search) && !(o.name||'').toLowerCase().includes(search)) return false;
+    /* Order id only. The buyer's name left this payload when the Fulfilment
+       page did, so `o.name` was a field that is never there and the second
+       half of this test could only ever be false: a search box offering to
+       match something the browser is not sent. */
+    if (search && !o.id.toLowerCase().includes(search)) return false;
     return true;
   });
 
@@ -8095,6 +8178,47 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
   const qRow = (labelHtml, contentHtml) =>
     '<div class="qrow"><div class="qrow-label">' + labelHtml + '</div>' +
       '<div class="qrow-body">' + contentHtml + '</div></div>';
+
+  /**
+   * ── THE CATEGORY IS A HEADING, NOT PART OF EVERY ROW ──────────────────
+   * Ellie: "Expectations: All questions rows still carry the section title.
+   * Drop it and add eyebrow headings with the questions under them."
+   *
+   * Expectations is the one page whose field labels are two things joined:
+   * "Finances · How we handle debt". The row printed both, so the category was
+   * repeated down a column a third of the tile wide, eleven times for
+   * Household alone. In mean mode it was not even split: that renderer used
+   * the whole label, which is why she was still seeing it after the bar
+   * renderer learned to take it off.
+   *
+   * One eyebrow per run of a category, and the row carries only the question.
+   * The order comes from the question set, which is grouped by category, so a
+   * run is a category. If that ever stops being true the headings repeat,
+   * which is visible rather than silent.
+   */
+  const catOf = (f) => {
+    if (containerId !== 'qx-exp' || typeof f.label !== 'string') return null;
+    const i = f.label.indexOf(' · ');
+    return i > -1 ? f.label.slice(0, i) : null;
+  };
+  const qTextOf = (f) => {
+    const cat = catOf(f);
+    return cat == null ? f.label : f.label.slice(cat.length + 3);
+  };
+  const catHead = (t) => '<div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;'
+    + 'text-transform:uppercase;color:var(--muted);font-weight:700;margin:1.15rem 0 .55rem;">' + QX_ESC(t) + '</div>';
+  /* Every All questions list goes through here, so the headings cannot appear
+     in one view of a page and not the other. */
+  const rowsFor = (fields, drows, sliced) => {
+    let last = null, out = '';
+    for (const f of fields) {
+      const c = catOf(f);
+      if (c && c !== last) out += catHead(c);
+      last = c;
+      out += measureBar(f, drows, sliced);
+    }
+    return out;
+  };
   const barFor = (f, drows) => {
     const counts = {}; let n = 0;
     drows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
@@ -8131,10 +8255,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
        answer to how big a question reads. The responsibilities page keeps its
        category eyebrow above the question, which is information the question
        text does not carry. */
-    const header = (containerId === 'qx-exp' && f.label.indexOf(' · ') > -1)
-      ? (function(){ const parts = f.label.split(' · '); const cat = parts.shift(); const q = parts.join(' · ');
-          return '<div style="font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.08rem;">' + QX_ESC(cat) + '</div>' + QX_ESC(q); })()
-      : QX_ESC(f.label);
+    const header = QX_ESC(qTextOf(f));
     const barRow = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + naSeg + '</div>';
 
     if (f.kind === 'scale') {
@@ -8216,7 +8337,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
        the column has a fixed width and the text wraps inside it. */
     const lo = QX_ESC(loFull), hi = QX_ESC(hiFull);
     const loPre = isScale ? '1 \u00b7 ' : '', hiPre = isScale ? '5 \u00b7 ' : '';
-    const header = QX_ESC(f.label);
+    const header = QX_ESC(qTextOf(f));
     /* ── WHICH DOT IS WHICH ────────────────────────────────────────────
        Ellie: "when the user selects a different demo from the slicer, include
        a small grey dot indicating the mean and then the larger, colored dot
@@ -8285,7 +8406,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
 
     distEl.innerHTML =
       (QX_MODE[containerId] === 'mean' ? '' : scaleLegend) + (highBox ? '' : meanKey) +
-      (highFields.length && !highBox ? sectionHead('High-level views') + highFields.map(f => measureBar(f, drows, sliced)).join('') + '<div style="height:1.1rem;"></div>' : '') +
+      (highFields.length && !highBox ? sectionHead('High-level views') + rowsFor(highFields, drows, sliced) + '<div style="height:1.1rem;"></div>' : '') +
       /* No inner "All questions" head: the tile is called that now, and a
          section head repeating its own tile's title is a line that says
          nothing. It is still drawn when the high-level block is in here with
@@ -8293,13 +8414,13 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
       /* The inner head only when both halves share this container. The tile is
          called All questions now, so on a page with no high-level block it was
          drawing that title twice, once as a tile and once as a section. */
-      (highBox || !highFields.length ? '' : sectionHead('All questions')) + detailFields.map(f => measureBar(f, drows, sliced)).join('');
+      (highBox || !highFields.length ? '' : sectionHead('All questions')) + rowsFor(detailFields, drows, sliced);
   };
   /* The high-level block's markup, built once and drawn by whichever of the
      two slicers owns it. A second copy of this would be a second answer to
      where the mean sits, which is the thing meanBar exists to settle. */
   function renderHighHtml(drows, sliced) {
-    return highFields.length ? meanKeyFor(sliced) + highFields.map(f => measureBar(f, drows, sliced)).join('') : '';
+    return highFields.length ? meanKeyFor(sliced) + rowsFor(highFields, drows, sliced) : '';
   }
   QX_REPAINT[containerId] = () => renderDist(curSlice, curSliced);
   renderDist(rows, false);
@@ -8810,13 +8931,18 @@ function flatTicks(cfg) {
     if (cats && cats <= 12 && ticks.autoSkip == null) ticks.autoSkip = false;
     ticks.font = Object.assign({ size: 10 }, ticks.font);
     ticks.color = ticks.color || '#5A6478';
+    /* A row chart's names run down the side, where the room is horizontal and
+       a line costs nothing: "The merging lives checklist" is three lines at
+       the column width and one at this one. A column chart's names sit under
+       the bar and share its width, which is what TICK_WRAP is measured for. */
+    const wrap = horizontal ? TICK_WRAP_SIDE : TICK_WRAP;
     ticks.callback = function (value) {
       const text = String(this.getLabelForValue ? this.getLabelForValue(value) : value);
-      if (text.length <= TICK_WRAP) return text;
+      if (text.length <= wrap) return text;
       const lines = [];
       let line = '';
       for (const w of text.split(' ')) {
-        if ((line + ' ' + w).trim().length > TICK_WRAP) { lines.push(line.trim()); line = w; }
+        if ((line + ' ' + w).trim().length > wrap) { lines.push(line.trim()); line = w; }
         else line += ' ' + w;
       }
       if (line.trim()) lines.push(line.trim());
@@ -8827,6 +8953,7 @@ function flatTicks(cfg) {
   } catch (e) { /* a tick is never worth breaking a chart for */ }
 }
 const TICK_WRAP = 14;
+const TICK_WRAP_SIDE = 28;
 
 /* markEmptyTile was here. It stamped a sentence into a tile that had no data,
    which Ellie asked for out ("If n=0 that speaks for itself"), and set an
@@ -9453,7 +9580,7 @@ function refreshSandbox() {
 
 
 
-window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overview');updateDashboardFulfillmentKPIs();restorePageFromHash();if(typeof initAllSlicers==='function')initAllSlicers();});
+window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overview');updateDashboardFulfillmentKPIs();restorePageFromHash();renderUxExercises();if(typeof initAllSlicers==='function')initAllSlicers();});
 
 window.__initEnv = async function () {
   var summary = document.getElementById('envSummary');

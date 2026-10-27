@@ -58,6 +58,10 @@ const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
 const { withEffectivePromoCodes, coupleKeyFromProfiles } = await import(`${ROOT}api/_lib/order-promo.js`);
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
 const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_questions.js`);
+/* The survey, from the module the endpoint sends and the function that builds
+   its one per-person list, rather than nine questions typed out here. */
+const { SURVEY_QUESTIONS, TEXT_QUESTIONS, SURVEY_VERSION, rankOptionsFor } = await import(`${ROOT}api/_lib/survey.js`);
+const { EXERCISES: SURVEY_EXERCISES } = await import(`${ROOT}api/_exercises.js`);
 const { genericLabel } = await import(`${ROOT}api/_lib/generic-label.js`);
 const { DIM_META, DIM_SCALE_POLES: DIM_SCALE_POLES_STUB } = await import(`${ROOT}api/_lib/dimensions.js`);
 const DIM_NAMES_STUB = Object.fromEntries(Object.entries(DIM_META).map(([k, v]) => [k, v.label]));
@@ -118,7 +122,11 @@ const fields = [
     const opts = q.options || [];
     const ordered = opts.length >= 3;
     return {
-      key: q.id, label: (q.category ? q.category + ' · ' : '') + String(q.text || q.id).replace(/\{[a-zA-Z]+\}/g, 'you'),
+      /* genericLabel, the same function the endpoint runs. Replacing every
+         placeholder with "you" gave two identical rows reading "Involvement
+         with you's family", which is a stub inventing a label while the
+         module that makes them is imported four lines up. */
+      key: q.id, label: (q.category ? q.category + ' · ' : '') + genericLabel(String(q.text || q.id)),
       group: 'Ex2 · Life & values', kind: 'cat',
       ...(ordered ? { ordinal: true, poleLow: opts[0], poleHigh: opts[opts.length - 1] } : {}),
       options: opts.map((v) => ({ v, label: v })), partnerable: true,
@@ -126,7 +134,7 @@ const fields = [
   }),
   ...RESPONSIBILITY_CATEGORIES.flatMap((cat) => (cat.items || []).slice(0, 2).map((item, i) => ({
     key: 'resp_' + cat.id + '_' + i,
-    label: cat.label + ' · ' + String(item).replace(/\{[a-zA-Z]+\}/g, 'you'),
+    label: cat.label + ' · ' + genericLabel(String(item)),
     group: 'Ex2 · Who does what', kind: 'cat', ordinal: true,
     poleLow: 'Myself', poleHigh: 'My partner',
     options: [['Me', 0], ['Both', 0.5], ['Partner', 1], ['N/A', null]].map(([v, val]) => ({ v, label: v, val })),
@@ -691,6 +699,72 @@ const server = createServer((req, res) => {
       flipped: [], blend: 0.5, dims: Object.keys(DIM_KEYS) }));
     return;
   }
+  /* ── THE SURVEY ─────────────────────────────────────────────────────────
+     Feedback is the one page whose numbers come from /api/admin-survey, and
+     this fell through to the catch-all below, which answers `{ rows: [] }`.
+     So the whole page was an empty grid with no error anywhere: the probe
+     printed "chart-grid 1184x0" and "no console errors", which is a harness
+     saying nothing about a page it cannot see. Ellie's asks about the x axis
+     and the ranking chart could not have been checked at all.
+
+     The questions are SURVEY_QUESTIONS, the ones the endpoint sends. The
+     ranking's options are rankOptionsFor, which is the only question built
+     per person, so a stub that typed a list would be inventing the thing the
+     chart is about. Answers are stored in the spellings the app writes: a
+     number for stars, scale and nps, the option's own words for a choice, and
+     an array of option names for the ranking. */
+  if (url.pathname.startsWith('/api/admin-survey')) {
+    const rankOptions = rankOptionsFor({
+      done: Object.fromEntries(SURVEY_EXERCISES.map((e) => [e.key, true])),
+      caps: { ownsWorkbook: true, ownsBudget: true, ownsChecklist: true },
+      exercises: SURVEY_EXERCISES,
+    });
+    const WORDS = [
+      'We talked about money for the first time without it turning into a fight.',
+      'The expectations section was the one that landed.',
+      'It put words to something we both already felt.',
+      'Reading my own answers back was the useful part.',
+    ];
+    const responses = rows.map((r, i) => {
+      const when = new Date(Date.now() - (i * 3 + 1) * 86400000).toISOString();
+      const answers = {};
+      for (const q of SURVEY_QUESTIONS) {
+        if (q.kind === 'stars') answers[q.id] = 3 + (i % 3);
+        else if (q.kind === 'scale') answers[q.id] = 1 + (i % (q.scale || []).length);
+        else if (q.kind === 'nps') answers[q.id] = (i * 3) % 11;
+        else if (q.kind === 'choice') answers[q.id] = (q.options || [])[i % Math.max(1, (q.options || []).length)];
+        else if (q.kind === 'text') answers[q.id] = WORDS[i % WORDS.length];
+        else if (q.kind === 'rank') {
+          /* A different order per person, so the mean place differs by option
+             rather than every bar being the same height. */
+          answers[q.id] = rankOptions.slice(i % rankOptions.length).concat(rankOptions.slice(0, i % rankOptions.length));
+        }
+      }
+      return {
+        id: 'sv' + i,
+        started_at: when, updated_at: when,
+        completed_at: i % 5 === 0 ? null : when,
+        version: SURVEY_VERSION,
+        answers,
+        featured: i === 2,
+        segment: {
+          relationship_length: r.relationship_length, relationship_status: r.relationship_status,
+          children: r.children, age_range: r.age_range, pronouns: r.pronouns,
+          signup_source: r.signup_source, pkg: r.pkg,
+        },
+        codes: i % 4 === 0 ? { [TEXT_QUESTIONS[0]]: ['Money'] } : {},
+      };
+    });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: true, version: SURVEY_VERSION, demoFilterApplied: true,
+      questions: SURVEY_QUESTIONS.map((q) => (q.kind === 'rank' ? { ...q, options: rankOptions } : q)),
+      textQuestions: TEXT_QUESTIONS,
+      responses,
+      counts: { all: responses.length, finished: responses.filter((x) => x.completed_at).length },
+    }));
+    return;
+  }
   if (url.pathname.startsWith('/api/')) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, rows: [], data: [] }));
@@ -891,10 +965,19 @@ const report = await page.evaluate(() => ({
         const meta = ch.getDatasetMeta(0);
         const pts = (meta && meta.data) || [];
         if (pts.length) {
-          const area = Math.round(ch.chartArea.right - ch.chartArea.left);
-          const last = Math.round(pts[pts.length - 1].x - ch.chartArea.left);
+          /* Which coordinate spreads the categories depends on which way the
+             chart runs. On a sideways bar, `.x` is where the bar ENDS, so
+             reading it as the category position reports every row at the same
+             place and calls a correct chart stale. The categories are on `.y`
+             there, down the height of the drawing area. */
+          const flipped = ch.options && ch.options.indexAxis === 'y';
+          const area = flipped
+            ? Math.round(ch.chartArea.bottom - ch.chartArea.top)
+            : Math.round(ch.chartArea.right - ch.chartArea.left);
+          const at = (pt) => Math.round((flipped ? pt.y - ch.chartArea.top : pt.x - ch.chartArea.left));
+          const last = at(pts[pts.length - 1]);
           const stale = pts.length > 1 && last < area * 0.6;
-          bars = `  bars ${pts.length} first ${Math.round(pts[0].x - ch.chartArea.left)}`
+          bars = `  bars ${pts.length}${flipped ? ' rows' : ''} first ${at(pts[0])}`
             + ` last ${last} of ${area}${stale ? '  <-- LAID OUT FOR A NARROWER BOX' : ''}`;
         }
       }
@@ -1240,6 +1323,23 @@ if (process.env.READ) {
   }
 }
 
+/* ── SCROLL= ───────────────────────────────────────────────────────────────
+   FULL_PAGE=1 re-lays out every responsive chart mid-capture, which this file
+   already says about pie axes and which cost a round here: the ranking tile
+   photographed as eight stubs huddled at the left while the chart reported
+   its bars ending at 860 of 1032. The picture was wrong and the measurement
+   was right. So a tile below the fold is reached by scrolling to it and
+   taking an ordinary viewport shot, which changes no layout at all. */
+if (process.env.SCROLL) {
+  await page.evaluate((to) => {
+    const n = Number(to);
+    if (Number.isFinite(n)) { window.scrollTo(0, n); return n; }
+    const el = document.querySelector(to);
+    if (el) el.scrollIntoView({ block: 'start' });
+    return el ? Math.round(window.scrollY) : null;
+  }, process.env.SCROLL);
+  await new Promise((r) => setTimeout(r, 400));
+}
 const shot = await page.screenshot({ fullPage: process.env.FULL_PAGE === '1' });
 writeFileSync(OUT, Buffer.from(shot, 'base64'));
 console.log('picture: ' + OUT);
