@@ -117,10 +117,6 @@ Complete a survey after running it and it will say 1, which is the proof.
 
 | # | What I am doing |
 |--|--|
-| A75 | Moving the Type Analytics and Feedback filters into the shell head. |
-| A77 | Slicers on the Expectations, Physical Intimacy and Conflict at-a-glance tiles. |
-| A80 | Explore chart: "[x] × [y]" title, clustered column default, the dropdown naming the chart type. |
-| A81 | Explore pickers: draw the seven section colours, indent the options under their field. |
 | A72 | Making Engagement readable. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
@@ -131,6 +127,10 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A77 | **The three at-a-glance tiles have slicers now.** They could not have worked before the payload fix either: the cut of every one of those measures has always been sent and the page read none of it. Cutting Physical Intimacy to Married moves alignment 78 to 75. |
+| A75 | **Type Analytics had no filters at all, and said it did.** Three dropdowns were being read by the code and existed nowhere in the markup, so every figure on that page has always been the whole population. They are in the top tile now and they cut it: the E:W ratio goes 2:3 to 6:7. Feedback's period control moved into its tile. |
+| A80 | **Explore: the title is just the two fields, the default is a clustered column, and the dropdown names the chart.** The measure moved to the line underneath rather than being dropped. It also said "undefined total" in my harness, which was the harness. |
+| A81 | **The picker lists are indented a step per level.** Your questions were less indented than the heading above them, which is the opposite of differentiation. The section colour is now set on the group; whether a dropdown paints it is the browser's call, so tell me if it still reads black and I will build a real picker. |
 | A76 | **The dimension tile: slicer, poles in line, no scrollbar, Reassurance capitalised.** Ten rows measured 289 points in a 255 point box and now measure 209, so nothing scrolls. It has its own slicer and reports its own n. |
 | A73 | **The promo table was showing two answers to one question.** A counter column and the real order count, side by side. One figure now, from the orders, which you can check against the table on the same page. Most codes really are at nought: the beta bought on two. |
 | A74 | **A couple buys once, so the partner who did not pay now takes their code.** On the test data that resolves 24 of 48 orders, and the tile says how many came that way rather than folding them in quietly. |

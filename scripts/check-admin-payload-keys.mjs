@@ -123,6 +123,25 @@ for (const [i, code] of scripts.entries()) {
      onto a name one line earlier is on this file's own list of the four forms
      to plant every time, and it is the one that got through. Depth-capped so
      a circular initialiser cannot spin. */
+  /* The two accessors that answer with a responses bundle, and the same
+     binding-following used for the payload. */
+  const BUNDLE_FNS = new Set(['respOf', 'respSegOf']);
+  const isBundle = (binding, depth = 0) => {
+    if (depth > 6) return false;
+    const d = binding?.path;
+    if (d?.node?.type !== 'VariableDeclarator' || !d.node.init) return false;
+    const init = d.node.init;
+    const inner = init.type === 'AwaitExpression' ? init.argument : init;
+    if (inner?.type === 'Identifier') return isBundle(d.scope.getBinding(inner.name), depth + 1);
+    /* `(a && a.b) || respOf(d)` and the like: any respOf/respSegOf call in the
+       initialiser makes this a bundle, which is the shape respSegOf itself
+       returns. */
+    if (inner?.type === 'LogicalExpression') {
+      const sides = [inner.left, inner.right];
+      return sides.some((x) => x?.type === 'CallExpression' && x.callee.type === 'Identifier' && BUNDLE_FNS.has(x.callee.name));
+    }
+    return inner?.type === 'CallExpression' && inner.callee.type === 'Identifier' && BUNDLE_FNS.has(inner.callee.name);
+  };
   const fromFetch = (binding, depth = 0) => {
     if (depth > 6) return false;
     const d = binding?.path;
@@ -138,12 +157,29 @@ for (const [i, code] of scripts.entries()) {
       const { object, property, computed } = path.node;
       if (computed || property.type !== 'Identifier') return;   // data[x] is out of scope, per the header
       const key = property.name;
-      /* respOf(data).X — a read of the responses bundle. */
-      if (object.type === 'CallExpression' && object.callee.type === 'Identifier'
-          && object.callee.name === 'respOf') {
+      /* respOf(data).X and respSegOf(data, k).X — reads of the responses
+         bundle, whole or cut to one segment. Both answer with the same shape,
+         which is the point of respSegOf falling back to the whole population.
+
+         Also followed through a name: `const bundle = respSegOf(d, k)` then
+         `bundle.X`. The first version did not, and when two renderers were
+         rewritten to read a bundle once instead of calling respOf per key, the
+         gate's count silently fell from 9 to 4. Nothing failed; it just
+         stopped looking at five reads. A gate's own figure is the thing to
+         watch, which is why it prints one. */
+      if (object.type === 'Identifier' && isBundle(path.scope.getBinding(object.name))) {
         respReads++;
         if (responseKeys && !responseKeys.has(key)) {
-          note(`public/admin.html reads respOf(...).${key}, which buildResponseAggregates does not return`
+          note(`public/admin.html reads ${object.name}.${key} off the responses bundle, which buildResponseAggregates does not return`
+            + (payloadKeys?.has(key) ? ` (the payload carries it at the top level: read data.${key})` : ''));
+        }
+        return;
+      }
+      if (object.type === 'CallExpression' && object.callee.type === 'Identifier'
+          && BUNDLE_FNS.has(object.callee.name)) {
+        respReads++;
+        if (responseKeys && !responseKeys.has(key)) {
+          note(`public/admin.html reads ${object.callee.name}(...).${key}, which buildResponseAggregates does not return`
             + (payloadKeys?.has(key) ? ` (the payload carries it at the top level: read data.${key})` : ''));
         }
         return;

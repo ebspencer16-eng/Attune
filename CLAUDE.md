@@ -528,6 +528,59 @@ reach a stubbed `fetch`, and counting the calls, is what made the ordering
 visible. If a gate is about when something happens, the thing has to be able to
 happen.
 
+**A stub is a claim about the server, and a wrong one lies in both
+directions.** Six of these in one session, and they cost more than every real
+bug in it.
+
+The expensive one: seven renderers in `public/admin.html` read
+`data.inheritance`, `data.intimacyStats` and five more off the top level of the
+payload, and `api/admin-data.js` builds all seven inside its response-aggregates
+helper and therefore sends them one level down, under `responses`. Every one of
+those tiles drew its empty state. Ellie reported it seven times in one message.
+`probe-admin.mjs` put those keys at the top level beside `responses`, so the
+harness rendered all seven tiles while production rendered none.
+
+The other five were the mirror, reporting a working feature as broken, and each
+one sent me looking for a bug in the product:
+
+| What the stub did | What I nearly "fixed" |
+|---|---|
+| Sent `dimLabel: q.dimension`, the id, where the server sends the label | A dimension chart captioned in lower case |
+| Took the first six intimacy questions, which are two dimensions | A two-point radar, which Chart.js draws as a line |
+| Hand-typed five responsibilities, all under one category | A 5x4 grid that drew one row and looked finished |
+| Put its one unmappable promo code at an odd index in a pool it indexed with even numbers | An Unknown bucket that never appeared |
+| Omitted `count`, which the cube has always sent | A page reading "undefined total" |
+
+The rule that would have caught all six: **build the stub from the server's own
+return statement, not from what the client happens to read.** Where the server
+imports a module to shape a value, the stub imports the same module and calls
+it. `withEffectivePromoCodes`, `genericLabel` and `DIM_META` are all run by the
+probe now rather than approximated, so those three can no longer disagree.
+
+And when a figure looks wrong in the harness, the first question is the same one
+this file asks about sweeps: is the harness wrong? Five times out of six here,
+it was.
+
+**A fallback that always fires is the same as no fallback, and it reads like
+cover.** Three in one session, all of the form `MAP[key] || key`.
+
+`DIM_LABELS` in `api/admin-explore.js` had a `stress` entry, which has not been
+a dimension for a long time, and no `reassurance`, which is one. Nine rows
+proved the mechanism worked and the tenth printed its own key, which is what
+Ellie saw: "Reassurance is the only dimension not capitalized." The pole map
+beside it had the same two faults, made independently, so that row also read
+"1 - low" and "5 - high". And the conflict field catalogue concatenated the
+horseman's one-word name INTO the label and never sent it as `riskLabel`, while
+both readers asked for `riskLabel` and fell back: the tile printed the whole
+question under a heading that had space for one word.
+
+A fallback that fires for one entry in ten is the hardest kind to see. So when
+you write `X[k] || k`, ask what it looks like when it fires, and whether anybody
+would be able to tell. If the answer is "it looks like ordinary content", the
+map needs a guard that the keys agree, at load time, next to the map. Both of
+these do now, and `api/_lib/dimensions.js` throws on a mismatch rather than
+describing one in a comment.
+
 **A second surface showing the same thing renders the first one, or it is a
 second drawing of it.** Ellie asked for the word of the day to open as a
 storycard "with the word card centered". I built a card from that sentence

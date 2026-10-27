@@ -21,7 +21,7 @@ export const EMAIL_TRIGGERS = {
     "src/App.jsx:16301"
   ],
   "shipping_notification": [
-    "public/admin.html:7931"
+    "public/admin.html:8061"
   ],
   "workbook_promo": [
     "api/generate-workbook-promo.js:185"

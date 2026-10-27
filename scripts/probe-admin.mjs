@@ -324,7 +324,10 @@ withEffectivePromoCodes(orders, (o) => o.couple_id || null);
    invented them would be testing my guess rather than the mapping. */
 const { EXPLORE_SECTIONS, placeAll } = await import(`${ROOT}api/_lib/explore-sections.js`);
 const _placed = placeAll(fields);
-const CUBE = { ok: true, fields: _placed.fields, dimNames: DIM_NAMES_STUB, sections: EXPLORE_SECTIONS,
+/* `count` is the total the Explore page's meta line reports, and it was
+   missing here while api/admin-explore.js has always sent it, so the harness
+   read "undefined total" on a page that is fine in production. */
+const CUBE = { ok: true, fields: _placed.fields, dimNames: DIM_NAMES_STUB, count: rows.length, sections: EXPLORE_SECTIONS,
   unmappedGroups: _placed.unmapped, rows, orders, demoFilterApplied: true };
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
@@ -545,7 +548,32 @@ const server = createServer((req, res) => {
       expCoupleDistances, alignedBand: 0.2, inheritance,
       reflectionCodes, conflictCodes, repairRank, intimacyStats,
     });
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, promoLink: { inherited: stubPromoLink.inherited, standalone: stubPromoLink.standalone }, responses, responsesBySegment: { '': responses } }));
+    /* ── SEGMENTS THE SLICERS CAN ACTUALLY PICK ──────────────────────────
+       This was `{ '': responses }`, one key, so every cut fell back to the
+       whole population and the at-a-glance slicers looked wired and changed
+       nothing. A stub that cannot produce the case under test reports the
+       feature as working.
+
+       The keys are built from the rows the cube sends, in the same
+       `field::value` form populateSlicer puts in the options, so a value the
+       slicer offers is a value this answers to. The figures are shifted per
+       segment, by a fixed amount rather than at random, so a cut that does
+       nothing is visible as a number that did not move. */
+    const segBundles = {};
+    for (const dim of ['pronouns', 'relationship_status']) {
+      for (const v of [...new Set(rows.map((r) => r[dim]).filter(Boolean))]) {
+        const shift = (String(v).length % 7) - 3;
+        segBundles[dim + '::' + v] = {
+          ...responses,
+          pairs: Math.max(1, Math.round(responses.pairs / 3)),
+          intimacyStats: { ...responses.intimacyStats,
+            avgAlignment: responses.intimacyStats.avgAlignment + shift,
+            partnerInitiates: responses.intimacyStats.partnerInitiates + shift },
+          expCoupleDistances: (responses.expCoupleDistances || []).slice(0, 6),
+        };
+      }
+    }
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, promoLink: { inherited: stubPromoLink.inherited, standalone: stubPromoLink.standalone }, responses, responsesBySegment: { '': responses, ...segBundles } }));
     return;
   }
   /* ── ENGAGEMENT ─────────────────────────────────────────────────────────

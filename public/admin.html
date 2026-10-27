@@ -1305,6 +1305,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
             <div class="chart-title">Expectations at a glance</div>
             <div class="chart-subtitle">Across the couples who have both halves</div>
           </div>
+          <select class="tile-slicer" id="slz-expsum" title="Cut this tile by a segment" aria-label="Slz expsum"><option value="">Everyone</option></select>
         </div>
         <div class="chart-body">
           <div class="kpi-grid" id="expsum-tiles" style="grid-template-columns:repeat(4,1fr);margin:0;">
@@ -1437,6 +1438,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       <div class="chart-card kpi-shell">
         <div class="chart-head">
           <div><div class="chart-title">Physical Intimacy at a glance</div><div class="chart-subtitle">Across everyone who has answered</div></div>
+          <select class="tile-slicer" id="slz-pisum" title="Cut this tile by a segment" aria-label="Slz pisum"><option value="">Everyone</option></select>
         </div>
         <div class="chart-body">
           <div class="kpi-grid" id="pisum-tiles" style="grid-template-columns:repeat(4,1fr);margin:0;">
@@ -1578,15 +1580,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
         <div class="topbar-sub">Every answer to the survey &middot; <span id="fb-count">0</span> responses,
           <span id="fb-done">0</span> finished</div>
       </div>
-      <div class="topbar-right">
-        <select class="tile-slicer" id="fb-period" title="Every tile below is cut to this period" aria-label="Time period">
-          <option value="">All time</option>
-          <option value="7">Last 7 days</option>
-          <option value="30">Last 30 days</option>
-          <option value="90">Last 90 days</option>
-          <option value="365">Last 12 months</option>
-        </select>
-      </div>
+
     </div>
 
     <!-- The four numbers, cut by the period above. Every one of them is a
@@ -1598,7 +1592,19 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
          placed: these tiles count people. -->
     <div class="chart-card kpi-shell">
       <div class="chart-head">
-        <div><div class="chart-title">Feedback at a glance</div><div class="chart-subtitle">This page keeps its own period control and filters below; a second set here would be two answers to one question</div></div>
+        <!-- Ellie: "on type and feedback move the filters into the top tile."
+             The period select was in the page's topbar, which is the one place
+             on this page that is not the shell, so it read as a page-level
+             control while every other page keeps the same thing in the shell
+             head. Moved, not duplicated: there is still one of it. -->
+        <div><div class="chart-title">Feedback at a glance</div><div class="chart-subtitle">Every tile on this page is cut to this period</div></div>
+        <select class="tile-slicer" id="fb-period" title="Every tile below is cut to this period" aria-label="Time period">
+          <option value="">All time</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last 12 months</option>
+        </select>
       </div>
       <div class="chart-body">
     <div class="kpi-grid" id="fbsum-tiles" style="grid-template-columns:repeat(4,1fr);">
@@ -1874,7 +1880,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       <span class="xp-viz-label" id="xp-viz-why">Chart</span>
       <select id="xp-viz-type" aria-label="Chart type">
         <option value="auto">Chosen for this cut</option>
-        <option value="bar">Grouped columns</option>
+        <option value="bar">Clustered column</option>
         <option value="stacked">Stacked columns</option>
         <option value="line">Lines</option>
         <option value="pie">Pie</option>
@@ -1970,14 +1976,35 @@ window.adminAuthHeaders = function(extra){
       const detail = mine.filter(f => f.tier !== 'high');
       /* The block is the coloured row: a select cannot be told to paint one,
          so the colour is drawn as a character the browser will render. */
-      html += '<optgroup label="\u2588 ' + sec.label.replace(/</g,'&lt;') + '">';
+      /* ── THE COLOURED BANNER, AND WHY IT MAY STILL BE BLACK ───────────────
+         Ellie: "Not seeing the colored banners, and I want the lists indented
+         for differentiation."
+
+         She is right and the block character was always going to be black: a
+         native <select> popup is drawn outside CSS's reach on most platforms,
+         so `\u2588` rendered in whatever colour the list text is. The colour is
+         now set on the optgroup and on the block itself, which Chrome does
+         honour in its own popup on some platforms and ignores on others. If it
+         still reads black, the answer is a custom picker rather than a
+         <select>, and that is a bigger build than a style attribute: say the
+         word.
+
+         The indenting is not conditional on any of that. */
+      html += '<optgroup style="color:' + (sec.color || 'inherit') + '" label="\u2588 ' + sec.label.replace(/</g,'&lt;') + '">';
+      /* ── ONE STEP PER LEVEL ───────────────────────────────────────────────
+         The section is the optgroup label, its two sub-heads sat at two
+         spaces, and the questions under them sat at none: the rows she reads
+         were LESS indented than the heading above them, which is the
+         "differentiation" she is asking for and the opposite of it. Two spaces
+         for a sub-head, four for the fields under it. */
+      const indented = (f) => '<option value="' + f.key + '">\u00a0\u00a0\u00a0\u00a0' + f.label.replace(/</g,'&lt;') + '</option>';
       if (high.length) {
         html += '<option disabled>\u00a0\u00a0High level</option>';
-        high.forEach(f => { html += opt(f); });
+        high.forEach(f => { html += indented(f); });
       }
       if (detail.length) {
         html += '<option disabled>\u00a0\u00a0Every question</option>';
-        detail.forEach(f => { html += opt(f); });
+        detail.forEach(f => { html += indented(f); });
       }
       html += '</optgroup>';
     });
@@ -2134,6 +2161,10 @@ window.adminAuthHeaders = function(extra){
    * about forty bars a chart is less readable than the table under it. Both
    * say so rather than drawing something misleading.
    */
+  /* The chart names, in one place, so the auto option and the fixed options
+     cannot end up calling the same chart two things. */
+  const VIZ_NAMES = { bar: 'Clustered column', stacked: 'Stacked columns', line: 'Lines', pie: 'Pie', none: 'No chart' };
+
   function vizChoice(ctx){
     const rows = ctx.rLabels.length, cols = ctx.cLabels.length;
     const rowField = FIELDS[ctx.rowField] || {};
@@ -2147,7 +2178,16 @@ window.adminAuthHeaders = function(extra){
     }
     if (ctx.cellMode === 'mean') return { type: 'bar', why: 'Averages across two fields: grouped columns, not a trend.' };
     if (ctx.cellMode === 'pctRow') return { type: 'stacked', why: 'Each row is 100%, so the bars stack.' };
-    if (ordered) return { type: 'line', why: 'The rows are an ordered scale, so the shape across them matters.' };
+    /* ── COLUMNS, NOT A LINE ──────────────────────────────────────────────
+       Ellie, of the default this produced: "the data example you picked
+       should be a clustered column not a line or whatever this is."
+
+       It had been a line because an ordered row field makes the shape across
+       the rows meaningful. That is true and it is not what she wants to look
+       at, and she has said the general form of this twice before: "You flipped
+       x and y axis for a few views, I don't want that. Wrap labels, I want
+       column charts." The dropdown still offers Lines. */
+    if (ordered) return { type: 'bar', why: 'The rows are an ordered scale: grouped columns, left to right.' };
     return { type: 'bar', why: 'Two fields, no order: grouped columns.' };
   }
 
@@ -2160,6 +2200,15 @@ window.adminAuthHeaders = function(extra){
     const auto = vizChoice(ctx);
     const picked = sel.value && sel.value !== 'auto' ? sel.value : auto.type;
     why.textContent = sel.value && sel.value !== 'auto' ? 'Your choice' : auto.why;
+    /* ── THE DROPDOWN SAYS WHAT IT PICKED ─────────────────────────────────
+       Ellie: "slicer in the top right should say 'Clustered column' not
+       'Chosen for this cut'."
+
+       "Chosen for this cut" describes the mechanism; she wants the answer. The
+       auto option is relabelled with whatever vizChoice returned, from the same
+       names the other options use so the list reads as one list. */
+    const autoOpt = sel.querySelector('option[value="auto"]');
+    if (autoOpt) autoOpt.textContent = VIZ_NAMES[auto.type] || 'Chosen for this cut';
     if (picked === 'none') { box.hidden = true; return; }
     box.hidden = false;
 
@@ -2208,10 +2257,16 @@ window.adminAuthHeaders = function(extra){
   }
   function updateTitle(rowField,rowSide,colField,colSide,cellMode,n){
     const modeTxt = {count:'Count',pctTotal:'% of total',pctRow:'% of row',pctCol:'% of column',mean:'Average'}[cellMode];
-    let t = modeTxt + ' of ' + labelFor(rowField,rowSide);
+    /* ── THE TITLE IS THE TWO FIELDS ──────────────────────────────────────
+       Ellie: "Chart should be titled '[x] x [y]', remove 'Count of'."
+
+       The measure is still worth saying, so it moves to the line underneath
+       rather than being dropped: a table of percentages that reads as counts
+       is a worse problem than a long title. */
+    let t = labelFor(rowField,rowSide);
     if (colField) t += ' \u00d7 ' + labelFor(colField,colSide);
     $('xp-title').textContent = t;
-    $('xp-meta').textContent = n + ' individuals in this cut \u00b7 ' + CUBE.count + ' total. Cells with n<5 are dimmed.';
+    $('xp-meta').textContent = modeTxt + ' \u00b7 ' + n + ' individuals in this cut \u00b7 ' + CUBE.count + ' total. Cells with n<5 are dimmed.';
   }
   function esc(s){ return String(s).replace(/</g,'&lt;'); }
 
@@ -2409,7 +2464,28 @@ window.adminAuthHeaders = function(extra){
          placed: these tiles count people. -->
     <div class="chart-card kpi-shell">
       <div class="chart-head">
-        <div><div class="chart-title">Types at a glance</div><div class="chart-subtitle">Type Analytics keeps its own filter bar below; a second set here would be two answers to one question</div></div>
+        <!-- ── THE FILTER BAR THAT WAS NOT THERE ─────────────────────────
+             Ellie: "on type and feedback move the filters into the top tile."
+
+             There was nothing to move. `activeFilters()` reads tf-pronouns,
+             tf-rellen and tf-relstat, `fill()` populates them on every load,
+             and not one of those ids existed in the markup: three
+             getElementById calls answering null, so `matchIndiv` was handed
+             an empty filter and every figure on the page has always been the
+             whole population. The subtitle said "Type Analytics keeps its own
+             filter bar below" and there was no filter bar, above or below,
+             which is this file's own rule about prose describing a dead path.
+
+             Every other page's shell carries its filters in the head, so that
+             is where these go. The plumbing was already written and tested
+             against nothing. -->
+        <div><div class="chart-title">Types at a glance</div><div class="chart-subtitle">Everything on this page is cut by these three</div></div>
+        <div class="tile-slicers">
+          <select class="tile-slicer" id="tf-relstat" title="Cut this page by relationship status" aria-label="Relationship status" onchange="renderTypes()"><option value="">Any status</option></select>
+          <select class="tile-slicer" id="tf-rellen" title="Cut this page by time together" aria-label="Time together" onchange="renderTypes()"><option value="">Any length</option></select>
+          <select class="tile-slicer" id="tf-pronouns" title="Cut this page by pronouns" aria-label="Pronouns" onchange="renderTypes()"><option value="">Anyone</option></select>
+          <span id="tf-active" style="font-size:.66rem;color:var(--dim);"></span>
+        </div>
       </div>
       <div class="chart-body">
     <div class="kpi-grid" id="typesum-tiles" style="grid-template-columns:repeat(4,1fr);">
@@ -5227,6 +5303,42 @@ async function loadRealFunnel(orders) {
  */
 function respOf(d){ return (d && d.responses) || {}; }
 
+/**
+ * The same bundle, cut to one segment.
+ *
+ * Ellie, of two at-a-glance tiles: "Data and slicers missing from at a glance."
+ * The data was the payload bug above. The slicers could not have worked before
+ * it either, for the same reason: api/admin-data.js has always sent a cut of
+ * every one of these measures per segment value, under `responsesBySegment`,
+ * and the page was reading none of it.
+ *
+ * An unknown key falls back to the whole population rather than to an empty
+ * object, because a tile drawing dashes looks identical to a measure that is
+ * broken, and this is the one place that difference is invisible.
+ */
+function respSegOf(d, key){
+  if (!key) return respOf(d);
+  const seg = d && d.responsesBySegment;
+  return (seg && seg[key]) || respOf(d);
+}
+
+/**
+ * Wire a tile's slicer and redraw it. The options come from the cube, which is
+ * the only thing that knows which segments exist; the figures come from the
+ * payload, which is the only thing that knows what they are. Shared by the two
+ * at-a-glance tiles so the wiring is written once.
+ */
+async function wireSummarySlicer(selId, redraw){
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  if (!sel.dataset.wired) {
+    sel.dataset.wired = '1';
+    try { const cube = await ensureCube(); populateSlicer(sel, null, cube.rows || [], RESP_SLICE_DIMS); } catch (e) {}
+    sel.onchange = () => { sel.classList.toggle('on', !!sel.value); redraw(); };
+  }
+  sel.classList.toggle('on', !!sel.value);
+}
+
 function shapeResponses(r){
   // Dimensions come from the server rather than being restated here. The old
   // hardcoded list still had 'stress', a dimension folded into Conflict Style
@@ -5977,7 +6089,9 @@ async function renderIntimacySummary() {
   const host = document.getElementById('pisum-tiles');
   if (!host) return;
   const data = await fetchAdminData();
-  const st = respOf(data).intimacyStats;
+  const sel = document.getElementById('slz-pisum');
+  await wireSummarySlicer('slz-pisum', renderIntimacySummary);
+  const st = respSegOf(data, sel ? sel.value : '').intimacyStats;
   const put = (id, v, sub) => { const e = document.getElementById(id); if (e) e.textContent = v;
     const sb = document.getElementById(id + '-sub'); if (sb) sb.textContent = sub; };
   if (!st) {
@@ -6305,7 +6419,14 @@ async function renderExpSummary() {
   const host = document.getElementById('expsum-tiles');
   if (!host) return;
   const data = await fetchAdminData();
-  const couples = Array.isArray(respOf(data).expCoupleDistances) ? respOf(data).expCoupleDistances : [];
+  const sel = document.getElementById('slz-expsum');
+  await wireSummarySlicer('slz-expsum', renderExpSummary);
+  /* One bundle, read once, so the four tiles cannot end up describing two
+     different populations: the distances and the threshold have to come from
+     the same cut or the "aligned" and "misaligned" groups are split by a line
+     computed somewhere else. */
+  const bundle = respSegOf(data, sel ? sel.value : '');
+  const couples = Array.isArray(bundle.expCoupleDistances) ? bundle.expCoupleDistances : [];
   setTileN(host, couples.length);
 
   const mean = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
@@ -6333,7 +6454,7 @@ async function renderExpSummary() {
      notices has drifted because both halves keep producing figures. If the
      server did not send it, these two tiles say so rather than quietly
      splitting the couples at a guess. */
-  const line = (typeof respOf(data).alignedBand === 'number') ? respOf(data).alignedBand : null;
+  const line = (typeof bundle.alignedBand === 'number') ? bundle.alignedBand : null;
   if (line == null) {
     put('es-gap-mis', '\u2014', 'The alignment threshold was not sent');
     put('es-gap-al', '\u2014', 'The alignment threshold was not sent');
@@ -6681,10 +6802,16 @@ function populateSlicer(sel, excludeKey, rows, onlyKeys){
     const f = cube.fields.find(x => x.key === bare);
     return f ? f.section : null;
   };
+  /* ── ONE STEP PER LEVEL ──────────────────────────────────────────────
+     Ellie: "I want the lists indented for differentiation." The same fault as
+     the row and column pickers: the field name sat at two spaces and its own
+     options sat at none, so the rows being chosen from were less indented
+     than the heading above them. Four spaces for an option, two for the field
+     it belongs to, and the section is the optgroup label. */
   const rowsFor = (d) => {
     const cats = orderedCats(d.key, rows);
     if (!cats.length) return '';
-    return cats.map(v => '<option value="' + d.key + '::' + QX_ESC(v) + '">'
+    return cats.map(v => '<option value="' + d.key + '::' + QX_ESC(v) + '">\u00a0\u00a0\u00a0\u00a0'
       + QX_ESC(sliceLabel(d.key, v)) + '</option>').join('');
   };
 
@@ -6711,7 +6838,10 @@ function populateSlicer(sel, excludeKey, rows, onlyKeys){
          own does not say which dimension it belongs to. */
       body += '<option disabled>\u00a0\u00a0' + QX_ESC(d.label) + '</option>' + r;
     });
-    if (body) html += '<optgroup label="\u2588 ' + QX_ESC(sec.label) + '">' + body + '</optgroup>';
+    /* The section's own colour on the optgroup, the same as the row and
+       column pickers. Whether a native popup paints it is the platform's
+       call; the indenting above does not depend on it. */
+    if (body) html += '<optgroup style="color:' + (sec.color || 'inherit') + '" label="\u2588 ' + QX_ESC(sec.label) + '">' + body + '</optgroup>';
   });
   /* Anything the cube does not place keeps working, in a group that says so
      rather than being dropped. */
