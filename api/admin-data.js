@@ -278,9 +278,13 @@ function buildResponseAggregates(profiles, sessions) {
    */
   const inheritance = { shape: { same: 0, sharedToOne: 0, oneToShared: 0, other: 0, unknown: 0 },
     gendered: { keepsSameGenderRole: 0, handsOffSameGenderRole: 0, takesOnOtherGenderRole: 0, handsOffOtherGenderRole: 0, unknown: 0 },
-    people: 0 };
+    byCat: {}, categories: [], people: 0 };
   {
-    const items = RESPONSIBILITY_CATEGORIES.flatMap((c) => (c.items || []).map((item) => ({ key: c.id + '__' + item })));
+    const items = RESPONSIBILITY_CATEGORIES.flatMap((c) => (c.items || []).map((item) => ({ key: c.id + '__' + item, cat: c.id })));
+    /* The categories travel with the counts, in the order the question set
+       lists them, so the chart does not have to know what a category is
+       called or invent an order for them. */
+    inheritance.categories = RESPONSIBILITY_CATEGORIES.map((c) => ({ id: c.id, label: c.label }));
     for (const p of profiles || []) {
       const ans = p.ex2_answers;
       if (!ans || !ans.responsibilities) continue;
@@ -289,6 +293,14 @@ function buildResponseAggregates(profiles, sessions) {
       inheritance.people++;
       for (const k of Object.keys(inheritance.shape)) inheritance.shape[k] += r.shape[k];
       for (const k of Object.keys(inheritance.gendered)) inheritance.gendered[k] += r.gendered[k];
+      for (const [cat, half] of Object.entries(r.byCat || {})) {
+        const into = inheritance.byCat[cat] || (inheritance.byCat[cat] = {
+          shape: { same: 0, sharedToOne: 0, oneToShared: 0, other: 0, unknown: 0 },
+          gendered: { keepsSameGenderRole: 0, handsOffSameGenderRole: 0, takesOnOtherGenderRole: 0, handsOffOtherGenderRole: 0, unknown: 0 },
+        });
+        for (const k of Object.keys(into.shape)) into.shape[k] += half.shape[k];
+        for (const k of Object.keys(into.gendered)) into.gendered[k] += half.gendered[k];
+      }
     }
   }
 

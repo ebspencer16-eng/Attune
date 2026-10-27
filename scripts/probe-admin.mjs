@@ -58,6 +58,7 @@ const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
 const { withEffectivePromoCodes, coupleKeyFromProfiles } = await import(`${ROOT}api/_lib/order-promo.js`);
 const { guardiansOf, CHILDHOOD_ROLES } = await import(`${ROOT}api/_questions.js`);
 const { LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } = await import(`${ROOT}api/_questions.js`);
+const { readInheritance } = await import(`${ROOT}api/_lib/inherited-roles.js`);
 /* The survey, from the module the endpoint sends and the function that builds
    its one per-person list, rather than nine questions typed out here. */
 const { SURVEY_QUESTIONS, TEXT_QUESTIONS, SURVEY_VERSION, rankOptionsFor } = await import(`${ROOT}api/_lib/survey.js`);
@@ -459,16 +460,82 @@ const server = createServer((req, res) => {
       life: Number((((k * 7) % 11) / 20).toFixed(4)),
       resp: Number((((k * 5) % 9) / 20).toFixed(4)),
     }));
-    /* The two inheritance charts. Deliberately with a large "not classified"
-       group, because that is what the real data will look like: the gendered
-       read needs one adult, a gendered role name, a gendered pronoun and an
-       expectation naming a person, and a stub where everything classifies
-       would hide how much of the answer is "we cannot say". */
-    const inheritance = {
-      people: 24,
-      shape: { same: 61, sharedToOne: 28, oneToShared: 44, other: 12, unknown: 35 },
-      gendered: { keepsSameGenderRole: 39, handsOffSameGenderRole: 11, takesOnOtherGenderRole: 22, handsOffOtherGenderRole: 9, unknown: 99 },
-    };
+    /* ── THE TWO INHERITANCE CHARTS, RUN RATHER THAN TYPED ───────────────
+       These were five numbers per chart, chosen by hand. That is a claim
+       about what the classifier does, made without running it, and it cannot
+       produce the per-category split the clustered charts now draw: a stub
+       that invents the totals would have had to invent the breakdown too, and
+       the two would not have added up.
+
+       So the probe builds answers in the shapes the database actually holds,
+       including the OLDER childhood spelling where the adult's own word was
+       stored, and runs readInheritance over them. The large "not classified"
+       group is then a fact about the rule rather than a number I picked: the
+       gendered read needs one adult, a gendered role name, a gendered pronoun
+       and an expectation naming a person. */
+    const inheritance = (() => {
+      const items = RESPONSIBILITY_CATEGORIES.flatMap((c) => (c.items || []).map((item) => ({ key: c.id + '__' + item, cat: c.id })));
+      const out = {
+        people: 0,
+        shape: { same: 0, sharedToOne: 0, oneToShared: 0, other: 0, unknown: 0 },
+        gendered: { keepsSameGenderRole: 0, handsOffSameGenderRole: 0, takesOnOtherGenderRole: 0, handsOffOtherGenderRole: 0, unknown: 0 },
+        byCat: {},
+        categories: RESPONSIBILITY_CATEGORIES.map((c) => ({ id: c.id, label: c.label })),
+      };
+      rows.forEach((r, i) => {
+        const adultSets = [
+          { a: 'Mom', b: 'Dad' }, { a: 'Mom', b: 'Stepdad' },
+          { a: 'Grandma', b: 'Grandpa' }, { a: 'Mom', b: '' }, { a: 'Guardian', b: 'Aunt' },
+        ];
+        const set = adultSets[i % adultSets.length];
+        const ans = { childhoodAdults: set, responsibilities: {}, childhood: {} };
+        items.forEach((it, k) => {
+          const ci = RESPONSIBILITY_CATEGORIES.findIndex((c) => c.id === it.cat);
+          /* Two independent walks. The first version offset the childhood
+             answer by exactly one step from the expectation, which made
+             "same as they saw" impossible and put every gendered case in the
+             one combination the rule cannot classify: 0 and 0 and 800
+             unknown, which reads exactly like the bug this chart was reported
+             for. A fixture whose two halves move together tests one diagonal
+             of the matrix. */
+          const e = (i + k + ci) % 4;
+          const c2 = (i * 3 + k * 7 + ci) % 4;
+          /* What they expect: the four shapes the exercise stores. */
+          ans.responsibilities[it.key] = ['Both of us', 'Primarily mine', 'Primarily theirs', "Doesn't apply to us"][e];
+          /* What they saw. Half in the slot spelling the site writes now and
+             half in the word spelling most stored answers are in, because a
+             reader that only understands one of those is the bug this chart
+             was reported for. */
+          const asWord = (i % 2) === 0;
+          const slot = ['a', 'b', 'both', 'neither'][c2];
+          ans.childhood[it.key] = asWord
+            ? ({ a: set.a, b: set.b || set.a, both: 'Both of them', neither: 'Nobody' })[slot]
+            : slot;
+        });
+        const profile = { name: 'A', partner_name: 'B', pronouns: r.pronouns };
+        /* "Primarily theirs" is not one of the exercise's words; expectedWho
+           reads the partner's NAME, so the stub has to speak the same way the
+           product does. */
+        items.forEach((it) => {
+          if (ans.responsibilities[it.key] === 'Primarily theirs') ans.responsibilities[it.key] = profile.partner_name;
+          if (ans.responsibilities[it.key] === 'Primarily mine') ans.responsibilities[it.key] = profile.name;
+        });
+        const adults = guardiansOf(ans);
+        const got = readInheritance(ans, profile, items, adults);
+        out.people += 1;
+        for (const k of Object.keys(out.shape)) out.shape[k] += got.shape[k];
+        for (const k of Object.keys(out.gendered)) out.gendered[k] += got.gendered[k];
+        for (const [cat, half] of Object.entries(got.byCat || {})) {
+          const into = out.byCat[cat] || (out.byCat[cat] = {
+            shape: { same: 0, sharedToOne: 0, oneToShared: 0, other: 0, unknown: 0 },
+            gendered: { keepsSameGenderRole: 0, handsOffSameGenderRole: 0, takesOnOtherGenderRole: 0, handsOffOtherGenderRole: 0, unknown: 0 },
+          });
+          for (const k of Object.keys(into.shape)) into.shape[k] += half.shape[k];
+          for (const k of Object.keys(into.gendered)) into.gendered[k] += half.gendered[k];
+        }
+      });
+      return out;
+    })();
     /* The coded written answers. Real sentences through the real frame, so
        the picture shows what the matching actually does rather than numbers I
        chose: an uncoded share that is invented tells you nothing about whether

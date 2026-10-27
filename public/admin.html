@@ -511,6 +511,15 @@
 .chart-head:has(.eng-stack) > .eng-stack{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;}
 .eng-stack{max-width:150px;}
 .qrow{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;}
+/* ── THE COUNT VIEW'S CELLS ───────────────────────────────────────────────
+   Five equal columns whatever the tile's width, because the point of the view
+   is that a column means the same thing on every row. */
+.qcount{display:flex;flex:1 1 auto;min-width:0;gap:3px;}
+.qcount-cell{flex:1 1 0;min-width:0;text-align:center;font-family:var(--mono);font-size:.66rem;
+  color:var(--text);padding:.2rem 0;border-radius:4px;cursor:default;}
+.qcount-cell.empty{color:var(--dim);}
+.qcount-head .qcount-cell{background:none;color:var(--dim);font-size:.56rem;letter-spacing:.08em;padding:0;}
+.qcount-head{margin-bottom:.15rem;}
 .qrow-label{flex:0 0 30%;min-width:96px;max-width:300px;font-size:.74rem;color:var(--text);text-align:right;line-height:1.35;overflow-wrap:anywhere;}
 .qrow-body{flex:1 1 auto;min-width:0;}
 .qrow-track{display:flex;align-items:center;gap:.5rem;}
@@ -2572,7 +2581,7 @@ window.adminAuthHeaders = function(extra){
       const data = ctx.rLabels.map(r => valueAt(r, ''));
       cfg = picked === 'pie'
         ? { type: 'pie', data: { labels: ctx.rLabels, datasets: [{ data, backgroundColor: PAL, borderColor: '#fff', borderWidth: 3 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, font: { size: 10 } } } } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }
         : { type: picked === 'line' ? 'line' : 'bar',
             data: { labels: ctx.rLabels, datasets: [{ data, backgroundColor: PAL[0], borderColor: PAL[0], borderRadius: 4, maxBarThickness: 46, tension: .3 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
@@ -2587,7 +2596,7 @@ window.adminAuthHeaders = function(extra){
       cfg = { type: picked === 'line' ? 'line' : 'bar',
         data: { labels: ctx.rLabels, datasets: sets },
         options: { responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, font: { size: 10 } } } },
+          plugins: { legend: { position: 'bottom' } },
           scales: { y: { beginAtZero: true, stacked, grid: { display: false }, ticks: { font: { size: 10 } } },
                     x: { stacked, grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 } } } } };
     }
@@ -3241,7 +3250,7 @@ function drawFunnel() {
         };
       }),
     },
-    options: { plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10 } } },
+    options: { plugins: { legend: { position: 'bottom' } },
       scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
   });
 }
@@ -3263,7 +3272,7 @@ function drawAcquisition() {
   mkChart(document.getElementById('chart-eng-acq'), {
     type: 'line',
     data: { labels: a.months || [], datasets: sets },
-    options: { plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10 } } },
+    options: { plugins: { legend: { position: 'bottom' } },
       scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
   });
   /* ── THE CAVEAT GOES IN THE SUBTITLE, NOT BESIDE THE TILE ─────────────
@@ -3566,7 +3575,7 @@ function drawTimeTile(canvasId, subId, measure, unit, shape) {
       datasets: v.labels && v.labels.length ? datasets : [{ label: v.axis, data: [0], backgroundColor: '#E6ECF6' }],
     },
     options: {
-      plugins: { legend: { display: datasets.length > 1, position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10 } } },
+      plugins: { legend: { display: datasets.length > 1, position: 'bottom' } },
       scales: {
         x: { grid: { display: false }, stacked: !!v.stacked },
         y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 }, beginAtZero: true, max: v.max, stacked: !!v.stacked },
@@ -6645,7 +6654,7 @@ async function renderIntimacySummary() {
           { label: 'Regularly intimate', data: rows.map(r => pct(r.intimate)), backgroundColor: '#B5546E', borderRadius: 4, maxBarThickness: 22 },
         ] },
         options: { responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10, font: { size: 10 } } },
+          plugins: { legend: { position: 'bottom' },
             tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + c.parsed.y + '% along' } } },
           scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { display: false } },
                     x: { ticks: { font: { size: 9 } }, grid: { display: false } } } } });
@@ -6803,7 +6812,7 @@ async function renderConflictPage() {
     mkChart(el, { type,
       data: { labels, datasets: [{ data, backgroundColor: palette, borderColor: '#FFFFFF', borderWidth: type === 'pie' ? 3 : 0, borderRadius: type === 'bar' ? 4 : 0, maxBarThickness: 46 }] },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: type === 'pie' ? { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10, font: { size: 10 } } } : { display: false },
+        plugins: { legend: type === 'pie' ? { position: 'bottom' } : { display: false },
           tooltip: { callbacks: { label: c2 => ' ' + c2.parsed + ' of ' + valuesOf(rows, id).length } } },
         ...(type === 'bar' ? { scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } }, x: { ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 }, grid: { display: false } } } } : { cutout: 0 }) } });
   };
@@ -6876,31 +6885,66 @@ async function renderInheritance() {
   if (genEl) setTileN(genEl, inh.people || 0);
 
   const GREY = '#9AA3B2';
-  const bar = (el, rows) => { if (!el) return; mkChart(el, {
-    type: 'bar',
-    data: { labels: rows.map(r => r[0]), datasets: [{ data: rows.map(r => r[1]), backgroundColor: rows.map(r => r[2]), borderRadius: 4, maxBarThickness: 46 }] },
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + c.parsed.y + ' answer' + (c.parsed.y === 1 ? '' : 's') } } },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } },
-                x: { ticks: { font: { size: 9 } }, grid: { display: false } } } },
-  }); };
+  /**
+   * ── A CLUSTER PER CATEGORY ────────────────────────────────────────────
+   * Ellie: "Make it a clustered column per expectations category."
+   *
+   * One bar per outcome over every item at once says whether arrangements
+   * changed and not where, and where is the interesting half: who cooks and
+   * who earns are different questions about the same couple. The categories
+   * and their order come with the payload, from the question set, so this
+   * does not keep its own list of what a category is called.
+   *
+   * A payload with no per-category split draws one cluster of everybody,
+   * which is the old chart, rather than an empty tile.
+   */
+  const cats = (inh.categories && inh.categories.length)
+    ? inh.categories
+    : [{ id: '__all__', label: 'All categories' }];
+  const byCat = inh.byCat || {};
+  const cell = (half, catId, key) => {
+    if (catId === '__all__') return (inh[half] || {})[key] || 0;
+    return (((byCat[catId] || {})[half]) || {})[key] || 0;
+  };
+  const clustered = (el, half, series) => {
+    if (!el) return;
+    mkChart(el, {
+      type: 'bar',
+      data: {
+        labels: cats.map((c) => c.label),
+        datasets: series.map(([label, key, color]) => ({
+          label, backgroundColor: color, borderRadius: 4, maxBarThickness: 16,
+          data: cats.map((c) => cell(half, c.id, key)),
+        })),
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: (c) => ' ' + c.dataset.label + ': ' + c.parsed.y + ' answer' + (c.parsed.y === 1 ? '' : 's') } },
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } },
+          x: { ticks: { font: { size: 9 } }, grid: { display: false } },
+        },
+      },
+    });
+  };
 
-  const sh = inh.shape || {};
-  bar(shapeEl, [
-    ['Same as they saw', sh.same || 0, '#5C6DDA'],
-    ['Shared, now one', sh.sharedToOne || 0, '#C55329'],
-    ['One, now shared', sh.oneToShared || 0, '#34D399'],
-    ['Other change', sh.other || 0, '#FBBF24'],
-    ['Not classified', sh.unknown || 0, GREY],
+  clustered(shapeEl, 'shape', [
+    ['Same as they saw', 'same', '#5C6DDA'],
+    ['Shared, now one', 'sharedToOne', '#C55329'],
+    ['One, now shared', 'oneToShared', '#34D399'],
+    ['Other change', 'other', '#FBBF24'],
+    ['Not classified', 'unknown', GREY],
   ]);
 
-  const g = inh.gendered || {};
-  bar(genEl, [
-    ['Keeps their own gender\u2019s role', g.keepsSameGenderRole || 0, '#5C6DDA'],
-    ['Hands that role over', g.handsOffSameGenderRole || 0, '#C55329'],
-    ['Takes on the other gender\u2019s role', g.takesOnOtherGenderRole || 0, '#34D399'],
-    ['Leaves that one to their partner', g.handsOffOtherGenderRole || 0, '#FBBF24'],
-    ['Not classified', g.unknown || 0, GREY],
+  clustered(genEl, 'gendered', [
+    ['Keeps their own gender\u2019s role', 'keepsSameGenderRole', '#5C6DDA'],
+    ['Hands that role over', 'handsOffSameGenderRole', '#C55329'],
+    ['Takes on the other gender\u2019s role', 'takesOnOtherGenderRole', '#34D399'],
+    ['Leaves that one to their partner', 'handsOffOtherGenderRole', '#FBBF24'],
+    ['Not classified', 'unknown', GREY],
   ]);
 }
 
@@ -8100,7 +8144,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
            something else was the same section with two names. */
         '<div style="font-size:.74rem;font-weight:700;color:var(--text);">All questions <span style="font-weight:400;color:var(--muted);">(<span id="' + containerId + '-distn">n=' + rows.length + '</span>)</span></div>' +
         '<div style="display:flex;gap:.4rem;align-items:center;">' +
-          (_hasSlider ? '<select class="tile-slicer" id="' + containerId + '-distmode" title="Mean position or full breakdown"><option value="mean">Mean</option><option value="breakdown">Breakdown</option></select>' : '') +
+          (_hasSlider ? '<select class="tile-slicer" id="' + containerId + '-distmode" title="Mean position, full breakdown, or how many people sat at each step"><option value="mean">Mean</option><option value="breakdown">Breakdown</option><option value="count">Count</option></select>' : '') +
           '<select class="tile-slicer" id="' + containerId + '-distslz" title="Cut these distributions by a segment"><option value="">Everyone</option></select>' +
         '</div>' +
       '</div>' +
@@ -8210,7 +8254,9 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
   /* Every All questions list goes through here, so the headings cannot appear
      in one view of a page and not the other. */
   const rowsFor = (fields, drows, sliced) => {
-    let last = null, out = '';
+    let last = null;
+    let out = (QX_MODE[containerId] === 'count' && fields.some((f) => f.kind === 'scale' || f.ordinal))
+      ? countHead() : '';
     for (const f of fields) {
       const c = catOf(f);
       if (c && c !== last) out += catHead(c);
@@ -8360,7 +8406,73 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
         '<span class="qrow-pole hi">' + hiPre + hi + '</span>' +
       '</div>');
   };
-  const measureBar = (f, drows, sliced) => (QX_MODE[containerId] === 'mean' && (f.kind === 'scale' || f.ordinal)) ? meanBar(f, drows, sliced) : barFor(f, drows);
+  /**
+   * ── COUNT: HOW MANY PEOPLE SAT AT EACH STEP ───────────────────────────
+   * Ellie: "A third option on the mean/breakdown dropdown, Count, drawing a
+   * table with columns 1-5 and the poles either side of each row."
+   *
+   * Mean says where the middle is and hides the shape; Breakdown draws the
+   * shape and gives no numbers. This is the numbers: five cells, shaded by
+   * their share so the shape is still visible, with the question's own poles
+   * either side so a column means something without a key.
+   *
+   * ── WHY A POSITION AND NOT AN OPTION INDEX ────────────────────────────
+   * The column is where an answer sits between the two poles, through the
+   * same posOf every other row uses. On a one-to-five question that is the
+   * score itself. On "Me / Both / My partner" it puts Both in the middle
+   * column where it belongs, which an index would not: index 1 of 3 would
+   * draw the midpoint next to the low pole.
+   *
+   * A question with no order has no step to count, so it keeps its breakdown
+   * bar, which is the same rule measureBar already applies to the mean.
+   */
+  const countCells = (f, drows) => {
+    const cells = [0, 0, 0, 0, 0];
+    let n = 0;
+    drows.forEach((r) => {
+      const p = posOf(f, r[f.key]);
+      if (p == null) return;
+      cells[Math.min(4, Math.max(0, Math.round(p * 4)))] += 1;
+      n += 1;
+    });
+    return { cells, n };
+  };
+  const countRow = (f, drows) => {
+    const { cells, n } = countCells(f, drows);
+    const max = Math.max(1, ...cells);
+    const isScale = f.kind === 'scale';
+    const lo = QX_ESC(f.poleLow || 'low'), hi = QX_ESC(f.poleHigh || 'high');
+    const body = cells.map((c, i) => {
+      const pct = n ? Math.round((c / n) * 100) : 0;
+      const tip = 'Step ' + (i + 1) + ' of 5 \u2014 ' + c + (c === 1 ? ' person' : ' people')
+        + (n ? ' \u00b7 ' + pct + '% of ' + n : '');
+      /* Shaded by share, and never darker than its own text can sit on. */
+      const bg = c ? hexShade(theme, 0.08 + 0.5 * (c / max)) : 'var(--surface)';
+      return '<span class="qcount-cell' + (c ? '' : ' empty') + '" data-tip="' + QX_ESC(tip)
+        + '" style="background:' + bg + ';">' + (c || '\u2013') + '</span>';
+    }).join('');
+    return qRow(QX_ESC(qTextOf(f)),
+      '<div class="qrow-track">' +
+        '<span class="qrow-pole lo">' + (isScale ? '1 \u00b7 ' : '') + lo + '</span>' +
+        '<div class="qcount">' + body + '</div>' +
+        '<span class="qrow-pole hi">' + (isScale ? '5 \u00b7 ' : '') + hi + '</span>' +
+      '</div>');
+  };
+  /* The numbers over the columns, once, with the label and pole columns left
+     empty so it lines up with every row under it. */
+  const countHead = () =>
+    '<div class="qrow qcount-head"><div class="qrow-label"></div><div class="qrow-body">' +
+      '<div class="qrow-track"><span class="qrow-pole lo"></span>' +
+      '<div class="qcount">' + [1, 2, 3, 4, 5].map((i) => '<span class="qcount-cell">' + i + '</span>').join('') + '</div>' +
+      '<span class="qrow-pole hi"></span></div></div></div>';
+  const measureBar = (f, drows, sliced) => {
+    const mode = QX_MODE[containerId];
+    const poled = f.kind === 'scale' || f.ordinal;
+    if (!poled) return barFor(f, drows);
+    if (mode === 'count') return countRow(f, drows);
+    if (mode === 'mean') return meanBar(f, drows, sliced);
+    return barFor(f, drows);
+  };
   /* The two-dot key, which depends only on whether a cut is on. It was a
      const inside renderDist, so the high block's own draw could not reach
      it and threw ReferenceError the moment that tile got its own slicer.
@@ -8405,7 +8517,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     if (highBox && !document.getElementById(containerId + '-highslz')) highBox.innerHTML = renderHighHtml(drows, sliced);
 
     distEl.innerHTML =
-      (QX_MODE[containerId] === 'mean' ? '' : scaleLegend) + (highBox ? '' : meanKey) +
+      (QX_MODE[containerId] === 'breakdown' ? scaleLegend : '') + (highBox ? '' : meanKey) +
       (highFields.length && !highBox ? sectionHead('High-level views') + rowsFor(highFields, drows, sliced) + '<div style="height:1.1rem;"></div>' : '') +
       /* No inner "All questions" head: the tile is called that now, and a
          section head repeating its own tile's title is a line that says
@@ -8785,6 +8897,18 @@ function mkChart(el, cfg) {
       const cat = o.scales[catKey] = o.scales[catKey] || {};
       cat.grid = Object.assign({ display: false, drawBorder: false }, cat.grid);
     }
+  }
+  /* ── ONE LEGEND STYLE, NOT SEVEN ───────────────────────────────────────
+     Ellie: "Line chart legends become a dash, not an outlined box." That was
+     done by writing the same five options into seven tiles, in three slightly
+     different spellings, which is the shape of bug this codebase is organised
+     against: the eighth chart gets a box and nobody can say why.
+
+     A chart that has asked for something keeps it, because Object.assign puts
+     the tile's own answer last. A chart with the legend off is untouched. */
+  if (!o.plugins.legend || o.plugins.legend.display !== false) {
+    const lg = o.plugins.legend = Object.assign({ position: 'bottom' }, o.plugins.legend);
+    lg.labels = Object.assign({ usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10, font: { size: 10 } }, lg.labels);
   }
   flatTicks(cfg);
   /* ── NO COLUMN SAYS ITS OWN NUMBER ANY MORE ─────────────────────────────

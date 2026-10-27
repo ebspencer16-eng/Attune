@@ -116,8 +116,30 @@ export function readInheritance(answers, profile, items, adults) {
 
   const shape = { same: 0, sharedToOne: 0, oneToShared: 0, other: 0, unknown: 0 };
   const gendered = { keepsSameGenderRole: 0, handsOffSameGenderRole: 0, takesOnOtherGenderRole: 0, handsOffOtherGenderRole: 0, unknown: 0 };
+  /**
+   * ── THE SAME TALLY, SPLIT BY CATEGORY ─────────────────────────────────
+   * Ellie: "Make it a clustered column per expectations category."
+   *
+   * One bar for "shared, now one" over every item at once answers whether
+   * arrangements changed and not WHERE, and where is the whole interest: who
+   * cooks and who earns are different questions about the same couple.
+   *
+   * Counted in the same pass rather than by calling this function once per
+   * category, so the totals and the per-category figures cannot disagree: a
+   * second pass with a filtered item list is a second implementation of the
+   * classifier's input. An item with no category still lands in the totals.
+   */
+  const byCat = {};
+  const bump = (cat, half, k) => {
+    if (!cat) return;
+    const c = byCat[cat] || (byCat[cat] = {
+      shape: { same: 0, sharedToOne: 0, oneToShared: 0, other: 0, unknown: 0 },
+      gendered: { keepsSameGenderRole: 0, handsOffSameGenderRole: 0, takesOnOtherGenderRole: 0, handsOffOtherGenderRole: 0, unknown: 0 },
+    });
+    c[half][k] += 1;
+  };
 
-  for (const { key } of items) {
+  for (const { key, cat } of items) {
     const exp = answers?.responsibilities?.[key];
     /* Through childhoodSlot, because most answers in the database are in the
        older spelling: the adult's own word rather than the slot. See the note
@@ -125,11 +147,13 @@ export function readInheritance(answers, profile, items, adults) {
     const slot = childhoodSlot(answers?.childhood?.[key], adults);
 
     const a = experiencedShape(slot), b = expectedShape(exp, selfName, partnerName);
-    if (a == null || b == null) shape.unknown++;
-    else if (a === b) shape.same++;
-    else if (a === 'shared' && b === 'one') shape.sharedToOne++;
-    else if (a === 'one' && b === 'shared') shape.oneToShared++;
-    else shape.other++;
+    const shapeKey = (a == null || b == null) ? 'unknown'
+      : a === b ? 'same'
+      : (a === 'shared' && b === 'one') ? 'sharedToOne'
+      : (a === 'one' && b === 'shared') ? 'oneToShared'
+      : 'other';
+    shape[shapeKey]++;
+    bump(cat, 'shape', shapeKey);
 
     /* The gendered half only has something to say when ONE adult did it, that
        adult's role implies a gender, the person's pronouns imply one, and the
@@ -138,14 +162,16 @@ export function readInheritance(answers, profile, items, adults) {
     const who = expectedWho(exp, selfName, partnerName);
     const role = (slot === 'a' || slot === 'yes') ? adults?.a : slot === 'b' ? adults?.b : null;
     const roleGender = role ? ROLE_GENDER[canonicalGuardian(role)] ?? null : null;
-    if (!who || !roleGender || !mine) { gendered.unknown++; continue; }
+    if (!who || !roleGender || !mine) { gendered.unknown++; bump(cat, 'gendered', 'unknown'); continue; }
     const sameGender = roleGender === mine;
-    if (sameGender && who === 'self') gendered.keepsSameGenderRole++;
-    else if (sameGender && who === 'partner') gendered.handsOffSameGenderRole++;
-    else if (!sameGender && who === 'self') gendered.takesOnOtherGenderRole++;
-    else gendered.handsOffOtherGenderRole++;
+    const genKey = (sameGender && who === 'self') ? 'keepsSameGenderRole'
+      : (sameGender && who === 'partner') ? 'handsOffSameGenderRole'
+      : (!sameGender && who === 'self') ? 'takesOnOtherGenderRole'
+      : 'handsOffOtherGenderRole';
+    gendered[genKey]++;
+    bump(cat, 'gendered', genKey);
   }
-  return { shape, gendered };
+  return { shape, gendered, byCat };
 }
 
 /**
