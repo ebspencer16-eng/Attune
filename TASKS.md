@@ -43,42 +43,16 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A99 | **Dashboard: the three right-hand charts are taller than their left-hand pair.** Package mix matched to revenue over time, and the same for the other two. |
-| A100 | **Dashboard: drop "Needs Part 2 answers, so the denominator is smaller"** from the understanding tile. |
-| A101 | **Order Details: sorting the order column by date is wrong.** Fixing it, then driving every sortable column in the admin and reporting which were right. |
-| A102 | **Order Details: is the Waiting on a partner tile still needed?** It was built for Rebecca. Checking whether the path that created her case can still happen before removing anything. |
-| A103 | **Order Details: the promo table Uses column becomes Max uses.** |
 | A104 | **Order Details: the orders table gets the white header the promo table has**, titled All orders, with the filters in it. |
-| A105 | **Package Mix: add-on order becomes Reflection, Intimacy, Conflict, Workbook, Budget, Checklist.** |
-| A106 | **Package Mix: the three exercise columns in add-on attachment become blues and indigos**, the three resources become other colours. |
 | A107 | **Package Mix: package split over time and revenue contribution side by side**, both line charts with four lines. |
-| A108 | **Responses: leaving the page and coming back should return to Communication** and it does not. |
-| A109 | **Comms: self v partner view gap has no slicer.** |
-| A110 | **Expectations: the at-a-glance tile has no timeframe slicer.** |
-| A111 | **Expectations: rename to avg gap among misaligned couples and avg gap among aligned couples.** |
-| A112 | **Expectations: no data for aligned couples, while the dashboard says 3 of 6 are aligned.** Two figures disagreeing is a bug in one of them; finding which. |
-| A113 | **Expectations: what people expect and inherited roles both read Not classified.** Chasing why nothing classifies, then making it a clustered column per category. |
+| A113 | **Inherited roles classify now; the chart shape is still to come.** The classifier only understood the newer stored spelling, so every answer resolved to null: on the demo couple it went from 20 of 20 unknown to 10 same, 5 one-to-shared, 5 unknown. Next is the clustered column per expectations category. |
 | A114 | **Expectations: All questions rows still carry the section title.** Dropping it and adding eyebrow headings with the questions under them. |
-| A115 | **Rel Relf: swap what people wrote about with qualities most admired**, for spacing. |
 | A116 | **All questions everywhere: a third option on the mean/breakdown dropdown, Count**, drawing a table with columns 1-5 and the poles either side of each row. |
-| A117 | **Conflict: the All questions figures look wrong.** You do not believe everyone said Often, and nor do I. Checking that section against the stored answers, then sweeping the other pages for the same fault. |
-| A118 | **Conflict: when it went better than expected and what they appreciate become full-width cards, stacked**, so the column labels are readable. |
-| A119 | **Every chart in admin loses its y axis and gridlines**, like what lands best from a partner. |
-| A120 | **Conflict: in the middle of a disagreement and when it touches something old are empty** and people have answered them. |
-| A121 | **Engagement: line chart legends become a dash, not an outlined box.** |
-| A122 | **Engagement: the three time-per-page charts should scale their axis to their own data**, not share one maximum. |
-| A123 | **Engagement: marketing page labels become Home, Our Purpose, Packages, Registry, In Practice, FAQs.** |
-| A124 | **Engagement: exercise and results labels abbreviate** to CS, E, RR, PIE, CP and H, CT, CS, E, RR, PIE, CP, WN. |
-| A125 | **Engagement: choosing a pill on detailed results pages changes other tiles.** It should change only its own. |
-| A126 | **Engagement: notes by section uses the same abbreviations.** |
-| A127 | **Engagement: stack the slicers on notes by section and notes by page** so the titles are not squeezed. |
-| A128 | **Engagement: the not-measured message sits flush against the tile edge.** |
 | A129 | **UX views: the Conflict Patterns demo has no exercises section.** |
 | A130 | **Feedback: charts need an x axis line.** |
 | A131 | **Feedback: order the aspects becomes a bar chart** so every label is readable. |
 | A132 | **Slicers: only offer options that have data for that tile**, the way the testimonials filter does. |
-| A133 | **Slicers: the whole taxonomy you wrote out, as a drill-down.** High level rows with arrows, a back arrow top left, and your groupings for all six exercises. The same rows become the Explore dropdowns, plus one All questions row per exercise that opens the full list. |
-| A134 | **Survey: a Back to dashboard button on the completion screen.** |
+| A133 | **Slicers: the whole taxonomy you wrote out, as a drill-down.** High level rows with arrows, a back arrow top left, and your groupings for all six exercises. The same rows become the Explore dropdowns, plus one All questions row per exercise that opens the full list. The largest of these; it is last on purpose. |
 
 ## 3. For you to review
 
@@ -87,6 +61,32 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A117 | **You were right about All questions, and the cause was five sliders pinned to their right-hand end.** The admin draws the mean at val times 100 per cent, so val has to be a fraction, and five of the thirty-nine conflict fields sent the option's own number, 0 to 4. Everything above 1 clamps to the far right, and the far right of a horseman row says Often. |
+| A120 | **The two empty conflict tiles were three forced-choice questions stored three different ways.** The site stored A and B, the app stored 0 and 1, the admin read a and b. Anyone who answered that exercise in the app also got nothing for those three on their own results page. The reader understands all three spellings, because stored answers are never rewritten. |
+| A112 | **Those two figures were never in disagreement: they are two different measures.** The dashboard's 3 of 6 aligned is a communication figure, and the Expectations gap tiles split couples by expectations distance. Both tiles now say which alignment they mean, which was the whole of your question. |
+| A111 | **The two Expectations tiles take your wording**: avg gap among misaligned couples, avg gap among aligned couples. |
+| A119 | **Every chart in the admin has lost its value axis and its gridlines**, as one rule in the chart builder rather than a dozen per-tile copies. The category axis keeps its names, and a pie, doughnut or radar has no cartesian axis so it does not get one. |
+| A122 | **The three time-per-page charts scale to their own data.** One ceiling was computed across all five and handed to each, so a tall column anywhere flattened the rest. This reverses your earlier "five time charts to one height"; both quotes are beside the code, because that still holds between the web and app lines inside one tile. |
+| A125 | **A pill on a detailed results page changes only its own tile now.** Same cause as A122: the shared ceiling meant one pill rescaled four tiles it had nothing to do with. |
+| A123 | **Marketing pages are named, not pathed**: Home, Our Purpose, Packages, Registry, In Practice, FAQs. The label was the path because nothing had ever given it anything else. |
+| A124 | **Exercise and results labels abbreviate, derived from the names the product already uses rather than typed into a map.** That gives your list exactly for seven of eight. What Comes Next initials to WCN where you wrote WN; say the word and I will override that one. |
+| A126 | **Notes by section uses the same abbreviations**, taken from the groups the results chart already builds, so the two tiles cannot disagree about what a section is called. |
+| A101 | **Sorting by date sorted by weekday name.** That column's sort key is a Date object, and typeof a Date is 'object', so the comparator fell past its numeric branch and compared "Fri Oct 02 2026" against "Mon Sep 28 2026". Every sortable column in the admin was driven and read back; the Date was the only object. |
+| A105 | **Add-on order is Reflection, Intimacy, Conflict, Workbook, Budget, Checklist, and two add-ons were missing from that chart altogether.** Conflict Patterns at $40 and the Merging Lives Checklist never appeared in the one view about what people buy alongside a package: two copies of the list, and the first was dead. |
+| A106 | **The three exercise columns in add-on attachment are blues and indigos**, the three resources are other colours. |
+| A110 | **Expectations at-a-glance has its timeframe slicer, and the couples it averages now carry a date so the control can actually cut.** The date is the later of the two partners' completion dates, because a couple's distance does not exist until both halves are in. 74 per cent all time, 75 at 30 days. |
+| A109 | **Self v partner view gap has a slicer.** It never had one because that tile builds its own head instead of using the shared chart head. |
+| A108 | **Responses opens on Communication again**, rather than wherever you last were. |
+| A99 | **The paired dashboard tiles are one height.** The canvases were already identical; the cards were not, because the right-hand heads wrap to a second line and each card was sized to itself. |
+| A118 | **The two coded conflict charts are full width and stacked**, so the column labels are readable. |
+| A115 | **Relationship Reflection: what people wrote about and qualities most admired are swapped.** |
+| A121 | **Line chart legends are a dash, not an outlined box.** |
+| A127 | **The slicers on notes by section and notes by page are stacked**, so the titles are not squeezed. |
+| A128 | **"Not measured" has a buffer under it** instead of sitting flush against the tile edge. |
+| A100 | **The denominator line is gone from the understanding tile.** |
+| A103 | **The promo table's Uses column is Max uses.** |
+| A102 | **Keep the Waiting on a partner tile.** The app can accept an invite code and has never been able to send one, so a buyer who sets up in the app still ends with a code and no email sent. That is the path that made Rebecca's case and it is still open. |
+| A134 | **The survey's completion screen has a Back to dashboard button.** The words are in the copy module, so an edit of yours reaches them. |
 | V1 | **Site and app match, and here is what that rests on.** Both are current: the app bundle on production was published after the last app commit with nothing since, and the live website bundle contains the newest commit, checked with a string that commit removed and a control string that stayed. Scoring is identical over 400 answer sets. All 29 results sections render on the site and all 29 have an app screen. Every sentence in the site's results is reachable by the app. Plans, next steps, budget, section names, category colours and 1,138 links are each held by a gate. |
 | V2 | **Four sentences are on the site and deliberately not in the app**, and I read all four: the two that explain the inline storycard reel, the couple-type fallback, and the download fallback. Each describes something the app does a different way, so copying them over would describe a mechanism that is not there. |
 | V3 | **What I did not prove.** Nothing renders the same couple on both surfaces and compares the result. Every check above compares a rule or a list, not two pictures. Building that needs the app served through its web build, which is a real piece of work. Say the word if you want it. |
