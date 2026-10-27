@@ -41,7 +41,44 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| A99 | **Dashboard: the three right-hand charts are taller than their left-hand pair.** Package mix matched to revenue over time, and the same for the other two. |
+| A100 | **Dashboard: drop "Needs Part 2 answers, so the denominator is smaller"** from the understanding tile. |
+| A101 | **Order Details: sorting the order column by date is wrong.** Fixing it, then driving every sortable column in the admin and reporting which were right. |
+| A102 | **Order Details: is the Waiting on a partner tile still needed?** It was built for Rebecca. Checking whether the path that created her case can still happen before removing anything. |
+| A103 | **Order Details: the promo table Uses column becomes Max uses.** |
+| A104 | **Order Details: the orders table gets the white header the promo table has**, titled All orders, with the filters in it. |
+| A105 | **Package Mix: add-on order becomes Reflection, Intimacy, Conflict, Workbook, Budget, Checklist.** |
+| A106 | **Package Mix: the three exercise columns in add-on attachment become blues and indigos**, the three resources become other colours. |
+| A107 | **Package Mix: package split over time and revenue contribution side by side**, both line charts with four lines. |
+| A108 | **Responses: leaving the page and coming back should return to Communication** and it does not. |
+| A109 | **Comms: self v partner view gap has no slicer.** |
+| A110 | **Expectations: the at-a-glance tile has no timeframe slicer.** |
+| A111 | **Expectations: rename to avg gap among misaligned couples and avg gap among aligned couples.** |
+| A112 | **Expectations: no data for aligned couples, while the dashboard says 3 of 6 are aligned.** Two figures disagreeing is a bug in one of them; finding which. |
+| A113 | **Expectations: what people expect and inherited roles both read Not classified.** Chasing why nothing classifies, then making it a clustered column per category. |
+| A114 | **Expectations: All questions rows still carry the section title.** Dropping it and adding eyebrow headings with the questions under them. |
+| A115 | **Rel Relf: swap what people wrote about with qualities most admired**, for spacing. |
+| A116 | **All questions everywhere: a third option on the mean/breakdown dropdown, Count**, drawing a table with columns 1-5 and the poles either side of each row. |
+| A117 | **Conflict: the All questions figures look wrong.** You do not believe everyone said Often, and nor do I. Checking that section against the stored answers, then sweeping the other pages for the same fault. |
+| A118 | **Conflict: when it went better than expected and what they appreciate become full-width cards, stacked**, so the column labels are readable. |
+| A119 | **Every chart in admin loses its y axis and gridlines**, like what lands best from a partner. |
+| A120 | **Conflict: in the middle of a disagreement and when it touches something old are empty** and people have answered them. |
+| A121 | **Engagement: line chart legends become a dash, not an outlined box.** |
+| A122 | **Engagement: the three time-per-page charts should scale their axis to their own data**, not share one maximum. |
+| A123 | **Engagement: marketing page labels become Home, Our Purpose, Packages, Registry, In Practice, FAQs.** |
+| A124 | **Engagement: exercise and results labels abbreviate** to CS, E, RR, PIE, CP and H, CT, CS, E, RR, PIE, CP, WN. |
+| A125 | **Engagement: choosing a pill on detailed results pages changes other tiles.** It should change only its own. |
+| A126 | **Engagement: notes by section uses the same abbreviations.** |
+| A127 | **Engagement: stack the slicers on notes by section and notes by page** so the titles are not squeezed. |
+| A128 | **Engagement: the not-measured message sits flush against the tile edge.** |
+| A129 | **UX views: the Conflict Patterns demo has no exercises section.** |
+| A130 | **Feedback: charts need an x axis line.** |
+| A131 | **Feedback: order the aspects becomes a bar chart** so every label is readable. |
+| A132 | **Slicers: only offer options that have data for that tile**, the way the testimonials filter does. |
+| A133 | **Slicers: the whole taxonomy you wrote out, as a drill-down.** High level rows with arrows, a back arrow top left, and your groupings for all six exercises. The same rows become the Explore dropdowns, plus one All questions row per exercise that opens the full list. |
+| A134 | **Survey: a Back to dashboard button on the completion screen.** |
 
 ## 3. For you to review
 
