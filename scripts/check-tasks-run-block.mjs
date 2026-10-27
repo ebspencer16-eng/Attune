@@ -60,7 +60,19 @@ if (!runHead) {
 } else {
   const after = doc.slice(runHead.index);
   const stop = after.search(/^## /m);
-  const run = stop > 0 ? after.slice(0, stop) : after;
+  const runWhole = stop > 0 ? after.slice(0, stop) : after;
+  /* ── THE IDS ARE IN THE PROSE, NOT IN THE SQL ──────────────────────────
+     The fenced blocks are pasted straight out of the migrations, and the id
+     matcher reads anything shaped like one. `to_char(created_at, 'YYYY-MM-DD
+     HH24:MI')` has `HH24` in it, which is a perfectly good row id as far as a
+     regular expression is concerned, and the gate reported that the run
+     section named a row that does not exist.
+
+     Same family as every other finding this week: matching a name without
+     asking where it is. A row id introduces a block, so it is always in the
+     prose above the fence and never inside it. Blanked rather than cut so the
+     line numbers in any later message still point at the file. */
+  const run = runWhole.replace(/```sql[\s\S]*?```/g, (m) => m.replace(/[^\n]/g, ' '));
 
   // 1 and 2: every id named in the run section.
   const named = [...new Set([...run.matchAll(/\b([A-Z]{1,3}\d+)\b/g)].map((m) => m[1]))];

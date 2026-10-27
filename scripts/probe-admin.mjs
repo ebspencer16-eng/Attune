@@ -449,6 +449,82 @@ const server = createServer((req, res) => {
     res.end(JSON.stringify({ ok: true, orders, beta_codes, expCoupleDistances, alignedBand: 0.2, inheritance, reflectionCodes, conflictCodes, repairRank, intimacyStats, responses: payload }));
     return;
   }
+  /* ── ENGAGEMENT ─────────────────────────────────────────────────────────
+     Unstubbed, so the page read d.headlines.siteVisits off a payload with no
+     headlines and threw on every load. Shaped to match api/admin-engagement.js
+     exactly: `headline()` returns { available, value, prev, change } and
+     `clustered()` returns { available, labels, site[], app[], n, rows[] }. A
+     stub that guesses at those is a stub that reports a working page as broken
+     and a broken one as working. */
+  if (url.pathname.startsWith('/api/admin-engagement')) {
+    const MONTHS = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(); d.setMonth(d.getMonth() - (11 - i));
+      return d.toLocaleDateString('en-US', { month: 'short' });
+    });
+    const headline = (value, prev) => ({ available: true, value, prev, change: prev > 0 ? Math.round(((value - prev) / prev) * 100) : null });
+    const unavailable = (why) => ({ available: false, why });
+    const clustered = (labels, seedSite, seedApp) => ({
+      available: true, labels,
+      site: labels.map((_, i) => seedSite ? Math.round(40 + ((i * 37) % 160)) : 0),
+      app: labels.map((_, i) => seedApp ? Math.round(30 + ((i * 53) % 220)) : 0),
+      n: labels.length * 6,
+      rows: labels.map((label, i) => ({ key: 'k' + i, label,
+        site: { seconds: seedSite ? Math.round(40 + ((i * 37) % 160)) : 0, n: seedSite ? 6 : 0 },
+        app: { seconds: seedApp ? Math.round(30 + ((i * 53) % 220)) : 0, n: seedApp ? 6 : 0 },
+        unknown: { seconds: 0, n: 0 } })),
+    });
+    const groups = [
+      { id: 'highlights', label: 'Highlights', pages: 1 },
+      { id: 'couple-type', label: 'Couple Type', pages: 1 },
+      { id: 'comms', label: 'Communication', pages: 12 },
+      { id: 'expectations', label: 'Expectations', pages: 7 },
+      { id: 'intimacy', label: 'Physical Intimacy', pages: 3 },
+    ];
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: true, generatedAt: new Date().toISOString(), demoFilterApplied: true,
+      window: { days: 30, from: new Date(Date.now() - 30 * 864e5).toISOString() },
+      slice: null,
+      headlines: {
+        siteVisits: { ...headline(412, 377), note: 'Visits, not unique visitors.' },
+        appDownloads: unavailable('Only App Store Connect knows this, and the app is not in the store yet.'),
+        articleReaders: { ...headline(38, 22), note: 'People who opened an In Practice post in the app.' },
+        annotators: headline(14, 17),
+      },
+      /* ── BOTH OF THESE ARE OVER MONTHS, NOT OVER STAGES ────────────────
+         I first stubbed the funnel as { labels, data } and the acquisition as
+         { labels, visits }. Both draw from `months`, and the funnel wants
+         `series: [{ step, points }]` rather than one array. So both charts
+         came back empty and looked exactly like two broken tiles on a page I
+         had been asked to rebuild for being unreadable.
+
+         That is the trap worth naming: a wrong stub does not report a missing
+         feature, it reports a working one as broken, and the instruction that
+         follows is to fix something that was never wrong. Shapes taken from
+         the renderers and from api/admin-engagement.js. */
+      funnel: { available: true, months: MONTHS, note: 'Over 12 months · sign-ups counted twice, because a sign-up is one half of a couple.',
+        series: [
+          { step: 'Visited', points: MONTHS.map((_, i) => 40 + ((i * 11) % 30)) },
+          { step: 'Signed up', points: MONTHS.map((_, i) => 14 + ((i * 7) % 12)) },
+          { step: 'Started', points: MONTHS.map((_, i) => 9 + ((i * 5) % 8)) },
+          { step: 'Finished', points: MONTHS.map((_, i) => 3 + ((i * 3) % 5)) },
+        ] },
+      acquisition: { available: true, months: MONTHS, note: 'Visits per month.',
+        visits: MONTHS.map((_, i) => 40 + ((i * 13) % 55)), downloads: null,
+        downloadsNeeds: 'not collected. App Store Connect needs a key, and the app is not in the store yet.' },
+      timePerPage: {
+        marketing: clustered(['/home', '/offerings', '/practice', '/faq', '/purpose'], true, false),
+        exercises: clustered(['Communication', 'Expectations', 'Reflection', 'Physical Intimacy', 'Conflict'], true, true),
+        resources: clustered(['Workbook', 'Budget', 'Checklist'], true, true),
+        results: clustered(groups.map((g) => g.label), true, true),
+        detailed: Object.fromEntries(groups.filter((g) => g.pages > 1).map((g) => [g.id, clustered(['Overview', 'Detail A', 'Detail B'], false, true)])),
+      },
+      learning: { available: false, why: 'Not enough reads yet.' },
+      groups, queryErrors: [],
+      rowsRead: { profiles: 40, notes: 12, tags: 7, articleReads: 38, events: 214 },
+    }));
+    return;
+  }
   if (url.pathname.startsWith('/api/admin-typing')) {
     const individuals = rows.map((r, i) => ({
       type: r.type, pronouns: ['she/her', 'he/him', 'they/them'][i % 3],
