@@ -41,13 +41,7 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| S81 | **Re-running every sweep that exists**, 36 of them, because the drill-down touched every slicer on every page and the three new cube fields touched the one endpoint every chart reads. Dead functions, ids nothing points at, classes nothing styles, silent read failures, unwritten columns, fetch routes, console errors on every static page. |
-| S82 | **Sweeping the thing I just built, which no existing sweep covers**: every slicer on every admin page, opened, with every leaf it offers resolved. A cut whose predicate is not registered, a branch with nothing under it, and a leaf that matches nobody are three different bugs that all look like a working dropdown. |
-| S83 | **Driving every cut on one page end to end.** Picking a leaf and reading the tile's n is the only thing that can tell a filter that works from one that is never consulted. |
-| S84 | **Checking the field picker's removal left nothing behind**: its stylesheet, its helpers, anything that called it. A definition that reads like a feature is worse than no definition. |
-| S85 | **Looking for the shapes CLAUDE.md says keep coming back**: a function defined twice, a fallback that always fires, a list typed beside the list it indexes, a catch that turns a failed read into an empty one. |
+**Nothing open.** The scan is done and what it found is in section 3.
 
 ## 3. For you to review
 
@@ -56,6 +50,12 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| S81 | **Twenty kilobytes of the admin could not be reached, and two pieces of it mattered.** Seven functions left behind by the Beta Codes and Fulfilment pages, each writing into an element deleted months ago. One was the promo Status toggle's old twin: nothing could call it, and the fix I reported to you as A86 went into it rather than into the live toggle, which already worked. The other drew a buyer's name, address and phone, one missing id away from working, under the banner saying this page holds none of that. All seven are gone. |
+| S85 | **The Testimonials page printed stored values where every other page prints words.** "she/her", "none", "friend" against Woman, None, Friend/family, in the line under each answer and in the filter checkboxes. It was invisible to me because the test data invented pretty values, so the conversion had nothing to do; the test data now stores what the product stores. |
+| S85b | **165 controls in the admin had no name a screen reader could say**: 120 "add a theme" boxes, 35 question-weight sliders, 10 axis sliders. The rule exists and has only ever been applied to the 38 public pages, never to the admin, which is the surface with the most controls on it. Named, and a gate now walks all 13 admin pages. |
+| S85c | **A failed read of the journal table would have said nobody journals.** The error was never tested, the catch could not fire, and the comment excusing it named a migration that adds no column. It says so in the reply now, like every other read in that file, and the gate's exemption for "a documented migration window" is gone: nothing else used it. |
+| S82 | **Every slicer on every admin page, audited leaf by leaf: all clean.** 136 cuts on a demographics tile, 140 on Responses, 29 on Feedback, with no cut that matches nobody, none that matches everybody, no branch with nothing under it, and no computed cut whose rule was never registered. |
+| S81b | **Four holes in the test data, each of which hid a page from me.** The survey endpoint was never stubbed, so the whole Feedback page was an empty grid; `surveys` was missing, so Couple type x outcomes drew its empty state; `dataQuality` was missing, so that strip read five dashes; and conflict answers only existed for half the people while the option index was that same number, so one side of every two-option conflict question was never stored. |
 | A133 | **The taxonomy is built, all six sections of it, and it is the Explore dropdowns too.** Open any tile's slicer: a coloured banner per section, an arrow into each, a back arrow top left. The rows that are not a stored column are computed, so "Children / No children", the score bands, "Household - aligned", the eight Rel Relf ends, aligned by intimacy dimension and the sixteen horsemen rows all work as cuts. Same control on the Explore pickers, with a search and your All questions row, and on the Feedback tiles. |
 | A133b | **Three things your taxonomy asked for that nothing stored.** "Two guardians of the same gender", "raised by someone other than a parent", and whether somebody kept, swapped or widened the roles they grew up with. All three are inferences from the name of a childhood role, which is the inference that file already makes and says so about. Tell me if you want any of the three worded differently. |
 | A116 | **All questions has a third view, Count.** Five cells per row, shaded by share, with the question's own poles either side. A column is where an answer sits between the poles, so on Me / Both / My partner it puts Both in the middle column, which an option number would not. |

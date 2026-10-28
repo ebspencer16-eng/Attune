@@ -25,7 +25,6 @@
  * the product checks its error":
  *   - customer endpoints, where a graceful empty answer is often the right
  *     behaviour and the trade-off is a product decision, not a rule
- *   - a read inside a try whose catch documents a migration window
  *
  * TWO THINGS THE FIRST VERSIONS GOT WRONG, both the measurement:
  *   - the indirection. Every profiles read goes through `selectProfiles`, so
@@ -55,7 +54,6 @@ const files = readdirSync(join(root, 'api'))
    read. Matching a name instead of what precedes it, which is this repo's
    most repeated gate bug. */
 const READ = /(?<!Array|Object)\.(from|rpc)\s*\(|\bselectProfiles\s*\(|\bfetchProfiles\s*\(/;
-const MIGRATION_NOTE = /migration \d+|column arrives|not there yet|schema cache/i;
 /** THE TWO PLANTS THAT WALKED THROUGH THE FIRST VERSION, because both are
  *  shapes CLAUDE.md already names.
  *
@@ -258,7 +256,16 @@ for (const rel of files) {
        The rule is now flat: an admin read tests its error. There is no
        version of "a figure Ellie reads" that is better off not knowing. */
     const nearby = lines.slice(i, Math.min(i + 14, lines.length)).join('\n');
-    if (/catch/.test(nearby) && MIGRATION_NOTE.test(nearby)) { ok++; continue; }
+    /* ── THE MIGRATION-WINDOW HATCH IS GONE ───────────────────────────
+       It let a read off on the strength of a comment naming a migration.
+       One read used it, in admin-explore.js, and every part of that excuse
+       was wrong: supabase-js returns its error rather than throwing, so the
+       catch it sat in could never fire; the default turned a broken query
+       into an empty table, so the journal slicers would have said nobody
+       has ever written an entry; and the migration it named widens a CHECK
+       constraint rather than adding the column. Nothing needs the hatch
+       now, which is the moment to take it out rather than the moment to
+       leave it for the next person. */
 
     fails.push(`${rel}:${line} reads the database, defaults to an empty answer, and never tests the error.\n` +
                `    A failed query and an empty table are then the same figure.\n` +
@@ -273,4 +280,4 @@ if (fails.length) {
   console.error('A try alone is not enough, because supabase-js returns its error.');
   process.exit(1);
 }
-console.log(`[check-admin-read-errors] ${files.length} admin endpoints, ${reads} database reads, ${ok} of them either testing their error and leaving, surfacing it in the reply, or inside a documented migration window.`);
+console.log(`[check-admin-read-errors] ${files.length} admin endpoints, ${reads} database reads, ${ok} of them either testing their error and leaving or surfacing it in the reply. The migration-window exemption is gone: nothing needed it, and its one user was wrong three ways.`);

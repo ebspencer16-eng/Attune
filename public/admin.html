@@ -1186,7 +1186,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
     </div>
 
     <!-- Funnel over time, and acquisition beside it -->
-    <div class="chart-grid two">
+    <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle" id="eng-funnel-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-funnel" data-tile="funnel" title="Cut this tile by a segment" aria-label="Slz eng funnel"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-funnel"></canvas></div>
@@ -1213,7 +1213,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
         <div class="chart-body"><canvas id="chart-eng-res"></canvas></div>
       </div>
     </div>
-    <div class="chart-grid two">
+    <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-head"><div><div class="chart-title">Results</div><div class="chart-subtitle" id="eng-rs-n">Mean seconds</div></div><select class="tile-slicer eng-slicer" id="slz-eng-rs" data-tile="rs" title="Cut this tile by a segment" aria-label="Slz eng rs"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-rs"></canvas></div>
@@ -1238,7 +1238,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
 
     <!-- Learning: two tables, then two charts -->
     <div class="section-label">Learning</div>
-    <div class="chart-grid two">
+    <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-head"><div><div class="chart-title">In Practice reads</div><div class="chart-subtitle" id="eng-art-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-art" data-tile="art" title="Cut this tile by a segment" aria-label="Slz eng art"><option value="">Everyone</option></select></div>
         <div id="eng-articles"></div>
@@ -1248,7 +1248,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
         <div id="eng-tags"></div>
       </div>
     </div>
-    <div class="chart-grid two">
+    <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-head">
           <div><div class="chart-title">Notes by section</div><div class="chart-subtitle" id="eng-ns-n">&mdash;</div></div>
@@ -3922,139 +3922,31 @@ window.attemptLogin = attemptLogin;
 // ── Date ──────────────────────────────────────────────
 document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
-// ── Navigation ────────────────────────────────────────
-// ── Beta codes ─────────────────────────────────────────
-// Fetch all codes from Supabase `beta_codes` table (upserted on redemption by
-// api/create-payment-intent). Render as a table with deactivate buttons.
-async function loadBetaCodes() {
-  const container = document.getElementById('bc-table');
-  if (!container) return;
-  const SUPABASE_URL = window.__SUPABASE_URL;
-  const SUPABASE_ANON = window.__SUPABASE_ANON;
-  const updatedEl = document.getElementById('beta-codes-last-updated');
+/* ── THE BETA CODES PAGE AND THE FULFILMENT PAGE WERE HERE ────────────────
+   Seven functions, about twenty kilobytes, every one of them unreachable.
 
-  // Known seeded codes (shown even if they haven't been redeemed yet)
-  const SEEDS = [
-    { code: 'BETA-CORE',        package_key: 'core',        label: 'The Attune Assessment' },
-    { code: 'BETA-NEWLYWED',    package_key: 'newlywed',    label: 'Starting Out Collection' },
-    { code: 'BETA-ANNIVERSARY', package_key: 'anniversary', label: 'Relationship Reflection' },
-    { code: 'BETA-PREMIUM',     package_key: 'premium',     label: 'Attune Premium' },
-  ];
-  const pkgLabel = {
-    core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary',
-    premium: 'Premium', '*': 'Universal',
-  };
+   Both pages were removed on purpose, months apart, and their readers were
+   left behind: loadBetaCodes wrote into `bc-table`, renderFulfillmentTable
+   into `fulfillment-tbody`, updateDashboardFulfillmentKPIs into three dash-*
+   ids, loadCompletionRate into `stat-completion`. None of those ids has
+   existed for months, so each one returned on its first line or wrote into
+   nothing, on every load.
 
-  let rows = [];
-  try {
-    const adminData = await fetchAdminData();
-    if (adminData && Array.isArray(adminData.beta_codes)) rows = adminData.beta_codes;
-  } catch (e) {
-    console.warn('[beta codes] admin-data fetch failed:', e);
-  }
+   Two of them mattered rather than merely being clutter.
 
-  // Merge seeds with rows so all 4 beta codes always appear, even at 0 uses
-  const rowByCode = {};
-  rows.forEach(r => { rowByCode[r.code] = r; });
-  SEEDS.forEach(s => {
-    if (!rowByCode[s.code]) {
-      rowByCode[s.code] = {
-        code: s.code,
-        package_key: s.package_key,
-        uses_count: 0,
-        active: true,
-        last_used_at: null,
-        last_used_by: null,
-      };
-    }
-  });
-  let all = Object.values(rowByCode).sort((a, b) => a.code.localeCompare(b.code));
+   toggleBetaCode was the promo Status toggle's OLD twin. Its only buttons
+   were drawn by loadBetaCodes, which returns immediately, so nothing could
+   call it. A fix for the status toggle was made inside it and reported as
+   done, while the live toggle is togglePromoCode and already did the right
+   thing: a repair aimed at the wrong copy of a duplicated rule, which is the
+   failure this codebase is organised against, done by hand.
 
-  /* No invented usage. This filled four codes with 47, 38, 31 and 22 uses and
-     a last-used date whenever the real count was zero, which is exactly when
-     somebody is looking to find out whether anybody has used them. */
-  // KPIs
-  const totalUses = all.reduce((s, r) => s + (r.uses_count || 0), 0);
-  const activeCount = all.filter(r => r.active !== false).length;
-  const lastUsed = all.map(r => r.last_used_at).filter(Boolean).sort().pop();
-  const top = all.slice().sort((a, b) => (b.uses_count || 0) - (a.uses_count || 0))[0];
-  document.getElementById('bc-total-uses').textContent = totalUses;
-  document.getElementById('bc-active-count').textContent = `${activeCount} / ${all.length}`;
-  document.getElementById('bc-last-used').textContent = lastUsed
-    ? new Date(lastUsed).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    : '—';
-  document.getElementById('bc-top-code').textContent = top && top.uses_count > 0 ? top.code : '—';
+   renderFulfillmentTable drew a buyer's name, their address and their phone
+   number. The payload stopped carrying those when the Fulfilment page went,
+   so it would have drawn "undefined" — but it is a READER of exactly the data
+   the banner on this page promises is not here, one missing id away from
+   working. */
 
-  // Table
-  const tableRows = all.map(r => {
-    const isActive = r.active !== false;
-    const lastUsedDisp = r.last_used_at
-      ? new Date(r.last_used_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : '—';
-    const lastUserDisp = r.last_used_by
-      ? `<span style="color:var(--muted);font-size:.72rem">${(r.last_used_by || '').slice(0, 30)}</span>`
-      : '';
-    const statusPill = isActive
-      ? '<span style="background:rgba(16,185,129,.15);color:#10B981;padding:2px 10px;border-radius:999px;font-size:.65rem;font-weight:700;letter-spacing:.04em">Active</span>'
-      : '<span style="background:rgba(100,116,139,.15);color:#94A3B8;padding:2px 10px;border-radius:999px;font-size:.65rem;font-weight:700;letter-spacing:.04em">Inactive</span>';
-    const actionBtn = isActive
-      ? `<button onclick="toggleBetaCode('${r.code}',false)" style="background:rgba(248,113,113,.12);color:#F87171;border:1px solid rgba(248,113,113,.3);border-radius:6px;padding:.35rem .7rem;font-size:.7rem;font-weight:600;cursor:pointer;font-family:var(--bfont)">Deactivate</button>`
-      : `<button onclick="toggleBetaCode('${r.code}',true)" style="background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.3);border-radius:6px;padding:.35rem .7rem;font-size:.7rem;font-weight:600;cursor:pointer;font-family:var(--bfont)">Reactivate</button>`;
-
-    return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:.9rem 1rem;font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--text)">${r.code}</td>
-      <td style="padding:.9rem 1rem;color:var(--muted);font-size:.78rem">${pkgLabel[r.package_key] || r.package_key}</td>
-      <td style="padding:.9rem 1rem;text-align:center;font-weight:700;color:var(--text);font-family:var(--mono)">${r.uses_count || 0}</td>
-      <td style="padding:.9rem 1rem;color:var(--muted);font-size:.78rem">${lastUsedDisp}${lastUserDisp ? '<br>' + lastUserDisp : ''}</td>
-      <td style="padding:.9rem 1rem">${statusPill}</td>
-      <td style="padding:.9rem 1rem;text-align:right">${actionBtn}</td>
-    </tr>`;
-  }).join('');
-
-  container.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.82rem">
-    <thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">
-      <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Code</th>
-      <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Package</th>
-      <th style="text-align:center;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Max uses</th>
-      <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Last used</th>
-      <th style="text-align:left;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Status</th>
-      <th style="text-align:right;padding:.6rem 1rem;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700">Action</th>
-    </tr></thead>
-    <tbody>${tableRows}</tbody>
-  </table>`;
-
-  if (updatedEl) updatedEl.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
-}
-
-async function toggleBetaCode(code, active) {
-  const verb = active ? 'reactivate' : 'deactivate';
-  if (!confirm(`Are you sure you want to ${verb} the code "${code}"?`)) return;
-  try {
-    const pkgMap = { 'BETA-CORE': 'core', 'BETA-NEWLYWED': 'newlywed', 'BETA-ANNIVERSARY': 'anniversary', 'BETA-PREMIUM': 'premium', 'ATTUNE-BETA-FEEDBACK': '*' };
-    // Upsert covers both existing rows and seeded codes never redeemed
-    const res = await adminAction({ action: 'beta_upsert', row: { code, package_key: pkgMap[code] || '*', active } });
-    if (res.error) throw new Error(res.error);
-    /* ── REDRAW THE TABLE THE TOGGLE LIVES IN ─────────────────────────────
-       This busted the cache and then called loadBetaCodes, which belongs to
-       the Beta Codes page. That page was removed in 92b3e2fb, so the function
-       returns on its first line and the promo code table was never redrawn:
-       the write landed, the row kept its old Status, and the toggle looked
-       like it did nothing. Ellie approved that toggle as A26 the same week.
-
-       renderPromosPage owns the table on Order Details and reads the payload
-       itself, so it is awaited with force rather than fired alongside a cache
-       bust and hoped for. */
-    await renderPromosPage(true);
-  } catch (e) {
-    console.error('[beta codes] toggle failed:', e);
-    alert('Could not update code. Check console for details.');
-  }
-}
-
-
-
-// ── Admin CSV export menu ─────────────────────────────────────────────
-// Toggles the 5-option dropdown next to the Export CSV button.
 function toggleExportMenu(e) {
   e.stopPropagation();
   const menu = document.getElementById('export-menu');
@@ -4282,7 +4174,6 @@ function showPage(id) {
   if (id==='testimonials') renderTestimonials();
   if (id==='types') loadTypesData();
   if (id==='responses') resetResponsesTab();
-  if (id==='beta-codes') loadBetaCodes();
   /* 'promos' is not a page any more: Order Details draws everything it held,
      and showPage('orders') calls renderPromosPage itself. */
   if (id==='engagement') renderEngagementPage();
@@ -4300,7 +4191,7 @@ function restorePageFromHash() {
   const id = (location.hash || '').replace(/^#/, '').trim();
   if (id && id !== 'overview' && document.getElementById('page-'+id)) showPage(id);
 }
-const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'ux-views':true,'explore':true,'engagement':true};
+const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,feedback:false,types:false,'survey-explorer':false,'ux-views':true,'explore':true,'engagement':true};
 let SURVEY_DATA = null;
 
 async function loadSurvey(force) {
@@ -4359,7 +4250,7 @@ function svFillSlicer(sel, rows) {
   for (const [key, label] of SV_DIMS) {
     const vals = [...new Set(rows.map((r) => (r.segment || {})[key]).filter(Boolean))].sort();
     if (!vals.length) continue;
-    tree.push({ label, children: vals.map((v) => ({ label: v, value: key + '::' + v })) });
+    tree.push({ label, children: vals.map((v) => ({ label: qxPretty(key, v), value: key + '::' + v })) });
   }
   let html = '<option value="">Everyone</option>';
   tree.forEach((n) => n.children.forEach((c) => {
@@ -4984,7 +4875,9 @@ function svBuildTsFilters(all) {
     for (const v of vals) {
       html += '<label style="display:flex;align-items:center;gap:.45rem;font-size:.72rem;color:var(--muted);padding:.1rem 0;cursor:pointer;">'
         + '<input type="checkbox" onchange="svTsToggle(&quot;' + svEsc(key) + '&quot;,&quot;' + svEsc(v) + '&quot;,this.checked)"> '
-        + svEsc(v) + '</label>';
+        /* The stored value goes to the filter and the readable one on the
+           label, the same split every other control on this page makes. */
+        + svEsc(qxPretty(key, v)) + '</label>';
     }
   }
   panel.innerHTML = html || '<div style="font-size:.72rem;color:var(--muted)">No demographics on these answers yet.</div>';
@@ -5084,7 +4977,14 @@ async function renderTestimonials() {
     const codes = a.codes.map((c) => '<button onclick="svCode(' + a.id + ',&quot;' + svEsc(a.qid) + '&quot;,&quot;' + svEsc(c) + '&quot;,true)" title="Remove this theme" '
       + 'style="background:rgba(232,103,58,.12);border:1px solid rgba(232,103,58,.3);color:var(--text);border-radius:999px;'
       + 'padding:.15rem .55rem;font-size:.68rem;cursor:pointer;font-family:var(--bfont)">' + svEsc(c) + ' &times;</button>').join(' ');
-    const seg = SV_DIMS.map(([k]) => a.segment[k]).filter(Boolean).slice(0, 3).map(svEsc).join(' · ');
+    /* ── THE SAME WORDS THE REST OF THE ADMIN USES ────────────────────
+       This printed the stored value: "she/her", "none", "friend", where
+       every other page says Woman, None, Friend/family. One value with two
+       names on one screen is the thing QX_VAL_LABELS exists to stop, and it
+       was invisible in the harness because the stub invented display-cased
+       values that pretty-print to themselves. */
+    const seg = SV_DIMS.map(([k]) => (a.segment[k] == null || a.segment[k] === '' ? null : qxPretty(k, a.segment[k])))
+      .filter(Boolean).slice(0, 3).map(svEsc).join(' · ');
     const date = a.when ? new Date(a.when).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
     return '<div style="border:1px solid ' + (a.featured ? 'rgba(16,185,129,.45)' : 'var(--border)') + ';border-radius:10px;'
       + 'padding:.85rem 1rem;margin-bottom:.7rem;background:' + (a.featured ? 'rgba(16,185,129,.06)' : 'var(--card)') + '">'
@@ -5092,7 +4992,7 @@ async function renderTestimonials() {
       + svEsc((q && q.label) || a.qid) + '</div>'
       + '<p style="font-size:.86rem;color:var(--text);line-height:1.6;margin:0 0 .5rem">' + svEsc(a.text) + '</p>'
       + '<div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.45rem">' + codes
-      + '<input id="' + inputId + '" placeholder="add a theme" '
+      + '<input id="' + inputId + '" placeholder="add a theme" aria-label="Add a theme to this answer" '
       + 'onkeydown="if(event.key===&quot;Enter&quot;){svCodeFromInput(&quot;' + inputId + '&quot;,' + a.id + ',&quot;' + svEsc(a.qid) + '&quot;)}" '
       + 'style="background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:.15rem .6rem;font-size:.68rem;'
       + 'color:var(--text);font-family:var(--bfont);width:9rem" /></div>'
@@ -5394,7 +5294,6 @@ async function loadRealData() {
         // Re-render current visible page
         const activePage = document.querySelector('.page.active')?.id?.replace('page-', '');
         if (activePage === 'orders') applyOrderFilters();
-        if (activePage === 'fulfillment') renderFulfillmentTable();
         updateStatsFromRealData(realOrders);
       } else {
         // No real orders yet. Clear synthetic orders so pages render
@@ -5409,11 +5308,9 @@ async function loadRealData() {
         if (el('stat-aov'))       el('stat-aov').textContent       = '$0';
         if (el('stat-digital'))   el('stat-digital').textContent   = '0';
         if (el('stat-physical'))  el('stat-physical').textContent  = '0';
-        if (el('stat-completion')) el('stat-completion').textContent = '—';
         // Re-render so tables show empty state
         const activePage = document.querySelector('.page.active')?.id?.replace('page-', '');
         if (activePage === 'orders') applyOrderFilters();
-        if (activePage === 'fulfillment' && typeof renderFulfillmentTable === 'function') renderFulfillmentTable();
       }
     }
   } catch (e) {
@@ -5526,7 +5423,6 @@ function updateStatsFromRealData(orders) {
 
   // Completion rate requires partner_sessions data — fetched separately.
   // Async, safe to run in the background.
-  loadCompletionRate().catch(() => {});
   // Real demographics from profiles. Async; the series stay at zero if empty.
   loadRealDemographics().catch(() => {});
   // Real package-mix trend from orders table, grouped by pkg_key + month
@@ -5940,28 +5836,6 @@ async function loadRealPackageTrend(orders) {
 
 // Completion rate = (partner_sessions with completed_at) / (total profiles with invite codes)
 // Rough proxy: couples where Partner B has submitted at least ex1 + ex2.
-async function loadCompletionRate() {
-  try {
-    const adminData = await fetchAdminData();
-    const prof = adminData && adminData.profiles;
-    if (!prof) return;
-    // Total couples = profiles with an invite_code
-    const totalCount = prof.invited_total || 0;
-    // Completed couples = partner_sessions with both ex1 and ex2 non-null
-    const doneCount = prof.completed_couples || 0;
-
-    const el = document.getElementById('stat-completion');
-    if (el && totalCount > 0) {
-      el.textContent = Math.round((doneCount / totalCount) * 100) + '%';
-    } else if (el) {
-      el.textContent = '—';
-    }
-  } catch (e) {
-    console.warn('[admin] completion rate fetch failed:', e);
-  }
-}
-
-// Credentials fetched at runtime from /api/admin-config (works with zip deployments)
 window.__SUPABASE_URL  = '';
 window.__SUPABASE_ANON = '';
 window.__adminConfigReady = false;
@@ -6076,46 +5950,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 // ── Compute fulfillment stats ─────────────────────────
-function getFulfillmentStats() {
-  const physical = ORDERS.filter(o=>o.physical);
-  const pending = physical.filter(o=>o.fulfillStatus==='pending');
-  const packed = physical.filter(o=>o.fulfillStatus==='packed');
-  const shipped = physical.filter(o=>o.fulfillStatus==='shipped');
-  const avgDays = shipped.length ? (shipped.reduce((s,o)=>s+o.daysToShip,0)/shipped.length).toFixed(1) : '-';
-  return { pending, packed, shipped, avgDays, physical };
-}
-
-// ── Update dashboard KPIs ─────────────────────────────
-function updateDashboardFulfillmentKPIs() {
-  const stats = getFulfillmentStats();
-  const pendingEl = document.getElementById('dash-pending-count');
-  const avgEl = document.getElementById('dash-avg-ship');
-  const trendEl = document.getElementById('dash-ship-trend');
-  if (pendingEl) pendingEl.textContent = stats.pending.length + stats.packed.length;
-  if (avgEl) avgEl.textContent = stats.avgDays + 'd';
-  if (trendEl) { trendEl.textContent = '↓ target: 3d or less'; trendEl.className = Number(stats.avgDays) <= 3 ? 'kpi-trend up' : 'kpi-trend down'; }
-  const badge = document.getElementById('sb-fulfillment-badge');
-  if (badge) { const n = stats.pending.length; badge.textContent = n > 0 ? n : ''; badge.style.display = n > 0 ? 'inline' : 'none'; }
-}
-
-/* ══ SORTABLE, PAGED TABLES ═══════════════════════════════════════════════
-   Ellie: "Add sorting carats into the code usage table, I should be able to
-   select which of these colummns to sort and how." And, of the orders table:
-   "Add sorting carats to each column of the table" and "Orders table should
-   show 8 rows with a dropdown option at the bottom to see the full table."
-
-   One implementation for both tables rather than two, because two tables with
-   two sorts is two places for the sort to be subtly different and only one of
-   them gets fixed.
-
-   ── WHAT A COLUMN SORTS BY ────────────────────────────────────────────────
-   Not its rendered text. "$1,200" sorts before "$9" as a string, and
-   "Oct 3" before "Sep 1". Each column declares a `sort` function returning a
-   number or a string, so the cell can say whatever reads best and the order is
-   still right. A column with no `sort` is not sortable and draws no caret,
-   which is honest: a caret that does nothing is worse than no caret. */
-
-/** The show-all slot for a table, searched from the card that holds both. */
 function tableFooter(id, table) {
   const card = table.closest('.chart-card') || table.parentElement;
   return card ? card.querySelector('[data-table-more="' + id + '"]') : null;
@@ -7324,8 +7158,6 @@ function sliceTreeBuild(cube, rows, excludeKey, onlyKeys) {
   };
   /** The options of a field, in the order the server sent them. */
   const optsOf = (key) => ((byKey[key] && byKey[key].options) || []).map((o) => (o && o.v != null ? o.v : o));
-  /** A field's label, falling back to its key so nothing draws blank. */
-  const labelOf = (key) => (byKey[key] && byKey[key].label) || key;
 
   /* ── 1 · DEMOGRAPHICS ──────────────────────────────────────────────── */
   const demographics = node('Demographics', [
@@ -9071,160 +8903,6 @@ function renderGeography() {
 }
 
 // ── Fulfillment table ─────────────────────────────────
-function renderFulfillmentTable() {
-  const tbody = document.getElementById('fulfillment-tbody');
-  if (!tbody) return;
-  const statusFilter = document.getElementById('fulfill-filter')?.value || 'pending';
-  const pkgFilter = document.getElementById('fulfill-pkg-filter')?.value || '';
-
-  let rows = ORDERS.filter(o=>o.physical);
-  if (statusFilter !== 'all') rows = rows.filter(o=>o.fulfillStatus===statusFilter);
-  if (pkgFilter) rows = rows.filter(o=>o.pkg===pkgFilter);
-
-  const label = document.getElementById('fulfill-count-label');
-  if (label) label.textContent = `${rows.length} order${rows.length!==1?'s':''}`;
-
-  const pkgColors = {'newlywed-box':'#FBBF24','anniversary-box':'#5C6DDA','premium-box':'#34D399'};
-  const pkgNames = {'newlywed-box':'Starting Out Box','anniversary-box':'Anniversary Box','premium-box':'Premium Box'};
-  const statusPill = { pending:'<span class="pill amber">🟡 Pending</span>', packed:'<span class="pill indigo">🔵 Packed</span>', shipped:'<span class="pill green">🟢 Shipped</span>' };
-
-  if (rows.length === 0) {
-    const msg = ORDERS.length === 0
-      ? `No physical orders yet.<br><span style="font-size:.7rem;color:var(--dim);margin-top:.4rem;display:inline-block">Box orders will appear here once customers purchase a physical package.</span>`
-      : `No orders match this filter.`;
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:2rem;font-size:.8rem;">${msg}</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = rows.map(o => {
-    const daysElapsed = o.fulfillStatus === 'shipped'
-      ? `<span style="color:var(--green);font-family:var(--mono)">${o.daysToShip}d</span>`
-      : `<span style="color:${o.fulfillStatus==='packed'?'#5C6DDA':'var(--amber)'};font-family:var(--mono)">${Math.floor((Date.now()-o.date)/86400000)}d open</span>`;
-
-    const action = o.fulfillStatus === 'pending'
-      ? `<button onclick="markStatus('${o.id}','packed')" style="background:rgba(108,127,255,.15);color:#8b9fff;border:1px solid rgba(108,127,255,.3);border-radius:7px;padding:.3rem .7rem;font-size:.65rem;font-weight:700;cursor:pointer;font-family:var(--mono);white-space:nowrap">Mark packed</button>`
-      : o.fulfillStatus === 'packed'
-      ? `<button onclick="markStatus('${o.id}','shipped')" style="background:rgba(52,211,153,.15);color:#34D399;border:1px solid rgba(52,211,153,.3);border-radius:7px;padding:.3rem .7rem;font-size:.65rem;font-weight:700;cursor:pointer;font-family:var(--mono);white-space:nowrap">Mark shipped</button>`
-      : `<span style="color:var(--dim);font-size:.68rem">✓ Done</span>`;
-
-    const msgDisplay = o.giftMsg
-      ? `<span title="${o.giftMsg}" style="font-size:.68rem;color:var(--muted);cursor:help;max-width:120px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"${o.giftMsg}"</span>`
-      : `<span style="color:var(--dim);font-size:.68rem">-</span>`;
-
-    const liveHighlight = o.isLiveSession ? 'background:rgba(16,185,129,.04);outline:1.5px solid rgba(16,185,129,.25);outline-offset:-1px;' : '';
-    return `<tr id="row-${o.id}" style="${liveHighlight}">
-      <td><span style="font-family:var(--mono);font-size:.7rem;color:${o.isLiveSession ? '#10B981' : 'var(--muted)'}">${o.id}${o.isLiveSession ? ' ✦' : ''}</span></td>
-      <td style="font-size:.75rem">${o.dateStr}</td>
-      <td>
-        <span class="pkg-tag" style="background:${pkgColors[o.pkg]}22;color:${pkgColors[o.pkg]};white-space:nowrap">${pkgNames[o.pkg]}</span>
-        ${o.isLiveSession && o.coupleType ? `<div style="font-size:.6rem;color:#10B981;font-weight:700;font-family:var(--mono);margin-top:.2rem;">${o.coupleType.name}</div>` : ''}
-      </td>
-      <td style="font-size:.75rem;color:var(--text)">${o.shipTo}</td>
-      <td style="font-size:.68rem;color:var(--muted);max-width:180px">${o.address}</td>
-      <td>${msgDisplay}</td>
-      <td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">${o.recipientPhone ? '(···) ···-'+o.recipientPhone.slice(-4) : '-'}</td>
-      <td><span class="pill ${o.shipSpeed==='express'?'rose':'indigo'}" style="white-space:nowrap">${o.shipSpeed==='express'?'⚡ Express':'Standard'}</span></td>
-      <td>${statusPill[o.fulfillStatus]}</td>
-      <td>${daysElapsed}</td>
-      <td>${(() => {
-        if (!o.hasWorkbook) return '<span style="color:var(--dim);font-size:.68rem">-</span>';
-        const wbStatus = o.workbookStatus || 'pending_exercises';
-        const isReady  = wbStatus === 'ready';
-        const isPrint  = o.workbookType === 'print';
-        const isPrintQ = wbStatus === 'print_queued';
-        const noData   = !o.scores;  // exercises not yet complete
-        if (isPrintQ) return `<span style="background:rgba(124,58,237,.12);color:#7C3AED;border:1px solid rgba(124,58,237,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;font-family:var(--mono);white-space:nowrap;display:inline-flex;align-items:center;gap:.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg> Print queued</span>`;
-        if (noData) return `<span style="color:rgba(255,255,255,.25);font-size:.65rem;font-style:italic">Exercises incomplete</span>`;
-        if (isReady && isPrint) return `<span style="background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;font-family:var(--mono);">✓ Sent to print</span>`;
-        return `<button onclick="generateWorkbookForOrder('${o.id}')" id="wb-btn-${o.id}" style="background:rgba(27,95,232,.12);color:#1B5FE8;border:1px solid rgba(27,95,232,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;cursor:pointer;font-family:var(--mono);white-space:nowrap;display:inline-flex;align-items:center;gap:.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> ${isPrint ? '🖨 Print' : '↓ Workbook'}</button>`;
-      })()}</td>
-      <td>${action}</td>
-    </tr>`;
-  }).join('');
-
-  // Update KPIs
-  const stats = getFulfillmentStats();
-  ['fk-pending','fk-packed','fk-shipped','fk-avgdays'].forEach((id,i)=>{
-    const el = document.getElementById(id);
-    if (el) el.textContent = [stats.pending.length, stats.packed.length, stats.shipped.length, stats.avgDays+'d'][i];
-  });
-}
-
-async function markStatus(orderId, newStatus) {
-  const order = ORDERS.find(o=>o.id===orderId);
-  if (!order) return;
-
-  // Optimistic update
-  order.fulfillStatus = newStatus;
-  if (newStatus === 'shipped') {
-    const days = Math.round((Date.now()-order.date)/86400000*10)/10;
-    order.daysToShip = days;
-    order.shippedDate = new Date();
-  }
-  renderFulfillmentTable();
-  updateDashboardFulfillmentKPIs();
-
-  // Persist to Supabase via orders API
-  const statusMap = { pending: 'pending', packed: 'packed', shipped: 'shipped' };
-  try {
-    await fetch('/api/orders', {
-      method: 'POST',
-      headers: window.adminAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({
-        action: 'update',
-        orderId: order.dbId || order.id,
-        updates: {
-          card_status: statusMap[newStatus] || newStatus,
-          workbook_status: order.hasWorkbook ? (newStatus === 'shipped' ? 'shipped' : order.workbookStatus) : undefined,
-        }
-      })
-    });
-  } catch(e) {
-    console.warn('[admin] markStatus persist failed:', e);
-  }
-
-  // Send shipping notification email when status flips to 'shipped' for the first time.
-  // Guarded so re-clicking 'shipped' does not resend. Also guarded on having an email.
-  if (newStatus === 'shipped' && !order._shippingEmailSent && order.email) {
-    order._shippingEmailSent = true;
-    try {
-      await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'shipping_notification',
-          toEmail: order.email,
-          toName: order.partnerA || (order.coupleNames || '').split(' & ')[0] || 'there',
-          partnerName: order.partnerB || (order.coupleNames || '').split(' & ')[1] || '',
-          orderNum: order.dbId || order.id,
-          trackingUrl: order.trackingUrl || '',
-          trackingNumber: order.trackingNumber || '',
-          carrier: order.carrier || '',
-        }),
-      });
-    } catch(e) {
-      console.warn('[admin] shipping email failed:', e);
-      order._shippingEmailSent = false; // Allow retry
-    }
-  }
-}
-
-// ── Generate workbook for a specific order ─────────────
-/**
- * The workbook is a PDF, and this control built a Word file out of demo data.
- *
- * Ellie: "I want customers to be able to download the pdf. Remove the word
- * file." This was the last caller of the Word builder, and the orders it ran
- * against come from generateOrders(), which invents names and scores. So it
- * never produced any real couple's workbook; it produced a Word document about
- * people who do not exist.
- *
- * Removed rather than repointed at the PDF service, because what a couple's
- * workbook contains is their own answers and this table does not have them. If
- * an admin build is wanted it belongs beside real order rows, through
- * /api/store-workbook-pdf with that couple's user id, which that endpoint
- * already accepts.
- */
 async function generateWorkbookForOrder(orderId) {
   const btn = document.getElementById('wb-btn-' + orderId);
   if (btn) {
@@ -9690,19 +9368,6 @@ function initCharts(page) {
     if (typeof renderPromosPage === 'function') renderPromosPage();
     if (typeof renderWaitingOnPartner === 'function') renderWaitingOnPartner();
   }
-  else if (page==='fulfillment') {
-    renderFulfillmentTable();
-    const stats = getFulfillmentStats();
-    // Fulfillment time distribution
-    const distBuckets = [0,0,0,0,0,0]; // 0-1, 1-2, 2-3, 3-4, 4-5, 5+
-    stats.shipped.forEach(o=>{ const d=o.daysToShip; const i=Math.min(Math.floor(d),5); distBuckets[i]++; });
-    mkChart(document.getElementById('chart-fulfill-dist'),{type:'bar',data:{labels:['0–1 days','1–2 days','2–3 days','3–4 days','4–5 days','5+ days'],datasets:[{data:distBuckets,backgroundColor:distBuckets.map((_,i)=>i<=2?'#34D399':i<=3?'#FBBF24':'#F87171'),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
-    // Weekly shipments
-    const weeks = Array(12).fill(0);
-    stats.shipped.forEach(o=>{ const w=Math.floor((Date.now()-o.date)/604800000); if(w<12) weeks[11-w]++; });
-    const weekLabels = Array.from({length:12},(_,i)=>{ const d=new Date(Date.now()-(11-i)*7*86400000); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); });
-    mkChart(document.getElementById('chart-weekly-ship'),{type:'bar',data:{labels:weekLabels,datasets:[{label:'Shipped',data:weeks,backgroundColor:'#5C6DDA',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:45}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
-  }
   else if (page==='packages') {
     // Use real package-trend data when loadRealPackageTrend has populated it
     const realTrend = pkgTrendStacked;
@@ -10022,7 +9687,7 @@ function buildSandbox() {
   if (!TYPES_DATA) return;
   sandboxWeights = {}; for (const d in TYPES_DATA.config) sandboxWeights[d] = TYPES_DATA.config[d].weight;
   const cfg = TYPES_DATA.config;
-  const slider = (d) => `<div style="margin-bottom:.7rem;"><div style="display:flex;justify-content:space-between;font-size:.72rem;color:#586187;margin-bottom:.2rem;"><span style="text-transform:capitalize;">${d}${cfg[d].invert?' <span style=\"color:#6B7280;\">(inv)</span>':''}</span><span id="sw-val-${d}" style="color:#1B2547;font-variant-numeric:tabular-nums;">${cfg[d].weight.toFixed(2)}</span></div><input type="range" id="sw-${d}" min="0" max="0.6" step="0.01" value="${cfg[d].weight}" oninput="onSandboxInput('${d}')" style="width:100%;accent-color:${cfg[d].axis==='withdraw'?'#C55329':'#5C6DDA'};"></div>`;
+  const slider = (d) => `<div style="margin-bottom:.7rem;"><div style="display:flex;justify-content:space-between;font-size:.72rem;color:#586187;margin-bottom:.2rem;"><span style="text-transform:capitalize;">${d}${cfg[d].invert?' <span style=\"color:#6B7280;\">(inv)</span>':''}</span><span id="sw-val-${d}" style="color:#1B2547;font-variant-numeric:tabular-nums;">${cfg[d].weight.toFixed(2)}</span></div><input type="range" id="sw-${d}" min="0" max="0.6" step="0.01" value="${cfg[d].weight}" aria-label="Axis weight for ${d}" oninput="onSandboxInput('${d}')" style="width:100%;accent-color:${cfg[d].axis==='withdraw'?'#C55329':'#5C6DDA'};"></div>`;
   const wDims = Object.keys(cfg).filter(d=>cfg[d].axis==='withdraw');
   const oDims = Object.keys(cfg).filter(d=>cfg[d].axis==='open');
   document.getElementById('sandbox-withdraw').innerHTML = wDims.map(slider).join('');
@@ -10053,6 +9718,7 @@ function buildQSandbox() {
       `<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;">
          <span style="width:42px;font-size:.66rem;color:#586187;font-family:monospace;">${q}</span>
          <input id="qw-${d}-${q}" type="range" min="0.05" max="0.90" step="0.05" value="${qSandboxWeights[d][q]}"
+                aria-label="Weight for question ${q} in ${d}"
                 oninput="onQSandboxInput('${d}','${q}')" style="flex:1;">
          <span id="qw-val-${d}-${q}" style="width:34px;text-align:right;font-size:.7rem;color:#1B2547;">${qSandboxWeights[d][q].toFixed(2)}</span>
        </div>`).join('');
@@ -10153,7 +9819,7 @@ function refreshSandbox() {
 
 
 
-window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overview');updateDashboardFulfillmentKPIs();restorePageFromHash();renderUxExercises();if(typeof initAllSlicers==='function')initAllSlicers();});
+window.addEventListener('load',()=>{chartsInit.overview=true;initCharts('overview');restorePageFromHash();renderUxExercises();if(typeof initAllSlicers==='function')initAllSlicers();});
 
 window.__initEnv = async function () {
   var summary = document.getElementById('envSummary');

@@ -4071,3 +4071,51 @@ And two measurement traps: a full-page screenshot re-lays-out responsive
 charts (SCROLL= takes an ordinary viewport shot instead), and the probe's
 staleness check read `.x` for the category position, which on a sideways bar
 is where the bar ends.
+
+## 2026-10-27, sixth round: a scan for bugs
+
+Four real findings, three of them invisible from the code alone.
+
+**Twenty kilobytes of `public/admin.html` could not be reached.** Seven
+functions left behind by the Beta Codes and Fulfilment pages, each writing
+into an element deleted months ago. `sweep-missing-ids` had been reporting 17
+such lookups and nobody had acted on them. Two mattered rather than being
+clutter: `toggleBetaCode` was the promo Status toggle's unreachable twin, and
+the A86 repair went into it rather than into `togglePromoCode`, which is live
+and already correct; `renderFulfillmentTable` drew a buyer's name, address and
+phone, one missing id away from working, under the banner promising the page
+holds none of that.
+
+**The Testimonials page printed stored values where the rest of the admin
+prints words** — `she/her`, `none`, `friend` — in the meta line and in every
+filter checkbox. Hidden by the harness: probe-admin invented display-cased
+segments, so `QX_VAL_LABELS` had nothing to do and a page that skipped it
+looked identical to one that used it. The fixture stores what the database
+stores now.
+
+**165 controls in the admin had no accessible name.** check-control-names has
+held that rule over the 38 static pages for weeks and had never seen the
+admin. `check-admin-control-names.mjs` walks all thirteen pages in one
+browser, clicking the real navigation.
+
+**A failed read of `notes` would have reported that nobody journals.** The
+error was never tested, the catch could not fire (supabase-js returns its
+error), and the comment excusing it named a migration that adds no column. It
+is in `couldNotRead` now, and the gate's "documented migration window"
+exemption is deleted: nothing else used it, and its one user was wrong three
+ways.
+
+**What the scan cleared.** `npm run smoke` passed end to end: 29 results
+sections, 38 static pages at three widths, all five exercises driven to
+completion, 24 carts quoting what they charge. Every slicer on every admin
+page was audited leaf by leaf — no cut that matches nobody, none that matches
+everybody, no empty branch, no computed cut whose rule was never registered.
+Fetch routes, selected columns, key lists, missing styles and dead exports all
+came back with nothing.
+
+**Four holes in the harness**, each hiding a page: the survey endpoint was
+never stubbed (the whole Feedback page was an empty grid), `surveys` was
+missing (Couple type x outcomes drew its empty state), `dataQuality` was
+missing (five em dashes), and conflict answers existed only for even `i` while
+the option index was `i`, so one side of every two-option conflict question
+was never stored.

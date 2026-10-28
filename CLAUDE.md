@@ -585,6 +585,49 @@ works, so `check-field-picker` opens the picker in a browser and reads the
 COMPUTED colour: six bands for six optgroups, 68 options for 68, every band
 painted, six distinct colours, full width.
 
+**A repair can land in the dead copy, and then it is reported as done.** The
+promo Status toggle had two implementations: `togglePromoCode`, which the
+table on Order Details draws buttons for, and `toggleBetaCode`, whose only
+buttons were drawn by `loadBetaCodes` — a function that returns on its first
+line because the Beta Codes page was deleted. Ellie reported the toggle
+leaving a stale row; the fix went into the unreachable one, and was written up
+for her as done. The live one already did the right thing.
+
+This file already says a gate can point at the wrong copy of a duplicated
+rule. The same is true of a fix made by hand, and it is harder to see, because
+there is no gate reporting success to make anyone suspicious. Before repairing
+a handler, find the thing that calls it. `grep` for the function, then grep for
+whatever renders the control that calls it.
+
+Removing the dead half is what makes it true for the next person: seven
+unreachable functions came out of `public/admin.html` in one sitting, about
+twenty kilobytes, and one of them drew a buyer's name, address and phone
+number into a page whose banner promises it holds none of those.
+
+**A stub that stores the pretty value makes a conversion a no-op.** The admin
+converts stored values to words in one table, `QX_VAL_LABELS`: `she/her`
+becomes Woman, `none` becomes None, `friend` becomes Friend/family. The
+Testimonials page skipped that table and printed the raw value, in the line
+under every answer and in every filter checkbox, and no screenshot could show
+it because `probe-admin.mjs` invented display-cased segments — "Engaged",
+"1-2 years", "Instagram" — which pretty-print to themselves.
+
+So the rule this file already states about building a stub from the server's
+own return has a sharper form: a fixture must store what the DATABASE stores,
+not what a screen shows. Anything that formats on the way out is invisible
+until the fixture is in the raw spelling.
+
+**A rule that is enforced for one surface is not enforced.** `check-control-names`
+has held "every visible field has a label" over the 38 static pages for weeks.
+The admin is one page behind a login that draws most of its controls from
+JavaScript, so the sweep never saw it, and the surface with the most controls
+on it had 165 with no name: 120 "add a theme" boxes, 45 sliders in the typing
+sandbox. `check-admin-control-names.mjs` walks all thirteen admin pages in one
+browser, clicking the real navigation rather than reloading.
+
+When a gate reports a count, ask which surfaces it counted. This file says
+that about directories; it is just as true of whole applications.
+
 **A definition that reads like a feature is worth grepping for before trusting
 a sentence about it.** I told Ellie the admin's Orders table holds email
 addresses because shipping a box needs them. She asked the obvious question,

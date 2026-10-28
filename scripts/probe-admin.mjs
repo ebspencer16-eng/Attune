@@ -242,11 +242,20 @@ const fields = [
 ];
 
 const rows = [];
-const PRONOUNS = ['she/her', 'he/him', 'they/them', 'she/they'];
+/* ── THE VALUES THE PRODUCT STORES, NOT PRETTIER ONES ──────────────────────
+   These were display-cased inventions: "Engaged", "1-2 years", "Instagram".
+   The product stores the option VALUE from the signup form in src/App.jsx:
+   `engaged`, `1-2`, `social`. Every admin page converts those through
+   QX_VAL_LABELS, so a stub that stores the pretty form makes that conversion
+   a no-op, and a page that forgot to convert looks exactly like one that did.
+   One had: the Testimonials meta line printed `she/her`, `none`, `friend`
+   while every other surface said Woman, None, Friend/family, and no screenshot
+   taken against this stub could show it. */
+const PRONOUNS = ['she/her', 'he/him', 'they/them', 'other'];
 const AGES = ['25-34', '35-44', '45-54', '18-24'];
-const STATUS = ['Engaged', 'Married', 'Dating', 'Partnered'];
-const LENGTH = ['1-2 years', '3-5 years', '6-10 years', 'Over 10 years'];
-const SOURCE = ['Instagram', 'A friend', 'Search', 'Therapist'];
+const STATUS = ['engaged', 'married', 'dating', 'partnership'];
+const LENGTH = ['1-2', '3-5', '6-10', '20+'];
+const SOURCE = ['social', 'friend', 'search', 'therapist'];
 
 for (let i = 0; i < 40; i++) {
   /* A real answer set, run through the server's own scorer, so every derived
@@ -452,8 +461,33 @@ const _placed = placeAll(fields);
 /* `count` is the total the Explore page's meta line reports, and it was
    missing here while api/admin-explore.js has always sent it, so the harness
    read "undefined total" on a page that is fine in production. */
+/* ── THE SURVEY ROWS THE CUBE CARRIES ──────────────────────────────────────
+   `surveys` is one row per survey response, carrying that person's segments
+   and their numeric answers, and the Couple type x outcomes tile on Type
+   Analytics is built from it. The stub sent no such array at all, so that
+   tile drew its empty state and its slicer offered nothing, and the probe
+   reported neither. Built from the same question set the endpoint reads, and
+   from the people already in this cube, so the segments on a survey row are
+   the segments that person has everywhere else. */
+const SURVEY_SEG_KEYS = ['pronouns', 'age_range', 'relationship_status', 'relationship_length',
+  'children', 'signup_source', 'type', 'axisEngage', 'axisOpen', 'couple_type', 'pkg'];
+const surveys = rows.filter((_, i) => i % 3 !== 2).map((r, i) => {
+  const row = {};
+  for (const k of SURVEY_SEG_KEYS) row[k] = r[k] != null ? r[k] : null;
+  const when = new Date(Date.now() - (i * 5 + 2) * 86400000);
+  row.month = when.toISOString().slice(0, 7);
+  row.ts = when.toISOString();
+  for (const q of SURVEY_QUESTIONS) {
+    if (q.kind === 'stars') row[q.id] = 3 + (i % 3);
+    else if (q.kind === 'scale') row[q.id] = 1 + (i % (q.scale || []).length);
+    else if (q.kind === 'nps') row[q.id] = (i * 3) % 11;
+    else if (q.kind === 'choice') row[q.id] = (q.options || [])[i % Math.max(1, (q.options || []).length)];
+  }
+  return row;
+});
+
 const CUBE = { ok: true, fields: _placed.fields, dimNames: DIM_NAMES_STUB, count: rows.length, sections: EXPLORE_SECTIONS,
-  unmappedGroups: _placed.unmapped, rows, orders, demoFilterApplied: true };
+  unmappedGroups: _placed.unmapped, rows, orders, surveys, demoFilterApplied: true };
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 const server = createServer((req, res) => {
@@ -843,6 +877,18 @@ const server = createServer((req, res) => {
 
          Taken from the modules rather than typed, so a reweighting cannot
          leave this behind. */
+      /* The five figures in the Data quality strip. Without them that row
+         printed five em dashes, which reads as a measure nobody collects
+         rather than a stub that forgot to send it. Counted from the rows this
+         stub already built, so the numbers add up the way the endpoint's do:
+         complete + partial = with answers. */
+      dataQuality: {
+        totalProfiles: rows.length,
+        withAnswers: individuals.length,
+        complete: individuals.filter((x) => !x.lowConf).length,
+        partial: individuals.filter((x) => x.lowConf).length,
+        unpaired: rows.length - couples.length * 2,
+      },
       config: AXIS_CONFIG, questionWeights: QUESTION_WEIGHTS, dimKeys: DIM_KEYS,
       flipped: [], blend: 0.5, dims: Object.keys(DIM_KEYS) }));
     return;
@@ -881,7 +927,11 @@ const server = createServer((req, res) => {
         else if (q.kind === 'scale') answers[q.id] = 1 + (i % (q.scale || []).length);
         else if (q.kind === 'nps') answers[q.id] = (i * 3) % 11;
         else if (q.kind === 'choice') answers[q.id] = (q.options || [])[i % Math.max(1, (q.options || []).length)];
-        else if (q.kind === 'text') answers[q.id] = WORDS[i % WORDS.length];
+        /* A different sentence per question as well as per person. With one
+           array indexed by the person, the Testimonials page drew the same
+           sentence three times under three different questions, which is a
+           page nobody can read for the thing it is for. */
+        else if (q.kind === 'text') answers[q.id] = WORDS[(i + q.id.length) % WORDS.length];
         else if (q.kind === 'rank') {
           /* A different order per person, so the mean place differs by option
              rather than every bar being the same height. */
@@ -1421,6 +1471,113 @@ if (process.env.PICKER) {
       return res;
     }, id);
     console.log('  picker ' + JSON.stringify(out));
+  }
+}
+
+/* ── NAMES= ────────────────────────────────────────────────────────────────
+   Every control on the open page, and whether a screen reader could say what
+   it is. check-control-names does this for the 38 static pages and has never
+   looked at the admin, which is the surface with the most controls on it. */
+if (process.env.NAMES) {
+  /* NAMES=all walks every page in this one browser, because the navigation is
+     client side and thirteen launches to ask one question of each page is two
+     minutes a build for nothing. */
+  const pages = process.env.NAMES === 'all'
+    ? await page.evaluate(() => [...document.querySelectorAll('.sb-item[onclick]')]
+        .map((a) => (/showPage\('([^']+)'\)/.exec(a.getAttribute('onclick') || '') || [])[1])
+        .filter(Boolean))
+    : [null];
+  for (const name of pages) {
+    if (name) {
+      await page.evaluate((id) => {
+        const el = [...document.querySelectorAll('.sb-item[onclick]')]
+          .find((a) => (a.getAttribute('onclick') || '').includes("showPage('" + id + "')"));
+        if (el) el.click();
+      }, name);
+      await new Promise((r) => setTimeout(r, 1200));
+    }
+  const out = await page.evaluate(() => {
+    const vis = (e) => e.offsetParent !== null || getComputedStyle(e).position === 'fixed';
+    const named = (e) => !!(
+      (e.getAttribute('aria-label') || '').trim() ||
+      (e.getAttribute('title') || '').trim() ||
+      (e.textContent || '').trim() ||
+      (e.labels && e.labels.length) ||
+      (e.getAttribute('aria-labelledby') || '').trim()
+    );
+    const bad = [];
+    for (const e of document.querySelectorAll('.page.active button, .page.active select, .page.active input, .page.active a')) {
+      if (!vis(e)) continue;
+      if (e.type === 'hidden') continue;
+      if (!named(e)) bad.push(e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (e.className ? '.' + String(e.className).split(' ')[0] : ''));
+    }
+    const total = [...document.querySelectorAll('.page.active button, .page.active select, .page.active input, .page.active a')].filter(vis).length;
+    return { total, bad: bad.slice(0, 10), n: bad.length };
+  });
+  console.log('  names ' + (name || PAGE) + ': ' + out.total + ' visible controls, ' + out.n + ' with no name'
+    + (out.n ? ': ' + out.bad.join(', ') : ''));
+  }
+}
+
+/* ── TREEAUDIT= ────────────────────────────────────────────────────────────
+   Every slicer on the open page, every leaf it offers, resolved.
+
+   A dropdown cannot be read for this. A leaf whose predicate was never
+   registered, a leaf that matches nobody, a leaf that matches EVERYBODY and a
+   branch with nothing under it are four different bugs, and all four look
+   like an ordinary row in a list. The tree and the rows are both in the page,
+   so the honest thing is to ask them. */
+if (process.env.TREEAUDIT) {
+  const out = await page.evaluate(() => {
+    const sels = [...document.querySelectorAll('.page.active .sd select')];
+    const report = [];
+    for (const sel of sels) {
+      const tree = sel.__sliceTree || [];
+      const leaves = [];
+      const emptyBranches = [];
+      const walk = (nodes, trail) => nodes.forEach((n) => {
+        if (n.children) {
+          if (!n.children.length) emptyBranches.push(trail.concat(n.label).join(' > '));
+          walk(n.children, trail.concat(n.label));
+        } else leaves.push({ v: n.value, path: trail.concat(n.label).join(' > ') });
+      });
+      walk(tree, []);
+      /* The population this slicer was built from. Read back off the tile
+         rather than guessed: window.__CUBE_FOR_SLICERS is everybody, and a
+         tile's slicer may have been built from fewer. */
+      const all = (window.__CUBE_FOR_SLICERS && window.__CUBE_FOR_SLICERS.rows) || [];
+      const unregistered = [], nobody = [], everybody = [];
+      for (const leaf of leaves) {
+        if (!leaf.v) continue;
+        if (leaf.v.indexOf('g::') === 0) {
+          /* A top-level `const` in a classic script is not a property of
+             window, so `window.SLICE_PRED` is undefined and every leaf would
+             have reported as unregistered: a sweep that is wrong about where
+             it is looking reports a disaster rather than nothing. */
+          const preds = (typeof SLICE_PRED !== 'undefined') ? SLICE_PRED : null;
+          const pred = preds && preds[leaf.v.slice(3)];
+          if (!pred) { unregistered.push(leaf.path); continue; }
+          const n = all.filter(pred.test).length;
+          if (!n) nobody.push(leaf.path);
+          else if (n === all.length && all.length > 1) everybody.push(leaf.path);
+        } else {
+          const i = leaf.v.indexOf('::');
+          const k = leaf.v.slice(0, i), val = leaf.v.slice(i + 2);
+          const n = all.filter((r) => String(r[k]) === val).length;
+          if (!n) nobody.push(leaf.path);
+          else if (n === all.length && all.length > 1) everybody.push(leaf.path);
+        }
+      }
+      report.push({ id: sel.id, leaves: leaves.length, emptyBranches, unregistered, nobody, everybody });
+    }
+    return report;
+  });
+  for (const r of out) {
+    const bad = r.emptyBranches.length + r.unregistered.length + r.nobody.length + r.everybody.length;
+    console.log('  tree ' + r.id + ': ' + r.leaves + ' leaves' + (bad ? '  PROBLEMS ' + JSON.stringify({
+      emptyBranches: r.emptyBranches.slice(0, 4), unregistered: r.unregistered.slice(0, 4),
+      nobody: r.nobody.slice(0, 6), everybody: r.everybody.slice(0, 6),
+    }) : '  clean'));
   }
 }
 

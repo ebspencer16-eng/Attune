@@ -779,13 +779,32 @@ export default async function handler(req) {
      * nothing in this variable to leak.
      */
     let journalByOwner = new Map();
-    try {
-      const { data: jRows = [] } = await admin
+    {
+      /* ── A FAILED READ HERE SAID NOBODY JOURNALS ──────────────────────
+         This was a try/catch with `= []` on the destructure and a comment
+         saying the column arrives with migration 073. Three things wrong
+         with that, and each one on its own makes the read silent.
+
+         supabase-js RETURNS its error rather than throwing, so the catch
+         could never fire. The default then turned a broken query into an
+         empty table, and the journal slicers would have offered "Never
+         used" for every person on the system, which is a real answer and
+         indistinguishable from the truth. And 073 widened a CHECK
+         constraint on anchor_type; it adds no column, so the sentence
+         excusing the silence was wrong about its own migration.
+
+         Read like every other read in this file: say so in the reply. */
+      const _j = await admin
         .from('notes')
         .select('owner_id, created_at')
         .eq('anchor_type', JOURNAL_ANCHOR);
-      journalByOwner = journalUseByOwner(jRows);
-    } catch (e) { /* the column arrives with migration 073; before it, nobody has entries. */ }
+      if (_j.error) {
+        console.error('[admin-explore] notes (journal):', _j.error.message || _j.error);
+        couldNotRead.push('journal entries, so the journal slicers read as nobody having written one');
+      } else {
+        journalByOwner = journalUseByOwner(_j.data || []);
+      }
+    }
 
     /**
      * Survey answers, keyed by respondent profile id, for the join below.
