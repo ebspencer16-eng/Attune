@@ -1784,6 +1784,126 @@ if (process.env.TREEAUDIT) {
   }
 }
 
+/* ── CLICKCUT= ─────────────────────────────────────────────────────────────
+   A cut made the way a person makes one: open the panel, walk down to a leaf,
+   click it.
+
+   Every test of a cut so far has assigned `sel.value` in code, which skips the
+   whole control: the panel, the walk, pick(), the label and the event. Ellie:
+   "Just made a slicer selection but the chart didnt change and slicer still
+   says everyone." Nothing here had ever driven that path.
+
+   Reports what the select holds, what the button says, and whether the tile
+   behind it moved. */
+if (process.env.CLICKCUT) {
+  /* CLICKCUT=all walks every slicer on the open page, because the fault Ellie
+     hit is on one tile somewhere and testing one tile proves one tile. */
+  /* CLICKCUT=every walks the whole admin in one browser, because a gate that
+     launches Chrome once per page spends two minutes a build asking one
+     question thirteen times. */
+  const pages = process.env.CLICKCUT === 'every'
+    ? await page.evaluate(() => [...document.querySelectorAll('.sb-item[onclick]')]
+        .map((a) => (/showPage\('([^']+)'\)/.exec(a.getAttribute('onclick') || '') || [])[1]).filter(Boolean))
+    : [null];
+  for (const pageName of pages) {
+  if (pageName) {
+    await page.evaluate((id) => {
+      const el = [...document.querySelectorAll('.sb-item[onclick]')]
+        .find((a) => (a.getAttribute('onclick') || '').includes("showPage('" + id + "')"));
+      if (el) el.click();
+    }, pageName);
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  const ids = (process.env.CLICKCUT === 'all' || process.env.CLICKCUT === 'every')
+    ? await page.evaluate(() => [...document.querySelectorAll('.page.active .sd select')].map((s) => s.id).filter(Boolean))
+    : [process.env.CLICKCUT];
+  for (const selId of ids) {
+  const read = () => page.evaluate((id) => {
+    const sel = document.getElementById(id);
+    if (!sel) return { err: 'no such slicer' };
+    const wrap = sel.closest('.sd');
+    const btn = wrap && wrap.querySelector('.sd-btn-text');
+    const card = sel.closest('.chart-card');
+    const canvas = card && card.querySelector('canvas');
+    const ch = canvas && window.Chart && Chart.getChart(canvas);
+    const sub = card && card.querySelector('.chart-subtitle');
+    return {
+      value: sel.value,
+      button: btn ? (btn.textContent || '').trim() : null,
+      options: sel.options.length,
+      data: ch ? JSON.stringify((ch.data.datasets || []).map((d) => d.data)) : null,
+      sub: sub ? (sub.textContent || '').trim().slice(0, 60) : null,
+    };
+  }, selId);
+
+  const before = await read();
+  /* Open it the way a finger does. */
+  const steps = [];
+  const hit = (sel2) => page.evaluate((q) => {
+    const el = document.querySelector(q);
+    if (!el) return 'nothing at ' + q;
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return 'no box at ' + q;
+    const label = (el.textContent || '').trim().slice(0, 40);
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+      clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
+    return 'clicked ' + label;
+  }, sel2);
+
+  const wrapSel = `#${selId}`;
+  steps.push(await page.evaluate((id) => {
+    const sel = document.getElementById(id);
+    const btn = sel && sel.closest('.sd') && sel.closest('.sd').querySelector('.sd-btn');
+    if (!btn) return 'no button';
+    btn.click();
+    return 'opened';
+  }, selId));
+  await new Promise((r) => setTimeout(r, 300));
+
+  /* Walk down the first branch until a leaf, then take the first leaf. */
+  for (let depth = 0; depth < 5; depth++) {
+    const what = await page.evaluate((id) => {
+      const sel = document.getElementById(id);
+      const panel = sel && sel.closest('.sd') && sel.closest('.sd').querySelector('.sd-panel');
+      if (!panel || panel.hidden) return { done: 'the panel is not open' };
+      const rows = [...panel.querySelectorAll('.sd-row')].filter((r) => !r.classList.contains('sd-back'));
+      /* The no-cut row is not a cut. "Everyone" on a slicer and "— none —" on
+         a field picker both mean "go back to nothing", and picking one proves
+         nothing about whether a choice sticks. */
+      const leaf = rows.find((r) => !r.querySelector('.sd-chev')
+        && (r.textContent || '').trim() !== 'Everyone'
+        && r.__sdValue !== '' && r.__sdValue != null);
+      const branch = rows.find((r) => r.querySelector('.sd-chev'));
+      const target = leaf || branch;
+      if (!target) return { done: 'nothing to click' };
+      const label = (target.textContent || '').trim().slice(0, 40);
+      /* What the row is FOR, and whether the select can hold it. A leaf whose
+         value is not among the options is the failure this was written to
+         find, and it looks exactly like a click that did nothing. */
+      const want = leaf && leaf.__sdValue != null ? leaf.__sdValue : null;
+      target.click();
+      return { clicked: label, leaf: !!leaf, want,
+        hasOption: want == null ? null : [...sel.options].some((o) => o.value === want),
+        optionCount: sel.options.length };
+    }, selId);
+    if (what.done) { steps.push(what.done); break; }
+    steps.push((what.leaf ? 'picked ' : 'into ') + what.clicked
+      + (what.leaf ? ' [value=' + what.want + ' amongTheOptions=' + what.hasOption + ' of ' + what.optionCount + ']' : ''));
+    if (what.leaf) break;
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  await new Promise((r) => setTimeout(r, 900));
+  const after = await read();
+  const ok = !!after.value && after.button !== 'Everyone';
+  console.log('  clickcut ' + (ok ? 'ok   ' : 'FAIL ') + (pageName ? pageName + '/' : '') + selId + ' ' + JSON.stringify({
+    steps, button: after.button, value: after.value,
+    sub: before.sub === after.sub ? 'unchanged: ' + after.sub : before.sub + ' -> ' + after.sub,
+    tileMoved: before.data != null ? (after.data !== before.data) : 'no chart',
+  }));
+  }
+  }
+}
+
 /* ── CUTTEST= ──────────────────────────────────────────────────────────────
    Does a DERIVED cut actually cut, and does it cut only its own tile?
 

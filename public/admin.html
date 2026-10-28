@@ -5713,7 +5713,11 @@ async function wireSummarySlicer(selId, redraw){
   if (!sel) return;
   if (!sel.dataset.wired) {
     sel.dataset.wired = '1';
-    try { const cube = await ensureCube(); populateSlicer(sel, null, cube.rows || [], RESP_SLICE_DIMS); } catch (e) {}
+    /* Both tiles this wires read a pre-computed bundle, so the cuts they can
+       honour are the bundle's own keys rather than this page's copy of the
+       server's field list. That copy had drifted to six of the ten, so four
+       cuts the server computes were never offered. */
+    try { const cube = await ensureCube(); populateSlicer(sel, null, cube.rows || [], null, { allowValues: respBundleCuts() }); } catch (e) {}
     sel.onchange = () => { sel.classList.toggle('on', !!sel.value); redraw(); };
   }
   sel.classList.toggle('on', !!sel.value);
@@ -5746,11 +5750,29 @@ function shapeResponses(r){
     pairs:(r&&r.pairs)||0,
   };
 }
+/* The couple-level cuts, for the one tile that filters rows itself and counts
+   couples: a person-level cut there would count one partner and not the other.
+   It is NOT the list of cuts the response bundles exist for; that is
+   respBundleCuts below, read from the payload. The two were the same list
+   once, which is how four of the server's segments stopped being offered. */
 const RESP_SLICE_DIMS=['relationship_status','relationship_length','children','couple_type','alignment_group','understanding_group'];
+/**
+ * The cuts the response bundles were actually built for.
+ *
+ * `responsesBySegment` is computed on the server, one bundle per segment, and
+ * a tile that reads it can only show a cut that has a bundle. RESP_SLICE_DIMS
+ * above is this page's guess at that list and had drifted to six of the ten
+ * the server sends, which is the copy-of-a-list failure this codebase is
+ * named for. Asking the payload cannot drift.
+ */
+function respBundleCuts(){
+  const seg = window.__responsesBySeg || {};
+  return new Set(Object.keys(seg).filter(Boolean));
+}
 async function renderResponseTile(opts){
   const el=document.getElementById(opts.target); if(!el) return;
   const sel=document.getElementById(opts.selId);
-  if(sel){ try{ const cube=await ensureCube(); populateSlicer(sel,null,cube.rows||[],RESP_SLICE_DIMS); }catch(e){} sel.classList.toggle('on',!!sel.value);
+  if(sel){ try{ const cube=await ensureCube(); populateSlicer(sel,null,cube.rows||[],null,{ allowValues: respBundleCuts() }); }catch(e){} sel.classList.toggle('on',!!sel.value);
     if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderResponseTile(opts); } }
   const seg=(window.__responsesBySeg||{});
   const a=seg[sel?sel.value:'']||seg['']||null; if(!a) return;
@@ -7842,6 +7864,10 @@ function mountSliceDrillUnsafe(sel) {
         r.onclick = (e) => { e.stopPropagation(); path.push(n.label); draw(); };
       } else {
         r.textContent = n.label;
+        /* The value this row stands for, readable from outside. A probe
+           cannot otherwise tell a click that did nothing from a click whose
+           value the select could not hold, and those are different bugs. */
+        r.__sdValue = n.value;
         if (sel.value === n.value) r.setAttribute('aria-selected', 'true');
         r.onclick = () => pick(n.value);
       }
@@ -7908,14 +7934,41 @@ function mountSliceDrillUnsafe(sel) {
  * when the new rows have nobody in it, because a cut showing zero of zero is
  * worse than no cut.
  */
-function populateSlicer(sel, excludeKey, rows, onlyKeys){
+function populateSlicer(sel, excludeKey, rows, onlyKeys, opts){
   if (!sel) return;
+  const allow = opts && opts.allowValues ? opts.allowValues : null;
+  const provisional = !!(opts && opts.provisional);
   /* A short, stable signature. The markup itself is the thing being compared
      and is far too big to park in a DOM attribute. */
   const sign = (t) => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return t.length + ':' + h; };
 
   const cube = window.__CUBE_FOR_SLICERS || null;
-  const tree = sliceTree(cube, rows || [], excludeKey, onlyKeys);
+  let tree = sliceTree(cube, rows || [], excludeKey, onlyKeys);
+  /**
+   * ── ONLY THE CUTS THIS TILE CAN HONOUR ────────────────────────────────
+   * Ellie: "Just made a slicer selection but the chart didnt change and
+   * slicer still says everyone."
+   *
+   * Some tiles do not filter anything: they read a bundle the server
+   * pre-computed per segment, and `responsesBySegment` carries ten fields and
+   * not the rest. Offering a cut there is offering something the tile will
+   * silently fall back from, and the fallback is the WHOLE population, which
+   * looks exactly like a click that did nothing.
+   *
+   * A caller that reads a bundle hands in the keys it has. The tree is pruned
+   * to those, so the panel cannot show a row the tile will ignore. The list
+   * comes from the payload rather than from a copy of the server's field
+   * list, which is what the page used to keep and which had already drifted
+   * to six of the ten.
+   */
+  if (allow) {
+    const prune = (nodes) => nodes.map((n) => {
+      if (!n.children) return allow.has(n.value) ? n : null;
+      const kids = prune(n.children);
+      return kids.length ? { ...n, children: kids } : null;
+    }).filter(Boolean);
+    tree = prune(tree);
+  }
 
   /* Every LEAF becomes an option, labelled with its whole path, so the select
      is still the thing that holds the answer and the button has something to
@@ -7928,11 +7981,34 @@ function populateSlicer(sel, excludeKey, rows, onlyKeys){
   walk(tree, []);
 
   const sig = sign(html);
-  if (sel.dataset.sig !== sig) {
+  /* ── AND A PLACEHOLDER NEVER REPLACES AN ANSWER ───────────────────────
+     The first version of this let the tile win over a provisional fill and
+     said nothing about the other direction, so initAllSlicers, which runs at
+     the end of every showPage, went on replacing the tile's list with its
+     own whenever the two differed. The list the tile had pruned came back
+     wider, and a cut chosen from it vanished on the next render. Both
+     directions, or neither. */
+  if (provisional && sel.dataset.sig && sel.dataset.provisional !== '1') {
+    /* And it leaves the TREE alone too. Setting it here was the same bug one
+       layer down: the options stayed the tile's and the panel went back to
+       the wide list, so every row in it offered a value the select could not
+       hold. A click then did nothing at all, which is what Ellie saw. */
+    mountSliceDrill(sel);
+    return;
+  }
+  /* ── A PLACEHOLDER MUST NOT OUTRANK THE TILE ──────────────────────────
+     initAllSlicers fills every slicer as soon as the cube lands so none of
+     them sits empty while its tile draws. That fill is a guess at the list;
+     the tile's own call is the answer, and it has to win even when the
+     fingerprints happen to differ in the other direction. Without this the
+     two populations alternated, and a cut chosen from one list vanished when
+     the other replaced it. */
+  if (sel.dataset.sig !== sig || (sel.dataset.provisional === '1' && !provisional)) {
     const keep = sel.value;
     sel.innerHTML = html;
     sel.dataset.sig = sig;
     sel.dataset.pop = '1';
+    if (provisional) sel.dataset.provisional = '1'; else delete sel.dataset.provisional;
     if (keep) {
       const still = [...sel.options].some((o) => o.value === keep);
       sel.value = still ? keep : '';
@@ -7980,7 +8056,7 @@ async function initAllSlicers(){
     // Full cut list (populateSlicer hides dims/values with no data), populated
     // from the rows that completed this view's exercise so a value only appears
     // when a responder in THIS view actually has it.
-    try { populateSlicer(sel, cfg.ex||null, exFilterRows(cube.rows||[], cfg.exKind), cfg.only); } catch(e){}
+    try { populateSlicer(sel, cfg.ex||null, exFilterRows(cube.rows||[], cfg.exKind), cfg.only, { provisional: true }); } catch(e){}
   });
 }
 function setTileN(el, n){
@@ -8601,9 +8677,18 @@ async function renderSelfPartnerGap(containerId){
   {
     const sv = document.getElementById('slz-svp');
     if (sv) {
+      /* ── OPTIONS FIRST, THEN THE VALUE ──────────────────────────────
+         This tile writes its own head, so the select is a NEW element on
+         every render with no options on it yet. Restoring the cut before
+         filling it assigned a value the element could not hold, which is
+         silently dropped, and the next line then filled the options with
+         nothing selected: the chart came back uncut and the control said
+         Everyone. The order is the whole fix. */
+      try { populateSlicer(sv, null, cube.rows || [], null, { allowValues: respBundleCuts() }); } catch (e) {}
       sv.value = cut;
-      sv.classList.toggle('on', !!cut);
-      try { populateSlicer(sv, null, cube.rows || [], RESP_SLICE_DIMS); } catch (e) {}
+      if (sv.value !== cut) sv.value = '';
+      sv.classList.toggle('on', !!sv.value);
+      if (sv.__sdLabel) sv.__sdLabel();
       sv.onchange = () => renderSelfPartnerGap(containerId);
     }
   }

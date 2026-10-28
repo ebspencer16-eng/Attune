@@ -41,9 +41,7 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| A161 | **A slicer selection does nothing and the control goes back to Everyone.** My first suspicion is my own gate: every test of a cut so far has SET the value in code, which is not what your click does. Nothing has ever driven the real path, opening the panel and clicking a row, so that is what I am building first. Then the fix. |
+**Nothing open.**
 
 ## 3. For you to review
 
@@ -52,6 +50,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A161 | **Seven slicers took a click and threw it away, and every gate here passed.** The cause was two lists fighting: the up-front fill that stops a dropdown sitting empty kept replacing each tile's own narrower list, so the panel offered cuts the select could not hold. Underneath that, some tiles do not filter anything — they read a bundle the server pre-computed per segment — and a cut with no bundle fell back to the whole population, which looks exactly like a click that did nothing. They now offer the bundle's own keys, which also gets you four cuts the page's hand-typed copy had lost. **Why no gate saw it:** every test of a cut set the value in code, which skips the panel, the walk and the click. One now drives all 68 slicers the way you do. |
 | V3 | **I did not build the two-surface comparison, and here is the measurement that says not to.** Rendering both and diffing the words would be flaky by construction: two layouts never produce the same text. The question underneath is whether the app can disagree about a NUMBER, so I counted: 143 figures are drawn in the app's results screens, 140 are read straight off the payload or formatted, and the nine flagged are positions, clamps and list numbering. The app works nothing out, so there is nothing for a render diff to catch. The one real find: it clamps a percentage to 0-100 before printing, so a value outside that would print differently on the two surfaces. Nothing the server makes today is outside it. |
 | A142 | **The add-on chart you approved was drawn by a different function.** Two renderers pointed at that one canvas and whichever ran last won, so my edit went into the loser; the gate was matching the variable name in the copy nobody drew. One renderer now, your order and colours on it, and the gate matches on content so a renamed copy cannot hide. A sweep over every canvas in the admin found no others. |
 | A141 | **The "undefined" legend was mine, from the colour fix an hour earlier.** It called Chart.js's default label builder for every chart, and a doughnut's legend is one entry per slice built by its own override, so the package mix doughnut got one entry named after its dataset. |

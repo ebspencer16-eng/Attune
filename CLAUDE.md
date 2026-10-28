@@ -585,6 +585,38 @@ works, so `check-field-picker` opens the picker in a browser and reads the
 COMPUTED colour: six bands for six optgroups, 68 options for 68, every band
 painted, six distinct colours, full width.
 
+**Driving a control is not the same as setting its value, and only one of
+them is what the user does.** Seven admin slicers took a click and threw it
+away. Ellie: "Just made a slicer selection but the chart didnt change and
+slicer still says everyone." Every gate passed, including three written for
+those slicers, because all of them assigned `sel.value` in code. That skips
+the panel, the walk down the tree, the pick, the label and the event — which
+is to say, it skips the control.
+
+What it hid was two populations fighting over one dropdown. The up-front fill
+that stops a slicer sitting empty while its tile draws kept replacing the
+tile's own narrower list, so the panel offered rows whose values the select
+could not hold. Assigning a value the select has no option for is silently
+dropped: the control falls back to its first option, which is "Everyone".
+
+The fix has two halves and the second is the one worth remembering. A
+placeholder must never replace an answer, in EITHER direction — the first
+version only stopped the tile being outranked and said nothing about the
+reverse, so the wide list came straight back. And the early return that
+skipped the rebuild still assigned the tree the panel renders from, so the
+options stayed the tile's while the panel went back to the wide list: the
+same bug one layer down.
+
+`check-slicer-click.mjs` opens, walks and clicks all 68 of them in one
+browser. Two of its three plants fail it; the third does not, and that is
+written down in the gate rather than papered over.
+
+**And the order of a restore is part of the restore.** The self-versus-partner
+tile writes its own head, so its select is a NEW element on every render with
+no options yet. Restoring the cut before filling the options assigned a value
+the element could not hold; the next line then built the options with nothing
+selected. Fill, then restore, then check the restore took.
+
 **A repair can land in the dead copy, and then it is reported as done.** The
 promo Status toggle had two implementations: `togglePromoCode`, which the
 table on Order Details draws buttons for, and `toggleBetaCode`, whose only

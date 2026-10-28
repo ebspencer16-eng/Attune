@@ -4164,3 +4164,33 @@ Testimonials page wears the slicer class, and clearing a sort sets a value none
 of its options has, so the dropdown drew blank. A cut always offers a way out
 of itself and a sort does not; that test is in the markup rather than in a list
 of ids.
+
+## 2026-10-28: a slicer that took a click and threw it away
+
+Ellie: "Just made a slicer selection but the chart didnt change and slicer
+still says everyone." Seven of them, and every gate passed.
+
+**Why nothing saw it.** Every test of a cut in this repo assigned
+`sel.value` in code. That skips the panel, the walk, the pick, the label and
+the event, which is to say it skips the control. `check-slicer-click.mjs`
+opens, walks and clicks all 68 slicers in one browser now.
+
+**What was actually wrong.** Two populations fighting over one dropdown.
+`initAllSlicers` fills every slicer as soon as the cube lands so none sits
+empty while its tile draws; it kept replacing each tile's own narrower list,
+so the panel offered rows whose values the select could not hold, and
+assigning a value with no option is silently dropped back to the first one:
+"Everyone". A fill is provisional now and never replaces an answer in either
+direction.
+
+**And a deeper one.** Some tiles do not filter anything — they read
+`responsesBySegment`, which the server pre-computes for ten fields. A cut with
+no bundle fell back to the whole population, which looks exactly like a click
+that did nothing. Those tiles now offer the bundle's own keys, which also
+recovers four cuts the page's hand-typed copy of that list had lost.
+
+Three plants: the placeholder outranking the tile again, and the
+self-versus-partner value restored before its options exist, both fail the new
+gate. The third, a tile offering cuts it has no bundle for, does NOT fail it,
+because the six keys that list happens to contain all have bundles; that is
+written in the gate rather than papered over.
