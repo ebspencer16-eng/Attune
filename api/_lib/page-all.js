@@ -79,3 +79,29 @@ export async function restAll(url, key, path) {
   }
   return { rows: out, error: null };
 }
+
+/**
+ * A read by a list of ids, in batches.
+ *
+ * `.in('id', ids)` writes every id into the request's address, about 37
+ * characters each, and the address has a ceiling. The admin's Feedback page
+ * read every survey respondent's profile that way in one request, so a few
+ * hundred respondents would have failed the whole page. Found in the A170
+ * sweep. Batches of 100 keep each address near 4 KB.
+ *
+ *   const { data, error } = await inBatches(ids, (chunk) =>
+ *     selectProfiles(admin, (q) => q.select('id').in('id', chunk)));
+ *
+ * Any failed batch fails the read: some of the people is not the people.
+ */
+export const IN_BATCH = 100;
+export async function inBatches(ids, read) {
+  const out = [];
+  const list = [...ids];
+  for (let i = 0; i < list.length; i += IN_BATCH) {
+    const r = await read(list.slice(i, i + IN_BATCH));
+    if (r?.error) return { ...r, data: null, error: r.error };
+    out.push(...(r?.data || []));
+  }
+  return { data: out, error: null };
+}

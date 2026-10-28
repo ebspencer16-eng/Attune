@@ -22,7 +22,9 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| A170 | **More sweeps while you are away, your ask: "keep running sweeps".** Each one measures one property over every instance of it. Findings land in section 3 as they are fixed; nothing waits on you. |
 
 ## 3. For you to review
 
@@ -31,6 +33,12 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A170a | **Saving an edit to a live In Practice article could unpublish it.** Saving reads the stored post first, to keep its publish date. If that read failed, the save treated the article as new: it wrote no publish date, which takes it off the site and the app, and gave every paragraph a new id, which detaches readers' notes on it. Proven by running it, not just by reading the code. A failed read now changes nothing and tells you to save again. |
+| A170b | **A failed read was shown as a statement about a person in eight places.** Each turned "we could not find out" into something untrue: your partner has done nothing (home), your partner's account is gone (results), your partner has not finished (Conflict Patterns), you never opted out of research (privacy choices), your partner shares no notes (Notes), you have answered nothing (survey, and exercises in the app). Each now says it could not check. Two of them also wrote over real data: the survey's next save replaced every answer someone had given, and the Shared Budget and Starting Out checklist could put an older copy over the couple's current one. |
+| A170c | **Two things would have stopped working as you grow, without any error.** The admin's Feedback page looked up every survey respondent in one request, and the request has a length limit, so past a few hundred it would fail. The journal-streak and new-article phone notifications did the same with everyone who has notifications on, so past a couple of hundred both would have stopped for everybody. Both now go 100 at a time, and the notification job reads past the 1,000-row limit. |
+| A170d | **Smaller ones.** The detailed time-per-page chart in Engagement was drawn from two hand copies of the same settings; it is one now. A test tool reported the admin's scoring as broken on every input, but the fault was in the tool; fixed, and the admin agrees with the engine on all 8,000 scores it checked. |
+| A170e | **The checks that would have caught these now exist.** 22 bugs planted against them; all 22 caught. The results and static-page checks now also reject "[object Object]" on screen, which is what A169a looked like. Three new checks: check-row-cap, check-childhood-detail and check-unread-is-not-no. |
+| A170f | **One question, no rush.** In Expectations, the app shows what both partners grew up with in full ("Usually Mum, sometimes Dad"). The website shows just "Both". Want them to match? |
 | A169 | **Sweep done. Results generate, and three real bugs are fixed: A169a to A169c.** What I drove: all 5 exercises in a real browser, their stored answers through the real results endpoint as 4 different couples (5,788 strings, 59 section checks), all 29 results sections, 38 static pages, 24 carts, the app's 5 covers on 6 iPhones, all 62 live routes from outside (no server errors), and every gate. |
 | A169a | **Expectations stored nonsense for six days on the website.** From 22 to 28 October, answering Both to who did a task growing up offered two buttons that both read "Usually [object Object], sometimes [object Object]", and that is what was saved. Fixed, so it stores the names you typed for the adults again. For anyone who answered in that window, results show "Both" there, because the two buttons were identical and which one they meant cannot be recovered. **Nothing for you to do** unless you want those people asked that follow-up again. |
 | A169b | **The admin would have stopped updating once any table passed 1,000 rows.** The database answers at most 1,000 rows per request and every admin page but Engagement read in one request, so each figure would have frozen at the first thousand with no error. Page views were the closest to that line. Every whole-table read in the admin, the CSV exports, the digest and the daily push now pages through. The survey nudge had the same problem with its "already answered" list, which past 1,000 respondents would have emailed people who had answered. |

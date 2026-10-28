@@ -83,8 +83,13 @@ export default async function handler(req) {
     const jsonHeaders = { ...svc, 'Content-Type': 'application/json' };
     const rest = (path, init) => fetch(`${supabaseUrl}/rest/v1/${path}`, init);
 
+    /* A failed read throws rather than answering null. Null is "never
+       chosen", so the page showed somebody who had opted out of research as
+       opted in, which is the one sentence this endpoint exists to get right
+       (A170). The handler's catch answers it. */
     const readRow = async () => {
       const r = await rest(`privacy_preferences?owner_id=eq.${me}&select=*`, { headers: svc });
+      if (!r.ok) throw new Error(`privacy_preferences ${r.status}`);
       return (await r.json().catch(() => []))?.[0] || null;
     };
 

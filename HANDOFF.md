@@ -4655,3 +4655,33 @@ as the focus.
 
 Measured and clean: 62 live routes (9/200, 2/400, 28/401, 23/405), the full
 smoke, the chain probe on fresh answers.
+
+## 2026-10-29: A170 sweeps, Ellie away ("keep running sweeps")
+
+Fixed, each gated and planted:
+- admin-posts save treated a failed read as a new post: unpublished live
+  articles, reset revision, re-ided blocks. Refuses now.
+- Failed reads refused instead of drawn as facts: home (partner fallback),
+  results (partner read before partner_not_found), conflict-results (partner
+  fallback), privacy-choices (stored choice; the page now shows its
+  "could not check" line on a refusal too), notes (own profile), questions
+  (own profile), survey GET (and its upsert replaced answers), tool-data
+  (sharedRow throws SharedReadFailed; a missing table still falls back).
+- admin-survey `.in('id', ids)` batched through `inBatches` in page-all.js.
+- Engagement detailed tile: one renderer (engCeiling, drawEngClustered).
+- check-render and check-static-render reject "[object Object]".
+- sweep-scorers harness fixed (engineDimScores import).
+
+New gate: check-unread-is-not-no. Extended: check-row-cap (inBatches),
+check-survey (3b), check-tool-seeding (6, 7), check-couple-link-mutual (home,
+results ordering).
+
+Open question for Ellie: A170f (website Experienced column shows "Both" where
+the app shows the follow-up).
+- cron-push: people via restAll, journal entries and post reads batched by
+  IN_BATCH through getForPeople. check-row-cap now also fails a joined list in
+  an `in.(...)` address unless it is a short array literal. Its blind spot,
+  printed by the gate: a read through a local helper taking a path string.
+- check-app-cover-fits now says "the Expo server stopped answering" rather than
+  "the cover never drew" when the server is gone. Seen in a smoke run in swap;
+  the check passed 30 of 30 on its own straight after.

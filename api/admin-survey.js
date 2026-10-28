@@ -35,7 +35,7 @@ import { demoOwners, selectProfiles } from './_lib/demo-accounts.js';
 /* The anonymous couple key, so a response can be cut by anything the cube
    knows about the person who gave it. One implementation, three callers. */
 import { anonCoupleId } from './_lib/couple-id.js';
-import { pageAll } from './_lib/page-all.js';
+import { inBatches, pageAll } from './_lib/page-all.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -141,16 +141,16 @@ export default async function handler(req) {
        * anonymous couple key, and that key is what lets the Feedback page cut
        * a response by anything at all: see the note on the page's svSlice.
        */
-      const { data: profs, error: profErr } = await selectProfiles(admin, (q) => q
+      const { data: profs, error: profErr } = await inBatches(ids, (chunk) => selectProfiles(admin, (q) => q
         .select('id, partner_profile_id, invite_code, age_range, pronouns, relationship_status, relationship_length, children, signup_source, pkg')
-        .in('id', ids));
+        .in('id', chunk)));
       /* Without this, a failed read leaves every respondent unsegmented and
          the page says so as though it were the answer. */
       if (profErr) throw profErr;
       const partnerIds = [...new Set((profs || []).map((p) => p.partner_profile_id).filter(Boolean))];
       const partnerSeen = new Set();
       if (partnerIds.length) {
-        const { data: pp, error: ppErr } = await selectProfiles(admin, (q) => q.select('id').in('id', partnerIds));
+        const { data: pp, error: ppErr } = await inBatches(partnerIds, (chunk) => selectProfiles(admin, (q) => q.select('id').in('id', chunk)));
         if (ppErr) throw ppErr;
         for (const x of (pp || [])) partnerSeen.add(x.id);
       }

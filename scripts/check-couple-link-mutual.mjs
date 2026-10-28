@@ -47,6 +47,7 @@
  * because every word a customer reads is hers.
  */
 import { readFileSync } from 'node:fs';
+import { SITE_URL } from '../api/_lib/site.js';
 
 const SRC = readFileSync(new URL('../api/results.js', import.meta.url), 'utf8');
 const fails = [];
@@ -64,6 +65,18 @@ if (posCheck < 0) {
 } else if (posCheck > posGate) {
   fails.push('api/results.js tests the link AFTER calling resultsGate. The gate has already'
     + ' decided by then, on a partner row it should not have been handed.');
+}
+
+/* A failed read must be refused before "not found" is decided, or a timeout
+   tells somebody their partner deleted their account (A170). Ordered, not
+   present, for the same reason as above. */
+{
+  const posOk = SRC.indexOf('if (!partRes.ok)');
+  const posNotFound = SRC.indexOf("reason: 'partner_not_found'");
+  if (posOk < 0 || posNotFound < 0 || posOk > posNotFound) {
+    fails.push('api/results.js does not refuse a failed partner read before answering partner_not_found,'
+      + ' so a read that timed out tells somebody their partner is gone.');
+  }
 }
 
 /* The two endings are different states and must stay different: one is a
@@ -101,6 +114,56 @@ if (!colsBlock) {
     + ' is undefined and the mutual-link test would refuse every couple.');
 }
 
+/* ── AND ON THE HOME SCREEN: A PARTNER WE COULD NOT READ IS NOT ABSENT ───
+   api/home.js reads both rows in one request and falls back to a second read
+   of the partner when the first did not bring them. A failed fallback made
+   the partner null, which draws as somebody who has done nothing and holds
+   results back to match. It refuses now, so the app keeps its last good home.
+   Run, not read, both ways: a failed read is refused, and a partner row that
+   is genuinely not there still answers 200 (A170). */
+{
+  const ME = '11111111-1111-4111-8111-111111111111';
+  const PT = '22222222-2222-4222-8222-222222222222';
+  Object.assign(process.env, {
+    SUPABASE_URL: 'https://example.invalid',
+    SUPABASE_SERVICE_KEY: 'test-not-a-real-key',
+    SUPABASE_ANON_KEY: 'test-not-a-real-key',
+  });
+  const realFetch = globalThis.fetch;
+  const realLog = console.log;
+  const realErr = console.error;
+  const homeWith = async (fallback) => {
+    globalThis.fetch = async (url) => {
+      const u = String(url);
+      const ok = (v) => new Response(JSON.stringify(v), { status: 200, headers: { 'content-type': 'application/json' } });
+      if (u.includes('/auth/v1/user')) return ok({ id: ME, email: 't@example.invalid' });
+      /* The pair read brings back only the viewer, so the fallback runs. */
+      if (u.includes('/rest/v1/profiles') && u.includes('or=')) return ok([{ id: ME, partner_profile_id: PT, name: 'A', pkg: 'core' }]);
+      if (u.includes(`/rest/v1/profiles?id=eq.${PT}`)) return fallback();
+      return ok([]);
+    };
+    console.log = () => {};
+    console.error = () => {};
+    try {
+      const home = (await import('../api/home.js')).default;
+      const res = await home(new Request(`${SITE_URL}/api/home`, { headers: { authorization: 'Bearer t' } }));
+      return res.status;
+    } finally {
+      globalThis.fetch = realFetch; console.log = realLog; console.error = realErr;
+    }
+  };
+  const failed = await homeWith(() => new Response('{"message":"timeout"}', { status: 503 }));
+  if (failed < 500) {
+    fails.push(`api/home.js answered ${failed} when the partner could not be read, so the home screen`
+      + ' draws a partner who has done nothing and holds results back. A read that failed is not an answer.');
+  }
+  const absent = await homeWith(() => new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } }));
+  if (absent !== 200) {
+    fails.push(`api/home.js answered ${absent} for a partner row that is genuinely not there. Refusing`
+      + ' that would leave a person whose partner deleted their account with no home screen at all.');
+  }
+}
+
 if (fails.length) {
   console.error('check-couple-link-mutual FAILED');
   for (const f of fails) console.error('  - ' + f);
@@ -108,4 +171,5 @@ if (fails.length) {
 }
 console.log('[check-couple-link-mutual] api/results.js tests that the partner points back before'
   + ' the gate decides, answers partner_link_one_way and partner_not_found separately, names no'
-  + ' exercise as waiting on a one-way link, and selects the column the test needs.');
+  + ' exercise as waiting on a one-way link, and selects the column the test needs. The home screen'
+  + ' refuses rather than drawing a partner it could not read, and still answers for one who is gone.');

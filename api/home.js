@@ -291,10 +291,19 @@ export default async function handler(req) {
     if (me.partner_profile_id) {
       partner = rows.find((r) => r.id === me.partner_profile_id) || null;
       if (!partner) {
+        let partnerUnread = false;
         partner = await t.mark('partner-fallback', async () => {
           const pRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc });
+          if (!pRes.ok) { partnerUnread = true; return null; }
           return (await pRes.json().catch(() => []))?.[0] || null;
         });
+        /* Unknown is not "not started". A failed read here made the partner
+           null, and null draws as somebody who has done nothing, with results
+           held back to match. The app keeps its last good home on a refusal
+           and says it could not refresh, which is true; a partner row that is
+           genuinely gone still comes back empty and reads as absent. Same
+           family as A167. Found in the A170 sweep. */
+        if (partnerUnread) return json({ ok: false, error: 'could not read your partner just now' }, 503);
       }
     }
 

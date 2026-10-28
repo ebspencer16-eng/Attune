@@ -127,6 +127,12 @@ export default async function handler(req) {
       if (!body.title) return json({ ok: false, error: 'title required' }, 400);
 
       const exRes = await rest(`posts?id=eq.${encodeURIComponent(id)}&select=blocks,revision,published_at`, { headers: svc });
+      /* A failed read is not a new post. Treated as one, the save below wrote
+         published_at null, which unpublished a live article for the crime of
+         being edited, reset its revision, and gave every paragraph a new id,
+         which orphans every reader's note anchored to one. Refused instead;
+         the editor keeps its text and can save again (A170). */
+      if (!exRes.ok) return json({ ok: false, error: 'could not read the saved post, so nothing was changed. Try again.' }, 503);
       const existing = (await exRes.json().catch(() => []))?.[0] || null;
 
       const blocks = normaliseBlocks(body.blocks, existing?.blocks);

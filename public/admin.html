@@ -3241,6 +3241,36 @@ function drawAcquisition() {
  * column across all five and every chart is drawn to it. Without that the eye
  * reads three seconds on one chart as the same as three minutes on another.
  */
+/**
+ * One web-and-app time tile, scaled to its own data.
+ *
+ * Module level because two paths draw the detailed tile: drawTimePerPage on
+ * load, drawDetailedOnly on a pill tap. The pill path carried a hand copy of
+ * this and of the ceiling below, identical today, so an edit to one would have
+ * made the tile look different depending on whether a pill had been tapped.
+ * Found by sweep-two-renderers (A170).
+ */
+function engCeiling(c) {
+  let max = 0;
+  if (!c || c.available === false) return undefined;
+  (c.site || []).concat(c.app || []).forEach(function (v) { if (v > max) max = v; });
+  return max > 0 ? Math.ceil(max * 1.1) : undefined;
+}
+function drawEngClustered(canvasId, subId, measure, subtitle) {
+  drawTimeTile(canvasId, subId, measure, 'seconds', function (v) {
+    return {
+      subtitle: subtitle + (v.n ? (' \u00b7 n=' + v.n) : ' \u00b7 nothing timed yet'),
+      labels: v.labels,
+      data: v.site,
+      firstLabel: 'Web',
+      second: { label: 'App', data: v.app, colour: '#E8673A' },
+      colour: '#5C6DDA',
+      axis: 'seconds',
+      max: engCeiling(measure),
+    };
+  });
+}
+
 function drawTimePerPage() {
   const base = engFor('mk');
   if (!base) return;
@@ -3297,31 +3327,13 @@ function drawTimePerPage() {
      Across tiles it cost her the ability to read the small ones at all. */
   const t = { marketing: tp('mk').marketing, exercises: tp('ex').exercises,
               resources: tp('res').resources, results: tp('rs').results };
-  const ceilingFor = function (c) {
-    let max = 0;
-    if (!c || c.available === false) return undefined;
-    (c.site || []).concat(c.app || []).forEach(function (v) { if (v > max) max = v; });
-    return max > 0 ? Math.ceil(max * 1.1) : undefined;
-  };
+  const ceilingFor = engCeiling;
 
   /* Ellie: "should the categories be web and app not seconds and app?" They
      should. The first series had no label of its own, so it fell back to the
      axis name and the legend read "seconds" against "App", which is a unit
      against a surface. The unit belongs in the subtitle, where it is. */
-  const clustered = function (canvasId, subId, measure, subtitle) {
-    drawTimeTile(canvasId, subId, measure, 'seconds', function (v) {
-      return {
-        subtitle: subtitle + (v.n ? (' · n=' + v.n) : ' · nothing timed yet'),
-        labels: v.labels,
-        data: v.site,
-        firstLabel: 'Web',
-        second: { label: 'App', data: v.app, colour: '#E8673A' },
-        colour: '#5C6DDA',
-        axis: 'seconds',
-        max: ceilingFor(measure),
-      };
-    });
-  };
+  const clustered = drawEngClustered;
 
   drawTimeTile('chart-eng-mk', 'eng-mk-n', t.marketing, 'seconds', function (v) {
     return {
@@ -3355,24 +3367,7 @@ function drawDetailedOnly() {
     });
   }
   const detailed = ((engFor('det') || {}).timePerPage || {}).detailed || {};
-  drawTimeTile('chart-eng-det', 'eng-det-n', detailed[chosen], 'seconds', function (v) {
-    return {
-      subtitle: 'Mean seconds' + (v.n ? (' \u00b7 n=' + v.n) : ' \u00b7 nothing timed yet'),
-      labels: v.labels,
-      data: v.site,
-      firstLabel: 'Web',
-      second: { label: 'App', data: v.app, colour: '#E8673A' },
-      colour: '#5C6DDA',
-      axis: 'seconds',
-      max: (function () {
-        let max = 0;
-        const c = detailed[chosen];
-        if (!c || c.available === false) return undefined;
-        (c.site || []).concat(c.app || []).forEach(function (x) { if (x > max) max = x; });
-        return max > 0 ? Math.ceil(max * 1.1) : undefined;
-      })(),
-    };
-  });
+  drawEngClustered('chart-eng-det', 'eng-det-n', detailed[chosen], 'Mean seconds');
 }
 
 /** The two tables and the two note charts. */

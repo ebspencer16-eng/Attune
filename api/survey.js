@@ -157,8 +157,15 @@ export default async function handler(req) {
     let answers = {};
     let finished = false;
     if (me) {
-      const { data } = await t.mark('answers', () => admin.from('survey_responses')
+      const { data, error } = await t.mark('answers', () => admin.from('survey_responses')
         .select('answers, completed_at').eq('respondent_id', me).maybeSingle());
+      /* A failed read is not an empty survey. The form opened blank, and the
+         save replaces the stored answers with what the form sends, so the
+         first autosave after a failed read wrote one answer over everything
+         they had given. Every client already handles a refusal: the app
+         offers a retry, the website hides the card, the feedback page says
+         to refresh. Found by sweep-masquerading-defaults (A170). */
+      if (error) return json(503, { ok: false, error: 'Could not read your answers. Try again in a moment.' }, t.header());
       answers = data?.answers || {};
       finished = !!data?.completed_at;
     }

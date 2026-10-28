@@ -82,8 +82,12 @@ async function draw(p, waitMs) {
   errors.length = 0;
   await page.goto(BASE + p);
   await page.wait(waitMs);
-  const chars = await page.evaluate(() => (document.body.innerText || '').trim().length);
-  return { chars, bad: errors.slice() };
+  const text = await page.evaluate(() => (document.body.innerText || '').trim());
+  /* What the page says, not only how much. A value glued into a sentence as
+     an object, a missing one, or an unfilled name all render as ordinary
+     text and pass a length check; A169a was the first and drew for six days. */
+  const leaks = [...new Set(text.match(/\[object Object\]|\bundefined\b|\bNaN\b|\{[A-Za-z_][A-Za-z0-9_]*\}/g) || [])];
+  return { chars: text.length, bad: errors.slice().concat(leaks.map((l) => `the page reads "${l}"`)) };
 }
 
 let failed = 0;

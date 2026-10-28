@@ -49,7 +49,7 @@ const fails = [];
  * @param theirs the partner's
  * @param shared what is already on the couple row, or null for none
  */
-async function read({ mine, theirs, shared }) {
+async function read({ mine, theirs, shared, readFails = null }) {
   const writes = [];
   let row = shared;
 
@@ -67,6 +67,8 @@ async function read({ mine, theirs, shared }) {
         row = { ...(row || {}), ...body };
         return j([]);
       }
+      if (readFails === 'error') return new Response('{"message":"timeout"}', { status: 503 });
+      if (readFails === 'no-table') return new Response('{"code":"PGRST205"}', { status: 404 });
       return j(row ? [row] : []);
     }
 
@@ -90,7 +92,7 @@ async function read({ mine, theirs, shared }) {
     headers: { Authorization: 'Bearer stub-token' },
   }));
   const payload = await res.json();
-  return { payload, writes, row };
+  return { payload, writes, row, status: res.status };
 }
 
 const BIG = { incomes: { A: '5000', B: '6000' }, expenses: { rent: '2000', food: '600' }, goals: [{ id: 'g1' }] };
@@ -165,11 +167,37 @@ const SMALL = { incomes: { A: '1' } };
   }
 }
 
+// ── 6. The read of the couple's row FAILS ──────────────────────────────────
+/* Found by sweep-masquerading-defaults (A170). A failed read answered null,
+   which is "no row yet", so the endpoint seeded from the profiles and wrote
+   that over the couple's current row: one failed read put each person's
+   pre-sharing copy over the budget they had built together. */
+{
+  const existing = { couple_key: 'x', budget_data: SMALL, editing: {} };
+  const { payload, writes, status } = await read({ mine: BIG, theirs: BIG, shared: existing, readFails: 'error' });
+  if (writes.some((w) => 'budget_data' in w || 'checklist_data' in w)) {
+    fails.push('a FAILED read of the couple row wrote a profile copy over it.');
+  }
+  if (status < 500 || payload.ok !== false) {
+    fails.push(`a failed read of the couple row answered ${status} with ok=${payload.ok}, so the screen shows`
+      + ' an old copy and its next save makes that copy the couple\'s budget.');
+  }
+}
+
+// ── 7. The table is not there yet: the documented fallback still holds ─────
+{
+  const { payload, status } = await read({ mine: BIG, theirs: null, shared: null, readFails: 'no-table' });
+  if (status !== 200 || JSON.stringify(payload.budget) !== JSON.stringify(BIG)) {
+    fails.push(`before migration 076 the endpoint must fall back to the reader's own copy; it answered ${status}.`);
+  }
+}
+
 if (fails.length) {
   console.error('\n check-tool-seeding: moving to one shared tool can lose work.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);
   process.exit(1);
 }
-console.log('[check-tool-seeding] five cases: either partner\'s work reaches the'
+console.log('[check-tool-seeding] seven cases: either partner\'s work reaches the'
   + ' other, the fuller copy wins when both have one, an existing shared row is'
-  + ' never re-seeded, and an empty couple gets no row and no invented value.');
+  + ' never re-seeded, an empty couple gets no row and no invented value, a failed'
+  + ' read writes nothing and says so, and a missing table still falls back.');

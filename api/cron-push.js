@@ -39,6 +39,7 @@ import { journalStreak } from './_lib/journal-use.js';
 import { JOURNAL_ANCHOR } from './_lib/tags.js';
 import { pushOnly } from './_lib/notifications.js';
 import { publishedFilter } from './_lib/posts-filter.js';
+import { IN_BATCH, restAll } from './_lib/page-all.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -90,6 +91,26 @@ export default async function handler(req) {
     if (!r.ok) return null;
     return r.json().catch(() => null);
   };
+  /* Every row, in pages: the server stops at a thousand without saying so.
+     Null on any failure, the same as `get`, so every caller below that treats
+     null as "send nothing" still does. */
+  const getAll = async (path) => {
+    const r = await restAll(url, key, path);
+    return r.error ? null : r.rows;
+  };
+  /* A read about these people, a hundred ids at a time. Every id goes into the
+     address, and past a couple of hundred the address is refused: the journal
+     streak and new-article pushes would have stopped for everybody, silently,
+     once enough people had notifications on. Found in the A170 sweep. */
+  const getForPeople = async (ids, pathFor) => {
+    const out = [];
+    for (let i = 0; i < ids.length; i += IN_BATCH) {
+      const rows = await getAll(pathFor(ids.slice(i, i + IN_BATCH).join(',')));
+      if (rows === null) return null;
+      out.push(...rows);
+    }
+    return out;
+  };
 
   const now = Date.now();
   const counts = { unfinished: 0, streak: 0, post: 0, considered: 0, skipped: 0 };
@@ -110,7 +131,7 @@ export default async function handler(req) {
     stage = 'reachable';
     const cols = ['id', 'name', 'partner_profile_id', 'created_at',
       ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
-    const people = await get(`profiles?push_opt_in=is.true&select=${cols}`);
+    const people = await getAll(`profiles?push_opt_in=is.true&select=${cols}&order=id`);
     if (!Array.isArray(people)) {
       return new Response(JSON.stringify({
         ok: true, ready: false,
@@ -168,9 +189,9 @@ export default async function handler(req) {
        can see what this asks for. Three fields: an id, a day, and a time.
        Nothing anybody wrote. check-journal-privacy reads this select and
        fails the build if `body`, `title` or `anchor_context` appears in it. */
-    const entries = await get('notes?select=owner_id,anchor_key,created_at'
+    const entries = await getForPeople(people.map((p) => p.id), (ids) => 'notes?select=owner_id,anchor_key,created_at'
       + `&anchor_type=eq.${JOURNAL_ANCHOR}`
-      + `&owner_id=in.(${people.map((p) => p.id).join(',')})`);
+      + `&owner_id=in.(${ids})&order=id`);
     if (Array.isArray(entries) && entries.length) {
       const byOwner = new Map();
       for (const e of entries) {
@@ -206,9 +227,9 @@ export default async function handler(req) {
     const post = Array.isArray(fresh) ? fresh[0] : null;
     if (post) {
       const readerSince = new Date(now - READER_WINDOW_DAYS * 24 * HOUR).toISOString();
-      const reads = await get(`post_reads?read_at=gte.${readerSince}`
-        + `&owner_id=in.(${people.map((p) => p.id).join(',')})`
-        + '&select=owner_id,post_id');
+      const reads = await getForPeople(people.map((p) => p.id), (ids) => `post_reads?read_at=gte.${readerSince}`
+        + `&owner_id=in.(${ids})`
+        + '&select=owner_id,post_id&order=owner_id,post_id');
       const perOwner = new Map();
       for (const r of (Array.isArray(reads) ? reads : [])) {
         if (!r?.owner_id) continue;

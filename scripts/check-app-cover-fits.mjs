@@ -139,7 +139,15 @@ for (const phone of PHONES) {
       }
       first = false;
       if (!m) {
-        fails.push(`${cover.key} on ${phone.name}: the cover never drew, so nothing was measured.`);
+        /* Broken or unavailable? In the smoke run on a machine deep in swap,
+           covers drew for two phones and then "never drew" for the rest: the
+           Expo server had stopped answering, and the cover was fine. Ask the
+           server before blaming the cover. */
+        const alive = await fetch(BASE).then((r) => r.ok).catch(() => false);
+        fails.push(alive
+          ? `${cover.key} on ${phone.name}: the cover never drew, so nothing was measured.`
+          : `${cover.key} on ${phone.name}: the Expo server stopped answering. This is "unavailable", not a cover that does not fit; run the check on its own.`);
+        if (!alive) break;
         continue;
       }
       /* The harness's own size, checked once per run rather than believed.

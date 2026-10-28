@@ -19,8 +19,8 @@ export const NOTIFICATION_TRIGGERS = {
     "api/partner-sync.js:314"
   ],
   "partner_shared": [
-    "api/notes.js:658",
-    "api/notes.js:763"
+    "api/notes.js:663",
+    "api/notes.js:768"
   ],
   "partner_deleted": [
     "api/delete-account.js:406"
@@ -54,13 +54,13 @@ export const PUSH_TRIGGERS = {
   ],
   "workbook_ready": [],
   "journal_streak": [
-    "api/cron-push.js:192"
+    "api/cron-push.js:213"
   ],
   "exercise_unfinished": [
-    "api/cron-push.js:149"
+    "api/cron-push.js:170"
   ],
   "new_post": [
-    "api/cron-push.js:227"
+    "api/cron-push.js:248"
   ]
 };
 

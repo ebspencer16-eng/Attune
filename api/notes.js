@@ -157,6 +157,11 @@ export default async function handler(req) {
       : null;
 
     const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,name,pronouns,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
+    /* A failed read made the profile {}, so the partner link vanished for this
+       request: their shared notes dropped out of the list as if there were
+       none, and a note marked shared was refused as having nobody to share
+       with. Refused instead (A170, the A167 family). */
+    if (!pRes.ok) return json({ ok: false, error: 'could not read your account just now' }, 503);
     const profile = (await pRes.json().catch(() => []))?.[0] || {};
     const partnerId = profile.partner_profile_id || null;
     const coupleKey = partnerId ? coupleKeyOf(me, partnerId) : null;

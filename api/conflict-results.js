@@ -171,6 +171,10 @@ export default async function handler(req) {
            named so it is visible in the timing if it ever happens. */
         const pRes = await t.mark('partner-fallback', () => fetch(
           `${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc }));
+        /* A failed read is not a partner who has not finished: null here
+           reads as exactly that below. Refused instead (A170, the A167
+           family). */
+        if (!pRes.ok) return json({ ok: false, error: 'could not read your partner just now' }, 503);
         partner = (await pRes.json().catch(() => []))?.[0] || null;
       }
     }

@@ -123,8 +123,10 @@ function pkgFor(view) {
 }
 
 // Anything in braces that survived to the screen, plus the two words that mean
-// a value was missing rather than absent.
-const LEAK = /\{[A-Za-z_][A-Za-z0-9_]*\}|\[[WXYZ] partner name\]|\bundefined\b|\bNaN\b/g;
+// a value was missing rather than absent, plus an object glued into a sentence.
+// The last is A169a: the Expectations follow-up drew "Usually [object Object],
+// sometimes [object Object]" for six days and this pattern did not look for it.
+const LEAK = /\{[A-Za-z_][A-Za-z0-9_]*\}|\[[WXYZ] partner name\]|\bundefined\b|\bNaN\b|\[object Object\]/g;
 
 const page = await launch({ width: 1280, height: 1200 });
 

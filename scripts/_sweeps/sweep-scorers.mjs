@@ -31,7 +31,12 @@ const QW = `const QUESTION_WEIGHTS = ${JSON.stringify(QUESTION_WEIGHTS)};
 const DIM_KEYS = ${JSON.stringify(DIM_KEYS)};
 const FLIPPED_QUESTIONS = new Set(['st1']);`;
 
-const admin = (await lift('api/admin-data.js', 'calcDimScores', QW)).default;
+/* admin-data.js now calls the engine's scorer under the name engineDimScores,
+   imported rather than defined, so lifting its function alone left that name
+   unbound and every seed "threw". The harness, not the admin (A170). The
+   engine is handed in under that name, which is what the file imports. */
+globalThis.engineDimScores = engine;
+const admin = (await lift('api/admin-data.js', 'calcDimScores', QW + '\nconst engineDimScores = globalThis.engineDimScores;')).default;
 const site  = (await lift('src/App.jsx', 'calcDimScores', QW)).default;
 
 /** Varied answers, not a tidy fixture: a weighting difference vanishes when

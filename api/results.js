@@ -584,6 +584,13 @@ export default async function handler(req) {
 
     const partRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc });
+    /* A read that failed is not a partner who is gone. Without this the
+       failure fell through to partner_not_found below, which is the deleted
+       account's answer, so one bad read told somebody their partner had left.
+       Found in the A170 sweep, the same family as A167. */
+    if (!partRes.ok) {
+      return json({ ok: false, error: 'could not read your partner just now' }, 503);
+    }
     const partner = (await partRes.json().catch(() => []))?.[0];
 
     /**

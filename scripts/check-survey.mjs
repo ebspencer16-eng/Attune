@@ -199,6 +199,32 @@ const lift = (src, needle, where) => {
       }
     }
   }
+  /* ── 3b. A failed read is not an empty survey ─────────────────────────
+     The save replaces stored answers with what the form sends, so a form
+     that opened blank after a failed read overwrote everything on its first
+     autosave. Found by sweep-masquerading-defaults (A170). Both directions:
+     a failure is refused, and a success hands back what is stored, so a
+     handler that refuses everything cannot pass. */
+  const getWith = async (surveyReply) => {
+    globalThis.fetch = async (url) => {
+      const u = String(url);
+      if (u.includes('/auth/v1/user')) return new Response('{"id":"person-1"}', { status: 200 });
+      if (u.includes('/rest/v1/survey_responses')) return surveyReply();
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } });
+    };
+    const r = await handler(new Request('https://x.invalid/api/survey', { headers: { Authorization: 'Bearer t' } }));
+    return { status: r.status, body: await r.json().catch(() => ({})) };
+  };
+  const failed = await getWith(() => new Response('{"message":"boom"}', { status: 500, headers: { 'Content-Type': 'application/json' } }));
+  if (failed.status < 500 || failed.body.ok !== false) {
+    problems.push(`a failed read of somebody's answers answered ${failed.status} with ok=${failed.body.ok}. `
+      + 'The form opens blank, and its first autosave overwrites every answer they gave.');
+  }
+  const held = await getWith(() => new Response(JSON.stringify({ answers: { rating: 3 }, completed_at: null }),
+    { status: 200, headers: { 'Content-Type': 'application/vnd.pgrst.object+json' } }));
+  if (held.status !== 200 || !held.body.answers || held.body.answers.rating !== 3) {
+    problems.push(`a successful read did not hand back the stored answers (status ${held.status}).`);
+  }
   globalThis.fetch = realFetch;
 }
 

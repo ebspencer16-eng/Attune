@@ -740,6 +740,21 @@ template literal, so every backslash in it needs doubling: `/\/api\//` written
 with single backslashes becomes `//`, a line comment, which silently removed
 the rest of the stub and left the screen reporting "You're offline".
 
+**A failed read handed back as `null` becomes a sentence about a person.**
+The A170 sweep found eight endpoints doing `(await res.json().catch(() => []))?.[0]`
+with no `res.ok` before it, so a timeout became "your partner has done
+nothing", "your partner's account is gone", "you never opted out of research".
+Three of them then WROTE on the strength of it: the post editor unpublished a
+live article, the survey replaced every answer with one, the shared tools put
+an old copy over the couple's. The search is one grep:
+
+    grep -rn "json().catch(() => \[\]))?.\[0\]" api
+
+and the triage is what the next line does with null. A read the caller can
+not finish without is refused (503, `ok: false`); every client here already
+draws a refusal as "could not check". check-unread-is-not-no holds the ones
+without a gate of their own.
+
 **The database answers a thousand rows, whatever you ask for.** Supabase cuts
 every request to its max rows, and `.limit(100000)` is cut to it without an
 error or a header saying so. Every admin read but Engagement's took one

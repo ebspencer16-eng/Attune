@@ -162,6 +162,10 @@ export default async function handler(req) {
     const profCols = ['name', 'partner_name', 'relationship_status', 'partner_profile_id', ...answerCols, ...progressCols].join(',');
     const profRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${profCols}`, { headers: svc });
+    /* A failed read is not somebody with nothing saved. Null here sends
+       `saved: null`, the app opens an exercise they have answered as a fresh
+       start, and finishing it again replaces what they gave (A170). */
+    if (!profRes.ok) return json({ ok: false, error: 'could not read your answers just now' }, 503);
     const profile = (await profRes.json().catch(() => []))?.[0] || null;
 
     // The exercise has to be one the registry knows about. Anything else is a

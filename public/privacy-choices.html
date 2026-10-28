@@ -265,7 +265,9 @@
   function load() {
     fetch('/api/privacy-choices', { headers: headers() })
       .then(function (r) { return r.json(); })
-      .then(function (d) { if (d && d.ok) paint(d); })
+      /* A refusal is the same as a failure here: the server could not say
+         what this person chose, so the page must not look as though it did. */
+      .then(function (d) { if (d && d.ok) paint(d); else throw new Error('refused'); })
       .catch(function () {
         text.textContent = 'We could not check your settings just now. Reload to try again.';
         pill.textContent = 'Unavailable';

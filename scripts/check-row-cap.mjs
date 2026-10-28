@@ -17,6 +17,11 @@
  *      and an error on page two is an error rather than half a table.
  *   2. selectProfiles, which every admin profile read goes through, does too.
  *   3. No `.limit(n)` in api/ asks for more than the server will give.
+ *   5. A read by a list of ids goes in batches (inBatches), because every id
+ *      is written into the request's address and the address has a ceiling.
+ *      Run against a fake that refuses more than IN_BATCH ids, and scanned:
+ *      an `.in(` fed from a variable must sit inside inBatches. Found in the
+ *      A170 sweep on the admin Feedback page.
  *   4. In the admin endpoints and the scheduled jobs, every read of a table
  *      that grows without bound goes through the pager, unless it is narrowed
  *      to a few rows: by id, by `.in(`, a single row, a write, an explicit
@@ -30,7 +35,7 @@
  *     They are counted and printed rather than skipped in silence.
  */
 import { readFileSync, readdirSync } from 'node:fs';
-import { pageAll, restAll, PAGE } from '../api/_lib/page-all.js';
+import { pageAll, restAll, inBatches, IN_BATCH, PAGE } from '../api/_lib/page-all.js';
 import { selectProfiles } from '../api/_lib/demo-accounts.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -84,6 +89,19 @@ const fakeBuilder = (failOnPage = -1) => {
   if (r.error || r.rows.length !== N) fails.push(`restAll returned ${r.rows.length} of ${N} rows.`);
 }
 
+{
+  const ids = Array.from({ length: 250 }, (_, i) => `id-${i}`);
+  const fakeRead = (fail) => async (chunk) => {
+    if (chunk.length > IN_BATCH) return { data: null, error: { message: 'URI too long' } };
+    if (fail && chunk[0] === `id-${IN_BATCH}`) return { data: null, error: { message: 'batch failed' } };
+    return { data: chunk.map((id) => ({ id })), error: null };
+  };
+  const r = await inBatches(ids, fakeRead(false));
+  if (r.error || (r.data || []).length !== ids.length) fails.push(`inBatches returned ${(r.data || []).length} of ${ids.length} ids.`);
+  const e = await inBatches(ids, fakeRead(true));
+  if (!e.error || e.data) fails.push('inBatches returned people when a batch failed. Some of the people is not the people.');
+}
+
 /* ── 3 and 4: the reads ─────────────────────────────────────────────────── */
 const strip = (src) => src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
   .split('\n').map((l) => l.replace(/(^|[^:'"`\\])\/\/.*$/, '$1')).join('\n');
@@ -95,7 +113,7 @@ const files = [
 const GROWS = ['profiles', 'orders', 'page_events', 'notes', 'post_reads', 'survey_responses', 'partner_sessions', 'beta_codes'];
 const scoped = (f) => /^api\/(admin-|cron-)/.test(f);
 const NARROW = /\.eq\(\s*['"](id|user_id|owner_id|respondent_id|code|invite_code|order_num)['"]|\.in\(|\.maybeSingle\(|\.single\(|\.insert\(|\.update\(|\.upsert\(|\.delete\(|\.gte\(|\.range\(|head:\s*true/;
-let reads = 0; let paged = 0; let narrow = 0; let dynamic = 0;
+let reads = 0; let paged = 0; let narrow = 0; let dynamic = 0; let inBatched = 0;
 
 for (const f of files) {
   const code = strip(readFileSync(`${ROOT}${f}`, 'utf8'));
@@ -104,6 +122,28 @@ for (const f of files) {
       const line = code.slice(0, m.index).split('\n').length;
       fails.push(`${f}:${line} asks for .limit(${m[1]}); the server gives ${PAGE}. Page it with pageAll.`);
     }
+  }
+  for (const m of code.matchAll(/\.in\(\s*['"][a-z_]+['"]\s*,\s*([A-Za-z_$][\w$.]*)\s*\)/g)) {
+    const before = code.slice(Math.max(0, m.index - 220), m.index);
+    if (/inBatches\(/.test(before)) { inBatched += 1; continue; }
+    const line = code.slice(0, m.index).split('\n').length;
+    fails.push(`${f}:${line} reads .in(..., ${m[1]}) in one request. Every id goes into the address; use inBatches.`);
+  }
+  /* The same thing spelled as PostgREST: `in.(${list.join(',')})` inside an
+     address. cron-push wrote every opted-in person's id that way, which the
+     `.in(` scan above could not see (A170). */
+  for (const m of code.matchAll(/=in\.\(\$\{([^}]*)\.join\(/g)) {
+    /* A list built from a fixed array literal is bounded by its own length:
+       store-workbook-pdf joins [subject, partner], which is a couple and
+       never more. Anything built by .map or a spread is as long as a query
+       made it. */
+    const name = (/^\s*([A-Za-z_$][\w$]*)\s*$/.exec(m[1]) || [])[1];
+    if (name) {
+      const decl = new RegExp(`const ${name} = \\[([^\\]]*)\\]`).exec(code);
+      if (decl && !/\.\.\.|\.map\(/.test(decl[1]) && decl[1].split(',').length <= 4) continue;
+    }
+    const line = code.slice(0, m.index).split('\n').length;
+    fails.push(`${f}:${line} writes a joined list into an in.(...) address in one request. Batch it by IN_BATCH.`);
   }
   if (!scoped(f)) continue;
   for (const m of code.matchAll(/\.from\(\s*['"]([a-z_]+)['"]\s*\)/g)) {
@@ -146,4 +186,5 @@ if (fails.length) {
 }
 console.log(`[check-row-cap] pageAll, restAll and selectProfiles return all ${N} rows through a server that answers ${PAGE} at a time. `
   + `${reads} reads of growing tables in the admin and the scheduled jobs: ${paged} paged, ${narrow} narrowed to a few rows or a time window. `
-  + `${dynamic} REST paths built at run time, which no scanner can read. No .limit over ${PAGE} in api/.`);
+  + `${dynamic} REST paths built at run time, which no scanner can read. No .limit over ${PAGE} in api/. `
+  + `${inBatched} reads by a list of ids, each in batches of ${IN_BATCH}.`);

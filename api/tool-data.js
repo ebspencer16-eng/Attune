@@ -163,13 +163,41 @@ async function readShared({ rest, svc, me, profile, coupleKey, wantsChecklist, w
  * Awaiting them one after another cost two round trips on the one tab that
  * draws three tools.
  */
+/**
+ * The couple's row, or null when they have none yet, or a throw when the read
+ * failed.
+ *
+ * ── WHY A FAILURE THROWS ──────────────────────────────────────────────────
+ * This answered null for all three, and null is what makes readShared seed a
+ * row from the two profiles and WRITE it, merging over whatever is there. So a
+ * single failed read put the profile copy, which is each person's last save
+ * from before the tools were shared, over the couple's current budget or
+ * checklist. Found by sweep-masquerading-defaults (A170).
+ *
+ * The one failure still read as "none" is the table not existing, which is
+ * the documented state before migration 076: no write can land then, so the
+ * old fallback is safe and is what the comment above readShared promises.
+ */
+class SharedReadFailed extends Error {}
 async function sharedRow({ rest, svc, coupleKey, started }) {
   if (!coupleKey) return null;
+  let r;
   try {
-    const r = await (started || rest(`couple_tools?couple_key=eq.${encodeURIComponent(coupleKey)}&select=*`, { headers: svc }));
-    if (!r || !r.ok) return null;
-    return (await r.json().catch(() => []))?.[0] || null;
-  } catch { return null; }
+    r = await (started || rest(`couple_tools?couple_key=eq.${encodeURIComponent(coupleKey)}&select=*`, { headers: svc }));
+  } catch (e) {
+    throw new SharedReadFailed(String(e?.message || e));
+  }
+  /* `started` is created with .catch(() => null), so a null here is a request
+     that never answered, not an empty table. */
+  if (!r) throw new SharedReadFailed('no answer');
+  if (!r.ok) {
+    const detail = await r.text().catch(() => '');
+    if (r.status === 404 || /PGRST205|42P01/.test(detail)) return null;
+    throw new SharedReadFailed(`couple_tools ${r.status}`);
+  }
+  const rows = await r.json().catch(() => null);
+  if (!Array.isArray(rows)) throw new SharedReadFailed('couple_tools did not answer with rows');
+  return rows[0] || null;
 }
 
 /** How much someone has actually put into a tool, for deciding which copy wins. */
@@ -417,7 +445,11 @@ export default async function handler(req) {
     if (body.editing !== undefined) {
       const field = String(body.editing || '').slice(0, 120);
       if (!profile.partner_profile_id) return json({ ok: true, editing: {} });
-      const row = await sharedRow({ rest, svc, coupleKey });
+      /* Presence is a courtesy. A failed read must not fail the screen, and
+         it must not write either: an empty map written now would wipe the
+         partner's own stamp. */
+      let row;
+      try { row = await sharedRow({ rest, svc, coupleKey }); } catch { return json({ ok: true }); }
       const next = { ...(row?.editing || {}) };
       /* Drop this person from wherever they were, then mark where they are.
          Without the first half, leaving a field silently keeps them in it for
