@@ -136,7 +136,12 @@ export function childhoodDisplay(value, detail, adults) {
   const v = childhoodWord(value, adults);
   if (v == null) return null;
   const refined = String(detail ?? '').trim();
-  if (refined) return refined;
+  /* From 22 to 28 October the website stored this follow-up as "Usually
+     [object Object], sometimes [object Object]": it glued the column objects
+     into the sentence instead of their labels. Both of its buttons read the
+     same, so which one somebody meant is not recoverable. The plain answer is
+     what they told us for certain, so that is what shows. */
+  if (refined && !refined.includes('[object Object]')) return refined;
   return v;
 }
 
@@ -308,7 +313,11 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
       categoryId: null,
       categoryIndex: null,
       item: substName(q.text, you, them),
-      prompt: q.core || null,
+      /* Names filled like `item` above it. Two life questions name a person
+         in their core sentence, and this went out with {userName} and
+         {partnerName} still in it. Nothing draws it yet, which is the only
+         reason nobody has seen them. */
+      prompt: q.core ? substName(q.core, you, them) : null,
       you: rawYours,
       them: rawTheirs,
       /**

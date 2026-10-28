@@ -46,9 +46,14 @@ import { TEXT_QUESTIONS } from './_lib/survey.js';
 // Emitting no header is stricter than an allowlist: a cross-origin read is
 // refused by the browser outright. corsHeaders takes a request when an
 // endpoint genuinely needs to answer another origin.
+/* Thirty seconds at the edge and nothing in the browser. It was five minutes
+   in both, so after a quote was featured the admin said "That quote is on the
+   homepage now" while visitors went on seeing the old one for up to ten. The
+   edge copy is what keeps a busy homepage off the database; the browser copy
+   bought nothing but staleness. */
 function json(o) {
   return new Response(JSON.stringify(o), {
-    headers: corsHeaders(undefined, { 'Cache-Control': 'public, max-age=300' }),
+    headers: corsHeaders(undefined, { 'Cache-Control': 'public, max-age=0, s-maxage=30' }),
   });
 }
 

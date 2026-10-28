@@ -30,6 +30,7 @@ import { safeError } from './_lib/http.js';
 import { EXERCISES, isExerciseDone } from './_exercises.js';
 
 import { createClient } from '@supabase/supabase-js';
+import { pageAll } from './_lib/page-all.js';
 
 const hasAnswers = (v) => v && typeof v === 'object' && Object.keys(v).length > 0;
 const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
@@ -60,9 +61,9 @@ export default async function handler(req) {
 
   try {
     const [profQ, ordersQ, psQ] = await Promise.all([
-      admin.from('profiles').select('id, created_at, partner_profile_id, invite_code, joined_via_invite, is_comp, ex3_completed, ex1_answers, ex2_answers, ex3_answers'),
-      admin.from('orders').select('order_num, created_at, total, pkg_key, is_physical, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook').order('created_at', { ascending: false }).limit(2000),
-      admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
+      pageAll(() => admin.from('profiles').select('id, created_at, partner_profile_id, invite_code, joined_via_invite, is_comp, ex3_completed, ex1_answers, ex2_answers, ex3_answers')),
+      pageAll(() => admin.from('orders').select('order_num, created_at, total, pkg_key, is_physical, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook'), { order: ['-created_at', 'id'] }),
+      pageAll(() => admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'), { order: ['invite_code'] }),
     ]);
     const firstErr = [profQ, ordersQ, psQ].find(q => q.error);
     if (firstErr) return new Response(JSON.stringify({ error: safeError('cron-beta-digest', firstErr.error, 'Digest failed.') }), { status: 500 });

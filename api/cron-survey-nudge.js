@@ -7,6 +7,7 @@
  * beta testers entirely (they were asked to do the beta survey directly).
  */
 import { unsubscribeLink } from './_lib/email-footer.js';
+import { restAll } from './_lib/page-all.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -107,10 +108,11 @@ export default async function handler(req) {
    * this exclusion list empty and nudged everybody. */
   const submitted = new Set();
   try {
-    const fr = await fetch(`${url}/rest/v1/survey_responses?select=respondent_id`, { headers: H });
-    if (!fr.ok) throw new Error(`survey_responses ${fr.status}`);
-    const rows = await fr.json();
-    if (!Array.isArray(rows)) throw new Error('survey_responses did not answer with rows');
+    /* Paged: an exclusion list cut at the server's thousand rows nudges
+       everybody past the thousandth respondent who already answered. */
+    const fr = await restAll(url, key, 'survey_responses?select=respondent_id&order=id');
+    if (fr.error) throw new Error(fr.error);
+    const rows = fr.rows;
     for (const r of rows) { if (r && r.respondent_id) submitted.add(r.respondent_id); }
   } catch (e) {
     console.error('[cron-survey-nudge] who has already answered:', e?.message || e);
@@ -120,15 +122,13 @@ export default async function handler(req) {
   // Beta testers -> excluded from all survey emails. Beta = an order used a beta code.
   const betaEmails = new Set();
   try {
-    const bc = await fetch(`${url}/rest/v1/beta_codes?select=code`, { headers: H });
-    if (!bc.ok) throw new Error(`beta_codes ${bc.status}`);
-    const codeRows = await bc.json();
-    if (!Array.isArray(codeRows)) throw new Error('beta_codes did not answer with rows');
+    const bc = await restAll(url, key, 'beta_codes?select=code&order=code');
+    if (bc.error) throw new Error(bc.error);
+    const codeRows = bc.rows;
     const codes = new Set(codeRows.map(c => String(c.code || '').toUpperCase()));
-    const ord = await fetch(`${url}/rest/v1/orders?select=buyer_email,promo_code`, { headers: H });
-    if (!ord.ok) throw new Error(`orders ${ord.status}`);
-    const orderRows = await ord.json();
-    if (!Array.isArray(orderRows)) throw new Error('orders did not answer with rows');
+    const ord = await restAll(url, key, 'orders?select=buyer_email,promo_code&order=id');
+    if (ord.error) throw new Error(ord.error);
+    const orderRows = ord.rows;
     for (const o of orderRows) { const pc = String(o.promo_code || '').toUpperCase(); if (pc && codes.has(pc) && o.buyer_email) betaEmails.add(String(o.buyer_email).toLowerCase()); }
   } catch (e) {
     console.error('[cron-survey-nudge] who is a beta tester:', e?.message || e);

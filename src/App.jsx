@@ -1626,7 +1626,12 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
             const showFutureExpand = futureVal === "Both of us";
             const needsDetail = showFutureExpand && !futureBothDetail;
             const done = itemDone(cat, item);
-            const childDetailOpts = ["Genuinely 50/50", ("Usually " + childCols[0] + ", sometimes " + childCols[1]), ("Usually " + childCols[1] + ", sometimes " + childCols[0])];
+            /* The columns are { slot, label } since the stored slot arrived, and
+               this line went on gluing the objects into a sentence: both
+               buttons read "Usually [object Object], sometimes [object Object]"
+               and that is what was stored, from 22 to 28 October. The label is
+               the words; the app's copy of this line had it right. */
+            const childDetailOpts = ["Genuinely 50/50", ("Usually " + childCols[0].label + ", sometimes " + childCols[1].label), ("Usually " + childCols[1].label + ", sometimes " + childCols[0].label)];
             const futureDetailOpts = ["Genuinely 50/50", ("Usually " + userName + ", sometimes " + partnerName), ("Usually " + partnerName + ", sometimes " + userName)];
             return (
               <div key={item} style={{ background: "white", border: ("1.5px solid " + (done ? "rgba(42,176,127,0.45)" : C.stone)), borderRadius: 14, padding: "0.9rem 0.95rem 1rem", transition: "border-color 0.15s" }}>

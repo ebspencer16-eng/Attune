@@ -807,6 +807,28 @@ for (const name of names) {
   const r = await runOne(name);
   const cfg = EXERCISES[name];
   if (dumpTo && r.stored?.value) dumped[name] = { key: cfg.key, value: r.stored.value };
+  /* ── WHAT WAS STORED, NOT ONLY THAT SOMETHING WAS ──────────────────────
+     This gate said Expectations was "stored correctly" for six days while it
+     stored "Usually [object Object], sometimes [object Object]" for every
+     childhood task answered Both: the follow-up glued column objects into a
+     sentence. A count of answers cannot see a wrong answer. So every string
+     stored is read, and one that is a program's words rather than a person's
+     fails the exercise. Found by probe-exercise-chain, A169. */
+  if (r.ok && r.stored?.value) {
+    const bad = [];
+    const walk = (v, path) => {
+      if (typeof v === 'string') {
+        if (/\[object Object\]|\bundefined\b|\bNaN\b|\{[a-zA-Z]+\}/.test(v)) bad.push(`${path} = "${v.slice(0, 70)}"`);
+      } else if (v && typeof v === 'object') {
+        for (const [k, x] of Object.entries(v)) walk(x, path ? `${path}.${k}` : k);
+      }
+    };
+    walk(typeof r.stored.value === 'string' ? JSON.parse(r.stored.value) : r.stored.value, '');
+    if (bad.length) {
+      r.ok = false;
+      r.why = `stored ${bad.length} answer(s) no person wrote: ${bad.slice(0, 3).join('; ')}`;
+    }
+  }
   if (r.ok) {
     console.log(`  ok    ${name.padEnd(10)} ${cfg.label.padEnd(24)} ${r.stored.doneCount} answers stored`);
   } else {

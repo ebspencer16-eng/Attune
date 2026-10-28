@@ -4629,3 +4629,29 @@ The app half needs an EAS update to reach phones (memory says I publish it).
 The simulator's Expo Go session was showing "Cannot find native module
 'ExpoAsset'", so nothing was checked on the simulator this round; the browser
 measurements are the evidence.
+
+## 2026-10-28, night: A169 sweep
+
+Approved A168, A167, A163f (section 4). Swept for bugs with results and admin
+as the focus.
+
+- A169a: website Expectations stored "Usually [object Object], sometimes
+  [object Object]" for every childhood Both follow-up since 327954e9 (22 Oct),
+  because childCols became {slot,label} and childDetailOpts concatenated the
+  objects. Fixed to `.label`. `childhoodDisplay` drops a stored detail
+  containing "[object Object]" so affected couples read the plain word; the
+  two options were identical, so nothing better is recoverable.
+  check-exercise-flow now fails on program-shaped stored strings;
+  check-childhood-detail holds the repair and the prompt substitution.
+- A169b: PostgREST max rows. New api/_lib/page-all.js (pageAll, restAll; the
+  latter is admin-engagement's old all()). selectProfiles pages. Converted the
+  admin endpoints, admin-csv, cron-beta-digest, cron-daily-push and the survey
+  nudge's three exclusion lists. check-row-cap: behavioural plus a scan of
+  every admin and cron read of a growing table (32 reads: 23 paged, 9 narrow).
+- A169c: /api/featured-testimonials was public max-age=300; now
+  max-age=0, s-maxage=30.
+- probe-exercise-chain's conflict stub learned the endpoint's `or=` read.
+- Expectations life-row `prompt` now goes through substName.
+
+Measured and clean: 62 live routes (9/200, 2/400, 28/401, 23/405), the full
+smoke, the chain probe on fresh answers.

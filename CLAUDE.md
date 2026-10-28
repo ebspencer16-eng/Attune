@@ -740,6 +740,29 @@ template literal, so every backslash in it needs doubling: `/\/api\//` written
 with single backslashes becomes `//`, a line comment, which silently removed
 the rest of the stub and left the screen reporting "You're offline".
 
+**The database answers a thousand rows, whatever you ask for.** Supabase cuts
+every request to its max rows, and `.limit(100000)` is cut to it without an
+error or a header saying so. Every admin read but Engagement's took one
+request, so each figure would have frozen at the first thousand rows of its
+table; a comment on the page_events read said its limit was "high enough that
+reaching it would itself be the news", and the news would never have arrived.
+Whole-table reads go through `pageAll` or `restAll` in `api/_lib/page-all.js`,
+and `selectProfiles` pages by itself. check-row-cap runs the pager against a
+server that answers a thousand at a time.
+
+**A gate that counts what was stored cannot see a wrong answer.**
+check-exercise-flow reported Expectations "stored correctly" for six days while
+it stored "Usually [object Object], sometimes [object Object]". It counted 82
+answers and never read one. The probe that found it reads every string a reader
+would see. It reads what it stores now; any gate whose subject is a value has
+to look at the value.
+
+**A probe stub falls behind the endpoint it stands in for.** probe-exercise-chain
+reported Conflict Patterns "not ready (undefined)" for a couple who had both
+finished. The endpoint had moved to reading both people in one `or=(...)` query
+and the stub answered that with nobody, so the 404 read as a refusal. Print the
+reply before believing the verdict, and make an error reply say it is one.
+
 **The app has a probe host now, so nothing has to swap `_layout.tsx` any
 more.** `attune-app/src/components/probe-host.tsx` is drawn instead of the tabs
 when the web build is opened with `?probe=<name>`, and never on a phone, where

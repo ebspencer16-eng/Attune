@@ -55,6 +55,7 @@ const scoresOf = (self, other) => {
 import { DIM_KEYS, calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, lowConfidence } from './_type-engine.js';
 /* Demo accounts are not people: see api/_lib/demo-accounts.js. */
 import { demoOwners, selectProfiles, withoutDemoOrders } from './_lib/demo-accounts.js';
+import { pageAll } from './_lib/page-all.js';
 
 // Thin wrapper preserving this file's null-guard: a couple with no Exercise 1
 // answers yields null axes/type rather than a midpoint default.
@@ -163,7 +164,7 @@ async function buildCombinedData(admin) {
      workbook_url and sets workbook_status to 'ready'. */
   const [profQ, ordersQ, _demo] = await Promise.all([
     selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, pronouns, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type')),
-    admin.from('orders').select('*'),
+    pageAll(() => admin.from('orders').select('*')),
     demoOwners(admin),
   ]);
   /* Both reads defaulted to an empty list and nothing looked at either error,
@@ -457,7 +458,7 @@ async function exportCombinedXlsx(admin) {
 // pre-results upsells separately yet — flagged as TODO below.
 async function exportOrders(admin) {
   /* A demo's test order is not a sale. The same rule as the admin pages. */
-  const { data: _orders, error: oErr } = await admin.from('orders').select('*').order('created_at', { ascending: false });
+  const { data: _orders, error: oErr } = await pageAll(() => admin.from('orders').select('*'), { order: ['-created_at', 'id'] });
   /* Without this, a failed read exports a file saying no orders exist. */
   if (oErr) return errResponse(500, 'Could not read the orders table');
   const orders = withoutDemoOrders(_orders, await demoOwners(admin));
@@ -659,7 +660,7 @@ async function exportEngagement(admin) {
   if (pErr) return errResponse(500, 'Could not read the profiles table');
   /* No workbooks table: see the note in the research export above. The order
      carries it. */
-  const { data: orders, error: oErr } = await admin.from('orders').select('user_id, addon_workbook, is_physical, workbook_status, workbook_url, card_status');
+  const { data: orders, error: oErr } = await pageAll(() => admin.from('orders').select('user_id, addon_workbook, is_physical, workbook_status, workbook_url, card_status'));
   if (oErr) return errResponse(500, 'Could not read the orders table');
 
   const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
@@ -800,10 +801,10 @@ async function exportFeedback(admin) {
   /* `respondent_id` is read and never written, the same way api/admin-survey.js
      reads it: it is how a demo's answers are left out, and the row that reaches
      the file carries no id, no name and no email. */
-  const { data, error } = await admin
+  const { data, error } = await pageAll(() => admin
     .from('survey_responses')
-    .select('answers, version, source, started_at, updated_at, completed_at, respondent_id')
-    .order('updated_at', { ascending: false });
+    .select('answers, version, source, started_at, updated_at, completed_at, respondent_id'),
+    { order: ['-updated_at', 'id'] });
   if (error) return errResponse(500, 'Could not read the survey table');
   const { ids: demoRespondents } = await demoOwners(admin);
   const entries = (data || [])

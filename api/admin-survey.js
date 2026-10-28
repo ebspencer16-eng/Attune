@@ -35,6 +35,7 @@ import { demoOwners, selectProfiles } from './_lib/demo-accounts.js';
 /* The anonymous couple key, so a response can be cut by anything the cube
    knows about the person who gave it. One implementation, three callers. */
 import { anonCoupleId } from './_lib/couple-id.js';
+import { pageAll } from './_lib/page-all.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -116,9 +117,9 @@ export default async function handler(req) {
   // ── Reading them ─────────────────────────────────────────────────────────
   try {
     const [resQ] = await Promise.all([
-      admin.from('survey_responses')
-        .select('id, answers, version, source, started_at, updated_at, completed_at, couple_id, respondent_id, featured_question, featured_at')
-        .order('updated_at', { ascending: false }).limit(2000),
+      pageAll(() => admin.from('survey_responses')
+        .select('id, answers, version, source, started_at, updated_at, completed_at, couple_id, respondent_id, featured_question, featured_at'),
+        { order: ['-updated_at', 'id'] }),
     ]);
     if (resQ.error) throw resQ.error;
 
@@ -164,8 +165,8 @@ export default async function handler(req) {
        */
       const invited = new Set();
       {
-        const { data: ps, error: psErr } = await admin.from('partner_sessions')
-          .select('invite_code, ex1_answers').limit(2000);
+        const { data: ps, error: psErr } = await pageAll(() => admin.from('partner_sessions')
+          .select('invite_code, ex1_answers'), { order: ['invite_code'] });
         /* Thrown rather than collected: this endpoint has no "what I could
            not read" field in its reply, and a failure here is a quiet
            undercount in every cut rather than a visible gap. The handler's

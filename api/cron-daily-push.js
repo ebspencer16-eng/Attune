@@ -52,6 +52,7 @@ import { WORD_EYEBROW, wordOfTheDay } from './_words.js';
 import { notificationFor } from './_lib/notifications.js';
 import { sendPush } from './_lib/push.js';
 import { dayNumberForOffset } from './_lib/day-number.js';
+import { pageAll } from './_lib/page-all.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -122,9 +123,9 @@ export default async function handler(req) {
 
   let rows = [];
   try {
-    const { data, error } = await admin.from('profiles')
+    const { data, error } = await pageAll(() => admin.from('profiles')
       .select(`id, tz_offset_minutes, ${Object.values(DAILY_KINDS).join(', ')}`)
-      .or(Object.values(DAILY_KINDS).map((c) => `${c}.not.is.null`).join(','));
+      .or(Object.values(DAILY_KINDS).map((c) => `${c}.not.is.null`).join(',')));
     if (error) throw error;
     rows = data || [];
   } catch (e) {

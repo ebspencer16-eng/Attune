@@ -30,6 +30,8 @@
  */
 
 /** The PostgREST filter, for a URL-built query. */
+import { pageAll } from './page-all.js';
+
 export const DEMO_FILTER_QS = 'is_demo=not.is.true';
 
 /** The column, for a select list that has to carry it. */
@@ -50,10 +52,13 @@ export function isMissingColumn(err) {
  * Returns { data, error, demoFilterApplied }.
  */
 export async function selectProfiles(admin, build) {
-  const first = await build(admin.from('profiles')).not(DEMO_COLUMN, 'is', true);
+  /* Paged, because a profile read through here is nearly always the whole
+     table and the server stops at a thousand rows without saying so. See
+     api/_lib/page-all.js. */
+  const first = await pageAll(() => build(admin.from('profiles')).not(DEMO_COLUMN, 'is', true));
   if (!first.error) return { ...first, demoFilterApplied: true };
   if (!isMissingColumn(first.error)) return { ...first, demoFilterApplied: true };
-  const again = await build(admin.from('profiles'));
+  const again = await pageAll(() => build(admin.from('profiles')));
   return { ...again, demoFilterApplied: false };
 }
 

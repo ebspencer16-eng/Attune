@@ -39,6 +39,7 @@ import { fetchProfiles, ownedBy } from './_lib/demo-accounts.js';
    every cube row; one implementation, in couple-id.js. */
 import { anonPersonId } from './_lib/couple-id.js';
 import { marketingPageName, marketingPageShort, abbreviate } from './_lib/page-names.js';
+import { restAll } from './_lib/page-all.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -56,42 +57,10 @@ const json = (b, s = 200) => new Response(JSON.stringify(b), {
 });
 
 /** Every row of a table, paged past PostgREST's default limit. */
-/**
- * Every row of a table, in pages.
- *
- * Returns the error as well as the rows, and that is the point. This used to
- * stop on a bad response and return an empty array, so a select naming a
- * column that does not exist looked exactly like a table with nothing in it.
- * That is what happened: the events select asked for `surface`, migration 061
- * had not been run, PostgREST rejected the whole select, and every chart on
- * the page read zero while the data sat in the table.
- *
- * A tool that cannot tell "broken" from "nothing here yet" is a tool that
- * reports the wrong thing confidently, which is worse than reporting nothing.
- */
-async function all(url, key, path) {
-  const out = [];
-  const step = 1000;
-  for (let from = 0; ; from += step) {
-    const res = await fetch(`${url}/rest/v1/${path}`, {
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        Range: `${from}-${from + step - 1}`,
-        Prefer: 'count=none',
-      },
-    });
-    if (!res.ok) {
-      const detail = await res.text().catch(() => '');
-      return { rows: out, error: `${path.split('?')[0]}: ${res.status} ${detail.slice(0, 160)}` };
-    }
-    const rows = await res.json().catch(() => []);
-    if (!Array.isArray(rows) || rows.length === 0) break;
-    out.push(...rows);
-    if (rows.length < step) break;
-  }
-  return { rows: out, error: null };
-}
+/* Every row of a table, in pages: restAll in api/_lib/page-all.js, which
+   began as this file's own `all()` and is now the one pager every whole-table
+   read in api/ goes through. */
+const all = restAll;
 
 /**
  * Everything the Engagement page draws, from what the product stores.

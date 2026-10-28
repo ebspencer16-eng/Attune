@@ -95,7 +95,7 @@ export default async function handler(req) {
          partner email on it, and the button beside it would send a real
          invitation to a made-up couple. */
       const { data: rows, error: wErr } = await selectProfiles(admin, (q) =>
-        q.select('id, invite_code, partner_joined, partner_email, joined_via_invite').limit(2000));
+        q.select('id, invite_code, partner_joined, partner_email, joined_via_invite'));
       if (wErr) return json({ error: safeError('admin-actions', wErr, 'Could not read who is waiting.') }, 500);
       const waiting = (rows || [])
         .filter((p) => p.partner_email && p.invite_code && !p.partner_joined && !p.joined_via_invite)

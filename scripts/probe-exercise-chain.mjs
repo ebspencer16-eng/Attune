@@ -213,6 +213,11 @@ for (const c of CASES) {
     const u = String(url);
     const reply = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { 'content-type': 'application/json' } });
     if (u.includes('/auth/v1/user')) return reply({ id: ME });
+    /* Both people in one read, which is how the endpoint asks now. This stub
+       knew only the one-at-a-time shape, answered the new one with nobody,
+       and the probe reported "not ready (undefined)" for a couple who had
+       both finished: a 404 read as a refusal. */
+    if (u.includes(`or=(id.eq.${ME}`)) return reply([me, partner]);
     if (u.includes(`id=eq.${ME}`)) return reply([me]);
     if (u.includes(`id=eq.${PT}`)) return reply([partner]);
     return reply([]);
@@ -227,7 +232,9 @@ for (const c of CASES) {
   } catch (e) {
     problems.push(`conflict: /api/conflict-results threw: ${e.message}`);
   }
-  if (body && !body.ready) {
+  if (body && body.ok === false) {
+    problems.push(`conflict: the endpoint answered an error, "${body.error}", which is the harness or the endpoint, not a refusal`);
+  } else if (body && !body.ready) {
     problems.push(`conflict: not ready (${body.reason}) for a couple who both finished it`
       + ' in the real exercise.');
   } else if (body) {

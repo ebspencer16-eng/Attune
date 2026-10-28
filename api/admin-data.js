@@ -68,6 +68,7 @@ import { ANNIVERSARY_QUESTIONS } from './_anniversary-questions.js';
 import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, isAlignmentCategory, scoreIntimacyPair, intimacyDimensionPositions } from './_intimacy-questions.js';
 import { closenessPct, meanPct } from './_lib/alignment.js';
+import { pageAll } from './_lib/page-all.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -724,14 +725,14 @@ export default async function handler(req) {
 
   try {
     const [ordersQ, codesQ, profQ, psQ] = await Promise.all([
-      admin.from('orders').select('*').order('created_at', { ascending: false }).limit(1000),
-      admin.from('beta_codes').select('*').order('code', { ascending: true }),
+      pageAll(() => admin.from('orders').select('*'), { order: ['-created_at', 'id'] }),
+      pageAll(() => admin.from('beta_codes').select('*'), { order: ['code'] }),
       selectProfiles(admin, (q) => q.select('id, partner_profile_id, invite_code, ex2_completed_at, name, partner_name, age_range, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data')),
       /* Legacy. Nothing has written a row to partner_sessions since the
          invited partner got a profile of their own, so this comes back empty;
          it is kept only as a fallback for any couple whose rows predate that.
          See the note on completedCouples below for what it used to decide. */
-      admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
+      pageAll(() => admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'), { order: ['invite_code'] }),
     ]);
 
     const firstErr = [ordersQ, codesQ, profQ, psQ].find(q => q.error);

@@ -67,6 +67,7 @@ import { EXPLORE_SECTIONS, placeAll } from './_lib/explore-sections.js';
 /* The anonymous couple key. api/admin-data.js reads it back to answer a cut,
    so the hash cannot live in either endpoint. */
 import { anonCoupleId, anonPersonId } from './_lib/couple-id.js';
+import { pageAll } from './_lib/page-all.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -781,7 +782,7 @@ export default async function handler(req) {
     // just because one half came in through an invite.
     let partnerSessions = [];
     try {
-      const _ps = await admin.from('partner_sessions').select('invite_code, ex1_answers');
+      const _ps = await pageAll(() => admin.from('partner_sessions').select('invite_code, ex1_answers'), { order: ['invite_code'] });
       if (_ps.error) throw _ps.error;
       /* Keyed by code, so the codes the figures are about are the ones on
          these profiles. A demo's invited partner was otherwise a person. */
@@ -823,10 +824,10 @@ export default async function handler(req) {
          in a shape of its own, because check-admin-read-errors reads the
          ending and a second ending is a second thing to keep teaching it. */
       try {
-        const _j = await admin
+        const _j = await pageAll(() => admin
           .from('notes')
           .select('owner_id, created_at')
-          .eq('anchor_type', JOURNAL_ANCHOR);
+          .eq('anchor_type', JOURNAL_ANCHOR));
         if (_j.error) throw _j.error;
         journalByOwner = journalUseByOwner(_j.data || []);
       } catch (e) {
@@ -847,19 +848,19 @@ export default async function handler(req) {
      *
      * Filtered in the database rather than here, because the marketing half
      * is the larger half and a cube should not pull it across to throw it
-     * away. The limit is there so one runaway table cannot take the whole
-     * endpoint down with it, and it is high enough that reaching it would
-     * itself be the news.
+     * away. It was `.limit(100000)` here, "high enough that reaching it would
+     * itself be the news", and the server cuts every request to a thousand
+     * rows without saying so: past a thousand page views the Depth cuts froze.
+     * Paged now, through api/_lib/page-all.js.
      */
     const portalMsByOwner = new Map();
     {
       try {
-        const _pe = await admin
+        const _pe = await pageAll(() => admin
           .from('page_events')
           .select('owner_id, ms')
           .eq('kind', 'page_time')
-          .like('key', 'app:%')
-          .limit(100000);
+          .like('key', 'app:%'));
         if (_pe.error) throw _pe.error;
         for (const e of _pe.data || []) {
           if (!e.owner_id) continue;
@@ -878,7 +879,7 @@ export default async function handler(req) {
     const articleReaders = new Set();
     {
       try {
-        const _pr = await admin.from('post_reads').select('owner_id').limit(100000);
+        const _pr = await pageAll(() => admin.from('post_reads').select('owner_id'), { order: ['owner_id', 'post_id'] });
         if (_pr.error) throw _pr.error;
         for (const r of _pr.data || []) if (r.owner_id) articleReaders.add(r.owner_id);
       } catch (e) {
@@ -901,8 +902,8 @@ export default async function handler(req) {
     const surveyByRespondent = {};
     const fbCatOptions = Object.fromEntries(Object.keys(FB_CAT_SRC).map((k) => [k, new Set()]));
     try {
-      const { data: svRows = [], error: svErr } = await admin.from('survey_responses')
-        .select('id, respondent_id, answers, updated_at, completed_at, featured_at');
+      const { data: svRows = [], error: svErr } = await pageAll(() => admin.from('survey_responses')
+        .select('id, respondent_id, answers, updated_at, completed_at, featured_at'));
       /* supabase-js RETURNS its error rather than throwing it, so the try
          around this read catches nothing on a failed query: the default fires
          and every respondent reads as unsegmented. Throwing is what reaches
@@ -1183,7 +1184,7 @@ export default async function handler(req) {
     let orderRows = [];
     try {
       /* A demo's test order was a row in the cube, unsegmented but counted. */
-      const { data: _ords = [], error: oErr } = await admin.from('orders').select('*').limit(2000);
+      const { data: _ords = [], error: oErr } = await pageAll(() => admin.from('orders').select('*'));
       /* Same as the survey read above: without this, a failed orders query and
          a shop that has sold nothing are the same empty cube. */
       if (oErr) throw oErr;
@@ -1214,7 +1215,7 @@ export default async function handler(req) {
         codeMeta[String(code).toUpperCase()] = meta;
       }
       {
-        const { data: betaRows, error: bErr } = await admin.from('beta_codes').select('*').limit(1000);
+        const { data: betaRows, error: bErr } = await pageAll(() => admin.from('beta_codes').select('*'), { order: ['code'] });
         if (bErr) couldNotRead.push('the issued promo codes, so add-on attachment counts only what was bought outright');
         else for (const row of betaRows || []) {
           if (row?.code) codeMeta[String(row.code).toUpperCase()] = codeMetaFromRow(row);
