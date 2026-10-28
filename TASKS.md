@@ -24,7 +24,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A170 | **More sweeps while you are away, your ask: "keep running sweeps".** Each one measures one property over every instance of it. Findings land in section 3 as they are fixed; nothing waits on you. |
+| A170 | **Sweeps, your ask while you were away. Two rounds done and live: A170a to A170f in section 3.** Say "keep going" and I'll run another round; nothing waits on you. |
 
 ## 3. For you to review
 
