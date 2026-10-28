@@ -2317,6 +2317,71 @@ if (process.env.PANEL) {
   console.log(out);
 }
 
+/* SDREACH=1: for every slicer on the open page, open its panel, scroll the
+   list to its end, and ask the browser what is under the last row. Ellie: "I
+   can't scroll down in the slicer dropdown to see the full list." A panel
+   clipped by the card it sits in still scrolls, and its last rows are still
+   in the DOM; they are just painted nowhere, so only elementFromPoint can
+   tell. Reports the visible height of the panel against its own height. */
+if (process.env.SDREACH) {
+  /* SDREACH=every walks every page in the sidebar, the way CLICKCUT=every
+     does, so one browser answers for the whole admin. */
+  const pages = process.env.SDREACH === 'every'
+    ? await page.evaluate(() => [...document.querySelectorAll('.sb-item[onclick]')]
+        .map((a) => (/showPage\('([^']+)'\)/.exec(a.getAttribute('onclick') || '') || [])[1]).filter(Boolean))
+    : [null];
+  const out = [];
+  for (const pageName of pages) {
+  if (pageName) {
+    await page.evaluate((id) => {
+      const el = [...document.querySelectorAll('.sb-item[onclick]')]
+        .find((a) => (a.getAttribute('onclick') || '').includes("showPage('" + id + "')"));
+      if (el) el.click();
+    }, pageName);
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  out.push(...(await page.evaluate(async (pageName) => {
+    const res = [];
+    const btns = [...document.querySelectorAll('.page.active .sd-btn')].filter((b) => b.offsetParent);
+    for (const b of btns) {
+      b.scrollIntoView({ block: 'center' });
+      const r = b.getBoundingClientRect();
+      b.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+        clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
+      await new Promise((ok) => setTimeout(ok, 60));
+      const p = b.parentNode.querySelector('.sd-panel');
+      if (!p || p.hidden) { res.push({ id: b.parentNode.querySelector('select').id, err: 'no panel' }); continue; }
+      /* Open the first branch too, since that is the long list. */
+      const branch = [...p.querySelectorAll('.sd-row')].find((x) => x.querySelector('.sd-chev') && !x.classList.contains('sd-back'));
+      if (branch) {
+        const br = branch.getBoundingClientRect();
+        branch.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+          clientX: Math.round(br.left + br.width / 2), clientY: Math.round(br.top + br.height / 2) }));
+        await new Promise((ok) => setTimeout(ok, 60));
+      }
+      p.scrollTop = p.scrollHeight;
+      await new Promise((ok) => setTimeout(ok, 30));
+      const rows = p.querySelectorAll('.sd-row');
+      const last = rows[rows.length - 1];
+      const lr = last.getBoundingClientRect();
+      const hit = document.elementFromPoint(Math.round(lr.left + lr.width / 2), Math.round(lr.top + lr.height / 2));
+      const pr = p.getBoundingClientRect();
+      const card = b.closest('.chart-card');
+      res.push({ page: pageName, id: b.parentNode.querySelector('select').id, rows: rows.length,
+        panelH: Math.round(pr.height), panelBottom: Math.round(pr.bottom),
+        cardBottom: card ? Math.round(card.getBoundingClientRect().bottom) : null,
+        viewport: innerHeight, lastReachable: !!(hit && p.contains(hit)) });
+      b.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true,
+        clientX: Math.round(r.left + r.width / 2), clientY: Math.round(r.top + r.height / 2) }));
+    }
+    return res;
+  }, pageName)));
+  }
+  const bad = out.filter((x) => !x.lastReachable);
+  for (const x of (process.env.SDREACH === 'every' ? bad : out)) console.log('  ' + JSON.stringify(x));
+  console.log(`\nSDREACH: ${out.length - bad.length} of ${out.length} slicers can show their last option.`);
+}
+
 if (process.env.CLICK) {
   for (const q of process.env.CLICK.split('|').map((x) => x.trim()).filter(Boolean)) {
     const out = await page.evaluate((sel) => {

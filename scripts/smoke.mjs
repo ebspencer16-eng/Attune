@@ -102,6 +102,14 @@ try {
 } catch {
   code = 1;
 }
+// The app's half of the cover rule: each exercise's first screen fits the
+// iPhone it is opened on, drawn by the real components in the Expo web build.
+// It starts its own Expo server, which is most of a minute, so it is here.
+try {
+  await run(process.execPath, ['scripts/check-app-cover-fits.mjs']);
+} catch {
+  code = 1;
+}
 stop();
 // Give the child a moment to die before the process exits.
 await Promise.race([once(preview, 'exit'), new Promise((r) => setTimeout(r, 2000))]);

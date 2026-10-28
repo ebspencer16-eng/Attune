@@ -22,19 +22,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { fetchExerciseQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ReflectionQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import {
-  ExerciseComplete, ExerciseEyebrow, ExerciseNav, ExerciseOpening, RankInOrder, exerciseColor,
-} from '@/components/exercise-chrome';
+  ExerciseComplete, ExerciseEyebrow, ExerciseNav, ExerciseOpening, RankInOrder, exerciseColor, ExerciseShell } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
-import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import { useFlushOnUnmount } from '@/hooks/use-flush-on-unmount';
 
@@ -372,21 +369,7 @@ function FreeText({
   );
 }
 
+/** The frame this exercise opens in. One component for all five: ExerciseShell. */
 function Shell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
-      {/* Ellie: "Exercise screens should have a hue gradient like the learn and
-          notes, but the hue gradient should be the exercise color." Its own
-          colour, from the same place its progress bar and its arrows take
-          theirs, so an exercise renamed or recoloured takes this with it. */}
-      <PageWash tint={exerciseColor('ex3')} />
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
-        <Pressable
-      accessibilityRole="button" onPress={onClose} hitSlop={10}>
-          <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
-        </Pressable>
-      </View>
-      {children}
-    </SafeAreaView>
-  );
+  return <ExerciseShell exerciseKey="ex3" onClose={onClose}>{children}</ExerciseShell>;
 }

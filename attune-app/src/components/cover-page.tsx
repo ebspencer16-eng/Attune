@@ -1,3 +1,4 @@
+import { createContext, useContext, useState } from 'react';
 import { View, ScrollView, useWindowDimensions } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -66,12 +67,24 @@ const GLOW_PEAK = 0.34;
  */
 const GLOW_ALPHA = 1 - (1 - GLOW_PEAK) ** (1 / GLOW_RINGS);
 
+/** The smallest glow that still reads as the mark, and below that, the least. */
+const GLOW_MIN = 96;
+const GLOW_FLOOR = 56;
+
+/**
+ * True when a cover has given up all the room its own furniture can give and
+ * still does not fit, so what it holds should tighten its spacing too. Read by
+ * ExerciseOpening; a results chapter is a title and a button and never needs it.
+ */
+const CoverCompact = createContext(false);
+export const useCoverCompact = () => useContext(CoverCompact);
+
 export function CoverPage({
   accent, icon, bottomInset = Spacing.lg, scroll = false, children,
 }: {
   accent: string;
   icon?: string | null;
-  /** How much room the frame leaves under itself. A tab bar, or nothing. */
+  /** How much room the frame leaves under itself. Both callers clear the tab bar. */
   bottomInset?: number;
   /** An exercise's opening prose can be longer than a phone. A chapter's is not. */
   scroll?: boolean;
@@ -85,9 +98,41 @@ export function CoverPage({
      cover a reader already knows is unchanged. Below 800 points the glow is
      the only furniture with room to give: measured on a 667 point screen, the
      cover ran 36 points past the fold and the Start button was clipped. */
-  const glow = winH >= 800 ? GLOW_SIZE : Math.round(Math.max(96, winH * 0.19));
+  const guessGlow = winH >= 800 ? GLOW_SIZE : Math.round(Math.max(GLOW_MIN, winH * 0.19));
+  const guessPad: number = winH >= 800 ? Spacing.xxl : winH >= 720 ? Spacing.lg : Spacing.sm;
+
+  /* ── FITTED TO THE FRAME, NOT GUESSED FROM THE WINDOW ─────────────────
+     Ellie (A163f): "please build appropriate height based on device type
+     user is using." The guess above reads the window, and the window is not
+     the room: a 13 mini is 812 points tall, so it got the full glow, and
+     after the status bar and the tab bar its frame is about 600. Measured by
+     check-app-cover-fits, Communication ran 135 points past the bottom and
+     Start was off the screen on four of six iPhones.
+
+     So the frame is measured, and so is everything in it that is not the
+     glow or the padding. What is left over is the glow's, up to its full
+     size; the padding gives way first, then the glow down to GLOW_MIN, then
+     the contents tighten (CoverCompact) and the glow goes to its floor. Past
+     that it scrolls, which is the right answer at the largest text sizes.
+     The guess is only the first frame, before anything has been measured. */
+  const [frameH, setFrameH] = useState(0);
+  const [fixed, setFixed] = useState<{ normal: number; compact: number }>({ normal: 0, compact: 0 });
+  const [compact, setCompact] = useState(false);
+  let glow = guessGlow;
+  let padV = guessPad;
+  const known = compact ? (fixed.compact || fixed.normal) : fixed.normal;
+  if (scroll && frameH && known) {
+    const fits = [Spacing.xxl, Spacing.lg, Spacing.sm].find((p) => frameH - known - 2 * p >= GLOW_MIN);
+    if (fits !== undefined) {
+      padV = fits;
+      glow = Math.min(GLOW_SIZE, Math.floor(frameH - known - 2 * fits));
+    } else {
+      padV = Spacing.sm;
+      glow = Math.max(GLOW_FLOOR, Math.min(GLOW_MIN, Math.floor(frameH - known - 2 * Spacing.sm)));
+      if (!compact) setCompact(true);
+    }
+  }
   const symbol = Math.round(glow * 0.44);
-  const padV = winH >= 800 ? Spacing.xxl : winH >= 720 ? Spacing.lg : Spacing.sm;
   /* The ScrollView stays. On a screen smaller than any phone this app
      supports, or with the largest accessibility text, a cover can still be
      taller than the glass, and a Start button nobody can reach is worse than
@@ -141,12 +186,33 @@ export function CoverPage({
         style={{ flex: 1, borderRadius: Radius.xl + 8, padding: 1.5 }}>
         {scroll ? (
           <ScrollView
+            testID="cover-scroll"
+            onLayout={(e) => {
+              const h = Math.round(e.nativeEvent.layout.height);
+              if (Math.abs(h - frameH) > 1) setFrameH(h);
+            }}
+
             style={{ flex: 1, borderRadius: Radius.xl + 7, backgroundColor: Palette.cream }}
             contentContainerStyle={{
               flexGrow: 1, alignItems: 'center', justifyContent: 'center',
               paddingHorizontal: Spacing.xxl, paddingVertical: padV,
             }}>
-            {inner}
+            <CoverCompact.Provider value={compact}>
+              {/* The column at its own height. The scroll content is stretched
+                  to the frame by flexGrow, so measuring that would read a short
+                  cover as a tall one and shrink the glow for ever. */}
+              <View
+                style={{ alignSelf: 'stretch', alignItems: 'center' }}
+                onLayout={(e) => {
+                  /* Everything but the glow, at this render's sizes, filed
+                     under the spacing it was measured at. */
+                  const rest = Math.round(e.nativeEvent.layout.height - glow);
+                  const slot = compact ? 'compact' : 'normal';
+                  if (Math.abs(rest - fixed[slot]) > 1) setFixed((f) => ({ ...f, [slot]: rest }));
+                }}>
+                {inner}
+              </View>
+            </CoverCompact.Provider>
           </ScrollView>
         ) : (
           <View

@@ -740,6 +740,35 @@ template literal, so every backslash in it needs doubling: `/\/api\//` written
 with single backslashes becomes `//`, a line comment, which silently removed
 the rest of the stub and left the screen reporting "You're offline".
 
+**The app has a probe host now, so nothing has to swap `_layout.tsx` any
+more.** `attune-app/src/components/probe-host.tsx` is drawn instead of the tabs
+when the web build is opened with `?probe=<name>`, and never on a phone, where
+`Platform.OS` is ios. What it draws arrives as `window.__PROBE__`, built by the
+check from the server's own modules. check-app-cover-fits is the first user;
+the Notes probe still does the old swap and could move onto this.
+
+**A screen sized from the window is sized for the wrong box.** The exercise
+cover read `useWindowDimensions().height` and gave the full glow to anything
+800 points tall, so a 13 mini (812) drew a cover for 812 points in a frame of
+about 600 and Start was off the screen. The window is the phone; the room is
+what is left after the status bar, the Close row and the tab bar. Measure the
+frame with onLayout and fit to that.
+
+**Every tab screen draws under the native tab bar.** That is why each one pads
+by `BottomTabInset`. The exercise cover passed "nothing to clear" under a
+comment saying exercises open over the whole screen, and they do not:
+insights.tsx draws them inside the tab. The question screens already padded;
+the cover was the exception. When a comment says a bar is not there, grep for
+how the neighbours clear it.
+
+**A tile that clips its overflow clips a dropdown inside it, and the dropdown
+still scrolls.** The admin slicer panel is absolutely positioned inside a
+`.chart-card` with `overflow:hidden`, so on a short tile the bottom of the list
+was painted nowhere while its rows stayed in the DOM. Every slicer gate passed,
+because a dispatched click does not care whether a row is visible.
+`document.elementFromPoint` at the last row is the only question that sees it,
+and check-slicer-panel-reach asks it on every admin page.
+
 **And when a surface cannot be driven by the usual checks, mount it in the web
 build.** The app's storycards are Expo components, which no browser gate here
 renders, so the first version passed every structural check while being wrong

@@ -567,6 +567,14 @@
 .sd-panel{position:absolute;z-index:45;top:calc(100% + 4px);right:0;min-width:260px;max-width:340px;
   max-height:min(60vh,380px);overflow-y:auto;background:var(--card);border:1px solid var(--border);
   border-radius:10px;box-shadow:0 10px 28px rgba(16,24,48,.16);padding:.35rem;}
+/* A tile clips what overflows it, for its rounded corners, and the panel is
+   absolutely positioned inside the tile. So on a short tile the bottom of the
+   list was painted nowhere: it scrolled, and the last rows never came into
+   view. Ellie: "I can't scroll down in the slicer dropdown to see the full
+   list." While a panel is open its tile lets it out. Measured by
+   check-slicer-panel-reach, which asks the browser what is under the last row. */
+.chart-card:has(.sd-panel:not([hidden])),.kpi-card:has(.sd-panel:not([hidden])),
+.xp-viz:has(.sd-panel:not([hidden])),.sv-tile-foot:has(.sd-panel:not([hidden])){overflow:visible;}
 .sd-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;box-sizing:border-box;
   text-align:left;background:transparent;border:0;border-radius:6px;padding:.38rem .55rem;font:inherit;
   font-size:.76rem;color:var(--text);cursor:pointer;line-height:1.35;}

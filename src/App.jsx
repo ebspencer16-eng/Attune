@@ -16677,8 +16677,15 @@ export default function App() {
   const [partnerSession, setPartnerSession] = useState(() => {
     try { return JSON.parse(localStorage.getItem('attune_partner_session') || 'null'); } catch { return null; }
   });
-  // True during the initial partner-sync fetch on mount — prevents flicker of stale "waiting" card
-  const [partnerSyncing, setPartnerSyncing] = useState(false);
+  /* ── NOT HEARD, NOT "NOT DONE" ────────────────────────────────────────
+     True until the server has answered about the partner at least once.
+     While it is, a partner row the cache cannot mark Done says so in
+     Ellie's words rather than "Pending", because "we have not checked yet"
+     and "they have not done it" used to render identically. A failed read
+     leaves it true: a failure says nothing about the partner. It was
+     declared here, set by the poll, and read by nothing (A167). */
+  const [partnerSyncing, setPartnerSyncing] = useState(true);
+  const PARTNER_NOT_LOADED = "Not loaded yet";
   /**
    * What in a partner session is actually news.
    *
@@ -16852,20 +16859,19 @@ export default function App() {
     // ex1/ex2, so exiting at hasRealPartner strands the gate on the partner-
     // intimacy check until a manual reload.
     const _needPartnerIntimacy = !!(order?.addonIntimacy) && !(partnerSession?.intimacy?.completedAt);
-    if (!account?.id || (hasRealPartner && !_needPartnerIntimacy)) return;
+    if (!account?.id || (hasRealPartner && !_needPartnerIntimacy)) { setPartnerSyncing(false); return; }
     let cancelled = false;
-    let isFirst = true;
 
     const poll = async () => {
-      if (isFirst && !hasRealPartner) setPartnerSyncing(true);
       try {
         const { supabase: sb, hasSupabase } = await import('./supabase.js');
-        if (!hasSupabase()) return;
+        if (!hasSupabase()) { setPartnerSyncing(false); return; }
 
         // 1. Look up own profile to get partner_profile_id
         const { data: ownProfile } = await sb.from('profiles').select('partner_profile_id').eq('id', account.id).maybeSingle();
         const partnerId = ownProfile?.partner_profile_id;
-        if (!partnerId) return; // Partner hasn't signed up yet
+        // Partner hasn't signed up yet. That is an answer: there is nobody to load.
+        if (!partnerId) { if (!cancelled) setPartnerSyncing(false); return; }
 
         // Reflect the link in local state. Without this, account.partnerJoined
         // stays false until Partner B finishes exercises — so the dashboard's
@@ -16885,6 +16891,7 @@ export default function App() {
         });
         if (!res.ok || cancelled) return;
         const json = await res.json();
+        if (!cancelled) setPartnerSyncing(false);
         // Any answers, not both of the first two. The all-or-nothing gate made
         // partner status binary: a partner mid-way through showed Pending on
         // everything, including exercises they had finished.
@@ -16976,9 +16983,6 @@ export default function App() {
         }
       } catch (e) {
         console.warn('[Attune] partner poll failed:', e);
-      }
-      finally {
-        if (isFirst && !cancelled) { setPartnerSyncing(false); isFirst = false; }
       }
     };
 
@@ -17957,7 +17961,7 @@ export default function App() {
                                 {/* Partner column — status only */}
                                 <div style={stCell}>
                                   {dot(r.partnerDone, false)}
-                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 600, fontFamily: BFONT, color: r.partnerDone ? "#059669" : "#A8997F", whiteSpace: "nowrap" }}>{r.partnerDone ? "Done" : "Pending"}</span>
+                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 600, fontFamily: BFONT, color: r.partnerDone ? "#059669" : "#A8997F", whiteSpace: "nowrap" }}>{r.partnerDone ? "Done" : partnerSyncing ? PARTNER_NOT_LOADED : "Pending"}</span>
                                 </div>
                               </div>
                             );
@@ -19158,13 +19162,13 @@ export default function App() {
                   {[
                     { label: "Communication exercise", done: !!ex1Answers, who: `${userName || "You"}` },
                     { label: "Expectations exercise", done: !!ex2Answers, who: `${userName || "You"}` },
-                    { label: `${partnerName || "Partner"}'s communication`, done: partnerSession?.inviteCode === account?.inviteCode && !!partnerSession?.ex1, who: partnerName || "Partner" },
-                    { label: `${partnerName || "Partner"}'s expectations`, done: partnerSession?.inviteCode === account?.inviteCode && !!partnerSession?.ex2, who: partnerName || "Partner" },
+                    { label: `${partnerName || "Partner"}'s communication`, done: partnerEx1Done, who: partnerName || "Partner", partner: true },
+                    { label: `${partnerName || "Partner"}'s expectations`, done: partnerEx2Done, who: partnerName || "Partner", partner: true },
                   ].map((row, i, arr) => (
                     <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 1.35rem", borderBottom: i < arr.length - 1 ? "1px solid #F9F6F1" : "none", gap: "1rem" }}>
                       <span style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body }}>{row.label}</span>
                       <span style={{ fontSize: "0.75rem", fontWeight: 600, color: row.done ? "#065f46" : "#A36333", fontFamily: font.body, background: row.done ? "rgba(16,185,129,0.1)" : "#FDF8F3", padding: "2px 10px", borderRadius: 99 }}>
-                        {row.done ? "Complete" : "Pending"}
+                        {row.done ? "Complete" : (row.partner && partnerSyncing) ? PARTNER_NOT_LOADED : "Pending"}
                       </span>
                     </div>
                   ))}
@@ -19476,7 +19480,7 @@ export default function App() {
                   ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#059669", fontFamily: font.body }}>Complete</span>
                   : (r.you
                       ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: C.clay, fontFamily: font.body }}>Start →</span>
-                      : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A36333", fontFamily: font.body }}>Pending</span>)}
+                      : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A36333", fontFamily: font.body }}>{partnerSyncing ? PARTNER_NOT_LOADED : "Pending"}</span>)}
               </div>
             ))}
           </div>

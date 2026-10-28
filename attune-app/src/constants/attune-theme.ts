@@ -448,6 +448,13 @@ export const Lift = {
 
 export const MaxContentWidth = 640;
 export const BottomTabInset = 84;
+/**
+ * The native tab bar itself, above whatever the phone puts under it. 84 above
+ * is this plus a Face ID phone's home indicator, a fixed figure that is 35
+ * points too generous on an iPhone SE, which has no indicator. A screen that
+ * has to fit rather than scroll adds the real bottom inset to this instead.
+ */
+export const TabBarHeight = 49;
 
 /**
  * Cards are a border and a radius, not a shadow.

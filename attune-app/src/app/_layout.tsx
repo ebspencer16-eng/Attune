@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
+import ProbeHost, { probeName } from '@/components/probe-host';
 import { initSession } from '@/api/session';
 import { refreshSession } from '@/api/auth';
 import { primeCache } from '@/lib/payload-cache';
@@ -101,7 +102,9 @@ export default function TabLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AnimatedSplashOverlay />
-        <AppTabs />
+        {/* A browser check's screen, in the web build only, when the address
+            asks for one. Never on a phone: see probe-host.tsx. */}
+        {probeName() ? <ProbeHost /> : <AppTabs />}
       </ThemeProvider>
     </GestureHandlerRootView>
   );

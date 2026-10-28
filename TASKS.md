@@ -10,9 +10,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A166 | **Live on the site. Both bugs are fixed and you can tell them.** Yours is the one your last message named: an invitee's own answers are kept in the same browser slot as the PARTNER's answers, as a routing marker, so somebody who finished on another device is not sent back through the exercises. The dashboard accepted that marker as partner data whenever the invite code matched, so the partner column was computed from the reader's own answers. Answers now count as the partner's only if they carry the partner's id, which also repairs the stale markers already in their browsers. Run the query below for the product's own confirmation once one of them has opened results. |
-| A166b | **Abram's was a second, separate bug, also live.** The site's "did anybody pay" test only ever asked about the buyer's order, and an invited partner of a plain core purchase has none of the things it asks for, so it refused him for ever. Two more turned up while checking: a couple linked in one direction only was reported as a partner who had not finished, and one failed background request could take an invited partner's exercises away until the next good one. **All four are general. None is about them skipping checkout.** |
-| A167 | **One phrase of copy, yours.** While the site is still fetching a partner's answers it says their exercises are incomplete, because "we have not checked yet" and "they have not done it" render identically. The code already knows the difference and nothing reads it. I need the words for the partner's row during that second or two. "Checking" and "Not loaded yet" are the shape; the words are your call. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -22,113 +19,6 @@ Every code block says which window it goes in, above the block.
 | O16 | Download numbers need an App Store Connect key. After launch. |
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
-
-### One thing to run, for A166
-
-The fix is live. Run this once one of them has opened their results page;
-before that it correctly says NOT GENERATED YET, because opening the page is
-what computes them.
-
-**Step 1. Paste this into Terminal.** It copies the query and prints `copied`.
-
-```bash
-cd /Users/Ellie/Projects/unison && sed -n '/^with asked/,$p' supabase/diagnostics/results-did-generate.sql | pbcopy && echo copied
-```
-
-**Step 2. Paste that into the Supabase SQL Editor**, not Terminal. Replace
-`REPLACE_WITH_THEIR_EMAIL` with Rebecca's email. Run it. It reads only.
-
-**Step 3. Paste me what it printed.** One row of plain text.
-
-<!-- SQL results-did-generate.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- Did a couple's results actually generate, and what do they say?
---
--- Run this in the Supabase SQL Editor. It reads only; it writes nothing.
---
--- Put either partner's email where it says REPLACE_WITH_THEIR_EMAIL, which
--- appears once, and run it. One row.
---
--- ── WHY THIS IS THE CONFIRMATION ──────────────────────────────────────────
--- Results are frozen: the first time a couple opens them, /api/results
--- computes them and writes one row to couple_results, keyed on the two ids in
--- sorted order. That row existing is the product saying "I generated these",
--- and its couple_type is what the two of them were actually shown.
---
--- So this answers a question no amount of reading the code can: not "should
--- their results open" but "did they, and what came out". Nothing can answer it
--- until one of them has opened the page, because that is what computes it.
---
--- content_version arrives with migration 046. If that has not run, this
--- errors on an unknown column rather than reporting it, which is the honest
--- failure: there is no way to read a column that is not there.
---
--- ── WHAT ITS ANSWERS MEAN ─────────────────────────────────────────────────
---   NOT GENERATED YET   no row. Either nobody has opened results since the
---                       fix deployed, or they still cannot.
---   GENERATED           a row, with the couple type and when it was frozen.
---   GENERATED, STALE    a row whose answers_hash no longer matches what the
---                       two of them have stored, which is what a retake looks
---                       like. The stored row is still what they see; this is
---                       information, not a fault.
-
-with asked as (select lower('REPLACE_WITH_THEIR_EMAIL') as email),
-pair as (
-  select p.id as me, p.partner_profile_id as them, p.name, p.email
-  from public.profiles p, asked a
-  where lower(p.email) = a.email
-),
-ordered as (
-  -- The same canonical order orderPair uses in api/_lib/results-store.js, so
-  -- this looks for the row where the row actually is.
-  select least(me, them) as a, greatest(me, them) as b, name, email from pair
-)
-select
-  concat_ws(E'\n',
-    'couple: ' || coalesce(o.name, '?') || ' <' || coalesce(o.email, '?') || '> and partner',
-    '  stored results row: ' || case when r.partner_a is null then 'NOT GENERATED YET'
-                                     else 'GENERATED' end,
-    case when r.partner_a is null then
-      '  nothing to report until one of them opens their results, which is what computes them'
-    else concat_ws(E'\n',
-      '  couple type: ' || coalesce(r.couple_type, 'none recorded'),
-      '  frozen at: ' || coalesce(r.frozen_at::text, r.computed_at::text, 'unknown'),
-      -- Cast before coalescing. Both of these are integer columns, and
-      -- `coalesce(r.version, '?')` is a type error Postgres refuses outright:
-      -- "COALESCE types integer and text cannot be matched". It parses
-      -- perfectly, which is why the parser said yes and the database would
-      -- have said no, in front of Ellie.
-      '  engine version: ' || coalesce(r.version::text, '?')
-        || ', content version: ' || coalesce(r.content_version::text, 'not set'),
-      '  sections in the stored payload: '
-        || coalesce((select count(*)::text from jsonb_object_keys(r.results)), 'unreadable')
-    ) end
-  ) as report
-from ordered o
-left join public.couple_results r
-  on r.partner_a = o.a and r.partner_b = o.b;
-```
-<!-- /SQL -->
-
-
-
----
-
-
----
-
-
----
-
-
----
-
-
-
----
-
-
----
 
 ## 2. Open
 
@@ -141,44 +31,11 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A164b | **Found on the way, and unrelated to them: the database schema file could not be run at all, and said it could.** `supabase/schema.sql` opens with "Run this in the Supabase SQL Editor. Safe to run in order; each block is idempotent." Seven of its statements used a form of CREATE POLICY that PostgreSQL has never had, so it stopped at line 25 with a syntax error, and an eighth error sat hidden behind the first. If you had ever pasted it, setting up a new project or restoring one, you would have got an error you could not act on. Fixed, and the file's own promise is now checked by a gate: every CREATE in it has to be safe to run twice. Six planted bugs fail it, including the next version of the same mistake. |
-
-| A164 | **Found it, fixed it, and it was not their fault at all. Nothing for you to run.** Abram is an invited partner, and every term in the website's "did anybody pay" test is something the BUYER's order carries: an order number, a comp flag, a package above core, or an add-on. An invited partner has none of those. Their device rebuilds a couple-level order from what the server sends, and that carried the add-ons and the workbook and nothing about the grant, so for a plain core purchase the answer was no. The gate then said nobody had paid and the dashboard told him he was waiting on you. **Your data is perfect:** mutual link both ways, no duplicate accounts, both of you finished both exercises you own, and when I ran the real gate over your two rows it answers ready for both of you. The server would have served the results; the website refused them. **It is general, not yours:** every invited partner of every core purchase hit this, which is the ordinary path. The server now sends the buyer's grant, the device carries it, and the rule reads it. **Live once this deploys, with no migration and nothing to click.** |
-| A164b | **The query that found it is kept, and it is the thing to reach for next time a couple cannot see results.** `supabase/diagnostics/results-will-not-open.sql`, read-only, prints one block per person: whether the couple link is mutual, what each account is granted, where every exercise stopped, duplicate accounts by three routes, and orders matched both ways. It took three attempts to make it useful, and what it taught is in HANDOFF.md: the first version lacked the columns that decide, the second made you read four of them, and the third prints one block you can paste back whole. |
-| A163 | **Scan done. Five real bugs, all fixed, and one gap that needs your call.** Clean: all 314 gates, the app's typecheck, and every one of the 62 API routes asked from outside the live site with no credentials (28 answered "not allowed", 23 "wrong method", 9 public, 2 "bad request", and no server errors, which is the measurement that tells a rejection from a crash). The five are A163a to A163e below. |
-| A163a | **An exercise could un-finish itself, silently.** Saving progress on Conflict Patterns or Physical Intimacy first reads what is already stored, so a half-answered save cannot wipe a completion. That read's failure was not checked, and the database returns its errors here rather than throwing, so a rejected query read as "nothing was stored" and the completion was overwritten with the half-answered record. The couple's results would have closed again. It now saves nothing and says so, because the app autosaves again a moment later and an erased completion is not recoverable. |
-| A163b | **An invited partner could silently inherit less than you paid for.** Partner B's access is built by unioning every one of Partner A's orders, matched by account and also by email because a guest checkout has no account on it. The email lookup's failure was not checked while both order lookups beside it were, so a rejected query quietly dropped exactly the guest-checkout orders that branch exists to find. Both now fail loudly instead. |
-| A163c | **The one string that names a couple had five implementations.** It is a sort of the two ids, retyped in the orders module, in the survey endpoint, and in three places that already shared it. They all agreed, which is why nothing had noticed; two partners computing it differently is how one writes a row the other cannot find. One implementation now, and a new check runs all the producers over the same pairs both ways round. Four planted bugs fail it. |
-| A163d | **The conflict miscount you reported was never actually gated.** Your words were "I have 4 items in my conflict action plan on that overview page, but one thing listed in the what comes next section for conflict." The fix shipped and the code claimed a check held it; no such check existed. It does now, in the conflict test, and planting the old bug back reproduces your numbers exactly: four against one. |
-| A163e | **Five dashboard tiles were wired twice**, from two places, under a comment reading "keep consistent with the other one". That is how the add-on chart went wrong in a way you had to report twice: an edit to one copy is invisible when the other draws last. One function now. Also removed: a read of your email preference whose answer nothing used, sitting under a comment saying the preference was respected. |
-| A163f | **The one gap I did not close, because it is yours to weigh.** The app's cover screens (the first screen of each exercise) are not checked for fitting on a phone without scrolling. The website's are. Worse, the check that lists what it does not cover named a file that has never existed, so it read as covered. I corrected the sentence. Building it needs the app driven through its web build, about the same work as the Notes screen probe. Worth it, or leave it? |
-| A162 | **Every slicer in the admin offers every cut now.** Five groups were narrow and all for one reason: the cut was picked from a list of fields the server happened to carry, instead of being sent to the server. The completion funnel offered 23 cuts, eight Responses tiles 39, Self v partner 39, Couple type x outcomes 39, the eleven Feedback tiles 29. Measured again after the fix, every one of the 66 tile slicers now offers between 115 and 150, and the only reason any offers fewer than 150 is that its tile is about the people who did one particular exercise, so fewer values occur among them. A score band, an alignment either side of a line or a horseman now cuts those tiles the same way Age does. **What I drove to check it:** 134 clicks in a real browser, every slicer twice, once on an ordinary cut and once on a derived one, with the tile's figures read before and after. |
-| A162b | **One thing to say no to if you want.** The page now tells the server which people a cut keeps, and it names them with a one-way hash rather than an id: nothing can be turned back into a person. The admin already carried the same kind of value for couples. The banner's promise, "records are identified by random UUID only", still reads true. Say the word and the narrow slicers come back. |
-| A162c | **A bug you did not report, found while measuring: every Engagement tile answered a score-band cut with a zero.** That endpoint took the cut as a field name and looked it up on a person's row, and a derived cut has no field name, so nobody matched and every chart drew nought. A zero reads as a finding, which is worse than a click that does nothing. Both ends now refuse a cut that matched nobody and say so on the page instead. |
-| A162d | **Three things got deleted on the way.** The admin's data endpoint carried its own alignment and understanding banding beside the one the slicers are actually built from, and nothing read it once the pre-computed cuts went. The Feedback page had its own drill-down tree builder that knew about seven fields. And the Engagement endpoint's field lookup, which is what the zero in A162c came from. The dashboard's first load is smaller too: it used to compute one cut of every measure per segment value whether anybody asked for it or not. |
-| A162e | **A cut that keeps people but no couples now says so instead of snapping back.** Some tiles count couples, and the panel offers a value as soon as one person has it, so a value only unpaired people have is a real and empty cut. My first version put the control back to Everyone, which is exactly the thing you reported in the first place. The tile draws a dash and says "No couple has both halves yet", and the selection stays where you put it. |
-| A161 | **Seven slicers took a click and threw it away, and every gate here passed.** The cause was two lists fighting: the up-front fill that stops a dropdown sitting empty kept replacing each tile's own narrower list, so the panel offered cuts the select could not hold. Underneath that, some tiles do not filter anything — they read a bundle the server pre-computed per segment — and a cut with no bundle fell back to the whole population, which looks exactly like a click that did nothing. That half has since been fixed properly rather than narrowed, under A162: the cut is sent to the server instead of chosen from a list of bundles it happened to have built, so those tiles offer all 150 cuts now. **Why no gate saw it:** every test of a cut set the value in code, which skips the panel, the walk and the click. One now drives all 68 slicers the way you do. |
-| V3 | **I did not build the two-surface comparison, and here is the measurement that says not to.** Rendering both and diffing the words would be flaky by construction: two layouts never produce the same text. The question underneath is whether the app can disagree about a NUMBER, so I counted: 143 figures are drawn in the app's results screens, 140 are read straight off the payload or formatted, and the nine flagged are positions, clamps and list numbering. The app works nothing out, so there is nothing for a render diff to catch. The one real find: it clamps a percentage to 0-100 before printing, so a value outside that would print differently on the two surfaces. Nothing the server makes today is outside it. |
-| A142 | **The add-on chart you approved was drawn by a different function.** Two renderers pointed at that one canvas and whichever ran last won, so my edit went into the loser; the gate was matching the variable name in the copy nobody drew. One renderer now, your order and colours on it, and the gate matches on content so a renamed copy cannot hide. A sweep over every canvas in the admin found no others. |
-| A141 | **The "undefined" legend was mine, from the colour fix an hour earlier.** It called Chart.js's default label builder for every chart, and a doughnut's legend is one entry per slice built by its own override, so the package mix doughnut got one entry named after its dataset. |
-| A143 | **Expectations modeled on experience: the outcome is the x axis now**, one colour per category, and Not classified is out of the bars and into the subtitle with its count. |
-| A144 | **Gender roles over generations, and your two confusing rows renamed.** They described the same action twice. Read as pairs: keeps their gender's role and leaves the other gender's role are the pattern repeating; hands their gender's role over and takes the other gender's role are it swapping. |
-| A145 | **Why anything is unclassified, and what Other change counts.** Both charts need two halves: what somebody saw growing up and what they expect now. Unclassified is one half missing or in a spelling the reader cannot resolve; the gendered one needs more still, which is why it loses more. Other change is an arrangement that appeared or disappeared, such as nobody to shared, rather than moving between shared and one person. |
-| A146 | **Responsibilities after each part-two header.** Household means two different questions depending on which half of the exercise you are in, and the header was the only thing that could say which. |
-| A147 | **The (0), (1) are gone from the relationship feel labels.** |
+| A168 | **The slicer list scrolls to its last option now. Open any slicer on a short tile, such as Orders at a glance, and scroll to the bottom.** The tile was clipping the bottom of the list, so the last rows were never painted however far you scrolled. Measured across every admin page in a browser: 20 of 54 slicers could not show their last option before, 0 after. A new check, check-slicer-panel-reach, now runs with every build. |
+| A167 | **"Not loaded yet", your words, on the partner rows while the site is still fetching their answers.** Three places: the dashboard's progress table, the account page and the results waiting screen. A failed fetch leaves it saying Not loaded yet rather than Pending, because a failure tells us nothing about your partner. The account page was also still matching the partner by invite code, which is the A166 bug; it uses the partner's id now. |
+| A163f | **Built. Every exercise's first screen in the app now fits the iPhone it is on, SE to Pro Max, with Start above the tab bar.** The check found 13 of 30 covers scrolling, up to 135 points on a 13 mini. Two causes: the cover sized itself from the phone's whole height rather than the room it had, and it was the one screen in the app that did not leave room for the tab bar, so Start could sit behind it. It now measures its frame and shrinks the glow, then its spacing, to fit. On an SE the glow is small; on anything from a 16 Pro Max up it is the size you know. **Reaches your phone with the next app update, which I publish.** |
 | A148 | **Avg dimension results, built like the Communication one.** It is neither alignment nor the most common answer: it is where the average answer sits between each dimension's two ends. The poles are on the tile now, and the two groups are two dots on one track. |
-| A149 | **The pie legends are gone**, and A150: all three forced-choice tiles are pies. Each subtitle names the two answers in the order the slices are drawn. |
-| A151 | **Renamed: What makes conflict go better than expected, and What people appreciate about how conflict is handled.** |
-| A152 | **Two new code frames, one per question, each column an answer.** "One of us apologised first", "We took a break and came back", "Nobody raises their voice". The shared reflection frame was about a relationship, which is why it gave you "Getting through something hard" for a question about a disagreement. |
-| A153 | **Explore opens empty**, with a line saying what to do rather than a default cross-tab nobody asked for. |
 | A154 | **A swap button between Rows and Columns.** |
-| A155 | **Marketing columns are H, OP, BP, WR, IP, FAQ**, with the whole name on hover. Your abbreviations are not the initials of the long names, so both are written down and a gate checks every page has each. |
-| A156 | **A hover over blank space says nothing.** |
-| A157 | **Cover pages are out of the detailed results list**, 13 sections down to 11. Every reader passes through a cover, so its seconds say nothing about interest. |
-| A158 | **The pills, measured this time.** The first fix was real and was not the cause: the handler called the function that draws all five tiles. With the old handler a tap rebuilt five charts; it now rebuilds one, and a gate taps a real pill and reads every chart's identity. |
-| A159 | **Slicers reset to Everyone when a page opens**, each one telling its tile so the chart redraws. A sort or a view switch is not a cut and is left alone: the difference is whether the control offers a way out of itself. |
-| A160 | **The "add a theme" box is gone and themes are read from the words.** It was yours to type, 120 answers at a time, and every chart downstream was reporting how far that had got. There is a By category view on Testimonials now: your categories, best quote first, with the count and an honest line about what matched nothing. |
-| A140 | **Your rule, and you were right that it felt wrong.** The old one cut one averaged distance at 0.2, which is a threshold that means something between two answers to one question and almost nothing averaged over forty: everybody fell the wrong side and the aligned tile was empty. Misaligned is now under half aligned in two or more categories, and both tiles say the count. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -190,6 +47,42 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A145 | **Unclassified answers stay off both inheritance charts, counted in the subtitle. Your call: nothing to change.** |
+| A166 | **Rebecca saw her own answers as her partner's: an invitee's routing marker was read as partner data. Answers count as the partner's only with the partner's id.** |
+| A166b | **Abram was refused for ever: the "did anybody pay" test asked only about the buyer's order. Plus a one-way couple link and a failed request taking an invitee's exercises away.** |
+| A164 | **An invited partner of a core purchase could never open results. The server now sends the buyer's grant and the website reads it.** |
+| A164b | **supabase/schema.sql could not be run at all and said it could. Fixed and gated. The diagnostic query for a couple who cannot see results is kept.** |
+| A163 | **Bug scan: 314 gates, the app typecheck and all 62 routes from outside. Five real bugs, all fixed.** |
+| A163a | **Saving progress could overwrite a finished exercise when a read failed. It now saves nothing and says so.** |
+| A163b | **An invited partner could inherit fewer orders than were paid for when the email lookup failed silently.** |
+| A163c | **The couple's identifying string had five implementations. One now, gated over every producer.** |
+| A163d | **Your conflict miscount, four plan items against one: the fix was never gated. It is now.** |
+| A163e | **Five dashboard tiles wired twice. One function now, and a dead read of the email preference removed.** |
+| A162 | **Every admin slicer offers every cut, 115 to 150 each. The cut is sent to the server instead of picked from a list.** |
+| A162b | **A cut names people by a one-way hash, never an id.** |
+| A162c | **Engagement tiles answered a derived cut with zero. Both ends now refuse a cut that matched nobody.** |
+| A162d | **Three dead copies deleted: the admin's own banding, the Feedback tree builder, the Engagement field lookup.** |
+| A162e | **A cut with people but no couples draws a dash and says so instead of snapping back to Everyone.** |
+| A161 | **Seven slicers threw clicks away. Now a gate drives all 68 the way you do.** |
+| V3 | **No render diff between app and website: the app works nothing out, so there is nothing for one to catch.** |
+| A142 | **The add-on chart had two renderers on one canvas. One now, with your order and colours.** |
+| A141 | **The "undefined" legend on the package mix doughnut, from the colour fix.** |
+| A143 | **Expectations modeled on experience: outcome on the x axis, one colour per category.** |
+| A144 | **Gender roles over generations: the two confusing rows renamed into keep/swap pairs.** |
+| A146 | **Responsibilities after each part-two header.** |
+| A147 | **The (0), (1) removed from the relationship feel labels.** |
+| A149 | **Pie legends removed.** |
+| A150 | **All three forced-choice tiles are pies.** |
+| A151 | **Renamed the two conflict "what goes well" tiles.** |
+| A152 | **Two new code frames for the conflict questions.** |
+| A153 | **Explore opens empty, with a line saying what to do.** |
+| A155 | **Marketing columns H, OP, BP, WR, IP, FAQ with full names on hover.** |
+| A156 | **A hover over blank space says nothing.** |
+| A157 | **Cover pages out of the detailed results list.** |
+| A158 | **A pill rebuilds one chart, not five.** |
+| A159 | **Slicers reset to Everyone when a page opens.** |
+| A160 | **The "add a theme" box removed; themes read from the words, with a By category view on Testimonials.** |
+| A140 | **Misaligned is under half aligned in two or more categories, and both tiles show the count.** |
 | A135 | **Every top-level banner takes white type. White reads 4.1 to 4.7 on the four darker bands, 3.5 on Relationship Reflection, 2.9 on Conflict Patterns and 1.9 on Engagement.** |
 | A136 | **Engage/Withdraw and Open/Guarded moved into Communication Styles, Typing, beside the two types they are the axes of.** |
 | A137 | **The catch-all section became Engagement, with depth by time in the portal, read an article, left a survey response, and NPS. No recorded time means no band rather than the bottom one.** |

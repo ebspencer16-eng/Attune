@@ -16,9 +16,11 @@ import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
 
 import {
-  AccentFallback, AccentFor, Colors, Palette, Radius, Spacing, Type,
+  AccentFallback, AccentFor, Colors, TabBarHeight, Palette, Radius, Spacing, Type,
  Fonts } from '@/constants/attune-theme';
-import { CoverPage } from '@/components/cover-page';
+import { CoverPage, useCoverCompact } from '@/components/cover-page';
+import PageWash from '@/components/page-wash';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GROUP_ICON } from '@/components/results-menu';
 
 const c = Colors.light;
@@ -26,6 +28,39 @@ const c = Colors.light;
 /** The exercise's own colour, from the one place that maps them. */
 export function exerciseColor(key?: string | null) {
   return (key && AccentFor[key]) || AccentFallback;
+}
+
+/**
+ * The frame every exercise screen sits in: the safe area, the wash in the
+ * exercise's own colour, and Close top right.
+ *
+ * It was a private `Shell` typed out five times, identical but for the key in
+ * the wash, so the cover check (check-app-cover-fits) would have measured a
+ * sixth copy rather than the one that ships. Each exercise still has a local
+ * Shell, which is now one line handing its key to this.
+ */
+export function ExerciseShell({
+  exerciseKey, onClose, children,
+}: {
+  exerciseKey: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
+      {/* Ellie: "Exercise screens should have a hue gradient like the learn and
+          notes, but the hue gradient should be the exercise color." Its own
+          colour, from the same place its progress bar and its arrows take
+          theirs, so an exercise renamed or recoloured takes this with it. */}
+      <PageWash tint={exerciseColor(exerciseKey)} />
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
+        <Pressable accessibilityRole="button" onPress={onClose} hitSlop={10}>
+          <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
+        </Pressable>
+      </View>
+      {children}
+    </SafeAreaView>
+  );
 }
 
 /**
@@ -158,14 +193,45 @@ export function ExerciseOpening({
   resultsGroup?: string | null;
 }) {
   const tint = exerciseColor(exerciseKey);
+  const safe = useSafeAreaInsets();
   return (
-    /* Opened over the whole screen rather than under the tab bar, so there is
-       no bar for the frame to clear. */
-    <CoverPage accent={tint} icon={resultsGroup ? GROUP_ICON[resultsGroup] : null} scroll>
-      <Text style={{ ...Type.eyebrow, color: tint, marginTop: Spacing.lg, textAlign: 'center' }}>{label}</Text>
-      <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.md, textAlign: 'center' }}>{intro.title}</Text>
+    /* ── IT CLEARS THE TAB BAR ─────────────────────────────────────────
+       This said an exercise is "opened over the whole screen", so there was
+       no bar to clear. It is not: insights.tsx draws the exercise in place
+       of the tab's content, every tab screen draws under the native bar and
+       pads by BottomTabInset, and so does the results cover. Without it the
+       bottom of this cover, Start included, sat behind the bar.
+
+       The bar this phone actually has, not BottomTabInset's fixed 84: that
+       left an iPhone SE's covers 20 to 27 points short of fitting for the
+       sake of a home indicator it does not have. */
+    <CoverPage accent={tint} icon={resultsGroup ? GROUP_ICON[resultsGroup] : null}
+      bottomInset={TabBarHeight + safe.bottom + Spacing.lg} scroll>
+      <OpeningContents tint={tint} label={label} intro={intro} onBegin={onBegin} />
+    </CoverPage>
+  );
+}
+
+/**
+ * What the cover holds. Its own component because it reads useCoverCompact,
+ * which only answers inside the CoverPage: on a frame too short for even the
+ * smallest glow, every gap here tightens a step.
+ */
+function OpeningContents({
+  tint, label, intro, onBegin,
+}: {
+  tint: string;
+  label: string;
+  intro: ExerciseIntro;
+  onBegin: () => void;
+}) {
+  const tight = useCoverCompact();
+  return (
+    <>
+      <Text style={{ ...Type.eyebrow, color: tint, marginTop: tight ? Spacing.sm : Spacing.lg, textAlign: 'center' }}>{label}</Text>
+      <Text style={{ ...Type.hero, color: c.textStrong, marginTop: tight ? Spacing.xs : Spacing.md, textAlign: 'center' }}>{intro.title}</Text>
       {intro.body.map((para) => (
-        <Text key={para.slice(0, 24)} style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.lg, lineHeight: 24, textAlign: 'center' }}>
+        <Text key={para.slice(0, 24)} style={{ ...Type.body, color: c.textMuted, marginTop: tight ? Spacing.md : Spacing.lg, lineHeight: 24, textAlign: 'center' }}>
           {para}
         </Text>
       ))}
@@ -176,7 +242,7 @@ export function ExerciseOpening({
           draw the same two. An eyebrow and a heading, which is what Ellie
           asked for: "neither tile should have a description". */}
       {intro.parts && intro.parts.length ? (
-        <View style={{ flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.xl, width: '100%' }}>
+        <View style={{ flexDirection: 'row', gap: Spacing.md, marginTop: tight ? Spacing.lg : Spacing.xl, width: '100%' }}>
           {intro.parts.map((part, i) => (
             <View
               key={part.eyebrow}
@@ -195,19 +261,20 @@ export function ExerciseOpening({
         </View>
       ) : null}
       {intro.note ? (
-        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl, textAlign: 'center' }}>{intro.note}</Text>
+        <Text style={{ ...Type.small, color: c.textMuted, marginTop: tight ? Spacing.lg : Spacing.xl, textAlign: 'center' }}>{intro.note}</Text>
       ) : null}
       <Pressable
         accessibilityRole="button"
+        testID="exercise-start"
         onPress={onBegin}
         style={{
-          marginTop: Spacing.xxl, borderRadius: Radius.pill,
+          marginTop: tight ? Spacing.xl : Spacing.xxl, borderRadius: Radius.pill,
           paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
           alignItems: 'center', backgroundColor: tint,
         }}>
         <Text style={{ ...Type.cardTitle, color: Palette.white }}>{intro.cta}</Text>
       </Pressable>
-    </CoverPage>
+    </>
   );
 }
 

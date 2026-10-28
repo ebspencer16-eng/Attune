@@ -4600,3 +4600,32 @@ serves. The server half deploys with the same commit.
 Note for next time: the bundle is linked from `/app`, not from `/`. A marker
 script pointed at the homepage finds no asset path, curls the page itself, and
 reports zero, which looks identical to an undeployed fix.
+
+## 2026-10-28, evening: approvals, A168, A167, A163f
+
+Ellie approved most of section 3; all moved to section 4. A166 removed from
+section 1 at her word (the couple will say if anything is wrong). A145 closed
+with nothing to change.
+
+- A168: admin slicer lists could not reach their last option on short tiles.
+  `.chart-card{overflow:hidden}` clipped the absolutely positioned panel. A
+  `:has(.sd-panel:not([hidden]))` rule lets the tile overflow while a panel is
+  open. check-slicer-panel-reach (in npm run check) drives every slicer on
+  every admin page and asks elementFromPoint about the last row: 34/54 before,
+  54/54 after.
+- A167: partner rows say "Not loaded yet" (her words) until /api/partner-sync
+  has answered once. `partnerSyncing` starts true, success clears it, failure
+  does not. Account page now uses partnerEx1Done/partnerEx2Done instead of the
+  invite-code match. check-partner-not-loaded, five plants.
+- A163f: app exercise covers fit SE to 16 Pro Max. ExerciseShell replaces five
+  identical Shell copies; CoverPage fits glow and padding to its measured frame
+  and tells its contents to tighten (useCoverCompact) when even the minimum
+  glow does not fit; the exercise cover clears TabBarHeight + safe bottom.
+  check-app-cover-fits runs in the smoke via the new probe host.
+
+### Where this stops
+
+The app half needs an EAS update to reach phones (memory says I publish it).
+The simulator's Expo Go session was showing "Cannot find native module
+'ExpoAsset'", so nothing was checked on the simulator this round; the browser
+measurements are the evidence.
