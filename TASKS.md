@@ -41,8 +41,9 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.** Everything from your last message is built, and V3 is
-answered in section 3 rather than built, with the measurement that answers it.
+| # | What I am doing |
+|--|--|
+| A161 | **A slicer selection does nothing and the control goes back to Everyone.** My first suspicion is my own gate: every test of a cut so far has SET the value in code, which is not what your click does. Nothing has ever driven the real path, opening the panel and clicking a row, so that is what I am building first. Then the fix. |
 
 ## 3. For you to review
 
