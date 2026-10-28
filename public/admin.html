@@ -5651,15 +5651,10 @@ async function loadRealDemographics() {
 
     // The dashboard also shows two demographic-derived visuals — relationship
     // length and "how couples found Attune". Those render once at page load,
-    // before this data arrives, so they came up empty. Re-render them here now
+    // before this data arrives, so they came up empty. Re-rendered here now
     // that relLengths/sourceData are populated. Targeted (not gated on the page
     // being active) since renderBars/mkChart work on off-screen elements too.
-    // Cube-backed + sliceable — keep consistent with initCharts('overview').
-    wireCubeTile({target:'chart-rellength',field:'relationship_length',selId:'slz-ovrellen',color:'#5C6DDA'});
-    wireOrderChartWithPeriod({target:'ov-sum-tiles',kind:'ovsum',selId:'slz-ovsum',periodId:'slz-ovsum-period'});
-    wireCubeTile({target:'chart-source',field:'signup_source',mode:'pie',selId:'slz-source',color:DEMO_HUE});
-    wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
-    wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
+    wireOverviewTiles();
   } catch (e) {
     console.warn('[admin] real demographics load failed:', e);
   }
@@ -10078,14 +10073,35 @@ function renderThresholdGrid(r) {
   html += '</div></details>';
   host.innerHTML = html;
 }
+/**
+ * The five tiles the dashboard draws, wired once.
+ *
+ * ── WHY IT IS A FUNCTION ──────────────────────────────────────────────────
+ * These five calls existed twice, here and at the end of
+ * loadRealDemographics, because the tiles have to be drawn again once the
+ * profile data lands or they come up empty. The second copy carried a comment
+ * reading "keep consistent with initCharts('overview')", which is this
+ * codebase's whole failure mode admitting itself in a comment: one rule
+ * maintained by hand in two places, with nothing checking they agree.
+ *
+ * They did agree, which is why nobody had looked. What it cost was the
+ * add-on chart: an edit to one copy of a renderer is invisible when another
+ * copy runs after it, and Ellie had to report that one twice.
+ * sweep-two-renderers names both callers of a canvas, which is how this
+ * surfaced.
+ */
+function wireOverviewTiles() {
+  wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
+  wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
+  wireCubeTile({target:'chart-rellength',field:'relationship_length',selId:'slz-ovrellen',color:'#5C6DDA'});
+  wireOrderChartWithPeriod({target:'ov-sum-tiles',kind:'ovsum',selId:'slz-ovsum',periodId:'slz-ovsum-period'});
+  wireCubeTile({target:'chart-source',field:'signup_source',mode:'pie',selId:'slz-source',color:DEMO_HUE});
+}
+
 function initCharts(page) {
   if (page==='overview') {
     renderRegrouped();
-    wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
-    wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
-    wireCubeTile({target:'chart-rellength',field:'relationship_length',selId:'slz-ovrellen',color:'#5C6DDA'});
-    wireOrderChartWithPeriod({target:'ov-sum-tiles',kind:'ovsum',selId:'slz-ovsum',periodId:'slz-ovsum-period'});
-    wireCubeTile({target:'chart-source',field:'signup_source',mode:'pie',selId:'slz-source',color:DEMO_HUE});
+    wireOverviewTiles();
   }
   else if (page==='orders') {
     /* Order Details holds everything Promo Analytics used to, so its three

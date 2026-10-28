@@ -73,7 +73,7 @@ const json = (body, status = 200) => new Response(JSON.stringify(body), { status
  * It has to match the schedule in vercel.json. If the cron ran hourly and this
  * said 30, every time in the other half hour would be silently skipped for
  * ever, and the only symptom would be somebody saying they never get theirs.
- * check-daily-push-window.mjs holds the two together.
+ * check-daily-push.mjs holds the two together.
  */
 export const WINDOW_MINUTES = 30;
 

@@ -183,7 +183,18 @@ async function handlePartnerSync(req) {
       const { data: byId, error: e1 } = await sb.from('orders').select(ORDER_SELECT).eq('user_id', partnerA.id);
       if (e1) throw e1;
       add(byId);
-      const { data: aProf } = await sb.from('profiles').select('email').eq('id', partnerA.id).maybeSingle();
+      /* ── THE SAME ENDING AS THE ORDER READS EITHER SIDE OF IT ────────
+         This read had no error bound while both order reads around it do
+         `if (eN) throw eN`. Two reads in one function handled two ways, and
+         the careless one is the later one, which is this codebase's own tell.
+
+         supabase-js returns its error, so a rejected query left `aProf`
+         null, the branch below was skipped, and the invitee inherited only
+         the orders matched by user_id: exactly the guest-checkout orders
+         the comment above says this exists to find. A paying couple's
+         partner would quietly have had less access than they bought. */
+      const { data: aProf, error: eProf } = await sb.from('profiles').select('email').eq('id', partnerA.id).maybeSingle();
+      if (eProf) throw eProf;
       if (aProf?.email) {
         const { data: byEmail, error: e2 } = await sb.from('orders').select(ORDER_SELECT).eq('buyer_email', aProf.email.toLowerCase());
         if (e2) throw e2;
@@ -274,10 +285,16 @@ async function handlePartnerSync(req) {
       const { data: authB } = await sb.auth.admin.getUserById(bId);
       const partnerBName = authB?.user?.user_metadata?.name || 'Your partner';
 
-      // Respect Partner A's email_opt_in preference
-      const { data: partnerAProfile } = await sb.from('profiles')
-        .select('email_opt_in').eq('id', partnerA.id).maybeSingle();
-      const optedOut = partnerAProfile && partnerAProfile.email_opt_in === false;
+      /* A read of `email_opt_in` was here, under a comment saying the
+         preference was respected, and its answer went into a const that
+         nothing consulted. The email it used to gate was retired for the
+         alert row below, and nothing replaced the gate because an alert is
+         not an email. So the read was a round trip per partner link whose
+         answer was discarded, under a sentence claiming a mechanism.
+
+         The preference itself is live and honoured where it applies:
+         api/unsubscribe.js sets it, and cron-checkin and cron-survey-nudge
+         both select on `email_opt_in=eq.true`. */
 
       /**
        * ── THE ALERT, WHICH IS WHAT REPLACED THE EMAIL ───────────────────
@@ -454,7 +471,12 @@ async function handlePartnerSync(req) {
         // order (a test purchase, a single add-on) would otherwise strip the
         // invitee's inherited add-ons on every poll. Also match by buyer_email
         // because guest-checkout orders can have a null user_id.
-        const { data: aProf } = await sb.from('profiles').select('email').eq('id', pid).maybeSingle();
+        /* Bound and thrown, like the two order reads below it. Without this
+           a rejected query drops every guest-checkout order from what the
+           invitee inherits, silently. See the note on the other copy of this
+           read above. */
+        const { data: aProf, error: eProf } = await sb.from('profiles').select('email').eq('id', pid).maybeSingle();
+        if (eProf) throw eProf;
         const rows = [];
         const seen = new Set();
         const add = (list) => { for (const r of (list || [])) { const k = r.order_num || JSON.stringify(r); if (!seen.has(k)) { seen.add(k); rows.push(r); } } };

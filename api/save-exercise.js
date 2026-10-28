@@ -190,8 +190,28 @@ export default async function handler(req) {
     // asked to lose.
     updates[spec.column] = answers;
     if (isProgress && answers && typeof answers === 'object' && !answers.completedAt) {
-      const { data: existing } = await admin
+      /**
+       * ── AND A FAILED READ IS THE SAME BUG ONE LAYER DOWN ────────────────
+       * This was `const { data: existing } = await ...`, with no error bound.
+       * supabase-js RETURNS its error rather than throwing, so a rejected
+       * query leaves `existing` null, `was` undefined, and the line below
+       * writes a progress record with no completedAt over a finished one.
+       *
+       * Which is to say: the guard that the paragraph above exists to
+       * describe was itself defeated by a failed read, silently, and the
+       * couple's readiness for results went with it. Destructive by
+       * omission, one layer further down than the bug it was written for.
+       *
+       * Answered rather than worked around. A progress save is an autosave
+       * and the client sends another one a moment later; a completion that
+       * has been erased is not recoverable at all. So nothing is written.
+       */
+      const { data: existing, error: storedErr } = await admin
         .from('profiles').select(spec.column).eq('id', resolvedUserId).maybeSingle();
+      if (storedErr) {
+        console.error('[save-exercise] could not read the stored completion:', storedErr);
+        return err(503, 'Could not read the stored completion, so nothing was saved');
+      }
       const was = existing?.[spec.column]?.completedAt;
       if (was) updates[spec.column] = { ...answers, completedAt: was };
     }

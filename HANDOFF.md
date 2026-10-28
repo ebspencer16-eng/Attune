@@ -4261,3 +4261,79 @@ so every intimacy responder had no children and that tile's cut was a no-op in
 the fixture. And the probe read a tile's state only from a canvas, so four
 at-a-glance tiles of figures reported "no chart" and a cut landing on them was
 invisible; two of them drew four dashes on every cut before that was fixed.
+
+## 2026-10-28: a scan for bugs and breaks
+
+Ellie: "Scan for bugs and breaks, I will engage in a bit."
+
+**What came back clean.** All 314 gates. The app's typecheck. Every one of the
+62 API routes asked from outside the live site with no credentials: 28 refused,
+23 wrong-method, 9 deliberately public, 2 bad-request, no 5xx. CLAUDE.md's own
+habit, and the only thing that tells a rejection from a crash.
+
+**Five real bugs, all of one shape.** supabase-js RETURNS its error rather than
+throwing, so `const { data: x } = await ...` makes a rejected query
+indistinguishable from an empty answer. check-admin-read-errors holds that rule
+over `api/admin-*.js` and says so in writing; the other 49 endpoints are
+outside it. Seventeen reads there bind data and never bind error. Two of the
+seventeen change what the product DOES:
+
+- `api/save-exercise.js` read the stored record before a progress save, so a
+  half-answered save could not wipe a completion. The read's failure was
+  unchecked, so a rejected query erased the completion the guard existed to
+  protect. It answers 503 and writes nothing now: the app autosaves again, and
+  an erased completion is not recoverable.
+- `api/partner-sync.js`, twice, read Partner A's email to find guest-checkout
+  orders, with no error bound, while both order reads either side of it did
+  `if (eN) throw eN`. Two reads in one function handled two ways, and the
+  careless one later: CLAUDE.md's own tell. A rejected query dropped exactly
+  the orders that branch exists to find, so an invitee silently inherited less
+  than the couple paid for.
+
+**The couple key had five implementations.** Found with the one grep this file
+recommends, for a function defined twice. `api/_lib/couple-key.js` holds the
+rule; `order-promo.js` and `api/survey.js` had each retyped the sort. Its header
+has always said "check-couple-key holds them to it" and there was no such file,
+which is worse than silence: a sentence claiming coverage is what somebody
+reads before deciding whether to look. `check-couple-key.mjs` exists now, runs
+all three producers over the same pairs both ways round, forbids a sixth copy,
+and found the fifth on its first run. Four plants fail it.
+
+The fifth copy is also the lesson: `api/survey.js` agreed about the common case
+and differed about the edge, filing a solo respondent under their bare id
+rather than null, so `survey_responses.couple_id` holds two shapes and anything
+comparing it to a couple key matches the pairs and never the solos.
+
+**A name collision I made an hour earlier.** `api/_lib/couple-id.js` exported a
+`coupleKeyOf` taking a profile, beside `couple-key.js`'s `coupleKeyOf` taking
+two ids: two modules differing by one word, same export name, different
+signature, in a language with no import checking. Renamed to `coupleAnchorOf`.
+
+**The conflict miscount was claimed to be gated and was not.** "4 items in my
+conflict action plan... one thing listed in the what comes next section."
+api/results.js carried "check-conflict-plans-agree holds the two together now";
+no such file. The rule is true today, by both callers going through one
+summariser, and nothing watched it. Asserted in `scripts/conflict-test.mjs`,
+which already had the complete record a new gate would have had to mirror.
+Planting the old bug back reproduces her numbers: four against one.
+
+**Two more, smaller.** Five dashboard tiles were wired from two places under a
+comment reading "keep consistent with initCharts('overview')", which is this
+repo's failure mode admitting itself in a comment; they are `wireOverviewTiles`
+now. And `partner-sync.js` read `email_opt_in` into a const nothing consulted,
+under a comment saying the preference was respected: the email it gated was
+retired for an alert row and nothing replaced the gate.
+
+**The gap left open, deliberately.** The app's cover screens are not checked for
+fitting a phone. `check-cover-fits` covers the website and its own
+what-this-does-not-cover sentence named `scripts/probe-cover-fits.mjs`, which
+has never existed, so the one line written to admit a gap was claiming
+coverage. The sentence is corrected and the gap is A163f in TASKS.md.
+
+**Two measurement bugs of my own, both in this scan.** My failure counter
+grepped case-insensitively for "failed" and matched the word in a gate's own
+prose, so a clean run reported one failure. And the first pass for unchecked
+reads looked for `data = []` defaults, which is not how these files are
+written: zero hits, and the honest spelling (`{ data: name }` with no error
+bound) had seventeen. Before believing a zero, print how the thing being
+counted is usually spelled.

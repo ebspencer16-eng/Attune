@@ -18,8 +18,10 @@
 // hash changes with them, which is correct: the document did change.
 //
 // Run before build, like build-pkg-rules and build-flags. The result is
-// committed so the site works from a plain checkout, and check-legal-version
-// fails the build when it drifts.
+// committed so the site works from a plain checkout, and check-consent-record
+// fails the build when it drifts: its third assertion is that this file is
+// current with public/legal.html. The sentence here used to name
+// check-legal-version, which has never existed.
 
 import { createHash } from 'crypto';
 import { readFileSync, writeFileSync } from 'fs';

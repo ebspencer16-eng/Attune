@@ -12,7 +12,7 @@
  * nobody would ever read, and the words that shipped went unreviewed.
  *
  * So the blocks are generated, and this regenerates them and refuses a
- * difference. Same shape as check-notification-copy-doc.mjs, one level up.
+ * difference. Same shape as check-notification-triggers.mjs, one level up.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Whether the words are good, which is the whole reason the blocks exist. Nor

@@ -39,6 +39,8 @@ import {
 } from './_lib/survey.js';
 import { userForRequest } from './_lib/verify-token.js';
 import { phases, withTiming } from './_lib/server-timing.js';
+/* The one string that names a couple; the sort used to be written out below. */
+import { coupleKeyOf } from './_lib/couple-key.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -187,8 +189,22 @@ export default async function handler(req) {
   }
   if (!hasAnswer(clean)) return json(400, { ok: false, error: 'Nothing to record.' });
 
+  /**
+   * Which couple this answer belongs to.
+   *
+   * The sort was written out here, which made it the fifth copy of the one
+   * string that names a couple: see api/_lib/couple-key.js, whose header says
+   * the third is what made it worth naming.
+   *
+   * The fallback is this endpoint's own and is kept: a respondent with nobody
+   * linked is filed under their own id rather than null, so their answer is
+   * still attributable to somebody. Worth knowing when reading that column,
+   * because it therefore holds two shapes, `a:b` and a bare id, and anything
+   * comparing it to a couple key will match the pairs and silently never
+   * match the solos.
+   */
   const coupleId = profile
-    ? (profile.partner_profile_id ? [profile.id, profile.partner_profile_id].sort().join(':') : profile.id)
+    ? (profile.partner_profile_id ? coupleKeyOf(profile.id, profile.partner_profile_id) : profile.id)
     : null;
   const source = ['results', 'app', 'link'].includes(body.source) ? body.source : 'link';
   const now = new Date().toISOString();

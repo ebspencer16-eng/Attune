@@ -1576,6 +1576,18 @@ that does nothing gets reported. A confident zero reads as a finding, so it
 does not. Both ends now compare what a cut ASKED for against what resolved,
 and refuse rather than draw.
 
+**`git checkout --` has now destroyed uncommitted work six times, and the
+sixth was an hour after writing the fifth down.** Restoring a planted bug in
+`api/_lib/what-comes-next.js` took an unrelated comment fix in the same file
+with it, because the file had two changes in it and the checkout does not know
+which one was the plant.
+
+The rule two sections down already says to copy the file first and restore
+from the copy. What this round adds is why the discipline keeps failing: the
+copy feels like ceremony when the plant is one line, and the plant is always
+one line. So the habit has to be the `cp`, not the judgement about whether
+this plant is small enough to skip it.
+
 **A long job holding a backup will restore it over anything you change
 meanwhile.** A gate run that plants a bug does `cp file backup`, plants, runs,
 and copies the backup back. Three edits made to that file while it ran were
@@ -1732,6 +1744,23 @@ called a one-tap deletion confirmed. And a window of lines ABOVE a call
 reaches into the previous handler, which has its own confirmation: scope to
 the enclosing declaration, or the gate passes a plant that removed the
 question entirely.
+
+**And the gate for that rule holds thirteen endpoints; there are sixty-two.**
+check-admin-read-errors says in its own header that "endpoints are the top
+level of api/" and then filters to `admin-*.js`, which is the scope it was
+written for and states honestly. Asked of the other forty-nine, the same
+question found seventeen reads that bind `data` and never bind `error`, and
+two that change what the product does rather than what it reports: a progress
+save that erased a stored completion, and an invitee inheriting fewer orders
+than the couple paid for.
+
+Two things worth keeping. The first sweep looked for `const { data = [] }`,
+the spelling the admin uses, and found nothing at all outside the admin;
+these files write `const { data: profile } = await ...`, with no error bound
+anywhere. A sweep blind to the common spelling reports zero and means nothing.
+And the triage that matters is not how many there are but what the next line
+does with a null: `if (!row) return 404` is a wrong answer, and
+`updates[col] = answers` is a deletion.
 
 **A try does not catch a query that fails, because supabase-js returns its
 error.** CLAUDE.md already says an empty table answers like a working one. The

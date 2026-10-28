@@ -26,6 +26,10 @@
  * alongside, with a flag saying when it was inherited, so a chart can say so.
  */
 
+/* The one string that names a couple. This file used to spell the sort out
+   again; see coupleKeyFromProfiles below. */
+import { coupleKeyOf } from './couple-key.js';
+
 /**
  * Annotate each order with `promo_code_effective` and `promo_code_from_partner`.
  *
@@ -72,8 +76,19 @@ export function withEffectivePromoCodes(orders, coupleKeyOf) {
 /**
  * A couple key from two profile ids, stable whichever partner is asked.
  * Returns null when there is no partner, which is not a couple of one.
+ *
+ * ── IT WAS A SECOND IMPLEMENTATION ────────────────────────────────────────
+ * The body was `[String(id), String(partnerId)].sort().join(':')`, which is
+ * `coupleKeyOf` in _lib/couple-key.js spelled out again. That module's own
+ * header says the rule "was already in two places... adding a third is what
+ * made it worth naming", and this was the fourth, sitting beside it under a
+ * different name. Nothing could see it, because the two agreed.
+ *
+ * What is left here is the null guard, which is this caller's question rather
+ * than the key's: an order whose buyer has no partner linked is not a couple
+ * of one, and the sort does not know that.
  */
 export function coupleKeyFromProfiles(id, partnerId) {
   if (!id || !partnerId) return null;
-  return [String(id), String(partnerId)].sort().join(':');
+  return coupleKeyOf(String(id), String(partnerId));
 }

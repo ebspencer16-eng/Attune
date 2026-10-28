@@ -133,8 +133,10 @@ if (body?.ok) {
 
 /**
  * ── WHAT COMES NEXT, AS THE ENDPOINT ACTUALLY ASSEMBLES IT ────────────────
- * check-what-comes-next.mjs compares the groups the module can build with the
- * groups the website builds. It cannot see the call: api/results.js passed
+ * check-what-comes-next.mjs USED to compare the groups the module can build
+ * with the groups the website builds; it is gone, because there is one builder
+ * now, and check-next-steps-mirror.mjs records why. Neither could see the
+ * call: api/results.js passed
  * `{ tiles: commsPlan.tiles }` into a function whose Communication group is
  * built from `commsPlan.protocols`, so the group was written and then the one
  * thing it reads was stripped on the way in. Ellie reported the app's page

@@ -45,8 +45,21 @@ export function coupleHash(a, b) {
  * never made a profile, and the code names that pair. Both endpoints resolve
  * those two facts from their own reads and pass them in, so the RULE is here
  * and only the lookups are theirs.
+ *
+ * ── WHY IT IS NOT CALLED coupleKeyOf ──────────────────────────────────────
+ * It was, for about an hour, and `_lib/couple-key.js` exports a `coupleKeyOf`
+ * of its own: the DATABASE key a couple's shared rows are filed under,
+ * `[a, b].sort().join(':')`, taking two ids. Two modules whose names differ by
+ * one word, each exporting the same function name with a different signature
+ * and a different meaning, in a language with no import checking: an import of
+ * the wrong one would have produced a wrong key and thrown nothing.
+ *
+ * This one answers a narrower question, which is where the anonymous name is
+ * anchored, so it says that. The two are related and not the same: the key in
+ * couple-key.js is stored, and the hash here is sent to a page that must not
+ * be able to read it back.
  */
-export function coupleKeyOf(profile, { partnerPresent, invitePresent } = {}) {
+export function coupleAnchorOf(profile, { partnerPresent, invitePresent } = {}) {
   if (!profile) return null;
   if (partnerPresent && profile.partner_profile_id) return profile.partner_profile_id;
   if (invitePresent && profile.invite_code) return 'inv:' + profile.invite_code;
@@ -81,6 +94,6 @@ export function anonPersonId(id) {
 
 /** This person's anonymous couple id, or null. */
 export function anonCoupleId(profile, opts) {
-  const key = coupleKeyOf(profile, opts);
-  return key ? coupleHash(profile.id, key) : null;
+  const anchor = coupleAnchorOf(profile, opts);
+  return anchor ? coupleHash(profile.id, anchor) : null;
 }

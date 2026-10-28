@@ -413,7 +413,7 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
      * line, so it still reads as one sentence.
      *
      * The website builds its own items for this group, client-side, which
-     * check-what-comes-next.mjs says out loud that it does not cover. This
+     * check-next-steps-mirror.mjs says out loud that it does not cover. This
      * changes the app only, and that is the surface she is reading.
      */
     /**

@@ -98,7 +98,7 @@ export function needsProfileSetup(error: ApiError | null): boolean {
  *
  * It is a prop rather than something read from context because TabScreen already
  * takes `groundTone` as a decision per ground, and a second mechanism saying the
- * same thing is how the two drift. check-error-contrast holds every caller under
+ * same thing is how the two drift. check-error-tone holds every caller under
  * a light ground to passing it.
  */
 export function ScreenError({

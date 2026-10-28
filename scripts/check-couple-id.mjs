@@ -40,7 +40,7 @@ const fail = [];
 
 /* ── One implementation ─────────────────────────────────────────────────── */
 const mod = code(MODULE);
-for (const name of ['coupleHash', 'coupleKeyOf', 'anonCoupleId', 'anonPersonId']) {
+for (const name of ['coupleHash', 'coupleAnchorOf', 'anonCoupleId', 'anonPersonId']) {
   if (!new RegExp('export function ' + name + '\\s*\\(').test(mod)) {
     fail.push(`${MODULE} no longer exports ${name}; this gate has lost its subject`);
   }
@@ -114,7 +114,7 @@ if (!/slice\.asked[\s\S]{0,80}slice\.people/.test(page)) {
 }
 
 /* ── The handle behaves ─────────────────────────────────────────────────── */
-const { coupleHash, anonCoupleId, anonPersonId, coupleKeyOf } = await import('../' + MODULE);
+const { coupleHash, anonCoupleId, anonPersonId, coupleAnchorOf } = await import('../' + MODULE);
 const A = 'aaaaaaaa-1111-2222-3333-444444444444';
 const B = 'bbbbbbbb-5555-6666-7777-888888888888';
 const checks = [
@@ -125,7 +125,7 @@ const checks = [
     'a partner nobody can see is not a couple'],
   [anonCoupleId({ id: A, invite_code: 'XY' }, { invitePresent: true }) === coupleHash(A, 'inv:XY'),
     'an invited partner keys the couple on the invite code'],
-  [coupleKeyOf({ id: A }, { partnerPresent: true, invitePresent: true }) === null,
+  [coupleAnchorOf({ id: A }, { partnerPresent: true, invitePresent: true }) === null,
     'a profile with neither route is a couple of one'],
   [anonPersonId(A) !== coupleHash(A, B) && anonPersonId(A) === anonPersonId(A),
     'a person handle must be stable and must not collide with their couple'],

@@ -16,9 +16,16 @@
  *
  * WHAT THIS DOES NOT COVER, so nobody reads it as "no page in the product
  * scrolls": the website only. The app's covers are Expo components that no
- * browser gate here renders, and `scripts/probe-cover-fits.mjs` drives those
- * through the Expo web build. The two have different layout engines and the
- * same rule.
+ * browser gate here renders.
+ *
+ * This sentence used to end "and `scripts/probe-cover-fits.mjs` drives those
+ * through the Expo web build", and there is no such file. So the one line
+ * written to say what was not covered was itself claiming coverage, which is
+ * worse than saying nothing: it is what somebody reads before deciding
+ * whether to look. The app's cover screens are unchecked. Driving them needs
+ * `npx expo start --web` and the one-line swap in _layout.tsx that
+ * probe-notes-screen.mjs documents, which is why it is a probe and not a
+ * gate, and why nobody has written it yet.
  */
 import { createServer } from 'node:http';
 import { readFileSync, existsSync } from 'node:fs';

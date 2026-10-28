@@ -15,6 +15,26 @@
  * For every canvas id in public/admin.html, how many distinct places name it.
  * A getElementById or a `target:` naming the same canvas from two functions is
  * the shape; one function that draws it twice is not.
+ *
+ * ── WHAT IT CANNOT ADJUDICATE ─────────────────────────────────────────────
+ * Naming a canvas is not drawing to it, and this counts names. The two it
+ * reports on 2026-10-28 were both read by hand and neither is a race. A
+ * record rather than an allowlist, deliberately: a third entry still shows up
+ * as new, where a list of exceptions is the escape hatch somebody reaches for
+ * the moment a real one starts failing.
+ *
+ *   chart-eng-det   drawTimePerPage draws it and drawDetailedOnly redraws
+ *                   that one tile when a pill changes, which is what it was
+ *                   added for. check-tile-isolation holds that it touches no
+ *                   other tile.
+ *   types-ct-bars   loadTypesData names it only in its error path, to write a
+ *                   message into the canvas's PARENT, because innerHTML on a
+ *                   canvas is dropped. The chart has one renderer.
+ *
+ * Four others it reported the same day were real: the five dashboard tiles
+ * were wired from initCharts and again from loadRealDemographics, under a
+ * comment reading "keep consistent with initCharts('overview')". They are one
+ * function now, wireOverviewTiles.
  */
 import { readFileSync } from 'node:fs';
 

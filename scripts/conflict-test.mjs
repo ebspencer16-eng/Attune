@@ -6,6 +6,9 @@
 import { summarizeConflict, conflictPair, isConflictComplete, riskBand } from '../api/_lib/conflict-results.js';
 import { CONFLICT_QUESTIONS, CONFLICT_SECTIONS, CONFLICT_REQUIRED, conflictQuestionsInOrder } from '../api/_conflict-questions.js';
 import { resetForm } from '../api/_conflict-results-prose.js';
+/* What Comes Next reads the same answers, which is the half that broke. */
+import { whatComesNext } from '../api/_lib/what-comes-next.js';
+import { readFileSync } from 'node:fs';
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -159,6 +162,54 @@ ok('no unresolved tokens left in any line', !/\{(partner|a|b)\}/.test(
     ok(`${row.id} has two distinct options`,
       OPENING_CHIPS[row.id].A !== OPENING_CHIPS[row.id].B);
   }
+}
+
+// ── What Comes Next counts the same patterns the overview does ──────────────
+//
+// Ellie: "I have 4 items in my conflict action plan on that overview page, but
+// one thing listed in the what comes next section for conflict." Four and one.
+//
+// api/conflict-results.js draws the overview from `me.conflict_data?.answers`.
+// api/results.js passed the WHOLE record into whatComesNext, and
+// summarizeConflict answers null for a record, so the group fell back to its
+// "no patterns worth watching" row: one item. Nothing threw. A record is an
+// object, and an object with no question ids on it is what an unfinished
+// exercise looks like.
+//
+// api/results.js carried a comment saying "check-conflict-plans-agree holds
+// the two together now", and there has never been such a file. The rule is
+// true today, by both call sites going through one summariser, and nothing was
+// watching it. It is watched here rather than in a new gate because the
+// complete record this needs is `base()` above: a second fixture mirroring an
+// existing one is a second version of a rule, not a second half of it.
+{
+  const answers = base({ c_crit: 4, c_cont: 4, c_def: 4, c_stone: 4 });
+  const call = (conflictAnswers) => whatComesNext({
+    coupleTypeId: 'WZ', conflictReady: true, conflictAnswers,
+    names: { you: 'Ellie', them: 'Preston' },
+    sides: {
+      you: { name: 'Ellie', axes: { open: 4, withdraw: 2 } },
+      them: { name: 'Preston', axes: { open: 2, withdraw: 4 } },
+    },
+  });
+  const conflictGroup = (built) => (built.groups || []).find((g) => /Conflict/.test(g.label));
+  const itemsFor = (ca) => (conflictGroup(call(ca))?.items || []).length;
+
+  const overview = summarizeConflict(answers).ranked.length;
+  ok('What Comes Next lists one item per pattern the overview ranks',
+    itemsFor(answers) === overview, `what comes next ${itemsFor(answers)} against overview ${overview}`);
+
+  /* And the test can tell the two shapes apart, or the assertion above would
+     pass on a surface that had regressed. This is the exact miscount she
+     reported: four against one. */
+  ok('passing the whole record instead of its answers is still visibly fewer',
+    itemsFor({ answers, completedAt: new Date().toISOString() }) < overview);
+
+  /* The call site, because that is what regressed. A gate that only runs the
+     module cannot see an endpoint handing it the wrong half. */
+  const resultsSrc = readFileSync(new URL('../api/results.js', import.meta.url), 'utf8');
+  ok('api/results.js passes the answers half of the conflict record',
+    /conflictAnswers:\s*me\?\.conflict_data\?\.answers/.test(resultsSrc));
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
