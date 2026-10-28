@@ -41,14 +41,7 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| A139 | **A113's legends have no colour, and it is my doing.** When the dash legend became one rule for every chart, it kept drawing in `borderColor`, which a line chart sets and a bar chart does not: every bar legend on the page lost its swatch, including add-on attachment. |
-| A135 | **Every top-level banner takes white text.** The ink is picked for contrast today, so the lighter sections get dark type. I will say which band white sits weakest on rather than quietly darkening a colour. |
-| A136 | **Engage/Withdraw and Open/Guarded move into Communication Styles > Typing**, out of the catch-all section. |
-| A137 | **Other cuts becomes Engagement, with four new cuts.** Depth, as top 25%, middle 50% and bottom 25% by time spent in portal pages; read an article or not; left a survey response or not; and NPS promoters and detractors. Each needs a per-person field the cube does not send yet. |
-| A138 | **A pole label that trails off gets its whole text on hover.** |
-| A140 | **Your question on A112: does Expectations have no misaligned couples?** Reading the live figures rather than reasoning about them. |
+**Nothing open.** Everything from your last message is built and in section 3.
 
 ## 3. For you to review
 
@@ -57,7 +50,12 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A121 | **The legend dash lost its colour on every bar chart, which you caught on A113.** The dash is drawn in the line colour, which a line chart has and a bar chart does not. Fixed as A139 and back for your eye with the clustered charts. |
+| A135 | **Every banner takes white type.** What it costs, since you should have the number rather than my judgement: white reads 4.1 to 4.7 against the four darker bands, 3.5 on Relationship Reflection, 2.9 on Conflict Patterns and 1.9 on Engagement, where 4.5 is the readable line at that size. Darkening those three section colours is one line and would move them everywhere else that colour is drawn, so it is yours to call. |
+| A136 | **Engage/Withdraw and Open/Guarded are in Communication Styles > Typing**, beside the two types they make. |
+| A137 | **Other cuts is Engagement, with your four.** Depth in the portal as top 25%, middle 50% and bottom 25% by time on app pages; read an article or not; left a survey response or not; and NPS as promoter, passive or detractor. Somebody with no recorded time is left out of the bands rather than counted as a light user. |
+| A139 | **The legends have their colours back, and it was two faults at once.** A dash is painted in the line colour, which a bar chart has not got and a pie sets to white; and a bar's line width is zero, so even the right colour drew nothing. Every bar and pie legend on the page was affected, not only the inheritance charts. |
+| A138 | **A pole label that trails off gives you the whole thing on hover**, through the page's own tooltip rather than the browser's slow one, in all three views of All questions. |
+| A140 | **Your A112 question, and the answer is the other way round.** Expectations had no ALIGNED couples: every couple's expectations distance was over the line, which is why that tile was blank and the misaligned one was not. The dashboard's 3 of 6 is communication. Both tiles now name the threshold when a side is empty, so the next empty one explains itself. |
 | S81 | **Twenty kilobytes of the admin could not be reached, and two pieces of it mattered.** Seven functions left behind by the Beta Codes and Fulfilment pages, each writing into an element deleted months ago. One was the promo Status toggle's old twin: nothing could call it, and the fix I reported to you as A86 went into it rather than into the live toggle, which already worked. The other drew a buyer's name, address and phone, one missing id away from working, under the banner saying this page holds none of that. All seven are gone. |
 | S85 | **The Testimonials page printed stored values where every other page prints words.** "she/her", "none", "friend" against Woman, None, Friend/family, in the line under each answer and in the filter checkboxes. It was invisible to me because the test data invented pretty values, so the conversion had nothing to do; the test data now stores what the product stores. |
 | S85b | **165 controls in the admin had no name a screen reader could say**: 120 "add a theme" boxes, 35 question-weight sliders, 10 axis sliders. The rule exists and has only ever been applied to the 38 public pages, never to the admin, which is the surface with the most controls on it. Named, and a gate now walks all 13 admin pages. |
@@ -77,6 +75,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A121 | **Line chart legends became a dash rather than an outlined box.** The colour it lost on bar and pie charts came back as A139. |
 | A133 | **The slicer taxonomy, six sections deep, as a drill-down with coloured banners and a back arrow, on every tile slicer, both Explore pickers and the Feedback tiles. Computed cuts for the rows no column stores.** |
 | A133b | **Three inferences the taxonomy needed and nothing stored: same-gender guardians, raised by someone other than a parent, and whether somebody kept, swapped or widened the roles they grew up with.** |
 | A116 | **A third view on All questions, Count: five cells per row shaded by share, with the question's own poles either side. A column is where an answer sits between them, so Both lands in the middle.** |

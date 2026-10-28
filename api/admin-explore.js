@@ -719,6 +719,33 @@ function buildCatalog(fbCatOptions) {
     options: JOURNAL_VOLUME_BANDS.map((v) => ({ v, label: v })),
     ordinal: true, poleLow: JOURNAL_VOLUME_BANDS[0], poleHigh: JOURNAL_VOLUME_BANDS[JOURNAL_VOLUME_BANDS.length - 1],
   });
+  /**
+   * ── FOUR MORE WAYS TO ASK WHO IS ENGAGED ──────────────────────────────
+   * Ellie, extending the slicer taxonomy: depth by time spent in the portal,
+   * whether somebody has read an article, whether they have left a survey
+   * response, and which end of NPS they sit on.
+   *
+   * Depth is ordinal and says so, so a slider view of it runs the right way
+   * round. The other three are plain categories: there is no order between
+   * having read an article and not having read one.
+   */
+  f.push({
+    key: 'depth_band', label: 'Depth in the portal', group: 'Engagement', kind: 'cat',
+    options: ['Bottom 25%', 'Middle 50%', 'Top 25%'].map((v) => ({ v, label: v })),
+    ordinal: true, poleLow: 'Bottom 25%', poleHigh: 'Top 25%',
+  });
+  f.push({
+    key: 'read_article', label: 'Has read an article', group: 'Engagement', kind: 'cat',
+    options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }],
+  });
+  f.push({
+    key: 'has_survey', label: 'Has left a survey response', group: 'Engagement', kind: 'cat',
+    options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }],
+  });
+  f.push({
+    key: 'nps_group', label: 'NPS group', group: 'Engagement', kind: 'cat',
+    options: ['Promoter', 'Passive', 'Detractor'].map((v) => ({ v, label: v })),
+  });
   return f;
 }
 
@@ -794,15 +821,73 @@ export default async function handler(req) {
          excusing the silence was wrong about its own migration.
 
          Read like every other read in this file: say so in the reply. */
-      const _j = await admin
-        .from('notes')
-        .select('owner_id, created_at')
-        .eq('anchor_type', JOURNAL_ANCHOR);
-      if (_j.error) {
-        console.error('[admin-explore] notes (journal):', _j.error.message || _j.error);
-        couldNotRead.push('journal entries, so the journal slicers read as nobody having written one');
-      } else {
+      /* The file's own shape for a read that must not fail silently: throw the
+         returned error into the catch, and let the catch put it in the reply.
+         Written the same way as the partner_sessions read above rather than
+         in a shape of its own, because check-admin-read-errors reads the
+         ending and a second ending is a second thing to keep teaching it. */
+      try {
+        const _j = await admin
+          .from('notes')
+          .select('owner_id, created_at')
+          .eq('anchor_type', JOURNAL_ANCHOR);
+        if (_j.error) throw _j.error;
         journalByOwner = journalUseByOwner(_j.data || []);
+      } catch (e) {
+        console.error('[admin-explore] notes (journal):', e?.message || e);
+        couldNotRead.push('journal entries, so the journal slicers read as nobody having written one');
+      }
+    }
+
+    /**
+     * ── HOW DEEP INTO THE PRODUCT SOMEBODY HAS BEEN ───────────────────────
+     * Ellie: "include 'depth' and have top 25% users, bottom 25% users,
+     * middle 50% users based on time spent in portal pages."
+     *
+     * The portal is the signed-in product: `page_events` keyed `app:*`.
+     * Anything keyed with a leading slash is a marketing page and is somebody
+     * browsing rather than using, which is a different question and already
+     * has its own tile.
+     *
+     * Filtered in the database rather than here, because the marketing half
+     * is the larger half and a cube should not pull it across to throw it
+     * away. The limit is there so one runaway table cannot take the whole
+     * endpoint down with it, and it is high enough that reaching it would
+     * itself be the news.
+     */
+    const portalMsByOwner = new Map();
+    {
+      try {
+        const _pe = await admin
+          .from('page_events')
+          .select('owner_id, ms')
+          .eq('kind', 'page_time')
+          .like('key', 'app:%')
+          .limit(100000);
+        if (_pe.error) throw _pe.error;
+        for (const e of _pe.data || []) {
+          if (!e.owner_id) continue;
+          const n = Number(e.ms);
+          if (!Number.isFinite(n) || n <= 0) continue;
+          portalMsByOwner.set(e.owner_id, (portalMsByOwner.get(e.owner_id) || 0) + n);
+        }
+      } catch (e) {
+        console.error('[admin-explore] page_events (portal time):', e?.message || e);
+        couldNotRead.push('time spent in the portal, so the Depth cuts are not offered');
+      }
+    }
+
+    /* Who has opened an In Practice post. One row per read, so the set is
+       what matters rather than the count. */
+    const articleReaders = new Set();
+    {
+      try {
+        const _pr = await admin.from('post_reads').select('owner_id').limit(100000);
+        if (_pr.error) throw _pr.error;
+        for (const r of _pr.data || []) if (r.owner_id) articleReaders.add(r.owner_id);
+      } catch (e) {
+        console.error('[admin-explore] post_reads:', e?.message || e);
+        couldNotRead.push('article reads, so the read-an-article cut is not offered');
       }
     }
 
@@ -862,6 +947,7 @@ export default async function handler(req) {
     const RETRO_COUPLE_TYPE = { 'ATTUNE-BETA-1':'WZ', 'ATTUNE-BETA-2':'WX', 'ATTUNE-BETA-5':'WY' };
     const segById = {}, segByEmail = {};
     const rows = [];
+    const rowOwner = [];
     for (const p of profiles) {
       const own = computed[p.id];
       if (!own) continue;
@@ -992,12 +1078,29 @@ export default async function handler(req) {
         row.journal_use = journalBucket(use);
         row.journal_entries = journalVolumeBand(use.ever);
       }
+      /* ── FOUR ENGAGEMENT CUTS ──────────────────────────────────────
+         Read an article, left a survey response, and which end of NPS they
+         sit on. Depth needs the whole distribution and is set after this
+         loop. Null rather than "No" is deliberate for NPS: somebody who
+         never answered the question is not a passive. */
+      row.read_article = articleReaders.has(p.id) ? 'Yes' : 'No';
+      row.has_survey = surveyByRespondent[p.id] ? 'Yes' : 'No';
+      {
+        const n = Number((surveyByRespondent[p.id] || {}).nps);
+        row.nps_group = !Number.isFinite(n) ? null : (n >= 9 ? 'Promoter' : n <= 6 ? 'Detractor' : 'Passive');
+      }
       const survey = surveyByRespondent[p.id];
       if (survey) {
         for (const [fk, src] of Object.entries(FB_SCALE_SRC)) { const v = Number(survey[src]); row[fk] = Number.isFinite(v) ? v : null; }
         for (const [fk, src] of Object.entries(FB_CAT_SRC)) { row[fk] = survey[src] != null && survey[src] !== '' ? survey[src] : null; }
       }
       rows.push(row);
+      /* Who each row belongs to, kept HERE and never sent, so the depth bands
+         below can be matched to a person without walking `profiles` again and
+         hoping the two walks skip the same people. An index that depends on
+         two loops agreeing is one `continue` away from banding everybody
+         wrongly, and nothing would say so. */
+      rowOwner.push(p.id);
       // Anonymized segment snapshot for order joins (keyed by id + email; no PII emitted).
       const _seg = {}; for (const k of SEG_KEYS) _seg[k] = row[k] !== undefined ? row[k] : null;
       /**
@@ -1016,6 +1119,32 @@ export default async function handler(req) {
       _seg.couple_id = row.couple_id || null;
       segById[p.id] = _seg;
       if (p.email) segByEmail[String(p.email).toLowerCase()] = _seg;
+    }
+
+    /**
+     * ── THE THREE DEPTH BANDS ─────────────────────────────────────────────
+     * A quartile is a fact about a population, so it cannot be set while the
+     * population is still being built. Measured over the people in this cube
+     * rather than over every owner in page_events: the cube already excludes
+     * demo accounts and people who have taken nothing, and a quartile that
+     * includes them is a quartile of a different group than the one every
+     * other figure on the page is about.
+     *
+     * Somebody with no recorded time is left null rather than being put at
+     * the bottom. They are not a light user; nothing was measured for them,
+     * and a band that quietly fills up with "we do not know" is the kind of
+     * figure this admin keeps having to unlearn.
+     */
+    {
+      const msOf = (pid) => portalMsByOwner.get(pid) || 0;
+      const measured = rowOwner.map(msOf).filter((n) => n > 0).sort((a, b) => a - b);
+      const at = (frac) => (measured.length ? measured[Math.min(measured.length - 1, Math.floor(frac * (measured.length - 1)))] : null);
+      const p25 = at(0.25), p75 = at(0.75);
+      rows.forEach((row, i) => {
+        const ms = msOf(rowOwner[i]);
+        row.depth_band = (!ms || p25 == null) ? null
+          : ms >= p75 ? 'Top 25%' : ms <= p25 ? 'Bottom 25%' : 'Middle 50%';
+      });
     }
 
     // ── Orders, joined to purchaser demographics, fully anonymized ───────────

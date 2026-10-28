@@ -2102,7 +2102,8 @@ window.adminAuthHeaders = function(extra){
      the two Explore selects, and the drill-down above does that job for every
      picker on the page now, so keeping it would be two controls that both
      render a <select> and only one of which anybody opens. Its contrast
-     helper survived as qxInk, which is the only part the drill needed. */
+     helper survived as qxInk for a while, and went when the bands were told
+     to take white type whatever colour they are. */
 
   /**
    * ── THE EXPLORE PICKERS, AS THE SAME DRILL-DOWN ───────────────────────
@@ -6677,8 +6678,24 @@ async function renderExpSummary() {
     return;
   }
   const mis = overall.filter(v => v > line), al = overall.filter(v => v <= line);
-  put('es-gap-mis', gapPct(mean(mis)), mis.length ? mis.length + ' of ' + overall.length + ' couples' : 'None over the line');
-  put('es-gap-al', gapPct(mean(al)), al.length ? al.length + ' of ' + overall.length + ' couples' : 'None under the line');
+  /* ── AN EMPTY HALF SAYS WHICH HALF IS EMPTY ──────────────────────────
+     Ellie, twice about these two tiles: first "why is there no data for
+     aligned couples", then "does that mean expectations has 0 misaligned?"
+     Both are the same question, and the answer was under the em dash all
+     along in words too thin to carry it: "None under the line" does not say
+     where the line is or which way round it runs.
+
+     The line is named as a percentage now, in the same units as the figure
+     above it, so an empty tile reads as a finding rather than as missing
+     data. A dash with no couples behind it is correct: there is no average
+     of nothing, and showing 0% would say they agree perfectly. */
+  const linePct = Math.round(line * 100);
+  put('es-gap-mis', gapPct(mean(mis)),
+    mis.length ? mis.length + ' of ' + overall.length + ' couples'
+      : 'No couple is more than ' + linePct + '% apart');
+  put('es-gap-al', gapPct(mean(al)),
+    al.length ? al.length + ' of ' + overall.length + ' couples'
+      : 'Every couple is more than ' + linePct + '% apart');
 }
 
 async function renderCommsSummary() {
@@ -7057,24 +7074,10 @@ function orderedCats(key, rows){
    tile has done does not appear at all.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/**
- * Black or white on a coloured band, whichever can be read on it.
- *
- * The seven section colours run from a deep rose to a light green, and white
- * on the light ones is the kind of thing a contrast sweep finds later. Lifted
- * out of the Explore field picker when the drill-down took that job over, so
- * there is one answer rather than two.
- */
-function qxInk(hex) {
-  const h = String(hex || '').trim();
-  const m = /^#?([0-9a-f]{6})$/i.exec(h.startsWith('rgb') ? '' : h);
-  let r, g, b;
-  if (m) { const n = parseInt(m[1], 16); r = n >> 16 & 255; g = n >> 8 & 255; b = n & 255; }
-  else { const p = h.match(/\d+/g); if (!p || p.length < 3) return '#fff'; r = +p[0]; g = +p[1]; b = +p[2]; }
-  const lin = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
-  const L = .2126 * lin(r) + .7152 * lin(g) + .0722 * lin(b);
-  return (L + .05) / .05 > 21 / ((L + .05) / .05) ? '#1B2547' : '#fff';
-}
+/* qxInk was here: it chose black or white against a band's colour. The bands
+   take white now, at Ellie's ask, so the only caller went and a function that
+   decides something nobody asks is the clutter this file keeps removing. The
+   figures it would have produced are in the note beside that choice. */
 
 /** Derived cuts, by stable id. See the note above on why ids are stable. */
 const SLICE_PRED = {};
@@ -7195,6 +7198,11 @@ function sliceTreeBuild(cube, rows, excludeKey, onlyKeys) {
     node('Typing', [
       node('Individual type', valueRows('type')),
       node('Couple type', valueRows('couple_type')),
+      /* Ellie: "move E/W and O/G from other cuts and into typing in comms."
+         They are the two axes the type is made of, so the catch-all was the
+         one place they did not belong. */
+      node('Engage / Withdraw', valueRows('axisEngage')),
+      node('Open / Guarded', valueRows('axisOpen')),
     ]),
     node('Dimensions', dimNodes),
     node('Understanding', [
@@ -7353,22 +7361,35 @@ function sliceTreeBuild(cube, rows, excludeKey, onlyKeys) {
     ]),
   ]);
 
-  /* ── ANYTHING ELSE THE CUBE OFFERS ─────────────────────────────────── */
-  /* A cut that works today and is not in her taxonomy keeps working, in a
-     section that says so. Dropping one silently would be this page deciding
-     which of her questions are worth asking. */
+  /* ── 7 · ENGAGEMENT ────────────────────────────────────────────────── */
+  /* Ellie: "rename other cuts to engagement and also include depth... top 25%
+     users, bottom 25% users, middle 50% users based on time spent in portal
+     pages", and cuts for whether somebody has read an article, left a survey
+     response, and which end of NPS they are on.
+
+     Her four come first and anything else the cube offers follows them, so a
+     cut that works today and is not in her taxonomy keeps working rather than
+     being dropped by this page deciding which of her questions matter. */
   /* What the taxonomy above already offers, so "Other cuts" does not offer it
      a second time under a different name: the horsemen are eight rows in
      SLICE_DIMS and sixteen under Conflict Patterns, and one cut reachable two
      ways by two names is how a reader comes to think they are two measures. */
   const placed = ['age_range', 'pronouns', 'relationship_status', 'children', 'relationship_length',
     'signup_source', 'pkg', 'type', 'couple_type', 'alignment_group', 'understanding_group', 'gen_roles',
+    'axisEngage', 'axisOpen',
+    'depth_band', 'read_article', 'has_survey', 'nps_group',
     'horse_crit', 'horse_cont', 'horse_def', 'horse_stone',
     'p_horse_crit', 'p_horse_cont', 'p_horse_def', 'p_horse_stone'];
+  const engagementFirst = [
+    node('Depth in the portal', valueRows('depth_band')),
+    node('Read an article', valueRows('read_article')),
+    node('Left a survey response', valueRows('has_survey')),
+    node('NPS', valueRows('nps_group')),
+  ];
   const others = (typeof SLICE_DIMS !== 'undefined' ? SLICE_DIMS : [])
     .filter((d) => placed.indexOf(d.key) < 0 && d.key.indexOf('dim_') !== 0)
     .map((d) => node(d.label, valueRows(d.key)));
-  const other = node('Other cuts', others);
+  const other = node('Engagement', engagementFirst.concat(others));
 
   const out = [
     demographics && { ...demographics, color: secColor.demographic },
@@ -7563,9 +7584,22 @@ function mountSliceDrillUnsafe(sel) {
            ink is chosen against the colour rather than assumed white. */
         r.innerHTML = '<span>' + QX_ESC(n.label) + '</span><span class="sd-chev">›</span>';
         if (!path.length && n.color) {
+          /* ── WHITE, AT HER ASK ─────────────────────────────────────
+             Ellie: "Please make all top level text white inside of their
+             colored banners."
+
+             This used to pick black or white for contrast, which is why the
+             lighter sections came out dark. White is hers to choose and this
+             is an internal page, so it is simply white; what the choice costs
+             is written down rather than quietly worked around. White reads
+             4.1 to 4.7 against the four darker bands, 3.5 on Relationship
+             Reflection, 2.9 on Conflict Patterns and 1.9 on Engagement, where
+             4.5 is the readable line for type this size. Darkening those
+             three colours is a one-line change and would move them wherever
+             else the section colour is drawn, so it is her call too. */
           r.classList.add('sd-band');
           r.style.background = n.color;
-          r.style.color = qxInk(n.color);
+          r.style.color = '#fff';
         }
         r.onclick = (e) => { e.stopPropagation(); path.push(n.label); draw(); };
       } else {
@@ -8500,6 +8534,24 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
    * width looks right at one tile size and wrong at the other two, and these
    * tiles are drawn at full width, half width and inside the Explore page.
    */
+  /**
+   * ── A POLE THAT TRAILS OFF SAYS THE WHOLE THING ON HOVER ──────────────
+   * Ellie: "If pole labels trail off, I should be able to hover it to see
+   * the full text."
+   *
+   * The column is a fixed share of the row and the text wraps inside it, so
+   * a long pole can still run out of room on a narrow tile. `data-tip` is
+   * the page's own tooltip, the one every bar and dot already uses, rather
+   * than a `title` the browser shows after a second and a half.
+   *
+   * One helper for all three renderers. The bar, the mean dot and the count
+   * table each draw their own pair of poles, and three copies of "and a
+   * tooltip" is how two of them end up without one.
+   */
+  const poleSpan = (side, prefix, text) =>
+    '<span class="qrow-pole ' + side + '" data-tip="' + QX_ESC(prefix + text) + '">'
+      + QX_ESC(prefix) + QX_ESC(text) + '</span>';
+
   const qRow = (labelHtml, contentHtml) =>
     '<div class="qrow"><div class="qrow-label">' + labelHtml + '</div>' +
       '<div class="qrow-body">' + contentHtml + '</div></div>';
@@ -8587,12 +8639,11 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
 
     if (f.kind === 'scale') {
       // Pole labels either side of the bar (what 1 and 5 mean for THIS question).
-      const lo = QX_ESC(f.poleLow || 'low'), hi = QX_ESC(f.poleHigh || 'high');
       return qRow(header,
         '<div class="qrow-track">' +
-          '<span class="qrow-pole lo">1 · ' + lo + '</span>' +
+          poleSpan('lo', '1 · ', f.poleLow || 'low') +
           '<div style="flex:1 1 auto;min-width:0;">' + barRow + '</div>' +
-          '<span class="qrow-pole hi">5 · ' + hi + '</span>' +
+          poleSpan('hi', '5 · ', f.poleHigh || 'high') +
         '</div>');
     }
 
@@ -8662,7 +8713,6 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
        A non-scale pole was cut to sixteen characters with an ellipsis, so the
        end of most of them was only in the tooltip. Nothing is truncated now;
        the column has a fixed width and the text wraps inside it. */
-    const lo = QX_ESC(loFull), hi = QX_ESC(hiFull);
     const loPre = isScale ? '1 \u00b7 ' : '', hiPre = isScale ? '5 \u00b7 ' : '';
     const header = QX_ESC(qTextOf(f));
     /* ── WHICH DOT IS WHICH ────────────────────────────────────────────
@@ -8683,8 +8733,8 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     // Score readout removed from the row; the dot's hover shows the exact mean.
     return qRow(header,
       '<div class="qrow-track">' +
-        '<span class="qrow-pole lo">' + loPre + lo + '</span>' + track +
-        '<span class="qrow-pole hi">' + hiPre + hi + '</span>' +
+        poleSpan('lo', loPre, loFull) + track +
+        poleSpan('hi', hiPre, hiFull) +
       '</div>');
   };
   /**
@@ -8722,7 +8772,6 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     const { cells, n } = countCells(f, drows);
     const max = Math.max(1, ...cells);
     const isScale = f.kind === 'scale';
-    const lo = QX_ESC(f.poleLow || 'low'), hi = QX_ESC(f.poleHigh || 'high');
     const body = cells.map((c, i) => {
       const pct = n ? Math.round((c / n) * 100) : 0;
       const tip = 'Step ' + (i + 1) + ' of 5 \u2014 ' + c + (c === 1 ? ' person' : ' people')
@@ -8734,9 +8783,9 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     }).join('');
     return qRow(QX_ESC(qTextOf(f)),
       '<div class="qrow-track">' +
-        '<span class="qrow-pole lo">' + (isScale ? '1 \u00b7 ' : '') + lo + '</span>' +
+        poleSpan('lo', isScale ? '1 · ' : '', f.poleLow || 'low') +
         '<div class="qcount">' + body + '</div>' +
-        '<span class="qrow-pole hi">' + (isScale ? '5 \u00b7 ' : '') + hi + '</span>' +
+        poleSpan('hi', isScale ? '5 · ' : '', f.poleHigh || 'high') +
       '</div>');
   };
   /* The numbers over the columns, once, with the label and pole columns left
@@ -8902,16 +8951,10 @@ function renderGeography() {
   el.innerHTML = html;
 }
 
-// ── Fulfillment table ─────────────────────────────────
-async function generateWorkbookForOrder(orderId) {
-  const btn = document.getElementById('wb-btn-' + orderId);
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'Not available here';
-  }
-}
-
-// ── Fulfillment CSV export ────────────────────────────
+/* generateWorkbookForOrder went with the table that drew its button. It
+   disabled that button and wrote "Not available here" on it, which is all it
+   had done since the workbook moved: a stub for a feature that had already
+   left, reachable only from a page that had also left. */
 
 
 
@@ -9035,7 +9078,42 @@ function mkChart(el, cfg) {
      the tile's own answer last. A chart with the legend off is untouched. */
   if (!o.plugins.legend || o.plugins.legend.display !== false) {
     const lg = o.plugins.legend = Object.assign({ position: 'bottom' }, o.plugins.legend);
-    lg.labels = Object.assign({ usePointStyle: true, pointStyle: 'line', boxWidth: 22, boxHeight: 2, padding: 10, font: { size: 10 } }, lg.labels);
+    /* ── A DASH IS DRAWN IN THE STROKE COLOUR ───────────────────────────
+       Ellie, of the clustered inheritance charts: "the legends aren't
+       showing colors."
+
+       A line chart carries its colour in `borderColor`, which is what the
+       dash is painted with, and that is why this looked right when it was
+       written for line charts. A bar sets `backgroundColor` and no border,
+       and a pie sets a WHITE border, so the moment the dash became one rule
+       for every chart, every bar legend lost its swatch and every pie legend
+       drew white on white. Both were invisible rather than wrong-coloured,
+       which is why it read as "no colours" rather than as a mistake.
+
+       The fill is the right colour for anything that is not a line, and the
+       dataset says which it is. */
+    lg.labels = Object.assign({
+      /* `boxWidth` is ignored once usePointStyle is on; `pointStyleWidth` is
+         the one Chart.js 4 reads, and without it a dash is drawn at the
+         marker's default size, which is a dot. */
+      usePointStyle: true, pointStyle: 'line', pointStyleWidth: 22, boxWidth: 22, boxHeight: 2, padding: 10, font: { size: 10 },
+      generateLabels(chart) {
+        const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+        const chartType = chart.config && chart.config.type;
+        items.forEach((it) => {
+          const ds = (chart.data.datasets || [])[it.datasetIndex] || {};
+          const type = ds.type || chartType;
+          if (type === 'line') return;
+          if (it.fillStyle) it.strokeStyle = it.fillStyle;
+          /* And a line of zero width draws nothing. A bar's borderWidth is 0,
+             which is what the legend copies, so even with the right colour
+             the dash was a stroke with no thickness: invisible for the same
+             reason twice over, and neither visible in the markup. */
+          if (!it.lineWidth) it.lineWidth = 3;
+        });
+        return items;
+      },
+    }, lg.labels);
   }
   flatTicks(cfg);
   /* ── NO COLUMN SAYS ITS OWN NUMBER ANY MORE ─────────────────────────────

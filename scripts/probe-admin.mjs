@@ -150,6 +150,16 @@ const fields = [
      is the real categoryAlignment over this person and the next one. */
   ...HORSEMAN_KEYS.map((h) => ({ key: h.key, label: 'Shows ' + h.label, group: 'Conflict Patterns',
     kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true })),
+  /* The four engagement cuts, as the endpoint declares them. */
+  { key: 'depth_band', label: 'Depth in the portal', group: 'Engagement', kind: 'cat',
+    options: ['Bottom 25%', 'Middle 50%', 'Top 25%'].map((v) => ({ v, label: v })),
+    ordinal: true, poleLow: 'Bottom 25%', poleHigh: 'Top 25%' },
+  { key: 'read_article', label: 'Has read an article', group: 'Engagement', kind: 'cat',
+    options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }] },
+  { key: 'has_survey', label: 'Has left a survey response', group: 'Engagement', kind: 'cat',
+    options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }] },
+  { key: 'nps_group', label: 'NPS group', group: 'Engagement', kind: 'cat',
+    options: ['Promoter', 'Passive', 'Detractor'].map((v) => ({ v, label: v })) },
   { key: 'expalign_overall', label: 'Alignment across categories', group: 'Ex2 \u00b7 Alignment across categories',
     kind: 'scale', poleLow: 'Different answers', poleHigh: 'Same answers', partnerable: false },
   ...RESPONSIBILITY_CATEGORIES.map((c) => ({ key: 'expalign_' + c.id, label: c.label + ' alignment',
@@ -358,6 +368,21 @@ for (let i = 0; i < 40; i++) {
        the "misaligned" half of that branch was never drawn. */
     r['p_' + f.key] = pick(f.options, i + 1 + (i % 3) + f.key.length).v;
   }
+  /* ── THE ENGAGEMENT CUTS ────────────────────────────────────────────────
+     Portal time is invented here, because page_events is a table this stub
+     has no copy of; the BANDING is the endpoint's rule, run over whatever
+     this cube's own people have, so the three bands come out the right size
+     rather than being assigned by hand. Everything else follows the same
+     rules the endpoint uses: a person left a survey response or did not, and
+     NPS splits at 9 and 6. */
+  r.__portalMs = (i % 7 === 3) ? 0 : (60000 + ((i * 37) % 97) * 15000);
+  r.read_article = (i % 3 !== 1) ? 'Yes' : 'No';
+  const leftSurvey = i % 3 !== 2;
+  r.has_survey = leftSurvey ? 'Yes' : 'No';
+  r.nps_group = !leftSurvey ? null : (() => {
+    const n = (i * 3) % 11;
+    return n >= 9 ? 'Promoter' : n <= 6 ? 'Detractor' : 'Passive';
+  })();
   /* The four yes/no horsemen, from the frequency answers, through the module
      the endpoint uses. Null where they did not do the exercise, which is what
      the server leaves too: a slicer counting somebody who never answered as
@@ -485,6 +510,20 @@ const surveys = rows.filter((_, i) => i % 3 !== 2).map((r, i) => {
   }
   return row;
 });
+
+/* Depth, after the loop: a quartile is a fact about a population, and the
+   endpoint sets it the same way for the same reason. The temporary field is
+   deleted rather than sent, because the cube carries no raw times. */
+{
+  const measured = rows.map((r) => r.__portalMs).filter((n) => n > 0).sort((a, b) => a - b);
+  const at = (frac) => (measured.length ? measured[Math.min(measured.length - 1, Math.floor(frac * (measured.length - 1)))] : null);
+  const p25 = at(0.25), p75 = at(0.75);
+  for (const r of rows) {
+    const ms = r.__portalMs || 0;
+    r.depth_band = (!ms || p25 == null) ? null : ms >= p75 ? 'Top 25%' : ms <= p25 ? 'Bottom 25%' : 'Middle 50%';
+    delete r.__portalMs;
+  }
+}
 
 const CUBE = { ok: true, fields: _placed.fields, dimNames: DIM_NAMES_STUB, count: rows.length, sections: EXPLORE_SECTIONS,
   unmappedGroups: _placed.unmapped, rows, orders, surveys, demoFilterApplied: true };
