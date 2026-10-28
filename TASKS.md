@@ -41,7 +41,9 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| A163 | **Scanning the whole product for bugs and breaks**, at your ask, before you come back to it. The list I am working through: all 313 gates; the smoke run, which renders every results section, every app view and every static page and drives all five exercises; every API route asked from outside the deployed site, because a 500 is not a rejection and only curl tells them apart; the admin driven page by page for console errors and tiles that drew nothing; the app typechecked; and a pass for the bug shapes this codebase keeps producing, which is one rule in two places and a reader with no writer. Anything real goes in section 3 with what proves it. |
 
 ## 3. For you to review
 
