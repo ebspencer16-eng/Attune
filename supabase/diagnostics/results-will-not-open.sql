@@ -12,6 +12,24 @@
 -- when results open is api/_lib/results-gate.js and the rule for whether an
 -- exercise is finished is api/_exercises.js. The long version of why those two
 -- are not restated here is in HANDOFF.md.
+--
+-- ── WHAT THE FIRST VERSION MISSED ────────────────────────────────────────
+-- It answered NOTHING THIS QUERY CAN SEE for a couple whose results plainly
+-- would not open, because it had been trimmed to read nicely and the three
+-- columns it lost are the three that decide:
+--
+--   whether the couple link is MUTUAL. results.js fetches the partner by
+--   `id = me.partner_profile_id` and nothing checks the pointer comes back,
+--   so a one-way link gives a partner row whose answers are somebody else's,
+--   or none.
+--
+--   what the profile GRANTS. The gate waits on every exercise the viewer owns
+--   and neither has started. Ownership is the union of three sources, and the
+--   trimmed query showed none of them: the pkg column, the six addon_*
+--   columns, and the `entitlements` blob, which can name a higher package and
+--   more add-ons than the columns do.
+--
+--   whether anybody paid, which is a separate question from what they can see.
 
 with asked as (select lower('REPLACE_WITH_THEIR_EMAIL') as email),
 
@@ -34,7 +52,28 @@ people as (
     case when jsonb_typeof(p.intimacy_data -> 'answers') = 'object'
          then (select count(*)::int from jsonb_object_keys(p.intimacy_data -> 'answers')) else 0 end as n_intimacy,
     case when jsonb_typeof(p.conflict_data -> 'answers') = 'object'
-         then (select count(*)::int from jsonb_object_keys(p.conflict_data -> 'answers')) else 0 end as n_conflict
+         then (select count(*)::int from jsonb_object_keys(p.conflict_data -> 'answers')) else 0 end as n_conflict,
+    -- Every ownership input, as stored. The pkg-to-capability mapping is
+    -- PKG_CAPS in api/_lib/entitlements.js and is deliberately NOT restated
+    -- here; `core` grants none of the three exercises, which is why they are
+    -- add-ons, so for a core account these columns are the whole answer.
+    array_remove(array[
+      case when p.addon_reflection then 'reflection' end,
+      case when p.addon_intimacy   then 'intimacy'   end,
+      case when p.addon_conflict   then 'conflict'   end,
+      case when p.addon_budget     then 'budget'     end,
+      case when p.addon_checklist  then 'checklist'  end,
+      case when coalesce(p.addon_workbook, '') <> '' then 'workbook' end
+    ], null) as addon_columns,
+    -- The blob grants on top of the columns, and can name a bigger package.
+    p.entitlements ->> 'pkg' as blob_pkg,
+    array_remove(array[
+      case when (p.entitlements ->> 'addonReflection')::boolean then 'reflection' end,
+      case when (p.entitlements ->> 'addonIntimacy')::boolean   then 'intimacy'   end,
+      case when (p.entitlements ->> 'addonConflict')::boolean   then 'conflict'   end
+    ], null) as blob_addons,
+    (p.entitlements ->> 'hasGrant')::boolean as blob_has_grant,
+    (p.entitlements ->> 'comp')::boolean as blob_comp
   from public.profiles p, asked a
   where lower(p.email) = a.email
      or p.id in (select partner_profile_id from public.profiles q, asked b
@@ -91,6 +130,19 @@ select
       then 'NO PARTNER LINKED'
     when not exists (select 1 from public.profiles x where x.id = p.partner_profile_id)
       then 'PARTNER LINK POINTS AT NOTHING'
+    -- A one-way link is the quiet one: the partner row exists, so nothing
+    -- errors, and its answers belong to the wrong person or to nobody.
+    when not exists (select 1 from public.profiles x
+                     where x.id = p.partner_profile_id and x.partner_profile_id = p.id)
+      then 'PARTNER LINK IS ONE WAY'
+    -- The gate waits on every exercise this account owns. One it owns and
+    -- nobody has started is a wait with no way out of it.
+    when 'conflict' = any(p.addon_columns || p.blob_addons) and p.conflict_data is null
+      then 'OWNS CONFLICT PATTERNS AND NOBODY HAS STARTED IT'
+    when 'intimacy' = any(p.addon_columns || p.blob_addons) and p.intimacy_data is null
+      then 'OWNS PHYSICAL INTIMACY AND NOBODY HAS STARTED IT'
+    when 'reflection' = any(p.addon_columns || p.blob_addons) and p.ex3_answers is null
+      then 'OWNS REFLECTION AND NOBODY HAS STARTED IT'
     when exists (select 1 from per_exercise e where e.id = p.id
                    and e.state = 'ANSWERED, NOT MARKED' and e.answers >= e.expected)
       then 'ANSWERED EVERYTHING, NEVER MARKED FINISHED'
@@ -110,7 +162,19 @@ select
                              else ' (' || e.answers || ' of ' || e.expected || ')' end,
                      '  |  ' order by e.exercise)
      from per_exercise e where e.id = p.id) as exercises,
+  -- Is the link mutual? results.js reads the partner by this id alone.
+  case
+    when p.partner_profile_id is null then 'NONE'
+    when exists (select 1 from public.profiles x
+                 where x.id = p.partner_profile_id and x.partner_profile_id = p.id) then 'MUTUAL'
+    else 'ONE WAY'
+  end as partner_link,
   p.pkg,
+  p.addon_columns,
+  p.blob_pkg,
+  p.blob_addons,
+  p.blob_has_grant,
+  p.blob_comp,
   p.is_comp,
   p.joined_via_invite,
   (select count(*) from public.partner_sessions s where s.invite_code = p.invite_code) as rows_in_old_table,
