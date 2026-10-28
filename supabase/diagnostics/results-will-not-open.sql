@@ -120,12 +120,74 @@ per_exercise as (
 )
 
 select
-  p.name,
-  p.email,
-  -- The one column to read. Anything but the last line is the answer.
-  case
+  -- ── ONE BLOCK OF TEXT PER PERSON ──────────────────────────────────────
+  -- A wide table made the reader pick which columns mattered, which is the
+  -- job this query exists to do. Everything is in one column now, so the
+  -- whole result can be handed back without choosing anything.
+  concat_ws(E'\n',
+    p.name || '  <' || coalesce(p.email, 'no email') || '>',
+    '  id: ' || p.id,
+    '  couple link: ' || case
+        when p.partner_profile_id is null then 'NONE'
+        when not exists (select 1 from public.profiles x where x.id = p.partner_profile_id)
+          then 'POINTS AT NOTHING (' || p.partner_profile_id || ')'
+        when exists (select 1 from public.profiles x
+                     where x.id = p.partner_profile_id and x.partner_profile_id = p.id)
+          then 'MUTUAL with ' || coalesce((select x.name from public.profiles x
+                                           where x.id = p.partner_profile_id), '?')
+        else 'ONE WAY to ' || coalesce((select x.name from public.profiles x
+                                        where x.id = p.partner_profile_id), '?')
+             || ', who points at ' || coalesce((select coalesce(y.name, y.id::text)
+                                                from public.profiles x
+                                                left join public.profiles y on y.id = x.partner_profile_id
+                                                where x.id = p.partner_profile_id), 'nobody')
+      end,
+    '  package: ' || coalesce(p.pkg, 'none')
+      || ', comp: ' || coalesce(p.is_comp::text, 'null')
+      || ', joined by invite: ' || coalesce(p.joined_via_invite::text, 'null'),
+    -- The one switch that removes somebody from every admin figure at once,
+    -- silently and by design. Worth printing next to a real account, because
+    -- "they are missing from the dashboard" and "they are flagged as a demo"
+    -- look identical from the outside.
+    '  flagged as a demo account: ' || coalesce(p.is_demo::text, 'null'),
+    '  add-on columns: ' || coalesce(array_to_string(p.addon_columns, ', '), '') ||
+      case when coalesce(array_length(p.addon_columns, 1), 0) = 0 then 'none' else '' end,
+    '  entitlements blob: ' || case when p.entitlements is null then 'none stored'
+      else 'pkg ' || coalesce(p.blob_pkg, 'none')
+           || ', add-ons ' || case when coalesce(array_length(p.blob_addons, 1), 0) = 0
+                                   then 'none' else array_to_string(p.blob_addons, ', ') end
+           || ', hasGrant ' || coalesce(p.blob_has_grant::text, 'null')
+           || ', comp ' || coalesce(p.blob_comp::text, 'null') end,
+    '  orders: ' || (select count(*) from public.orders o where o.user_id = p.id) || ' by account id, '
+      || (select count(*) from public.orders o
+          where p.email is not null and lower(o.buyer_email) = lower(p.email)) || ' by email',
+    '  rows in the old partner_sessions table: '
+      || (select count(*) from public.partner_sessions t where t.invite_code = p.invite_code),
+    -- A second account for one person is what an off-path signup produces, and
+    -- the first version of this looked for one by EMAIL only. Somebody who
+    -- signed up once through an invite and once by hand has two addresses, so
+    -- that check could not see the case it was written for. Name and pointer
+    -- are the two other ways the same person shows up twice.
+    '  other accounts with this name: '
+      || (select count(*) - 1 from public.profiles d
+          where d.name is not null and lower(d.name) = lower(p.name)),
+    '  other accounts with this email: '
+      || (select count(*) - 1 from public.profiles d where lower(d.email) = lower(p.email)),
+    '  other accounts pointing at the same partner: '
+      || coalesce((select count(*) from public.profiles d
+                   where d.partner_profile_id = p.partner_profile_id and d.id <> p.id), 0),
+    '  exercises:',
+    (select string_agg('    ' || e.exercise || ': ' || e.state
+                       || case when e.expected is null then ''
+                               else ' (' || e.answers || ' of ' || e.expected || ')' end,
+                       E'\n' order by e.exercise)
+       from per_exercise e where e.id = p.id),
+    '  verdict: ' || case
     when (select count(*) from public.profiles d where lower(d.email) = lower(p.email)) > 1
-      then 'TWO ACCOUNTS FOR THIS PERSON'
+      then 'TWO ACCOUNTS FOR THIS PERSON, SAME EMAIL'
+    when (select count(*) from public.profiles d
+          where d.name is not null and lower(d.name) = lower(p.name)) > 1
+      then 'TWO ACCOUNTS WITH THIS NAME, DIFFERENT EMAILS'
     when p.partner_profile_id is null
       then 'NO PARTNER LINKED'
     when not exists (select 1 from public.profiles x where x.id = p.partner_profile_id)
@@ -155,32 +217,7 @@ select
     -- Not "all is well": it means this query found nothing, which is itself
     -- worth knowing because it rules the others out.
     else 'NOTHING THIS QUERY CAN SEE'
-  end as verdict,
-  -- And the detail behind it, one line per exercise.
-  (select string_agg(e.exercise || ': ' || e.state
-                     || case when e.expected is null then ''
-                             else ' (' || e.answers || ' of ' || e.expected || ')' end,
-                     '  |  ' order by e.exercise)
-     from per_exercise e where e.id = p.id) as exercises,
-  -- Is the link mutual? results.js reads the partner by this id alone.
-  case
-    when p.partner_profile_id is null then 'NONE'
-    when exists (select 1 from public.profiles x
-                 where x.id = p.partner_profile_id and x.partner_profile_id = p.id) then 'MUTUAL'
-    else 'ONE WAY'
-  end as partner_link,
-  p.pkg,
-  p.addon_columns,
-  p.blob_pkg,
-  p.blob_addons,
-  p.blob_has_grant,
-  p.blob_comp,
-  p.is_comp,
-  p.joined_via_invite,
-  (select count(*) from public.partner_sessions s where s.invite_code = p.invite_code) as rows_in_old_table,
-  (select count(*) from public.orders o
-    where o.user_id = p.id
-       or (p.email is not null and lower(o.buyer_email) = lower(p.email))) as their_orders,
-  p.id
+  end
+  ) as report
 from people p
 order by p.created_at;

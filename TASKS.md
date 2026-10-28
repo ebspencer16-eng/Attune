@@ -10,8 +10,9 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A164 | **Your table ruled out everything I expected, and showed that the query I sent you was trimmed too far. Same query with three columns put back is in the block below: please run it once more.** **What your run settled:** you and Abram have both finished Communication and Expectations, nothing else is started, neither of you has a duplicate account, and nothing is in the old table. So it is not the cause I predicted, and I was wrong to predict it out loud. **What it could not see, because I cut the columns:** whether the couple link is mutual, what each account is GRANTED, and whether the stored entitlements blob grants more than the columns do. Those three are exactly what decides this. The app's words are "your partner has not finished this yet", which the server only says about an exercise you own; `core` grants neither Conflict nor Intimacy nor Reflection, so if something granted one of those to one of you, the wait has no way out of it. **The new verdict names that directly**, along with a one-way couple link, which is the other candidate and is invisible until you check that his pointer comes back to you. |
-
+| A166 | **Live on the site. Both bugs are fixed and you can tell them.** Yours is the one your last message named: an invitee's own answers are kept in the same browser slot as the PARTNER's answers, as a routing marker, so somebody who finished on another device is not sent back through the exercises. The dashboard accepted that marker as partner data whenever the invite code matched, so the partner column was computed from the reader's own answers. Answers now count as the partner's only if they carry the partner's id, which also repairs the stale markers already in their browsers. Run the query below for the product's own confirmation once one of them has opened results. |
+| A166b | **Abram's was a second, separate bug, also live.** The site's "did anybody pay" test only ever asked about the buyer's order, and an invited partner of a plain core purchase has none of the things it asks for, so it refused him for ever. Two more turned up while checking: a couple linked in one direction only was reported as a partner who had not finished, and one failed background request could take an invited partner's exercises away until the next good one. **All four are general. None is about them skipping checkout.** |
+| A167 | **One phrase of copy, yours.** While the site is still fetching a partner's answers it says their exercises are incomplete, because "we have not checked yet" and "they have not done it" render identically. The code already knows the difference and nothing reads it. I need the words for the partner's row during that second or two. "Checking" and "Not loaded yet" are the shape; the words are your call. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -22,216 +23,93 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### One thing to run, for A164
+### One thing to run, for A166
 
-**Step 1 goes in Terminal.** It puts the query on your clipboard, so you do not
-have to find or select anything. It prints `copied` and nothing else.
+The fix is live. Run this once one of them has opened their results page;
+before that it correctly says NOT GENERATED YET, because opening the page is
+what computes them.
+
+**Step 1. Paste this into Terminal.** It copies the query and prints `copied`.
 
 ```bash
-cd /Users/Ellie/Projects/unison && sed -n '/^with asked/,$p' supabase/diagnostics/results-will-not-open.sql | pbcopy && echo copied
+cd /Users/Ellie/Projects/unison && sed -n '/^with asked/,$p' supabase/diagnostics/results-did-generate.sql | pbcopy && echo copied
 ```
 
-**Step 2 goes in the Supabase SQL Editor, not Terminal.** Paste, then find
-`REPLACE_WITH_THEIR_EMAIL`, which appears once, put either of their email
-addresses there, and run it. It reads only; it writes nothing.
+**Step 2. Paste that into the Supabase SQL Editor**, not Terminal. Replace
+`REPLACE_WITH_THEIR_EMAIL` with Rebecca's email. Run it. It reads only.
 
-The same query is printed in full below, so this document still holds
-everything you need if the clipboard step goes wrong.
+**Step 3. Paste me what it printed.** One row of plain text.
 
-You get one row per person. The column to read is **`verdict`**, which says in
-words what is wrong; `exercises` beside it shows the five exercises and where
-each one stopped. Tell me those two and I will write the fix.
-
-<!-- SQL results-will-not-open.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL results-did-generate.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
--- Why a couple's results will not open.
+-- Did a couple's results actually generate, and what do they say?
 --
--- Run this in the Supabase SQL Editor. It reads only; it writes nothing, and
--- it creates nothing: one SELECT, start to finish.
+-- Run this in the Supabase SQL Editor. It reads only; it writes nothing.
 --
--- Find REPLACE_WITH_THEIR_EMAIL below, which appears once, and put either
--- partner's email address there. Then run it. It finds the other half of the
--- couple itself. One row per person, and the column that answers it is
--- `verdict`.
+-- Put either partner's email where it says REPLACE_WITH_THEIR_EMAIL, which
+-- appears once, and run it. One row.
 --
--- It reports what the product reads and does not try to decide: the rule for
--- when results open is api/_lib/results-gate.js and the rule for whether an
--- exercise is finished is api/_exercises.js. The long version of why those two
--- are not restated here is in HANDOFF.md.
+-- ── WHY THIS IS THE CONFIRMATION ──────────────────────────────────────────
+-- Results are frozen: the first time a couple opens them, /api/results
+-- computes them and writes one row to couple_results, keyed on the two ids in
+-- sorted order. That row existing is the product saying "I generated these",
+-- and its couple_type is what the two of them were actually shown.
 --
--- ── WHAT THE FIRST VERSION MISSED ────────────────────────────────────────
--- It answered NOTHING THIS QUERY CAN SEE for a couple whose results plainly
--- would not open, because it had been trimmed to read nicely and the three
--- columns it lost are the three that decide:
+-- So this answers a question no amount of reading the code can: not "should
+-- their results open" but "did they, and what came out". Nothing can answer it
+-- until one of them has opened the page, because that is what computes it.
 --
---   whether the couple link is MUTUAL. results.js fetches the partner by
---   `id = me.partner_profile_id` and nothing checks the pointer comes back,
---   so a one-way link gives a partner row whose answers are somebody else's,
---   or none.
+-- content_version arrives with migration 046. If that has not run, this
+-- errors on an unknown column rather than reporting it, which is the honest
+-- failure: there is no way to read a column that is not there.
 --
---   what the profile GRANTS. The gate waits on every exercise the viewer owns
---   and neither has started. Ownership is the union of three sources, and the
---   trimmed query showed none of them: the pkg column, the six addon_*
---   columns, and the `entitlements` blob, which can name a higher package and
---   more add-ons than the columns do.
---
---   whether anybody paid, which is a separate question from what they can see.
+-- ── WHAT ITS ANSWERS MEAN ─────────────────────────────────────────────────
+--   NOT GENERATED YET   no row. Either nobody has opened results since the
+--                       fix deployed, or they still cannot.
+--   GENERATED           a row, with the couple type and when it was frozen.
+--   GENERATED, STALE    a row whose answers_hash no longer matches what the
+--                       two of them have stored, which is what a retake looks
+--                       like. The stored row is still what they see; this is
+--                       information, not a fault.
 
 with asked as (select lower('REPLACE_WITH_THEIR_EMAIL') as email),
-
--- Both halves of the couple, plus any duplicate account for either of them,
--- because a signup outside the checkout path is how a second account happens.
---
--- The answer counts are taken here, once, each guarded on the value actually
--- being an object. jsonb_object_keys raises on a scalar, and an error message
--- in place of an answer is the worst outcome this query has; these accounts
--- did not come through the normal path, which is where odd data lives.
-people as (
-  select
-    p.*,
-    case when jsonb_typeof(p.ex1_answers) = 'object'
-         then (select count(*)::int from jsonb_object_keys(p.ex1_answers)) else 0 end as n_ex1,
-    case when jsonb_typeof(p.ex2_answers) = 'object'
-         then (select count(*)::int from jsonb_object_keys(p.ex2_answers)) else 0 end as n_ex2,
-    case when jsonb_typeof(p.ex3_answers) = 'object'
-         then (select count(*)::int from jsonb_object_keys(p.ex3_answers)) else 0 end as n_ex3,
-    case when jsonb_typeof(p.intimacy_data -> 'answers') = 'object'
-         then (select count(*)::int from jsonb_object_keys(p.intimacy_data -> 'answers')) else 0 end as n_intimacy,
-    case when jsonb_typeof(p.conflict_data -> 'answers') = 'object'
-         then (select count(*)::int from jsonb_object_keys(p.conflict_data -> 'answers')) else 0 end as n_conflict,
-    -- Every ownership input, as stored. The pkg-to-capability mapping is
-    -- PKG_CAPS in api/_lib/entitlements.js and is deliberately NOT restated
-    -- here; `core` grants none of the three exercises, which is why they are
-    -- add-ons, so for a core account these columns are the whole answer.
-    array_remove(array[
-      case when p.addon_reflection then 'reflection' end,
-      case when p.addon_intimacy   then 'intimacy'   end,
-      case when p.addon_conflict   then 'conflict'   end,
-      case when p.addon_budget     then 'budget'     end,
-      case when p.addon_checklist  then 'checklist'  end,
-      case when coalesce(p.addon_workbook, '') <> '' then 'workbook' end
-    ], null) as addon_columns,
-    -- The blob grants on top of the columns, and can name a bigger package.
-    p.entitlements ->> 'pkg' as blob_pkg,
-    array_remove(array[
-      case when (p.entitlements ->> 'addonReflection')::boolean then 'reflection' end,
-      case when (p.entitlements ->> 'addonIntimacy')::boolean   then 'intimacy'   end,
-      case when (p.entitlements ->> 'addonConflict')::boolean   then 'conflict'   end
-    ], null) as blob_addons,
-    (p.entitlements ->> 'hasGrant')::boolean as blob_has_grant,
-    (p.entitlements ->> 'comp')::boolean as blob_comp
+pair as (
+  select p.id as me, p.partner_profile_id as them, p.name, p.email
   from public.profiles p, asked a
   where lower(p.email) = a.email
-     or p.id in (select partner_profile_id from public.profiles q, asked b
-                 where lower(q.email) = b.email)
-     or p.partner_profile_id in (select id from public.profiles q, asked c
-                                 where lower(q.email) = c.email)
 ),
-
--- An exercise is finished when its answers column has any keys, except the two
--- stored as a record, which are finished only when the record carries
--- completedAt. Conflict Patterns is 12 questions and Physical Intimacy is 16;
--- those two counts are a note, not the rule, and the lists live in
--- api/_conflict-questions.js and api/_intimacy-questions.js.
-per_exercise as (
-  select p.id, 'Communication' as exercise, p.n_ex1 as answers, null::int as expected,
-         case when p.ex1_answers is null then 'NOT STARTED'
-              when p.n_ex1 = 0 then 'NOT AN ANSWER SET'
-              else 'FINISHED' end as state
-  from people p
-  union all
-  select p.id, 'Expectations', p.n_ex2, null,
-         case when p.ex2_answers is null then 'NOT STARTED'
-              when p.n_ex2 = 0 then 'NOT AN ANSWER SET'
-              else 'FINISHED' end
-  from people p
-  union all
-  select p.id, 'Reflection', p.n_ex3, null,
-         case when p.ex3_answers is null then 'NOT STARTED'
-              when p.n_ex3 = 0 then 'NOT AN ANSWER SET'
-              else 'FINISHED' end
-  from people p
-  union all
-  select p.id, 'Physical Intimacy', p.n_intimacy, 16,
-         case when p.intimacy_data is null then 'NOT STARTED'
-              when p.intimacy_data ->> 'completedAt' is not null then 'FINISHED'
-              else 'ANSWERED, NOT MARKED' end
-  from people p
-  union all
-  select p.id, 'Conflict Patterns', p.n_conflict, 12,
-         case when p.conflict_data is null then 'NOT STARTED'
-              when p.conflict_data ->> 'completedAt' is not null then 'FINISHED'
-              else 'ANSWERED, NOT MARKED' end
-  from people p
+ordered as (
+  -- The same canonical order orderPair uses in api/_lib/results-store.js, so
+  -- this looks for the row where the row actually is.
+  select least(me, them) as a, greatest(me, them) as b, name, email from pair
 )
-
 select
-  p.name,
-  p.email,
-  -- The one column to read. Anything but the last line is the answer.
-  case
-    when (select count(*) from public.profiles d where lower(d.email) = lower(p.email)) > 1
-      then 'TWO ACCOUNTS FOR THIS PERSON'
-    when p.partner_profile_id is null
-      then 'NO PARTNER LINKED'
-    when not exists (select 1 from public.profiles x where x.id = p.partner_profile_id)
-      then 'PARTNER LINK POINTS AT NOTHING'
-    -- A one-way link is the quiet one: the partner row exists, so nothing
-    -- errors, and its answers belong to the wrong person or to nobody.
-    when not exists (select 1 from public.profiles x
-                     where x.id = p.partner_profile_id and x.partner_profile_id = p.id)
-      then 'PARTNER LINK IS ONE WAY'
-    -- The gate waits on every exercise this account owns. One it owns and
-    -- nobody has started is a wait with no way out of it.
-    when 'conflict' = any(p.addon_columns || p.blob_addons) and p.conflict_data is null
-      then 'OWNS CONFLICT PATTERNS AND NOBODY HAS STARTED IT'
-    when 'intimacy' = any(p.addon_columns || p.blob_addons) and p.intimacy_data is null
-      then 'OWNS PHYSICAL INTIMACY AND NOBODY HAS STARTED IT'
-    when 'reflection' = any(p.addon_columns || p.blob_addons) and p.ex3_answers is null
-      then 'OWNS REFLECTION AND NOBODY HAS STARTED IT'
-    when exists (select 1 from per_exercise e where e.id = p.id
-                   and e.state = 'ANSWERED, NOT MARKED' and e.answers >= e.expected)
-      then 'ANSWERED EVERYTHING, NEVER MARKED FINISHED'
-    when exists (select 1 from per_exercise e where e.id = p.id
-                   and e.state = 'ANSWERED, NOT MARKED')
-      then 'STOPPED PART WAY THROUGH'
-    when exists (select 1 from per_exercise e where e.id = p.id
-                   and e.state = 'NOT AN ANSWER SET')
-      then 'AN ANSWERS COLUMN HOLDS SOMETHING THAT IS NOT ANSWERS'
-    -- Not "all is well": it means this query found nothing, which is itself
-    -- worth knowing because it rules the others out.
-    else 'NOTHING THIS QUERY CAN SEE'
-  end as verdict,
-  -- And the detail behind it, one line per exercise.
-  (select string_agg(e.exercise || ': ' || e.state
-                     || case when e.expected is null then ''
-                             else ' (' || e.answers || ' of ' || e.expected || ')' end,
-                     '  |  ' order by e.exercise)
-     from per_exercise e where e.id = p.id) as exercises,
-  -- Is the link mutual? results.js reads the partner by this id alone.
-  case
-    when p.partner_profile_id is null then 'NONE'
-    when exists (select 1 from public.profiles x
-                 where x.id = p.partner_profile_id and x.partner_profile_id = p.id) then 'MUTUAL'
-    else 'ONE WAY'
-  end as partner_link,
-  p.pkg,
-  p.addon_columns,
-  p.blob_pkg,
-  p.blob_addons,
-  p.blob_has_grant,
-  p.blob_comp,
-  p.is_comp,
-  p.joined_via_invite,
-  (select count(*) from public.partner_sessions s where s.invite_code = p.invite_code) as rows_in_old_table,
-  (select count(*) from public.orders o
-    where o.user_id = p.id
-       or (p.email is not null and lower(o.buyer_email) = lower(p.email))) as their_orders,
-  p.id
-from people p
-order by p.created_at;
+  concat_ws(E'\n',
+    'couple: ' || coalesce(o.name, '?') || ' <' || coalesce(o.email, '?') || '> and partner',
+    '  stored results row: ' || case when r.partner_a is null then 'NOT GENERATED YET'
+                                     else 'GENERATED' end,
+    case when r.partner_a is null then
+      '  nothing to report until one of them opens their results, which is what computes them'
+    else concat_ws(E'\n',
+      '  couple type: ' || coalesce(r.couple_type, 'none recorded'),
+      '  frozen at: ' || coalesce(r.frozen_at::text, r.computed_at::text, 'unknown'),
+      -- Cast before coalescing. Both of these are integer columns, and
+      -- `coalesce(r.version, '?')` is a type error Postgres refuses outright:
+      -- "COALESCE types integer and text cannot be matched". It parses
+      -- perfectly, which is why the parser said yes and the database would
+      -- have said no, in front of Ellie.
+      '  engine version: ' || coalesce(r.version::text, '?')
+        || ', content version: ' || coalesce(r.content_version::text, 'not set'),
+      '  sections in the stored payload: '
+        || coalesce((select count(*)::text from jsonb_object_keys(r.results)), 'unreadable')
+    ) end
+  ) as report
+from ordered o
+left join public.couple_results r
+  on r.partner_a = o.a and r.partner_b = o.b;
 ```
 <!-- /SQL -->
+
 
 
 ---
@@ -265,6 +143,8 @@ section 3 explaining things, just include the context I need in section 3."
 |--|--|
 | A164b | **Found on the way, and unrelated to them: the database schema file could not be run at all, and said it could.** `supabase/schema.sql` opens with "Run this in the Supabase SQL Editor. Safe to run in order; each block is idempotent." Seven of its statements used a form of CREATE POLICY that PostgreSQL has never had, so it stopped at line 25 with a syntax error, and an eighth error sat hidden behind the first. If you had ever pasted it, setting up a new project or restoring one, you would have got an error you could not act on. Fixed, and the file's own promise is now checked by a gate: every CREATE in it has to be safe to run twice. Six planted bugs fail it, including the next version of the same mistake. |
 
+| A164 | **Found it, fixed it, and it was not their fault at all. Nothing for you to run.** Abram is an invited partner, and every term in the website's "did anybody pay" test is something the BUYER's order carries: an order number, a comp flag, a package above core, or an add-on. An invited partner has none of those. Their device rebuilds a couple-level order from what the server sends, and that carried the add-ons and the workbook and nothing about the grant, so for a plain core purchase the answer was no. The gate then said nobody had paid and the dashboard told him he was waiting on you. **Your data is perfect:** mutual link both ways, no duplicate accounts, both of you finished both exercises you own, and when I ran the real gate over your two rows it answers ready for both of you. The server would have served the results; the website refused them. **It is general, not yours:** every invited partner of every core purchase hit this, which is the ordinary path. The server now sends the buyer's grant, the device carries it, and the rule reads it. **Live once this deploys, with no migration and nothing to click.** |
+| A164b | **The query that found it is kept, and it is the thing to reach for next time a couple cannot see results.** `supabase/diagnostics/results-will-not-open.sql`, read-only, prints one block per person: whether the couple link is mutual, what each account is granted, where every exercise stopped, duplicate accounts by three routes, and orders matched both ways. It took three attempts to make it useful, and what it taught is in HANDOFF.md: the first version lacked the columns that decide, the second made you read four of them, and the third prints one block you can paste back whole. |
 | A163 | **Scan done. Five real bugs, all fixed, and one gap that needs your call.** Clean: all 314 gates, the app's typecheck, and every one of the 62 API routes asked from outside the live site with no credentials (28 answered "not allowed", 23 "wrong method", 9 public, 2 "bad request", and no server errors, which is the measurement that tells a rejection from a crash). The five are A163a to A163e below. |
 | A163a | **An exercise could un-finish itself, silently.** Saving progress on Conflict Patterns or Physical Intimacy first reads what is already stored, so a half-answered save cannot wipe a completion. That read's failure was not checked, and the database returns its errors here rather than throwing, so a rejected query read as "nothing was stored" and the completion was overwritten with the half-answered record. The couple's results would have closed again. It now saves nothing and says so, because the app autosaves again a moment later and an erased completion is not recoverable. |
 | A163b | **An invited partner could silently inherit less than you paid for.** Partner B's access is built by unioning every one of Partner A's orders, matched by account and also by email because a guest checkout has no account on it. The email lookup's failure was not checked while both order lookups beside it were, so a rejected query quietly dropped exactly the guest-checkout orders that branch exists to find. Both now fail loudly instead. |

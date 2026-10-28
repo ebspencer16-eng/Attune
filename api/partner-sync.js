@@ -465,7 +465,28 @@ async function handlePartnerSync(req) {
       // the couple-level order (workbook readiness, reflection, budget)
       // on every poll. The invitee never placed the order, so without this
       // they never see the workbook and lose order state across logout/login.
-      let inherited = { addonReflection: false, addonBudget: false, addonChecklist: false, addonWorkbook: '', addonIntimacy: false, workbookStatus: null , addonConflict: false };
+      /**
+       * ── AND WHETHER ANYBODY PAID, WHICH WAS THE MISSING ONE ─────────────
+       * Ellie, of a linked couple who had both finished: "their results
+       * aren't generating because it says his are incomplete... I want their
+       * account to function normally."
+       *
+       * This carried the add-ons and the workbook and stopped there. The
+       * invitee's device rebuilds its couple-level order from exactly these
+       * fields, and the website's "did anybody pay" test reads orderNum,
+       * comp, a package above core, or an add-on. An invited partner of a
+       * plain CORE purchase has none of those: no order of their own, no
+       * add-ons to inherit, and core fails the package test by definition.
+       *
+       * So `purchased` was false on their device, resultsGate answered
+       * not_purchased, and the dashboard showed them waiting on a partner who
+       * had finished. For ever, and for every invited partner of every core
+       * purchase, which is the ordinary path rather than an edge case.
+       *
+       * computeEntitlements already works all three out. They were simply not
+       * being passed on.
+       */
+      let inherited = { addonReflection: false, addonBudget: false, addonChecklist: false, addonWorkbook: '', addonIntimacy: false, workbookStatus: null , addonConflict: false, hasGrant: false, comp: false, pkg: null };
       try {
         // Union ALL of Partner A's orders, never newest-wins. A newer partial
         // order (a test purchase, a single add-on) would otherwise strip the
@@ -491,6 +512,22 @@ async function handlePartnerSync(req) {
         }
         if (rows.length) {
           const ent = computeEntitlements(rows, null);
+          /* The grant itself, which is what the invitee's device had no way of
+             knowing. `pkg` too, because the same test accepts any package
+             above core and the invitee's rebuilt order said core regardless of
+             what the buyer bought. */
+          inherited.hasGrant = !!ent.hasGrant;
+          inherited.comp = !!ent.comp;
+          /* null, not 'core', when the read failed. The block above is inside a
+             try whose catch only warns, so a rejected orders query used to
+             leave this at the initialiser's 'core' and send it as though it
+             were an answer. The browser then wrote core over a premium it
+             already knew about and took the invitee's own exercises away until
+             the next good poll. 'core' is both a real package and the default,
+             which is what made the failure invisible: unknown has to be a
+             value of its own, the same lesson as a partner whose answers have
+             not arrived not being a partner who has not finished. */
+          inherited.pkg = ent.pkg || null;
           inherited.addonReflection = ent.addonReflection;
           inherited.addonBudget     = ent.addonBudget;
           inherited.addonChecklist  = ent.addonChecklist;

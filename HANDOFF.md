@@ -4418,3 +4418,175 @@ the folder now, and a write planted into either of the other two fails it. And
 while its own header said the second block is for "a new read-only question":
 it reads both folders now, so a diagnostic can be inline in TASKS.md without
 being a hand-pasted copy.
+
+## 2026-10-28: an invited partner of a core purchase could never see results
+
+Ellie: "Rebecca and Abram cannot see their results and are seeing pending when
+they've completed exercises... I want their account to function normally."
+
+**Their data was perfect.** Mutual couple link both ways, no duplicate accounts
+by email, name or pointer, nothing in the legacy table, both finished
+Communication and Expectations, and neither owns anything else because both are
+`core`. Running `resultsGate` over their exact rows answers `ready: true` for
+both of them. The server would have served the results.
+
+**The website refused them.** `_purchased` in src/App.jsx is the `purchased`
+argument to the shared gate, and every term in it is something the BUYER's
+order carries: `order.orderNum`, `order.comp`, a package above core, or an
+add-on. An invited partner has no order of their own; their device rebuilds a
+couple-level order from what `/api/partner-sync` sends as `inherited`, and that
+carried the add-ons, the workbook and nothing about the grant.
+
+So for a plain CORE purchase the invitee satisfied no term at all: `purchased`
+false, `resultsGate` answered `not_purchased`, and the dashboard told them they
+were waiting on a partner who had finished. For ever, and for every invited
+partner of every core purchase, which is the ordinary path. The couple had been
+linked by hand outside checkout, which is exactly why it looked like their
+fault and was not.
+
+`computeEntitlements` had already worked the grant out. It was simply not
+passed on. `inherited` now carries `hasGrant`, `comp` and `pkg`; the poll
+carries them onto the rebuilt order; `_purchased` reads the grant.
+
+**How it was found, after two wasted round trips.** By running the real code
+over her pasted values rather than reasoning about it. Three lines of node with
+`capabilitiesFor`, `doneFromProfile` and `resultsGate` said `ready: true` for
+both, which turned "why is the gate blocking them" into "the gate is not
+blocking them", and from there the disagreement had to be client-side. That
+should have been the first thing I did with her data.
+
+**check-invitee-sees-results.mjs** lifts the `_purchased` expression out of
+src/App.jsx and RUNS it, then feeds the answer to the real gate, because the
+expression is 19,000 lines into a file no gate here can import. Same approach as
+check-card-type-clipping with the app's type scale, for the same reason: test
+the copy that ships. A gate asserting the string appears would have passed on a
+field that is sent, carried and never read, so it also removes the grant from
+the fixture and requires the answer to change.
+
+Four plants, and the second walked through: the gate matched
+`/inherited\.hasGrant\s*=/`, which `inherited.hasGrant = false` satisfies
+perfectly. Matching a name instead of what follows it, this repo's most
+recorded gate fault, made inside the gate written to stop a silent refusal. It
+matches the assignment from `ent.hasGrant` now, and both hardcoding directions
+fail it.
+
+**And the diagnostic took three attempts**, which is its own lesson. The first
+was 141 lines and answered everything; I trimmed it to 122 for readability and
+cut the three columns that decide: whether the link is mutual, what the account
+grants, and the entitlements blob. The second asked her to read four columns
+and say which mattered, which is the job the query exists to do. The third
+prints one block of plain text per person that can be pasted back whole. A
+diagnostic shortened for readability answers fewer questions, and the columns
+that go are the ones whose value is not obvious until the day they are needed.
+
+The one thing that went right throughout: the clean verdict reads NOTHING THIS
+QUERY CAN SEE rather than "looks fine", so a blind query cost one more question
+instead of a confident wrong fix.
+
+## 2026-10-28, later: the invitee's own answers were in the partner's slot
+
+Ellie, which is the sentence that solved it: "Rebecca was seeing that abram's
+exercises were incomplete when they were not."
+
+That cannot come from Abram's bug. His was the website's "did anybody pay"
+test, which produces a not_purchased gate and no per-exercise status at all. A
+per-exercise status for HIM on HER screen comes from one place: what her device
+holds as the partner session.
+
+**The bug.** src/App.jsx keeps the linked partner's answers in localStorage
+under `attune_partner_session`. An invitee's own device also writes a routing
+marker to that same key, holding that person's OWN ex1 and ex2 and no
+partnerProfileId, so somebody who finished on another device is not sent back
+through the exercises. `_partnerLinked` accepted a session with no
+partnerProfileId as long as its inviteCode matched the account's, which the
+marker's does. So the partner column was computed from the reader's own
+answers.
+
+Nothing threw. Both objects have an ex1 and an ex2; only whose they are
+differs, and no shape distinguishes them. The inviteCode branch dates from
+3e1b848e and from the era when an invited partner's answers arrived keyed by
+invite code with no profile id, which is the dead partner_sessions flow.
+
+**partnerProfileId is the only field that says a set of answers belongs to
+somebody else**, so it is now the only test.
+
+**The first fix was wrong and the gate said so.** I labelled the marker
+`selfMarker: true` and excluded the label. check-partner-status-is-the-partner
+refused it on its first run, asserting that a session with answers, a matching
+inviteCode and no partnerProfileId must not read as a partner however it is
+labelled. It was right for a reason I had not thought of: every marker already
+sitting in somebody's browser carries no label, so the people affected today
+would have stayed affected until their device happened to write a new one.
+Requiring the id repairs those devices on the next render. The label is gone
+rather than left unused.
+
+**Two measurement bugs in that gate, both mine.** It lifts the three
+derivations out of src/App.jsx and runs them, and the lift ended at a fixed
+`');'`, which was the end of `_partnerLinked` while it was a two-term
+expression and became the end of `partnerEx1Done` three lines later once it was
+one term: the lifted body declared that name twice and the gate died on a
+SyntaxError. A fixed closing token is a guess about a shape. The statement's own
+semicolon is not.
+
+Four plants, all caught, including the marker moving to a key of its own, which
+would be the better fix and must not pass silently as though nothing changed.
+
+**And a robustness bug in my earlier invitee fix.** The poll overwrote
+`inheritedHasGrant` on every run, so one failed orders read inside
+partner-sync's own try/catch put the invitee straight back behind the gate.
+Grant-only now, like every other entitlement merge in this product.
+
+**What is still not proved.** That either of them can see results. Both fixes
+are correct and gated, and neither can be confirmed from here: I have never
+seen their answers and cannot log in as either of them.
+supabase/diagnostics/results-did-generate.sql reads the stored couple_results
+row, which exists only because the product computed it, and prints the couple
+type it produced. That is the confirmation, and it needs one of them to open
+the page first.
+
+## 2026-10-28, later: the invitee's inherited entitlements
+
+Pushed and green. Four refusals on the path an invited partner takes to their
+results, found from Ellie's report of one couple and none of them about that
+couple.
+
+1. `_purchased` in src/App.jsx asked only about the BUYER's order, so an
+   invited partner of a plain core purchase satisfied no term and was refused
+   for ever. partner-sync now sends the buyer's grant, comp and package from
+   `computeEntitlements`, and the poll carries them onto the rebuilt order.
+2. The dashboard read the invitee's own answers as the partner's, because
+   those answers live in the partner's slot as a routing marker and the test
+   was an invite-code match. It is the partner's id now, which also repairs
+   the markers already sitting in browsers.
+3. `api/results.js` never checked that the partner pointed back, so a one-way
+   link read as a partner who had not finished. It answers
+   `partner_link_one_way` and `partner_not_found` separately now.
+4. Found while re-reading my own diff: the poll's merge overwrote eight fields
+   with whatever the endpoint sent, and the endpoint pre-fills them false
+   before a read whose catch only warns. One rejected query took an invitee's
+   add-ons, their grant and their package away until the next good poll. The
+   merge is one grant-only `keep()` now, and `inherited.pkg` is null rather
+   than `'core'` when the read failed, so unknown is distinguishable from a
+   real core purchase.
+
+Three new gates, all planted against: check-invitee-sees-results (12 plants,
+including the code exactly as it shipped this morning), check-couple-link-mutual
+(5), check-partner-status-is-the-partner (4). The first lifts both the shipped
+`_purchased` and the shipped merge out of src/App.jsx and runs them.
+
+`supabase/schema.sql` could not be run at all: PostgreSQL has no
+`CREATE POLICY ... IF NOT EXISTS` and seven policies used it, plus one
+`FOR INSERT` policy carrying an illegal `USING`. check-schema-runnable holds
+every CREATE in it to an idempotent form.
+
+### Where this stops
+
+Nothing half-done. One thing waiting on Ellie, as A167 in TASKS.md: the words
+for a partner's row while their answers are still being fetched. `partnerSyncing`
+is declared, set by the poll and read by nothing, so "we have not checked yet"
+renders as "they have not finished". The code change is a few lines once the
+phrase exists; she writes all customer-facing copy.
+
+And A166's confirmation loop: one of them opens their results, she runs
+`supabase/diagnostics/results-did-generate.sql` from the block in TASKS.md and
+pastes the row.

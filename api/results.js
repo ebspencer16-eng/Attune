@@ -585,6 +585,50 @@ export default async function handler(req) {
     const partRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc });
     const partner = (await partRes.json().catch(() => []))?.[0];
+
+    /**
+     * ── THE LINK HAS TO COME BACK ──────────────────────────────────────────
+     * Ellie, of a couple who had both finished: "their results aren't
+     * generating because it says his are incomplete."
+     *
+     * This followed `me.partner_profile_id` and asked no further questions.
+     * api/partner-sync.js writes that column on BOTH rows when two people are
+     * linked, and api/home.js says in its own comment that a link written one
+     * way "should not exist" and instruments the case so that it shows up.
+     * This endpoint had no equivalent, so a pointer at the wrong row, or at a
+     * row that never answered anything, came back as a partner with no
+     * answers. The gate then correctly reported every exercise the viewer had
+     * finished as one their partner had not, and the app said "your partner
+     * has not finished this yet" about somebody who had finished everything.
+     *
+     * Nothing threw, and nothing could: a profile row is a profile row. The
+     * only tell was a sentence that was not true.
+     *
+     * It costs no extra read. `cols` already carries partner_profile_id,
+     * because the viewer's own row is selected with the same list.
+     *
+     * A missing row is kept separate from a row that does not point back. The
+     * first is a deleted account, which has its own path above; the second is
+     * a half-written link, which is a repair.
+     */
+    if (!partner) {
+      return json({
+        ok: true, ready: false, reason: 'partner_not_found',
+        self: mine ? personResults(mine, null) : null,
+      });
+    }
+    if (partner.partner_profile_id !== me.id) {
+      return json({
+        ok: true, ready: false, reason: 'partner_link_one_way',
+        /* Nothing is waiting on an exercise, so nothing may be named as
+           waiting on one. An empty list is what stops a surface drawing the
+           sentence that was wrong in the first place. */
+        waitingOn: [],
+        self: mine ? personResults(mine, null) : null,
+        partnerName: partner.name || null,
+      });
+    }
+
     const theirs = partner?.ex1_answers && Object.keys(partner.ex1_answers).length ? partner.ex1_answers : null;
 
     // Readiness is api/_lib/results-gate.js's decision, not this endpoint's.

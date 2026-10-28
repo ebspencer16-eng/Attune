@@ -1657,6 +1657,51 @@ so `options.some(o => o.value === want)` compared an option to an object and
 was false for every pick: the one assertion that line exists for had become a
 constant while reporting a plausible-looking false.
 
+**One rule, two sets of inputs, two answers.** results-gate.js was written to
+end a bug where the rule existed three times and the three disagreed. It is one
+function now and it was still giving two answers, because what it is HANDED
+differs by surface. Ellie: "Rebecca and Abram cannot see their results and are
+seeing pending when they've completed exercises."
+
+Their data was perfect, and running the real gate over their two rows answered
+`ready: true` for both. The server would have served the results. The website
+refused, because its `purchased` argument is built from terms the BUYER's order
+carries: an order number, a comp flag, a package above core, an add-on. An
+invited partner has none of those, and their device rebuilds a couple-level
+order from what partner-sync sends, which carried the add-ons and nothing about
+the grant. For a plain CORE purchase the invitee satisfied no term at all, so
+every invited partner of every core purchase waited for ever on a partner who
+had finished.
+
+Consolidating a rule is half the job. The other half is the inputs, and they
+are harder to see, because each caller's version looks locally reasonable and
+there is no second implementation to diff against. When one surface says ready
+and another says pending, do not read the rule: run it, with each surface's own
+arguments, and print both.
+
+**And three lines of node beat an hour of reading.** Two round trips went into
+theorising about why the gate was blocking them. Importing `capabilitiesFor`,
+`doneFromProfile` and `resultsGate` and running them over the values she had
+pasted took one command and turned "why is it blocking" into "it is not
+blocking", which is a different search. With a real row in hand, run the code
+over it before forming a theory about the code.
+
+**A diagnostic shortened for readability answers fewer questions.** The query
+for that couple took three attempts. The first was long and answered
+everything. I trimmed it for readability and cut exactly the three columns that
+decide: whether the couple link is mutual, what the account grants, and the
+entitlements blob, which OWNERSHIP_COLUMNS warns in writing is "the narrower
+question that hid a paid-for add-on from the app". The second asked her to read
+four columns and say which mattered, which is the job the query exists to do.
+The third prints one block of plain text per person that can be pasted back
+whole.
+
+The columns that get cut are the ones whose value is not obvious until the day
+they are needed, which is the day you are writing the query. And the clean
+verdict said NOTHING THIS QUERY CAN SEE rather than "looks fine", which is the
+only reason a blind query cost one more question instead of a confident wrong
+fix.
+
 **A gate that compares inputs is not comparing the thing.** check-scoring-mirror
 held the website's scorer to the engine on which questions belong to which
 dimension and which are reverse-worded, and never ran either of them. That is
@@ -2309,6 +2354,54 @@ TASKS.md instead.
 The count in that sentence has now been wrong twice, which is this file doing
 the thing it warns about. `find . -name '*.md' -not -path './node_modules/*'`
 settles it in one command, so count rather than remember.
+
+**A matcher that knows one spelling fails a right change, which is the mirror
+of letting a wrong value through.** This file records "match the name with its
+call, not the name" several times over, always about a gate that passed when it
+should have failed. The other direction cost a build today.
+
+`check-invitee-sees-results` asserted
+`/inheritedHasGrant:\s*!!json\.inherited\.hasGrant/`. An hour later the merge
+became grant-only, `!!prev.inheritedHasGrant || !!json.inherited.hasGrant`, so
+one failed poll could not un-grant somebody mid-session. Correct change, red
+build, and the gate was pointing at a form rather than at a value.
+
+The parse-the-property version that replaced it was better and still wrong in
+kind: `inheritedHasGrant: true` satisfies "the property exists and reads
+something", and a constant is this file's most-recorded way to defeat a check.
+What holds is lifting the merge out of src/App.jsx and RUNNING it, three ways:
+a grant arriving lands, a grant already held survives a response that knows
+nothing, and nothing arriving grants nothing. The third is the one that makes a
+hardcoded yes fail, and it was missing from the first behavioural version too.
+
+So: a rule about values is checked by running the code and comparing answers,
+and the directions to test are "it happens", "it is not undone" and "it does
+not happen for free". Two of those are easy to forget because the bug as found
+only needed the first.
+
+**Unknown is not "no", and a pre-filled default sent as an answer is
+indistinguishable from one.** `api/partner-sync` builds the `inherited` object
+an invited partner's device runs on by pre-filling every field false and then
+reading the buyer's orders inside a `try` whose `catch` only warns. So the
+shape it sends when a query fails is exactly the shape for "the buyer bought
+nothing", and eight fields in the browser's merge were plain overwrites of what
+that device already knew. One rejected query took an invitee's exercises away
+until the next good poll, on their device only, with nothing logged anywhere.
+
+`pkg` was the clearest version: `'core'` is both the initialiser and a real
+package, so a failed read was sent as a purchase. It sends null now, and null
+means keep what you had.
+
+The merge is one `keep(mine, theirs)` written once rather than eight lines, so
+a ninth field cannot be added as an overwrite. `capabilitiesFor` on the server
+already unions the order columns with the entitlements blob and can never take
+access away; this is that rule on the client, where the invitee's copy of it
+lives.
+
+Same shape as the thing it was found next to: a partner whose answers have not
+arrived yet is not a partner who has not finished. Any time a surface renders
+"we have not heard" identically to "no", a failed read becomes a product
+statement about somebody.
 
 ---
 

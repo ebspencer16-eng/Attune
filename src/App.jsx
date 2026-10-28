@@ -15864,6 +15864,21 @@ export default function App() {
               if (profile?.joined_via_invite && profile?.ex1_answers && profile?.ex2_answers) {
                 // Into state as well as storage, for the same reason as the
                 // answers above: routing and the partner column read state.
+                /**
+                 * ── THIS IS ABOUT ME, NOT ABOUT MY PARTNER ──────────────
+                 * Stored under `attune_partner_session`, the key that
+                 * otherwise holds the PARTNER's answers, because routing
+                 * keys off that key. So it is an invitee's own ex1 and ex2
+                 * sitting in the slot the dashboard reads the other
+                 * person's progress from, and for a while the dashboard
+                 * read it as theirs. See the note on `_partnerLinked`.
+                 *
+                 * It carries no partnerProfileId, which is now the one
+                 * thing that makes a session somebody else's. A
+                 * `selfMarker: true` flag was added here first and then
+                 * removed: a field nothing reads is not a mechanism, and
+                 * every marker already in a browser would have lacked it.
+                 */
                 const _marker = {
                   inviteCode: profile.invite_code || '',
                   name: profile.name || '',
@@ -16908,15 +16923,46 @@ export default function App() {
         if (json.inherited && account?.joinedViaInvite && !cancelled) {
           try {
             const prev = JSON.parse(localStorage.getItem('attune_order') || 'null') || {};
+            /* ── A POLL MAY NOT TAKE CAPABILITY AWAY ───────────────────────
+               Every line below was a plain overwrite of what this browser
+               already knew. api/partner-sync builds its `inherited` by
+               pre-filling false and then reading the buyer's orders inside a
+               try whose catch only warns, so ONE rejected query answered "no
+               add-ons, no grant, no package", the browser wrote that over the
+               truth, and an invited partner lost exercises they own until the
+               next good poll. Nothing errored and nothing logged on their
+               device.
+
+               `capabilitiesFor` on the server unions the order columns with
+               the entitlements blob and can never take access away. This is
+               that same rule on the client, which is where the invitee's
+               copy of it lives, and it is written once rather than eight
+               times so a ninth field cannot be added as an overwrite.
+
+               Unknown is not "no". Same lesson as a partner whose answers
+               have not arrived yet not being a partner who has not
+               finished. */
+            const keep = (mine, theirs) => !!mine || !!theirs;
             const merged = {
               ...prev,
-              addonReflection: json.inherited.addonReflection,
-              addonBudget:     json.inherited.addonBudget,
-              addonChecklist:  json.inherited.addonChecklist,
-              addonIntimacy:     json.inherited.addonIntimacy,
-              addonConflict:     json.inherited.addonConflict,
-              addonWorkbook:   json.inherited.addonWorkbook || null,
+              addonReflection: keep(prev.addonReflection, json.inherited.addonReflection),
+              addonBudget:     keep(prev.addonBudget,     json.inherited.addonBudget),
+              addonChecklist:  keep(prev.addonChecklist,  json.inherited.addonChecklist),
+              addonIntimacy:   keep(prev.addonIntimacy,   json.inherited.addonIntimacy),
+              addonConflict:   keep(prev.addonConflict,   json.inherited.addonConflict),
+              addonWorkbook:   json.inherited.addonWorkbook || prev.addonWorkbook || null,
               workbookStatus:  json.inherited.workbookStatus || prev.workbookStatus || null,
+              /* The buyer's grant. Without it an invited partner of a plain
+                 core purchase had nothing on their device saying anybody had
+                 paid, so the results gate answered not_purchased and they
+                 waited for ever on a partner who had finished. */
+              inheritedHasGrant: keep(prev.inheritedHasGrant, json.inherited.hasGrant),
+              comp:             keep(prev.comp, json.inherited.comp),
+              /* partner-sync sends null, not 'core', when it could not read
+                 the orders, so an unknown package no longer overwrites a
+                 known one. A lower package from a read that SUCCEEDED is the
+                 truth and is allowed through. */
+              pkg: json.inherited.pkg || prev.pkg || 'core',
               inheritedFromPartner: true,
             };
             const mergedWB = carryWorkbook(merged);
@@ -17053,6 +17099,12 @@ export default function App() {
     || (_effectivePkgKey && _effectivePkgKey !== 'core')
     || order?.addonIntimacy || order?.addonConflict || order?.addonReflection
     || order?.addonBudget || order?.addonChecklist || order?.addonWorkbook
+    /* An invited partner has no order of their own, and inherits no order
+       number. Every other term here is a thing the BUYER's order carries, so
+       for a plain core purchase an invitee satisfied none of them and this
+       read false on their device for ever. /api/partner-sync sends the
+       buyer's grant now and the poll carries it onto the rebuilt order. */
+    || order?.inheritedHasGrant
   );
   const bothDone = isDemo
     ? !!(ex1Answers && ex2Answers)
@@ -17099,7 +17151,46 @@ export default function App() {
   // Granular completion signals for the dashboard status view and the
   // results-pending screen. Partner signals require the linked partner session
   // (invite-code match), never the demo fallback.
-  const _partnerLinked = !!(partnerSession?.partnerProfileId) || (partnerSession?.inviteCode != null && partnerSession?.inviteCode === account?.inviteCode);
+  /**
+   * Is there a LINKED PARTNER whose data this session holds?
+   *
+   * The inviteCode branch exists because the partner column used to fall back
+   * to demo data and always read Complete (3e1b848e). It also matched the
+   * routing marker an invitee's own device writes under this key, which
+   * carries their own ex1 and ex2 and no partnerProfileId. So an invitee's
+   * dashboard read their own answers as their partner's.
+   *
+   * A self-marker says so now, and is excluded here rather than at each of
+   * the three reads below.
+   */
+  /**
+   * Is there a LINKED PARTNER whose answers this session holds?
+   *
+   * One test: partnerProfileId. It is the only field that says these answers
+   * belong to somebody else.
+   *
+   * ── WHAT WENT AND WHY ──────────────────────────────────────────────────
+   * It used to accept a session with no partnerProfileId as long as its
+   * inviteCode matched the account's. That branch comes from 3e1b848e, where
+   * the partner column was falling back to demo data and always read
+   * Complete, and it dates from the era when an invited partner's answers
+   * arrived keyed by invite code with no profile id at all. Nothing has
+   * written to partner_sessions since invitees got accounts of their own.
+   *
+   * What it also matched was the routing marker an invitee's own device
+   * writes under this very key, which holds that person's OWN ex1 and ex2 and
+   * their own invite code. So on an invitee's device the partner column was
+   * computed from the reader's own answers: their partner read as complete
+   * when they were not, and incomplete when they were.
+   *
+   * Labelling the marker was the first fix and it was not enough, which
+   * check-partner-status-is-the-partner said on its first run: every marker
+   * already sitting in somebody's localStorage carries no label, so the
+   * people affected today would have stayed affected until their device
+   * happened to write a new one. Requiring the id fixes those devices on the
+   * next render.
+   */
+  const _partnerLinked = !!partnerSession?.partnerProfileId;
   const myEx1Done = !!ex1Answers;
   const myEx2Done = !!ex2Answers;
   const partnerEx1Done = !!(_partnerLinked && partnerSession?.ex1);

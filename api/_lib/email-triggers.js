@@ -12,13 +12,13 @@ export const EMAIL_TRIGGERS = {
     "src/App.jsx:12453",
     "src/App.jsx:12555",
     "src/App.jsx:12873",
-    "src/App.jsx:19025",
-    "src/App.jsx:19821",
+    "src/App.jsx:19116",
+    "src/App.jsx:19912",
     "src/App.jsx:3488"
   ],
   "results_viewed": [
     "src/App.jsx:13926",
-    "src/App.jsx:16261"
+    "src/App.jsx:16276"
   ],
   "workbook_promo": [
     "api/generate-workbook-promo.js:185"
