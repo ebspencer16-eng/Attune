@@ -41,7 +41,9 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| A162 | **The completion funnel offers a handful of cuts and should offer many.** Measuring every slicer in the admin first: how many cuts each one offers and why it is narrow, because there are three different reasons and only one of them is a real limit. Then widening every one that is narrow for no reason, and saying which are narrow for a reason. |
 
 ## 3. For you to review
 
