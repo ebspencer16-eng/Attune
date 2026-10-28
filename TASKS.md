@@ -41,8 +41,13 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.** Every one of the 36 items from your admin review is built
-and sitting in section 3 for your eye.
+| # | What I am doing |
+|--|--|
+| S81 | **Re-running every sweep that exists**, 36 of them, because the drill-down touched every slicer on every page and the three new cube fields touched the one endpoint every chart reads. Dead functions, ids nothing points at, classes nothing styles, silent read failures, unwritten columns, fetch routes, console errors on every static page. |
+| S82 | **Sweeping the thing I just built, which no existing sweep covers**: every slicer on every admin page, opened, with every leaf it offers resolved. A cut whose predicate is not registered, a branch with nothing under it, and a leaf that matches nobody are three different bugs that all look like a working dropdown. |
+| S83 | **Driving every cut on one page end to end.** Picking a leaf and reading the tile's n is the only thing that can tell a filter that works from one that is never consulted. |
+| S84 | **Checking the field picker's removal left nothing behind**: its stylesheet, its helpers, anything that called it. A definition that reads like a feature is worse than no definition. |
+| S85 | **Looking for the shapes CLAUDE.md says keep coming back**: a function defined twice, a fallback that always fires, a list typed beside the list it indexes, a catch that turns a failed read into an empty one. |
 
 ## 3. For you to review
 
