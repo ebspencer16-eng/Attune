@@ -36,7 +36,7 @@ import { EXERCISES } from './_exercises.js';
 import { resultsNav } from './_lib/results-sections.js';
 import { axisScores, calcDimScores, typeCodeFromAxes } from './_type-engine.js';
 import { fetchProfiles, ownedBy } from './_lib/demo-accounts.js';
-import { marketingPageName, abbreviate } from './_lib/page-names.js';
+import { marketingPageName, marketingPageShort, abbreviate } from './_lib/page-names.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -215,8 +215,18 @@ function clustered(events, entries) {
 function resultsGroups(nav) {
   const groups = [];
   for (const item of nav) {
+    /* ── NO COVER PAGES IN THE DETAILED LIST ──────────────────────────────
+       Ellie: "Remove cover page from detailed results pages."
+
+       A cover is the title card a group opens on. Every group has one, every
+       reader passes through it, and the seconds spent there say nothing about
+       which part of the results somebody actually read: it is the one column
+       that is high for a reason unconnected to interest. Matched on the id's
+       own suffix, which is how both surfaces recognise a cover, rather than
+       on the word "cover" in a label somebody may rewrite. */
+    const isCover = (id) => String(id || '').endsWith('-cover');
     const children = item.children?.length
-      ? item.children.map((c) => ({ key: `app:results:${c.id}`, label: c.label, id: c.id }))
+      ? item.children.filter((c) => !isCover(c.id)).map((c) => ({ key: `app:results:${c.id}`, label: c.label, id: c.id }))
       : [{ key: `app:results:${item.id}`, label: item.label, id: item.id }];
     /* The group's own name is what the results chart draws, and eight of them
        do not fit across one tile. */
@@ -340,7 +350,11 @@ function engagementFromEvents(events, { profiles, notes, tags, noteTags, reads, 
          are wrong, they should be Home, Our Purpose, Packages, Registry, In
          Practice, FAQs." The label was the key because nothing had ever given
          it anything else. */
-      ? clustered(events, marketingKeys.map((k) => ({ key: k, label: marketingPageName(k) })))
+      /* Short on the axis, the whole name in the hover. Ellie: "Marketing page
+         labels still make no sense... We can abbreviate to H, OP, BP, WR, IP,
+         FAQ." Six full names will not sit under six columns in a third-width
+         tile, which is the same reason the exercises abbreviate. */
+      ? clustered(events, marketingKeys.map((k) => ({ key: k, label: marketingPageShort(k), full: marketingPageName(k) })))
       : notYet,
     exercises: measured ? clustered(events, exerciseEntries) : notYet,
     resources: measured ? clustered(events, RESOURCE_VIEWS) : notYet,

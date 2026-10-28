@@ -117,6 +117,10 @@ const stubProfile = (i) => ({ name: STUB_SELF, partner_name: STUB_PARTNER, prono
 const { SURVEY_QUESTIONS, TEXT_QUESTIONS, SURVEY_VERSION, rankOptionsFor } = await import(`${ROOT}api/_lib/survey.js`);
 const { EXERCISES: SURVEY_EXERCISES } = await import(`${ROOT}api/_exercises.js`);
 const { genericLabel } = await import(`${ROOT}api/_lib/generic-label.js`);
+const { conflictFrameFor } = await import(`${ROOT}api/_lib/conflict-codes.js`);
+const { TESTIMONIAL_THEMES } = await import(`${ROOT}api/_lib/testimonial-themes.js`);
+const { codesFor } = await import(`${ROOT}api/_lib/reflection-codes.js`);
+const THEME_LABELS = Object.fromEntries(TESTIMONIAL_THEMES.map((t) => [t.id, t.label]));
 const { DIM_META, DIM_SCALE_POLES: DIM_SCALE_POLES_STUB } = await import(`${ROOT}api/_lib/dimensions.js`);
 const DIM_NAMES_STUB = Object.fromEntries(Object.entries(DIM_META).map(([k, v]) => [k, v.label]));
 const { REFLECTION_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
@@ -648,6 +652,12 @@ const server = createServer((req, res) => {
       at: new Date(Date.now() - k * 9 * 864e5).toISOString(),
       life: Number((((k * 7) % 11) / 20).toFixed(4)),
       resp: Number((((k * 5) % 9) / 20).toFixed(4)),
+      /* Ellie's rule needs a count of categories a couple is mostly out of
+         step in, so the stub has to carry one or the two tiles both read
+         "no couple has enough answers" and the rule is unmeasured. Spread
+         across 0 to 5 so both halves of the split have couples in them. */
+      catsRead: 6,
+      catsBelow50: (k * 2) % 6,
     }));
     /* ── THE TWO INHERITANCE CHARTS, RUN RATHER THAN TYPED ───────────────
        These were five numbers per chart, chosen by hand. That is a claim
@@ -717,14 +727,41 @@ const server = createServer((req, res) => {
         return { id: q.id, label: q.text, category: q.category || null, ...tallyCodes(answers) };
       }),
     };
-    /* The two written conflict answers and the repair ranking. Same real
-       sentences through the same real frame as the reflection ones. */
+    /* ── THE TWO WRITTEN CONFLICT ANSWERS ──────────────────────────────
+       Each question carries its OWN frame now, so the stub does too, and the
+       sentences are about conflict rather than about the relationship: the
+       reflection samples ("He brings me coffee every morning") match a
+       conflict frame almost nowhere, and a stub where everything is uncoded
+       cannot tell a frame that does not fit from one that was never run. */
+    const CONFLICT_WRITING = {
+      c9: [
+        'He apologised first and that was the end of it',
+        'We took a break and came back to it the next morning',
+        'She actually listened without interrupting me',
+        'We ended up laughing about it',
+        'Naming the pattern out loud helped more than anything',
+        'I said what was really bothering me instead of the surface thing',
+        'Nothing in particular, it just fizzled out',
+      ],
+      c_grat: [
+        'We never go to bed angry',
+        'He owns his part every time',
+        'Nobody ever shouts in our house',
+        'She gives me time to think before we talk',
+        'We always come back and finish it',
+        'Neither of us brings up old things',
+      ],
+    };
     const conflictCodes = {
-      frame: REFLECTION_CODES.map((c) => ({ id: c.id, label: c.label })),
-      questions: CONFLICT_QUESTIONS.filter((q) => q.kind === 'openText').map((q, i) => ({
-        id: q.id, label: q.text,
-        ...tallyCodes(SAMPLE_WRITING.slice(i).concat(SAMPLE_WRITING.slice(0, i))),
-      })),
+      questions: CONFLICT_QUESTIONS.filter((q) => q.kind === 'openText').map((q) => {
+        const frame = conflictFrameFor(q.id) || REFLECTION_CODES;
+        const writing = CONFLICT_WRITING[q.id] || SAMPLE_WRITING;
+        return {
+          id: q.id, label: q.text,
+          frame: frame.map((c) => ({ id: c.id, label: c.label })),
+          ...tallyCodes(writing, frame),
+        };
+      }),
     };
     const repairRank = (() => {
       const q = CONFLICT_QUESTIONS.find((x) => x.kind === 'rank');
@@ -747,6 +784,11 @@ const server = createServer((req, res) => {
         stageN: { 'Not yet': 9, 'Regularly intimate': 15 },
         stageRows: INTIMACY_DIMENSIONS.map((d, i) => ({
           id: d.id, label: d.label,
+          /* The poles, as the endpoint sends them. Without these the tile
+             drew "one end" and "the other" on every row, which is the
+             fallback and looks exactly like a dimension with no poles. */
+          poleLow: (d.poles || [])[0] || null,
+          poleHigh: (d.poles || [])[1] || null,
           notYet: Number((0.35 + (i % 4) * 0.08).toFixed(3)),
           intimate: Number((0.52 + ((i + 2) % 4) * 0.09).toFixed(3)),
         })),
@@ -965,11 +1007,23 @@ const server = createServer((req, res) => {
       caps: { ownsWorkbook: true, ownsBudget: true, ownsChecklist: true },
       exercises: SURVEY_EXERCISES,
     });
+    /* ── SENTENCES THE FRAME CAN READ ──────────────────────────────────
+       Four short lines, none of which mention a subject, made the By category
+       view draw one group and report 110 answers as matching nothing: a stub
+       that cannot be coded cannot show whether the coding works. These are
+       written the way people answer, across the subjects the frame has
+       categories for. */
     const WORDS = [
       'We talked about money for the first time without it turning into a fight.',
-      'The expectations section was the one that landed.',
-      'It put words to something we both already felt.',
+      'The expectations section landed. We had never said out loud who does what.',
+      'We were close to separating and this gave us somewhere to start.',
+      'My mother in law comes up every christmas and we finally talked about it.',
+      'I had no idea he felt that way about initiating. It was a surprise.',
+      'It made me feel closer to her than I have in years.',
+      'We have been together eleven years and still learned something.',
       'Reading my own answers back was the useful part.',
+      'We argue less. Neither of us shouts now.',
+      'With a baby coming we needed to agree on the chores before it arrives.',
     ];
     const responses = rows.map((r, i) => {
       const when = new Date(Date.now() - (i * 3 + 1) * 86400000).toISOString();
@@ -1002,7 +1056,14 @@ const server = createServer((req, res) => {
           children: r.children, age_range: r.age_range, pronouns: r.pronouns,
           signup_source: r.signup_source, pkg: r.pkg,
         },
-        codes: i % 4 === 0 ? { [TEXT_QUESTIONS[0]]: ['Money'] } : {},
+        /* Coded by the real frame over the real answer, which is what the
+           endpoint does. The stub used to hand-label one question "Money" on
+           every fourth person, so the Testimonials category view drew one
+           group however good the frame was. */
+        codes: Object.fromEntries(TEXT_QUESTIONS
+          .map((q) => [q, typeof answers[q] === 'string' && answers[q].trim()
+            ? codesFor(answers[q], TESTIMONIAL_THEMES).map((id) => THEME_LABELS[id] || id) : []])
+          .filter(([, v]) => v.length)),
       };
     });
     res.writeHead(200, { 'Content-Type': 'application/json' });

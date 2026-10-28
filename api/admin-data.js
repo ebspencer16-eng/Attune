@@ -50,12 +50,13 @@ import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
 import { withEffectivePromoCodes, coupleKeyFromProfiles } from './_lib/order-promo.js';
 import { genericLabel } from './_lib/generic-label.js';
-import { itemAgreement } from './_lib/resp-agreement.js';
+import { categoryAlignment, itemAgreement } from './_lib/resp-agreement.js';
 import { ordersWithoutIdentifying } from './_lib/admin-order-privacy.js';
 import { DIM_META } from './_lib/dimensions.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
 import { REFLECTION_CODES, tallyCodes } from './_lib/reflection-codes.js';
+import { conflictFrameFor } from './_lib/conflict-codes.js';
 import { ANNIVERSARY_QUESTIONS } from './_anniversary-questions.js';
 import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, isAlignmentCategory, scoreIntimacyPair, intimacyDimensionPositions } from './_intimacy-questions.js';
@@ -259,10 +260,39 @@ function buildResponseAggregates(profiles, sessions) {
        later of the two partners is when the COUPLE finished, since a couple's
        distance does not exist until both halves are in. */
     const at = [a.ex2_completed_at, b.ex2_completed_at].filter(Boolean).sort();
+    /**
+     * ── HER RULE FOR ALIGNED AND MISALIGNED ───────────────────────────────
+     * Ellie: "What are we counting as aligned v misaligned for expectations?
+     * Feels wrong that no one is regarded as aligned. I think misaligned
+     * should have <50% alignment in 2+ categories."
+     *
+     * It felt wrong because it was. The old rule took one distance across
+     * both halves of the exercise and cut it at 0.2, a threshold borrowed
+     * from the communication bands, where a distance is between two answers
+     * on one question. Averaged over forty-odd items, almost nobody lands
+     * under 0.2, so everybody came out misaligned and the aligned tile was
+     * empty.
+     *
+     * Hers is a different measure and a better one: how many CATEGORIES a
+     * couple is mostly out of step in. Two is the line. The percentages come
+     * from categoryAlignment, which is the same function the Explore cuts and
+     * the Responsibilities tile use, so a couple cannot be aligned on one
+     * screen and misaligned on another.
+     *
+     * A couple with no readable category is left null rather than counted as
+     * aligned: nought categories below the line is also what "we could not
+     * read any of them" looks like.
+     */
+    const _ca = categoryAlignment(a, b);
+    const _cats = RESPONSIBILITY_CATEGORIES
+      .map((c) => (_ca.byCategory[c.id] ? _ca.byCategory[c.id].pct : null))
+      .filter((v) => typeof v === 'number');
     expCoupleDistances.push({
       life: lifeD.length ? Number(mean(lifeD).toFixed(4)) : null,
       resp: respD.length ? Number(mean(respD).toFixed(4)) : null,
       at: at.length ? at[at.length - 1] : null,
+      catsRead: _cats.length,
+      catsBelow50: _cats.length ? _cats.filter((v) => v < 50).length : null,
     });
   });
 
@@ -354,10 +384,18 @@ function buildResponseAggregates(profiles, sessions) {
    *
    * Counts only, as everywhere else: the text goes in, theme ids come back.
    */
-  const conflictCodes = { frame: REFLECTION_CODES.map((c) => ({ id: c.id, label: c.label })), questions: [] };
+  const conflictCodes = { questions: [] };
   for (const q of CONFLICT_QUESTIONS.filter((x) => x.kind === 'openText')) {
+    const frame = conflictFrameFor(q.id) || REFLECTION_CODES;
     const answers = (profiles || []).map((p) => p.conflict_data?.answers?.[q.id]).filter((v) => typeof v === 'string' && v.trim());
-    conflictCodes.questions.push({ id: q.id, label: q.text, ...tallyCodes(answers) });
+    /* The frame travels WITH the question now, because the two questions no
+       longer share one. A single `frame` on the envelope was the shape that
+       made sharing look free. */
+    conflictCodes.questions.push({
+      id: q.id, label: q.text,
+      frame: frame.map((c) => ({ id: c.id, label: c.label })),
+      ...tallyCodes(answers, frame),
+    });
   }
 
   /**
@@ -476,7 +514,18 @@ function buildResponseAggregates(profiles, sessions) {
     }
     const stageRows = INTIMACY_DIMENSIONS.map((d) => {
       const avg = (arr) => (arr && arr.length) ? Number((arr.reduce((x, y) => x + y, 0) / arr.length).toFixed(3)) : null;
-      return { id: d.id, label: d.label, notYet: avg(byStage['Not yet'][d.id]), intimate: avg(byStage['Regularly intimate'][d.id]) };
+      /* ── THE POLES TRAVEL WITH THE ROW ─────────────────────────────────
+         Ellie: "build it like the one on comms page so I can see pole labels
+         too." The dimension knows its own two ends; the admin would have had
+         to keep a second copy of all six pairs to draw them, which is the
+         copy that goes stale when a pole is reworded. */
+      return {
+        id: d.id, label: d.label,
+        poleLow: (d.poles || [])[0] || null,
+        poleHigh: (d.poles || [])[1] || null,
+        notYet: avg(byStage['Not yet'][d.id]),
+        intimate: avg(byStage['Regularly intimate'][d.id]),
+      };
     });
 
     return { avgAlignment, couples: pcts.length, meanFor, meanForPeople, partnerInitiates, noveltyCloseness, stageRows, stageN };

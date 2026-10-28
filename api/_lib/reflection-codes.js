@@ -102,11 +102,11 @@ function normalise(text) {
  *          the frame, not a failure: it means this person wrote something the
  *          frame has no theme for, which is how the frame gets improved.
  */
-export function codesFor(text) {
+export function codesFor(text, frame = REFLECTION_CODES) {
   const t = normalise(text);
   if (t.trim().length < 3) return [];
   const out = [];
-  for (const c of REFLECTION_CODES) {
+  for (const c of frame) {
     /* A term matches at a word boundary, so "ill" does not match "will" and
        "back" does not match "background". A term ending mid-stem like
        "communicat" matches any continuation, which is the point of writing it
@@ -125,14 +125,21 @@ export function codesFor(text) {
  * many carried none. The last two are what make the first honest: a bar of 12
  * means something different out of 20 answers than out of 200.
  */
-export function tallyCodes(answers) {
-  const counts = Object.fromEntries(REFLECTION_CODES.map((c) => [c.id, 0]));
+export function tallyCodes(answers, frame = REFLECTION_CODES) {
+  /* ── ONE MATCHER, MORE THAN ONE FRAME ─────────────────────────────────
+     The conflict answers have frames of their own now, because a theme has
+     to be an answer to ITS question and "Getting through something hard"
+     is not an answer to what made a disagreement go well. What they share
+     is the MATCHING: whole words, light stems, an answer can carry several
+     codes, and anything matching nothing is counted rather than dropped.
+     That rule stays here, in one place, and the frame is an argument. */
+  const counts = Object.fromEntries(frame.map((c) => [c.id, 0]));
   let coded = 0, uncoded = 0, total = 0;
   for (const a of answers || []) {
     const text = String(a == null ? '' : a).trim();
     if (!text) continue;
     total++;
-    const codes = codesFor(text);
+    const codes = codesFor(text, frame);
     if (!codes.length) { uncoded++; continue; }
     coded++;
     for (const id of codes) counts[id]++;

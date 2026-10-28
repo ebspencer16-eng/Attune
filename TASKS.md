@@ -43,28 +43,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A141 | **Dashboard: the "undefined" legend on how couples found Attune.** It appeared when legends got their colours back: that chart has one unnamed dataset, so Chart.js printed the only name it had. |
-| A142 | **The add-on chart's colours and order did not change, and you approved it anyway.** Correcting it, then re-reading all 36 items of your original list against the live page rather than against my own commits, and saying which others fell through. |
-| A143 | **Expectations modeled on experience: the clusters become the outcome.** Same, shared now one, one now shared, other on the x axis, one line of colour per category. Not classified leaves the chart. |
-| A144 | **Gender roles over generations: retitled, and the two confusing rows explained or renamed.** "Hands that role over" and "leaves that one to their partner" are the same action against two different starting points; if the wording cannot carry that, the rows change. Not classified leaves this one too. |
-| A145 | **Two explanations you asked for, in writing**: why anything is unclassified, and what "other change" actually counts. |
-| A146 | **Expectations All questions: "Responsibilities" after each part-2 section header.** The life and values categories keep their own names. |
-| A147 | **Overall relationship feel distribution: drop the (0), (1) from the column labels.** |
-| A148 | **Intimacy: "Where each group places itself" becomes Avg dimension results**, built like the Communication one so the poles show. Saying first what that tile is actually measuring, because the name should follow the measure. |
-| A149 | **When a disagreement starts: remove the pie's legend.** |
-| A150 | **In the middle of a disagreement, and when it touches something old, become pie charts.** |
-| A151 | **Rename the two written-answer conflict charts** to What makes conflict go better than expected, and What people appreciate about how conflict is handled. |
-| A152 | **Rewrite the code frames behind those two charts so each column reads as an answer to its question.** Two different lists. "Getting through something hard" says nothing, which is the fault to fix. |
-| A153 | **Explore resets to empty when you leave it.** |
-| A154 | **A swap button on Explore for the rows and columns.** |
-| A155 | **Marketing page labels abbreviate to H, OP, BP, WR, IP, FAQ.** |
-| A156 | **A hover over blank space says nothing.** Today an empty bar still answers, which reads as data where there is none. |
-| A157 | **Drop the cover page from the detailed results pages chart.** |
-| A158 | **The detailed results pills are STILL changing other tiles.** I reported this fixed as A125 and you are seeing it again, so the first fix was not the cause. Finding what actually links them, and checking the same for every slicer. |
-| A159 | **Slicers reset to Everyone when you open a page.** Your words: very important. |
-| A160 | **Testimonials: the manual "add a theme" box goes, and themes are applied automatically**, as many as fit. Then a tab of recommended content by category, which is the thing the themes are for. |
-| A140 | **Expectations alignment gets your rule: misaligned means under 50% alignment in two or more categories.** Today it is one distance across both halves against a 0.2 line, which is why nobody came out aligned. |
-| V3 | **The two-surface comparison, since you have left the call to me.** I will say what it would catch that the eighteen existing gates cannot before I build it, and build it if that answer is worth the work. |
+| V3 | **The two-surface comparison, and my answer on whether to build it.** The broad version, rendering the same couple on both surfaces and diffing the words, would be flaky by construction: two layouts never produce the same text and the normaliser that fixed it would prove nothing. The sharp version is worth it and is what I am building: the app's results screen, driven through its web build, asserting it draws no number the server did not send. |
 
 ## 3. For you to review
 
@@ -73,6 +52,26 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A142 | **The add-on chart you approved was drawn by a different function.** Two renderers pointed at that one canvas and whichever ran last won, so my edit went into the loser; the gate was matching the variable name in the copy nobody drew. One renderer now, your order and colours on it, and the gate matches on content so a renamed copy cannot hide. A sweep over every canvas in the admin found no others. |
+| A141 | **The "undefined" legend was mine, from the colour fix an hour earlier.** It called Chart.js's default label builder for every chart, and a doughnut's legend is one entry per slice built by its own override, so the package mix doughnut got one entry named after its dataset. |
+| A143 | **Expectations modeled on experience: the outcome is the x axis now**, one colour per category, and Not classified is out of the bars and into the subtitle with its count. |
+| A144 | **Gender roles over generations, and your two confusing rows renamed.** They described the same action twice. Read as pairs: keeps their gender's role and leaves the other gender's role are the pattern repeating; hands their gender's role over and takes the other gender's role are it swapping. |
+| A145 | **Why anything is unclassified, and what Other change counts.** Both charts need two halves: what somebody saw growing up and what they expect now. Unclassified is one half missing or in a spelling the reader cannot resolve; the gendered one needs more still, which is why it loses more. Other change is an arrangement that appeared or disappeared, such as nobody to shared, rather than moving between shared and one person. |
+| A146 | **Responsibilities after each part-two header.** Household means two different questions depending on which half of the exercise you are in, and the header was the only thing that could say which. |
+| A147 | **The (0), (1) are gone from the relationship feel labels.** |
+| A148 | **Avg dimension results, built like the Communication one.** It is neither alignment nor the most common answer: it is where the average answer sits between each dimension's two ends. The poles are on the tile now, and the two groups are two dots on one track. |
+| A149 | **The pie legends are gone**, and A150: all three forced-choice tiles are pies. Each subtitle names the two answers in the order the slices are drawn. |
+| A151 | **Renamed: What makes conflict go better than expected, and What people appreciate about how conflict is handled.** |
+| A152 | **Two new code frames, one per question, each column an answer.** "One of us apologised first", "We took a break and came back", "Nobody raises their voice". The shared reflection frame was about a relationship, which is why it gave you "Getting through something hard" for a question about a disagreement. |
+| A153 | **Explore opens empty**, with a line saying what to do rather than a default cross-tab nobody asked for. |
+| A154 | **A swap button between Rows and Columns.** |
+| A155 | **Marketing columns are H, OP, BP, WR, IP, FAQ**, with the whole name on hover. Your abbreviations are not the initials of the long names, so both are written down and a gate checks every page has each. |
+| A156 | **A hover over blank space says nothing.** |
+| A157 | **Cover pages are out of the detailed results list**, 13 sections down to 11. Every reader passes through a cover, so its seconds say nothing about interest. |
+| A158 | **The pills, measured this time.** The first fix was real and was not the cause: the handler called the function that draws all five tiles. With the old handler a tap rebuilt five charts; it now rebuilds one, and a gate taps a real pill and reads every chart's identity. |
+| A159 | **Slicers reset to Everyone when a page opens**, each one telling its tile so the chart redraws. A sort or a view switch is not a cut and is left alone: the difference is whether the control offers a way out of itself. |
+| A160 | **The "add a theme" box is gone and themes are read from the words.** It was yours to type, 120 answers at a time, and every chart downstream was reporting how far that had got. There is a By category view on Testimonials now: your categories, best quote first, with the count and an honest line about what matched nothing. |
+| A140 | **Your rule, and you were right that it felt wrong.** The old one cut one averaged distance at 0.2, which is a threshold that means something between two answers to one question and almost nothing averaged over forty: everybody fell the wrong side and the aligned tile was empty. Misaligned is now under half aligned in two or more categories, and both tiles say the count. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 

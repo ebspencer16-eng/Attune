@@ -26,6 +26,11 @@ import { jsonBody } from './_lib/http.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { corsHeaders, safeError } from './_lib/http.js';
 import { SURVEY_QUESTIONS, SURVEY_VERSION, TEXT_QUESTIONS } from './_lib/survey.js';
+import { TESTIMONIAL_THEMES } from './_lib/testimonial-themes.js';
+import { codesFor } from './_lib/reflection-codes.js';
+
+/* The label is what the admin draws, and the id is what the matcher returns. */
+const THEME_LABEL = Object.fromEntries(TESTIMONIAL_THEMES.map((t) => [t.id, t.label]));
 import { demoOwners, selectProfiles } from './_lib/demo-accounts.js';
 
 /**
@@ -93,38 +98,24 @@ export default async function handler(req) {
       return json(200, { ok: true, featured: on }, req);
     }
 
-    const code = typeof b.code === 'string' ? b.code.trim().slice(0, 60) : '';
-    if (!Number.isFinite(responseId) || !TEXT_QUESTIONS.includes(questionId) || !code) {
-      return json(400, { ok: false, error: 'A response, an open question and a code.' }, req);
-    }
-    try {
-      if (b.remove === true) {
-        const { error } = await admin.from('survey_codes').delete()
-          .eq('response_id', responseId).eq('question_id', questionId).eq('code', code);
-        if (error) throw error;
-      } else {
-        /* Adding the same code twice is a tap rather than an intention, and
-           the unique index makes that a no-op rather than a second row. */
-        const { error } = await admin.from('survey_codes')
-          .upsert({ response_id: responseId, question_id: questionId, code },
-            { onConflict: 'response_id,question_id,code', ignoreDuplicates: true });
-        if (error) throw error;
-      }
-    } catch (e) {
-      return json(500, { ok: false, error: safeError('admin-survey', e, 'Could not save the code.') }, req);
-    }
-    return json(200, { ok: true }, req);
-  }
+    /* ── THE MANUAL CODING PATH IS GONE ──────────────────────────────────
+       It wrote a `survey_codes` row per theme per answer, from a box in the
+       admin that Ellie had to type into. Themes are read from the words now,
+       by the frame in _lib/testimonial-themes.js, so this endpoint has one
+       thing left to write: which answer is the featured quote.
 
-  if (req.method !== 'GET') return json(405, { ok: false, error: 'GET or POST only' }, req);
+       The table is left alone rather than dropped: a migration that deletes
+       somebody's typing is not a change to make on the way past, and nothing
+       reads it, so it costs nothing to leave. */
+    return json(400, { ok: false, error: 'Themes are read from the answer now; there is nothing to code by hand.' }, req);
+  }
 
   // ── Reading them ─────────────────────────────────────────────────────────
   try {
-    const [resQ, codeQ] = await Promise.all([
+    const [resQ] = await Promise.all([
       admin.from('survey_responses')
         .select('id, answers, version, source, started_at, updated_at, completed_at, couple_id, respondent_id, featured_question, featured_at')
         .order('updated_at', { ascending: false }).limit(2000),
-      admin.from('survey_codes').select('response_id, question_id, code'),
     ]);
     if (resQ.error) throw resQ.error;
 
@@ -150,11 +141,22 @@ export default async function handler(req) {
       }
     }
 
+    /**
+     * ── THE THEMES ARE READ FROM THE WORDS ────────────────────────────────
+     * Ellie: "If it's for me to go in and postcode manually, remove this and
+     * do it automatically with as many tags as are appropriate."
+     *
+     * They used to come from `survey_codes`, one row per theme per answer,
+     * written by somebody clicking a box in the admin. A hundred and twenty
+     * answers each needing a person to read it, and every chart downstream
+     * reporting on how far that had got: "10 of 40 read and given a theme" is
+     * a measure of reading, not of what anybody said.
+     *
+     * The frame is api/_lib/testimonial-themes.js and the matcher is the one
+     * the other two frames use. As many as fit, which is her ask: a sentence
+     * about money and shouting is both.
+     */
     const codesBy = {};
-    for (const c of (codeQ.data || [])) {
-      const k = `${c.response_id}:${c.question_id}`;
-      (codesBy[k] = codesBy[k] || []).push(c.code);
-    }
 
     /* A demo's demographics being absent would hide them from the slicers and
        leave their answers in every chart, so the rows go too. */
@@ -169,7 +171,11 @@ export default async function handler(req) {
         /* Who answered never leaves this file. */
         segment: demo[who] || {},
         codes: Object.fromEntries(TEXT_QUESTIONS
-          .map((q) => [q, codesBy[`${r.id}:${q}`] || []])
+          .map((q) => {
+            const text = (r.answers || {})[q];
+            if (typeof text !== 'string' || !text.trim()) return [q, []];
+            return [q, codesFor(text, TESTIMONIAL_THEMES).map((id) => THEME_LABEL[id] || id)];
+          })
           .filter(([, v]) => v.length)),
       };
     });

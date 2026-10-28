@@ -492,13 +492,25 @@ const lift = (src, needle, where) => {
     problems.push('the Feedback page has no time-period slicer, or nothing applies it.');
   }
 
-  /* The written answers: coded where they are read, and the full list of
-     themes a click away from the tile that counts them. */
-  for (const id of TEXT_QUESTIONS) {
-    if (!/svCode\(/.test(admin)) {
-      problems.push(`the admin cannot code ${id}, so the open answers can only be read one at a time.`);
-      break;
-    }
+  /* ── THE WRITTEN ANSWERS ARE THEMED, AND NOT BY HAND ────────────────────
+     This used to require `svCode(` in the admin: a box Ellie typed a theme
+     into, one answer at a time. She asked for it out — "If it's for me to go
+     in and postcode manually, remove this and do it automatically with as
+     many tags as are appropriate" — and the rule it was protecting is still
+     the rule: a written answer that carries no theme can only be read one at
+     a time, so nothing above it can count anything.
+
+     What satisfies it now is the endpoint reading the themes out of the words
+     through the shared matcher. Checked on the endpoint rather than on the
+     page, because that is where the themes come from; the page's job is to
+     draw them, which the tile check below covers. */
+  const surveyEndpoint = read('api/admin-survey.js');
+  if (!/TESTIMONIAL_THEMES/.test(surveyEndpoint) || !/codesFor\(/.test(surveyEndpoint)) {
+    problems.push('api/admin-survey.js no longer reads a theme out of each written answer, so the'
+      + ' open answers can only be read one at a time.');
+  }
+  if (/survey_codes/.test(admin)) {
+    problems.push('the admin is still writing survey_codes by hand; themes are read from the words now.');
   }
   if (!/function svOpenThemes\(/.test(admin) || !/View full list/.test(admin)) {
     problems.push('a themes tile no longer opens the full list, so a chart of the top few is the'

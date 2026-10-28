@@ -30,11 +30,44 @@ export const MARKETING_PAGE_NAMES = {
   '/faq': 'FAQs',
 };
 
+/**
+ * The short form, for a column label.
+ *
+ * ── WHY A SECOND MAP RATHER THAN INITIALS ─────────────────────────────────
+ * Ellie: "Marketing page labels still make no sense on marketing pages time
+ * per page chart. We can abbreviate to H, OP, BP, WR, IP, FAQ."
+ *
+ * Her list is not the initials of the names above: Packages abbreviates to BP
+ * and Registry to WR, because the pages are Buy Packages and the Wedding
+ * Registry in her head. So this is a name too, and a name has to be written
+ * down. Keyed by path like the long form, so the two cannot come to disagree
+ * about which page they are describing, and the gate checks every path has
+ * both.
+ *
+ * The full name is still in the hover: the chart draws these and says the
+ * long one when you ask it.
+ */
+export const MARKETING_PAGE_SHORT = {
+  '/home': 'H',
+  '/purpose': 'OP',
+  '/offerings': 'BP',
+  '/wedding-registry': 'WR',
+  '/practice': 'IP',
+  '/faq': 'FAQ',
+};
+
 /** The name for a recorded path, or the path when it has no name yet. */
 export function marketingPageName(path) {
   if (!path) return path;
   const p = String(path).replace(/\/+$/, '') || '/home';
   return MARKETING_PAGE_NAMES[p] || MARKETING_PAGE_NAMES['/' + p.replace(/^\//, '')] || path;
+}
+
+/** The short label for a recorded path, or its long name when it has none. */
+export function marketingPageShort(path) {
+  if (!path) return path;
+  const p = String(path).replace(/\/+$/, '') || '/home';
+  return MARKETING_PAGE_SHORT[p] || MARKETING_PAGE_SHORT['/' + p.replace(/^\//, '')] || marketingPageName(path);
 }
 
 /**

@@ -1508,11 +1508,11 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
            told us. -->
       <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.25rem">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">What people expect, against what they saw</div><div class="chart-subtitle">Did the arrangement change shape: shared, one person, or nobody</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Expectations modeled on experience</div><div class="chart-subtitle">Did the arrangement change shape: shared between two, done by one, or nobody. Other change is an arrangement that appeared or disappeared rather than moving between shared and one person.</div></div></div>
           <div class="chart-body"><canvas id="chart-inherit-shape"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Inherited roles, by gender</div><div class="chart-subtitle">Gender is read from pronouns, and a childhood role from its name. Both are inferences, not answers.</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Gender roles over generations</div><div class="chart-subtitle">The first and last bars are the pattern repeating, the middle two are it swapping. Gender is read from pronouns and a childhood role from its name: both are inferences, not answers.</div></div></div>
           <div class="chart-body"><canvas id="chart-inherit-gender"></canvas></div>
         </div>
       </div>
@@ -1620,8 +1620,8 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
           <div class="chart-body"><canvas id="chart-pi-meanfor"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Where each group places itself</div><div class="chart-subtitle" id="pi-stage-sub">Couples who are not yet physically intimate, against those who are</div></div></div>
-          <div class="chart-body"><canvas id="chart-pi-stage"></canvas></div>
+          <div class="chart-head"><div><div class="chart-title">Avg dimension results</div><div class="chart-subtitle" id="pi-stage-sub">Where the average answer sits between each dimension's two ends, for couples who are not yet physically intimate against those who are</div></div></div>
+          <div class="chart-body"><div id="pi-stage-rows" style="padding:.4rem 0;"></div></div>
         </div>
       </div>
       <div class="qx-section" id="qx-intimacy" style="margin-top:1.25rem"></div>
@@ -1718,11 +1718,11 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
            across half a page turns every label sideways or drops one. -->
       <div class="chart-grid" style="grid-template-columns:minmax(0,1fr);margin-top:1.25rem">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">When it went better than expected</div><div class="chart-subtitle" id="cfcode-c9-sub">Themes in what people wrote</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">What makes conflict go better than expected</div><div class="chart-subtitle" id="cfcode-c9-sub">Themes in what people wrote</div></div></div>
           <div class="chart-body"><canvas id="chart-cfcode-c9"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">What they appreciate about how it is handled</div><div class="chart-subtitle" id="cfcode-c_grat-sub">Themes in what people wrote</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">What people appreciate about how conflict is handled</div><div class="chart-subtitle" id="cfcode-c_grat-sub">Themes in what people wrote</div></div></div>
           <div class="chart-body"><canvas id="chart-cfcode-c_grat"></canvas></div>
         </div>
       </div>
@@ -1801,6 +1801,14 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
           star one to publish it on the homepage, with no name</div>
       </div>
       <div class="topbar-right">
+        <!-- Ellie: "Maybe build me a tab with recommended content by category
+             (ie. couple in distress, help with extended family, etc.)" The two
+             views are the same answers: one list, or grouped by what each one
+             is about. -->
+        <select class="tile-slicer" id="ts-view" title="How to show them" aria-label="View">
+          <option value="list">Every answer</option>
+          <option value="cat">By category</option>
+        </select>
         <select class="tile-slicer" id="ts-sort" title="Order" aria-label="Order">
           <option value="new">Newest first</option>
           <option value="old">Oldest first</option>
@@ -1974,6 +1982,14 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
     <div class="xp-ctl">
       <label>Rows</label>
 <select id="xp-row-field" aria-label="Xp row field"></select>
+    </div>
+    <!-- Ellie: "There should be a quick button on the explore page to swap the
+         x and y selection." Between the two it swaps, so what it does is where
+         it is. -->
+    <div class="xp-ctl">
+      <label>&nbsp;</label>
+      <button type="button" class="xp-btn" id="xp-swap" title="Swap rows and columns"
+        aria-label="Swap rows and columns" style="padding:.45rem .6rem;line-height:1;">&#8644;</button>
     </div>
     <div class="xp-ctl">
       <label>Columns</label>
@@ -2241,6 +2257,18 @@ window.adminAuthHeaders = function(extra){
     const rLabels = Object.keys(rowKeys).sort((a,b)=> (rowKeys[a]>rowKeys[b]?1:rowKeys[a]<rowKeys[b]?-1:0));
     const cLabels = Object.keys(colKeys).sort((a,b)=> (colKeys[a]>colKeys[b]?1:colKeys[a]<colKeys[b]?-1:0));
 
+    /* ── NOTHING CHOSEN IS NOT AN EMPTY RESULT ──────────────────────────
+       The page opens empty now, at her ask, and "No data for this cut yet"
+       over a blank chart reads as a broken page rather than as a page waiting
+       for a question. Two different nothings, two different sentences. */
+    if (!rowField) {
+      $('xp-output').innerHTML = '<div class="xp-empty">Pick something for the rows to start. '
+        + 'Add a column to cross it by a second thing.</div>';
+      const _viz = document.getElementById('xp-viz'); if (_viz) _viz.style.display = 'none';
+      LAST = null; $('xp-title').textContent = ''; $('xp-meta').textContent = '';
+      return;
+    }
+    { const _viz = document.getElementById('xp-viz'); if (_viz) _viz.style.display = ''; }
     if (!rLabels.length){ $('xp-output').innerHTML = '<div class="xp-empty">No data for this cut yet.</div>'; LAST=null; updateTitle(rowField,rowSide,colField,colSide,cellMode,0); return; }
 
     // column + row totals
@@ -2489,10 +2517,17 @@ window.adminAuthHeaders = function(extra){
    */
   window.__resetExplore = function(){
     if (!loaded) return;
+    /* ── EMPTY, NOT BACK TO A DEFAULT ───────────────────────────────────
+       Ellie: "Explore page should reset to empty when I leave it."
+
+       This used to put back the first Ex1 question against individual type,
+       which is a fine thing to open on the first time and a strange thing to
+       find on the fourth: a cross-tab somebody did not ask for, sitting where
+       the one they were looking at was. Empty says the page is waiting for a
+       question, which is what it is doing. */
     FILTERS = [];
-    const firstQ = (CUBE.fields || []).find(f => f.group && f.group.indexOf('Ex1') === 0) || (CUBE.fields || [])[0];
-    if ($('xp-row-field') && firstQ) $('xp-row-field').value = firstQ.key;
-    if ($('xp-col-field')) $('xp-col-field').value = 'type';
+    if ($('xp-row-field')) $('xp-row-field').value = '';
+    if ($('xp-col-field')) $('xp-col-field').value = '';
     if ($('xp-cell')) $('xp-cell').selectedIndex = 0;
     const m = $('xp-measure-field'); if (m) m.selectedIndex = 0;
     if (typeof renderFilters === 'function') renderFilters();
@@ -2532,15 +2567,31 @@ window.adminAuthHeaders = function(extra){
          none, leaving Rows on "— none —" and the page on "No data for this cut
          yet": an empty page that looks broken because one group was renamed.
          Falls back to the first field there is, which is always something. */
-      const firstQ = data.fields.find(f => f.group && f.group.indexOf('Ex1') === 0) || data.fields[0];
-      if (firstQ) $('xp-row-field').value = firstQ.key;
-      $('xp-col-field').value = 'type';
+      /* Empty on arrival, the same as on every return. A default cross-tab
+         is a question nobody asked, and the page says what to do instead. */
+      $('xp-row-field').value = '';
+      $('xp-col-field').value = '';
       /* The coloured picker goes on after the options exist and after the
          default is set, because it draws what the select holds. Mounting it
          first would have given a button labelled from an empty list. */
       mountSliceDrill($('xp-row-field'));
       mountSliceDrill($('xp-col-field'));
       ['xp-row-field','xp-col-field','xp-cell','xp-measure-field'].forEach(id => { const el = $(id); if (el) el.addEventListener('change', render); });
+      /* ── THE SWAP ───────────────────────────────────────────────────────
+         Two assignments and one render. Each select is told it changed so the
+         drill-down's button re-reads it: a value set in code fires no event,
+         which this page has been bitten by before. */
+      const swap = $('xp-swap');
+      if (swap) swap.onclick = () => {
+        const R = $('xp-row-field'), C = $('xp-col-field');
+        if (!R || !C) return;
+        const r = R.value;
+        R.value = C.value;
+        C.value = r;
+        if (R.__sdLabel) R.__sdLabel();
+        if (C.__sdLabel) C.__sdLabel();
+        render();
+      };
       $('xp-add-filter').onclick = () => { FILTERS.push({ field:'', value:'', side:'self' }); renderFilters(); };
       $('xp-export').onclick = exportCSV;
       // Shared Explore presets (via /api/admin-presets). Apply restores the full
@@ -4228,6 +4279,17 @@ function resetSlicersOn(pageId) {
   let n = 0;
   for (const sel of sels) {
     if (!sel.value) continue;
+    /* ── A SORT IS NOT A CUT ───────────────────────────────────────────
+       The first version reset every control wearing the slicer class, which
+       on Testimonials includes the sort order and the view switch. Those have
+       no "everyone" to go back to, so clearing them set a value none of their
+       options has and the dropdown drew blank.
+
+       A cut always offers a way out of itself: an option with an empty value,
+       labelled Everyone, All time, All packages. A sort does not. That is the
+       difference, and it is in the markup rather than in a list of ids kept
+       here. */
+    if (![...sel.options].some((o) => o.value === '')) continue;
     sel.value = '';
     sel.classList.remove('on');
     if (sel.__sdLabel) sel.__sdLabel();
@@ -4360,28 +4422,11 @@ function svFillSlicer(sel, rows) {
   mountSliceDrill(sel);
 }
 
-/** Add or remove a theme on one written answer, then redraw both pages. */
-async function svCode(responseId, questionId, code, remove) {
-  if (!code) return;
-  try {
-    await fetch('/api/admin-survey', {
-      method: 'POST',
-      headers: window.adminAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ responseId: responseId, questionId: questionId, code: code, remove: !!remove }),
-    });
-  } catch (e) {}
-  await loadSurvey(true);
-  renderTestimonials();
-  renderFeedback();
-}
-window.svCode = svCode;
-window.svCodeFromInput = function (id, responseId, questionId) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const v = el.value.trim();
-  el.value = '';
-  svCode(responseId, questionId, v, false);
-};
+/* svCode and svCodeFromInput were here. They posted a theme somebody typed
+   into a box on every testimonial, and the endpoint wrote a row per theme per
+   answer. Themes are read from the words now, so there is nothing to post:
+   the box is gone, the two functions with it, and the server answers that
+   path with a sentence saying so rather than writing a row nothing reads. */
 
 /**
  * Publish one written answer on the homepage, or take it down.
@@ -4997,7 +5042,7 @@ async function renderTestimonials() {
         return '<option value="' + svEsc(id) + '">' + svEsc((q && q.label) || id) + '</option>';
       }).join('');
   }
-  for (const id of ['ts-search', 'ts-sort', 'ts-period', 'ts-question']) {
+  for (const id of ['ts-search', 'ts-sort', 'ts-view', 'ts-period', 'ts-question']) {
     const el = document.getElementById(id);
     if (el && !el.dataset.wired) {
       el.dataset.wired = '1';
@@ -5062,12 +5107,69 @@ async function renderTestimonials() {
     return;
   }
 
+  /**
+   * ── RECOMMENDED CONTENT, BY CATEGORY ──────────────────────────────────
+   * Ellie: "Maybe build me a tab with recommended content by category (ie.
+   * couple in distress, help with extended family, etc.)"
+   *
+   * The same answers, grouped by what the frame read in them, best first
+   * inside each group. "Best" is: the one already on the homepage, then the
+   * highest rating, then the longest, because a long specific sentence is the
+   * one somebody can use and a three-word answer is not.
+   *
+   * An answer in three categories appears in three, which is the point: the
+   * question this view answers is "what can I show somebody who is looking
+   * for X", and the same sentence can be the answer to more than one X.
+   */
+  if ((document.getElementById('ts-view') || {}).value === 'cat') {
+    const groups = new Map();
+    for (const a of items) {
+      for (const c of (a.codes || [])) {
+        if (!groups.has(c)) groups.set(c, []);
+        groups.get(c).push(a);
+      }
+    }
+    const unmatched = items.filter((a) => !(a.codes || []).length);
+    const best = (arr) => arr.slice().sort((x, y) =>
+      (y.featured ? 1 : 0) - (x.featured ? 1 : 0)
+      || (y.rating || 0) - (x.rating || 0)
+      || y.text.length - x.text.length);
+    const sections = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
+    const quote = (a) => '<div style="border-left:3px solid ' + (a.featured ? '#10B981' : 'var(--border)') + ';'
+      + 'padding:.15rem 0 .15rem .7rem;margin:.5rem 0;">'
+      + '<p style="font-size:.84rem;color:var(--text);line-height:1.55;margin:0 0 .2rem">' + svEsc(a.text) + '</p>'
+      + '<div style="font-size:.66rem;color:var(--dim)">'
+      + (Number.isFinite(a.rating) ? '\u2605 ' + a.rating + ' \u00b7 ' : '')
+      + svEsc(SV_DIMS.map(([k]) => (a.segment[k] == null || a.segment[k] === '' ? null : qxPretty(k, a.segment[k]))).filter(Boolean).slice(0, 2).join(' \u00b7 '))
+      + (a.featured ? ' \u00b7 on the homepage' : '') + '</div></div>';
+    list.innerHTML = (sections.length ? '' : '<div style="color:var(--muted);font-size:.82rem;padding:1.5rem 0">Nothing in these answers matched a category yet.</div>')
+      + sections.map(([label, arr]) =>
+        '<div class="chart-card" style="padding:1rem 1.2rem;margin-bottom:.8rem;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;">'
+        + '<div style="font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700;">' + svEsc(label) + '</div>'
+        + '<div style="font-size:.66rem;color:var(--dim);font-family:var(--mono);">' + arr.length + '</div></div>'
+        + best(arr).slice(0, 5).map(quote).join('')
+        + (arr.length > 5 ? '<div style="font-size:.66rem;color:var(--dim);margin-top:.3rem">' + (arr.length - 5) + ' more in this category</div>' : '')
+        + '</div>').join('')
+      + (unmatched.length
+        ? '<div style="font-size:.7rem;color:var(--dim);padding:.4rem 0 1rem">' + unmatched.length
+          + ' answer' + (unmatched.length === 1 ? '' : 's') + ' matched no category. A frame that places everything is a frame that says nothing.</div>'
+        : '');
+    return;
+  }
+
   list.innerHTML = items.map((a) => {
     const q = (data.questions || []).find((x) => x.id === a.qid);
-    const inputId = 'tsc-' + a.qid + '-' + a.id;
-    const codes = a.codes.map((c) => '<button onclick="svCode(' + a.id + ',&quot;' + svEsc(a.qid) + '&quot;,&quot;' + svEsc(c) + '&quot;,true)" title="Remove this theme" '
+    /* ── THE THEMES ARE READ, NOT TYPED ──────────────────────────────
+       Ellie: "If it's for me to go in and postcode manually, remove this and
+       do it automatically with as many tags as are appropriate."
+
+       The box she typed into is gone and so are the little remove buttons:
+       there is nothing to remove from a reading. These are what the frame in
+       api/_lib/testimonial-themes.js found in the words. */
+    const codes = a.codes.map((c) => '<span '
       + 'style="background:rgba(232,103,58,.12);border:1px solid rgba(232,103,58,.3);color:var(--text);border-radius:999px;'
-      + 'padding:.15rem .55rem;font-size:.68rem;cursor:pointer;font-family:var(--bfont)">' + svEsc(c) + ' &times;</button>').join(' ');
+      + 'padding:.15rem .55rem;font-size:.68rem;font-family:var(--bfont)">' + svEsc(c) + '</span>').join(' ');
     /* ── THE SAME WORDS THE REST OF THE ADMIN USES ────────────────────
        This printed the stored value: "she/her", "none", "friend", where
        every other page says Woman, None, Friend/family. One value with two
@@ -5082,11 +5184,7 @@ async function renderTestimonials() {
       + '<div style="font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:.35rem">'
       + svEsc((q && q.label) || a.qid) + '</div>'
       + '<p style="font-size:.86rem;color:var(--text);line-height:1.6;margin:0 0 .5rem">' + svEsc(a.text) + '</p>'
-      + '<div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.45rem">' + codes
-      + '<input id="' + inputId + '" placeholder="add a theme" aria-label="Add a theme to this answer" '
-      + 'onkeydown="if(event.key===&quot;Enter&quot;){svCodeFromInput(&quot;' + inputId + '&quot;,' + a.id + ',&quot;' + svEsc(a.qid) + '&quot;)}" '
-      + 'style="background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:.15rem .6rem;font-size:.68rem;'
-      + 'color:var(--text);font-family:var(--bfont);width:9rem" /></div>'
+      + (codes ? '<div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.45rem">' + codes + '</div>' : '')
       + '<div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap">'
       + '<div style="font-size:.68rem;color:var(--muted)">'
       + (Number.isFinite(a.rating) ? '★ ' + a.rating + ' · ' : '')
@@ -5686,7 +5784,11 @@ async function renderResponseTile(opts){
         scales:{y:{beginAtZero:true,max:100,ticks:{stepSize:50,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
                 x:{ticks:{font:{size:9}},grid:{display:false}}}}});
   } else if(opts.kind==='relfeel'){
-    mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
+    mkChart(el,{type:'bar',data:{/* Ellie: "Remove (0), (1), etc. from overall relationship feel distribution
+       column labels." The number was the stored value, which is a fact about
+       the database rather than about the couple, and the column's position
+       already says which end it is. */
+      labels:['Needs work','Rough patch','Solid','Really good','Better than ever'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){
     /* ── THE SAME SHAPE AS THE SELF VS PARTNER GAP ─────────────────────
        Ellie: "I want life and values gap visual on expectations responses page
@@ -6353,29 +6455,68 @@ async function renderIntimacySummary() {
     }
   }
 
-  /* ── THE TWO GROUPS, PER ASPECT ─────────────────────────────────────── */
+  /**
+   * ── AVG DIMENSION RESULTS, BUILT LIKE THE COMMUNICATION ONE ───────────
+   * Ellie: "'Where each group places itself' in intimacy responses is not an
+   * intuitive title. Is this showing alignment? Or common responses? Should
+   * it be 'Avg dimension results'? If so, build it like the one on comms page
+   * so I can see pole labels too."
+   *
+   * It is neither alignment nor the most common answer: it is where the
+   * AVERAGE answer sits between a dimension's two ends, which is exactly what
+   * the Communication tile shows, drawn as a pair of columns with a
+   * percentage axis. So it reads as a different measure when it is the same
+   * one, and the two ends it is a position between were nowhere on the tile.
+   *
+   * Drawn as the same slider row: the poles either side, a dot on the track,
+   * and one row per dimension. Two dots rather than one, because this tile's
+   * whole point is the comparison between the two groups, and the colours
+   * match the key underneath.
+   *
+   * The poles come with the payload, from INTIMACY_DIMENSIONS, rather than
+   * from a second list kept here.
+   */
   {
-    const el = document.getElementById('chart-pi-stage');
+    const host = document.getElementById('pi-stage-rows');
     const sub = document.getElementById('pi-stage-sub');
     const rows = (st.stageRows || []).filter(r => r.notYet != null || r.intimate != null);
     const n = st.stageN || {};
-    if (sub) sub.textContent = (n['Not yet'] || 0) + ' not yet, ' + (n['Regularly intimate'] || 0) + ' regularly intimate';
-    if (el && rows.length) {
-      /* A position is 0 to 1; shown as a percentage along each aspect's own
-         axis, which is what the sliders at the foot of this page draw. */
-      const pct = (v) => v == null ? null : Math.round(v * 100);
-      mkChart(el, { type: 'bar',
-        data: { labels: rows.map(r => r.label), datasets: [
-          { label: 'Not yet', data: rows.map(r => pct(r.notYet)), backgroundColor: '#9AA3B2', borderRadius: 4, maxBarThickness: 22 },
-          { label: 'Regularly intimate', data: rows.map(r => pct(r.intimate)), backgroundColor: '#B5546E', borderRadius: 4, maxBarThickness: 22 },
-        ] },
-        options: { responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' },
-            tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + c.parsed.y + '% along' } } },
-          scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { display: false } },
-                    x: { ticks: { font: { size: 9 } }, grid: { display: false } } } } });
-    } else if (el && el.parentElement) {
-      el.parentElement.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">Nobody has answered this yet.</div>';
+    if (sub && sub.dataset.n !== String(rows.length)) {
+      sub.dataset.n = String(rows.length);
+      sub.textContent = (sub.textContent || '').split(' \u00b7 ')[0]
+        + ' \u00b7 ' + (n['Not yet'] || 0) + ' not yet, ' + (n['Regularly intimate'] || 0) + ' regularly intimate';
+    }
+    if (host) {
+      if (!rows.length) {
+        host.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">Nobody has answered this yet.</div>';
+      } else {
+        const NOT_YET = '#9AA3B2', INTIMATE = '#B5546E';
+        const pct = (v) => Math.max(2, Math.min(98, v * 100));
+        const dot = (v, colour, size, z, tip) => v == null ? '' :
+          '<div data-tip="' + QX_ESC(tip) + '" style="position:absolute;top:50%;left:' + pct(v) + '%;'
+          + 'transform:translate(-50%,-50%);width:' + size + 'px;height:' + size + 'px;border-radius:50%;'
+          + 'background:' + colour + ';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25);'
+          + 'cursor:default;z-index:' + z + ';"></div>';
+        const say = (v) => v == null ? 'no answers' : Math.round(v * 100) + '% toward ' ;
+        host.innerHTML =
+          '<div style="display:flex;gap:1.1rem;align-items:center;margin:0 0 .8rem;font-size:.62rem;color:var(--muted);">'
+          + '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:9px;height:9px;border-radius:50%;background:' + NOT_YET + ';border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Not yet</span>'
+          + '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:13px;height:13px;border-radius:50%;background:' + INTIMATE + ';border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Regularly intimate</span>'
+          + '</div>'
+          + rows.map(r => {
+            const lo = r.poleLow || 'one end', hi = r.poleHigh || 'the other';
+            const track = '<div style="position:relative;flex:1 1 auto;min-width:0;height:6px;background:var(--surface);border-radius:999px;">'
+              + dot(r.notYet, NOT_YET, 9, 1, 'Not yet: ' + say(r.notYet) + (r.notYet == null ? '' : hi))
+              + dot(r.intimate, INTIMATE, 14, 2, 'Regularly intimate: ' + say(r.intimate) + (r.intimate == null ? '' : hi))
+              + '</div>';
+            return '<div class="qrow"><div class="qrow-label">' + QX_ESC(r.label) + '</div>'
+              + '<div class="qrow-body"><div class="qrow-track">'
+              + '<span class="qrow-pole lo" data-tip="' + QX_ESC(lo) + '">' + QX_ESC(lo) + '</span>'
+              + track
+              + '<span class="qrow-pole hi" data-tip="' + QX_ESC(hi) + '">' + QX_ESC(hi) + '</span>'
+              + '</div></div></div>';
+          }).join('');
+      }
     }
   }
 }
@@ -6407,17 +6548,21 @@ async function renderConflictExtras() {
   /* ── THE TWO CODED TEXT CHARTS ──────────────────────────────────────── */
   const cc = respOf(data).conflictCodes;
   if (!cc || !cc.questions) return;
-  const byId = Object.fromEntries((cc.frame || []).map(c => [c.id, c.label]));
   for (const q of cc.questions) {
     const el = document.getElementById('chart-cfcode-' + q.id);
     const sub = document.getElementById('cfcode-' + q.id + '-sub');
     if (!el) continue;
-    const bars = (cc.frame || []).map(c => ({ label: byId[c.id], v: (q.counts || {})[c.id] || 0 }))
+    /* ── EACH QUESTION'S OWN FRAME ────────────────────────────────────
+       These two shared the reflection frame, and Ellie read the result:
+       "'getting through something hard' doesn't tell me anything." A theme
+       has to be an answer to its own question, so each question now carries
+       its frame with it. `cc.frame` was the envelope-level copy that made
+       sharing look free; it is gone. */
+    const frame = q.frame || [];
+    const bars = frame.map(c => ({ label: c.label, v: (q.counts || {})[c.id] || 0 }))
       .sort((a, b) => b.v - a.v);
-    /* The uncoded share is drawn here too, and it matters more here than on
-       the reflection page: this frame was written for those answers and is
-       being reused on these. How much it fails to place is the evidence for
-       whether that reuse was right. */
+    /* How much the frame fails to place is the evidence for whether the
+       frame is right, so it is drawn rather than left out. */
     bars.push({ label: 'No theme matched', v: q.uncoded || 0, grey: true });
     if (sub) sub.textContent = (q.total || 0) + ' answer' + (q.total === 1 ? '' : 's') + ', ' + (q.coded || 0) + ' with a theme';
     mkChart(el, { type: 'bar',
@@ -6528,13 +6673,27 @@ async function renderConflictPage() {
     mkChart(el, { type,
       data: { labels, datasets: [{ data, backgroundColor: palette, borderColor: '#FFFFFF', borderWidth: type === 'pie' ? 3 : 0, borderRadius: type === 'bar' ? 4 : 0, maxBarThickness: 46 }] },
       options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: type === 'pie' ? { position: 'bottom' } : { display: false },
+        plugins: { legend: { display: false },
           tooltip: { callbacks: { label: c2 => ' ' + c2.parsed + ' of ' + valuesOf(rows, id).length } } },
         ...(type === 'bar' ? { scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } }, x: { ticks: { font: { size: 9 }, maxRotation: 35, minRotation: 35 }, grid: { display: false } } } } : { cutout: 0 }) } });
   };
+  /* ── THE THREE FORCED CHOICES ARE PIES, AND NONE OF THEM HAS A KEY ────
+     Ellie: "When a disagreement starts pie chart has a legend that should be
+     removed", and "Change 'in the middle of a disagreement' and 'when it
+     touches something old' chart style to pie charts."
+
+     Two answers each, so a pie says the split at a glance in a way a pair of
+     columns does not. The legend goes because she asked, and because each
+     tile's subtitle already names the two answers in the order the slices are
+     drawn: "Keep talking, or pause first" over a chart whose first slice is
+     keep talking. The hover carries the count, which is the rule she has
+     asked for three times over data labels.
+
+     c8 stays a column chart: it has five answers and a pie of five slices
+     with no key is a colour wheel. */
   qChart('c1', 'pie', CAT_PALETTE);
-  qChart('c2', 'bar', '#5C6DDA');
-  qChart('c_topic', 'bar', '#9B5DE5');
+  qChart('c2', 'pie', CAT_PALETTE);
+  qChart('c_topic', 'pie', CAT_PALETTE);
   qChart('c8', 'bar', '#34D399');
 }
 
@@ -6600,20 +6759,25 @@ async function renderInheritance() {
   if (shapeEl) setTileN(shapeEl, inh.people || 0);
   if (genEl) setTileN(genEl, inh.people || 0);
 
-  const GREY = '#9AA3B2';
   /**
-   * ── A CLUSTER PER CATEGORY ────────────────────────────────────────────
-   * Ellie: "Make it a clustered column per expectations category."
+   * ── THE OUTCOME IS THE QUESTION, SO IT IS THE AXIS ────────────────────
+   * Ellie: "I want the clusters to be the outcome (same, shared now one, one
+   * now shared, other) should be the x axis."
    *
-   * One bar per outcome over every item at once says whether arrangements
-   * changed and not where, and where is the interesting half: who cooks and
-   * who earns are different questions about the same couple. The categories
-   * and their order come with the payload, from the question set, so this
-   * does not keep its own list of what a category is called.
+   * It was the other way round: a cluster per category with a bar per
+   * outcome, which answers "what happened in Household" and makes "how often
+   * does one person's job become shared" something you read across five
+   * tiles. Her way answers the second, which is the question the chart is
+   * for, and the categories become the colours.
    *
-   * A payload with no per-category split draws one cluster of everybody,
-   * which is the old chart, rather than an empty tile.
+   * ── AND NOT CLASSIFIED LEAVES THE CHART ───────────────────────────────
+   * Ellie: "for anything that's not classified let's leave it out." It was
+   * the tallest bar on the gendered chart by a distance, which made the four
+   * real answers unreadable. It is not hidden, though: the count goes in the
+   * subtitle, because a chart that silently drops a third of its answers is
+   * reporting on a population it does not name.
    */
+  const CAT_COLOURS = ['#5C6DDA', '#C55329', '#34D399', '#FBBF24', '#9B5DE5', '#22A5C4', '#E5578C'];
   const cats = (inh.categories && inh.categories.length)
     ? inh.categories
     : [{ id: '__all__', label: 'All categories' }];
@@ -6622,15 +6786,33 @@ async function renderInheritance() {
     if (catId === '__all__') return (inh[half] || {})[key] || 0;
     return (((byCat[catId] || {})[half]) || {})[key] || 0;
   };
-  const clustered = (el, half, series) => {
+  /* How many answers the rule could not place, for the subtitle. */
+  const unknownIn = (half) => cats.reduce((n, c) => n + cell(half, c.id, 'unknown'), 0);
+  const sayUnknown = (el, half, why) => {
+    const card = el && el.closest('.chart-card');
+    const sub = card && card.querySelector('.chart-subtitle');
+    const n = unknownIn(half);
+    if (!sub || !n) return;
+    if (sub.dataset.unk === String(n)) return;
+    sub.dataset.unk = String(n);
+    sub.textContent = (sub.textContent || '').split(' \u00b7 Left out:')[0]
+      + ' \u00b7 Left out: ' + n + ' answer' + (n === 1 ? '' : 's') + ' ' + why;
+  };
+
+  const clustered = (el, half, series, why) => {
     if (!el) return;
+    sayUnknown(el, half, why);
     mkChart(el, {
       type: 'bar',
       data: {
-        labels: cats.map((c) => c.label),
-        datasets: series.map(([label, key, color]) => ({
-          label, backgroundColor: color, borderRadius: 4, maxBarThickness: 16,
-          data: cats.map((c) => cell(half, c.id, key)),
+        /* The outcomes are the columns now, and the categories the colours. */
+        labels: series.map((sx) => sx[0]),
+        datasets: cats.map((c, i) => ({
+          label: c.label,
+          backgroundColor: CAT_COLOURS[i % CAT_COLOURS.length],
+          borderRadius: 4,
+          maxBarThickness: 16,
+          data: series.map((sx) => cell(half, c.id, sx[1])),
         })),
       },
       options: {
@@ -6648,20 +6830,26 @@ async function renderInheritance() {
   };
 
   clustered(shapeEl, 'shape', [
-    ['Same as they saw', 'same', '#5C6DDA'],
-    ['Shared, now one', 'sharedToOne', '#C55329'],
-    ['One, now shared', 'oneToShared', '#34D399'],
-    ['Other change', 'other', '#FBBF24'],
-    ['Not classified', 'unknown', GREY],
-  ]);
+    ['Same as they saw', 'same'],
+    ['Shared, now one', 'sharedToOne'],
+    ['One, now shared', 'oneToShared'],
+    ['Other change', 'other'],
+  ], 'where one half of the pair was missing or unreadable');
 
+  /* ── THE FOUR GENDERED OUTCOMES, NAMED SO THE PAIRS SHOW ──────────────
+     Ellie: "I don't understand what the difference is between hands that role
+     over and leaves that one to their partner."
+
+     Fair, because the old names describe the same action twice. Both mean
+     their partner does it; what differs is WHOSE gender held it growing up.
+     Read as pairs: the first and the last are the gendered pattern
+     repeating, the middle two are it swapping. */
   clustered(genEl, 'gendered', [
-    ['Keeps their own gender\u2019s role', 'keepsSameGenderRole', '#5C6DDA'],
-    ['Hands that role over', 'handsOffSameGenderRole', '#C55329'],
-    ['Takes on the other gender\u2019s role', 'takesOnOtherGenderRole', '#34D399'],
-    ['Leaves that one to their partner', 'handsOffOtherGenderRole', '#FBBF24'],
-    ['Not classified', 'unknown', GREY],
-  ]);
+    ['Keeps their gender\u2019s role', 'keepsSameGenderRole'],
+    ['Hands their gender\u2019s role over', 'handsOffSameGenderRole'],
+    ['Takes the other gender\u2019s role', 'takesOnOtherGenderRole'],
+    ['Leaves the other gender\u2019s role', 'handsOffOtherGenderRole'],
+  ], 'where one adult, a gendered role name, a gendered pronoun or a named person was missing');
 }
 
 async function renderExpSummary() {
@@ -6707,42 +6895,45 @@ async function renderExpSummary() {
   put('es-life', asPct(mean(life)), life.length + ' couple' + (life.length === 1 ? '' : 's'));
   put('es-resp', asPct(mean(resp)), resp.length + ' couple' + (resp.length === 1 ? '' : 's'));
 
-  /* A couple's overall distance across both halves, which is what decides
-     which side of the line they are on. A couple with only one half counts on
-     the half they have rather than being dropped. */
+  /* The gap each tile averages is still the distance across both halves. What
+     changed is WHICH couples go in which tile. */
   const overall = couples
     .map(c => { const vs = [c.life, c.resp].filter(v => v != null); return vs.length ? mean(vs) : null; })
     .filter(v => v != null);
-  /* The threshold comes from the payload, not from a number typed here. A
-     literal would be a second copy of the rule, and the kind that nobody
-     notices has drifted because both halves keep producing figures. If the
-     server did not send it, these two tiles say so rather than quietly
-     splitting the couples at a guess. */
-  const line = (typeof bundle.alignedBand === 'number') ? bundle.alignedBand : null;
-  if (line == null) {
-    put('es-gap-mis', '\u2014', 'The alignment threshold was not sent');
-    put('es-gap-al', '\u2014', 'The alignment threshold was not sent');
+  /**
+   * ── HER RULE: MISALIGNED IS TWO CATEGORIES OR MORE ────────────────────
+   * Ellie: "What are we counting as aligned v misaligned for expectations?
+   * Feels wrong that no one is regarded as aligned. I think misaligned should
+   * have <50% alignment in 2+ categories."
+   *
+   * The old rule cut one averaged distance at 0.2, a threshold that means
+   * something between two answers to one question and almost nothing averaged
+   * over forty items: everybody fell the wrong side of it and the aligned
+   * tile was empty, which is what she was reading.
+   *
+   * The count of categories a couple is mostly out of step in comes with the
+   * payload now, from the same function the Explore cuts use. A couple whose
+   * categories could not be read at all is in neither tile rather than in the
+   * aligned one, because nought-below-the-line is also what unreadable looks
+   * like.
+   */
+  const scored = couples.filter(c => typeof c.catsBelow50 === 'number');
+  const gapOf = (c) => { const vs = [c.life, c.resp].filter(v => v != null); return vs.length ? mean(vs) : null; };
+  const misGaps = scored.filter(c => c.catsBelow50 >= 2).map(gapOf).filter(v => v != null);
+  const alGaps = scored.filter(c => c.catsBelow50 < 2).map(gapOf).filter(v => v != null);
+  if (!scored.length) {
+    put('es-gap-mis', '\u2014', 'No couple has enough answers to read a category yet');
+    put('es-gap-al', '\u2014', 'No couple has enough answers to read a category yet');
     return;
   }
-  const mis = overall.filter(v => v > line), al = overall.filter(v => v <= line);
-  /* ── AN EMPTY HALF SAYS WHICH HALF IS EMPTY ──────────────────────────
-     Ellie, twice about these two tiles: first "why is there no data for
-     aligned couples", then "does that mean expectations has 0 misaligned?"
-     Both are the same question, and the answer was under the em dash all
-     along in words too thin to carry it: "None under the line" does not say
-     where the line is or which way round it runs.
-
-     The line is named as a percentage now, in the same units as the figure
-     above it, so an empty tile reads as a finding rather than as missing
-     data. A dash with no couples behind it is correct: there is no average
-     of nothing, and showing 0% would say they agree perfectly. */
-  const linePct = Math.round(line * 100);
-  put('es-gap-mis', gapPct(mean(mis)),
-    mis.length ? mis.length + ' of ' + overall.length + ' couples'
-      : 'No couple is more than ' + linePct + '% apart');
-  put('es-gap-al', gapPct(mean(al)),
-    al.length ? al.length + ' of ' + overall.length + ' couples'
-      : 'Every couple is more than ' + linePct + '% apart');
+  const misN = scored.filter(c => c.catsBelow50 >= 2).length;
+  const alN = scored.length - misN;
+  put('es-gap-mis', gapPct(mean(misGaps)),
+    misN ? misN + ' of ' + scored.length + ' couples, under half aligned in two or more categories'
+      : 'No couple is under half aligned in two or more categories');
+  put('es-gap-al', gapPct(mean(alGaps)),
+    alN ? alN + ' of ' + scored.length + ' couples, out of step in at most one category'
+      : 'Every couple is under half aligned in two or more categories');
 }
 
 async function renderCommsSummary() {
@@ -8642,6 +8833,20 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
   };
   const catHead = (t) => '<div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;'
     + 'text-transform:uppercase;color:var(--muted);font-weight:700;margin:1.15rem 0 .55rem;">' + QX_ESC(t) + '</div>';
+  /**
+   * ── WHICH HALF OF THE EXERCISE A CATEGORY BELONGS TO ──────────────────
+   * Ellie: "Add the word Responsibilities after each section header for the
+   * all questions in expectations that are referring to pt 2 of the
+   * exercise."
+   *
+   * Part one is life and values, part two is who does what. Household means
+   * two different questions depending on which half you are in, and the
+   * header was the only thing that could have said so. Read off the field's
+   * group, which the server sets, rather than from a list of category names
+   * kept here: a category added to the exercise would not be in that list and
+   * would quietly get the wrong header.
+   */
+  const catSuffix = (f) => (String(f.group || '').indexOf('Who does what') > -1 ? ' Responsibilities' : '');
   /* Every All questions list goes through here, so the headings cannot appear
      in one view of a page and not the other. */
   const rowsFor = (fields, drows, sliced) => {
@@ -8650,8 +8855,9 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
       ? countHead() : '';
     for (const f of fields) {
       const c = catOf(f);
-      if (c && c !== last) out += catHead(c);
-      last = c;
+      const head = c == null ? null : c + catSuffix(f);
+      if (head && head !== last) out += catHead(head);
+      last = head;
       out += measureBar(f, drows, sliced);
     }
     return out;

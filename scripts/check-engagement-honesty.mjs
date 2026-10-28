@@ -112,9 +112,16 @@ if (!missingBlock) {
 for (const m of html.matchAll(/drawTimeTile\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*([^,]+),/g)) {
   const [, canvas, , measure] = m;
   const arg = measure.trim();
-  // A measure, or a variable holding one. `null` is the thing this catches:
-  // a tile wired to nothing always says "not measured", whether or not it is.
-  if (/^(d\.[\w.]+|t\.\w+|measure|detailed|byDetailed\[[\w.]+\]|L\.[\w.]+)$/.test(arg)) continue;
+  /* ── WHAT IS ACTUALLY WRONG IS A LITERAL NOTHING ───────────────────────
+     This was an allowlist of spellings: `d.x`, `t.x`, `detailed`, and so on.
+     Adding a renderer that passes `detailed[chosen]`, which is a measure,
+     failed the gate — the matcher knew one spelling of the right answer,
+     which is the fault this file warns about pointed at itself.
+     The bug is a tile wired to NOTHING, so that is what is matched: a literal
+     null, undefined, an empty object or array, a string or a number. Anything
+     that could hold a measure is let through, and anything that cannot is
+     not. */
+  if (!/^(null|undefined|\{\s*\}|\[\s*\]|['"`]|\d)/.test(arg)) continue;
   problems.push(
     `the tile on #${canvas} is passed ${measure.trim()} rather than a measure.\n`
     + '      It will always say "not measured", whether or not it is.');

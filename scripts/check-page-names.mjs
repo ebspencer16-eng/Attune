@@ -16,7 +16,7 @@
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 
-const { MARKETING_PAGE_NAMES, marketingPageName } = await import('../api/_lib/page-names.js');
+const { MARKETING_PAGE_NAMES, MARKETING_PAGE_SHORT, marketingPageName } = await import('../api/_lib/page-names.js');
 const fail = [];
 
 /* Link text per href, from every static page, because the nav is pasted into
@@ -47,6 +47,17 @@ for (const [path, name] of Object.entries(MARKETING_PAGE_NAMES)) {
 /* An unnamed path keeps its path rather than becoming something invented. */
 if (marketingPageName('/not-a-page') !== '/not-a-page') fail.push('an unknown path no longer falls back to itself');
 if (marketingPageName('/offerings/') !== 'Packages') fail.push('a trailing slash stops a path resolving to its name');
+
+/* ── EVERY PAGE HAS BOTH NAMES ────────────────────────────────────────────
+   The chart draws the short one and says the long one on hover, so a page
+   with only one of them either loses its hover or falls back to its path in
+   the place Ellie reported twice. */
+for (const path of Object.keys(MARKETING_PAGE_NAMES)) {
+  if (!MARKETING_PAGE_SHORT[path]) fail.push(`${path} has a name and no short label, so its column falls back to the path`);
+}
+for (const path of Object.keys(MARKETING_PAGE_SHORT)) {
+  if (!MARKETING_PAGE_NAMES[path]) fail.push(`${path} has a short label and no name, so its hover has nothing to say`);
+}
 
 if (fail.length) {
   console.error('check-page-names FAILED');
