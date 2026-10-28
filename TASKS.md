@@ -41,7 +41,14 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.** The scan is done and what it found is in section 3.
+| # | What I am doing |
+|--|--|
+| A139 | **A113's legends have no colour, and it is my doing.** When the dash legend became one rule for every chart, it kept drawing in `borderColor`, which a line chart sets and a bar chart does not: every bar legend on the page lost its swatch, including add-on attachment. |
+| A135 | **Every top-level banner takes white text.** The ink is picked for contrast today, so the lighter sections get dark type. I will say which band white sits weakest on rather than quietly darkening a colour. |
+| A136 | **Engage/Withdraw and Open/Guarded move into Communication Styles > Typing**, out of the catch-all section. |
+| A137 | **Other cuts becomes Engagement, with four new cuts.** Depth, as top 25%, middle 50% and bottom 25% by time spent in portal pages; read an article or not; left a survey response or not; and NPS promoters and detractors. Each needs a per-person field the cube does not send yet. |
+| A138 | **A pole label that trails off gets its whole text on hover.** |
+| A140 | **Your question on A112: does Expectations have no misaligned couples?** Reading the live figures rather than reasoning about them. |
 
 ## 3. For you to review
 
@@ -50,54 +57,15 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A121 | **The legend dash lost its colour on every bar chart, which you caught on A113.** The dash is drawn in the line colour, which a line chart has and a bar chart does not. Fixed as A139 and back for your eye with the clustered charts. |
 | S81 | **Twenty kilobytes of the admin could not be reached, and two pieces of it mattered.** Seven functions left behind by the Beta Codes and Fulfilment pages, each writing into an element deleted months ago. One was the promo Status toggle's old twin: nothing could call it, and the fix I reported to you as A86 went into it rather than into the live toggle, which already worked. The other drew a buyer's name, address and phone, one missing id away from working, under the banner saying this page holds none of that. All seven are gone. |
 | S85 | **The Testimonials page printed stored values where every other page prints words.** "she/her", "none", "friend" against Woman, None, Friend/family, in the line under each answer and in the filter checkboxes. It was invisible to me because the test data invented pretty values, so the conversion had nothing to do; the test data now stores what the product stores. |
 | S85b | **165 controls in the admin had no name a screen reader could say**: 120 "add a theme" boxes, 35 question-weight sliders, 10 axis sliders. The rule exists and has only ever been applied to the 38 public pages, never to the admin, which is the surface with the most controls on it. Named, and a gate now walks all 13 admin pages. |
 | S85c | **A failed read of the journal table would have said nobody journals.** The error was never tested, the catch could not fire, and the comment excusing it named a migration that adds no column. It says so in the reply now, like every other read in that file, and the gate's exemption for "a documented migration window" is gone: nothing else used it. |
 | S82 | **Every slicer on every admin page, audited leaf by leaf: all clean.** 136 cuts on a demographics tile, 140 on Responses, 29 on Feedback, with no cut that matches nobody, none that matches everybody, no branch with nothing under it, and no computed cut whose rule was never registered. |
 | S81b | **Four holes in the test data, each of which hid a page from me.** The survey endpoint was never stubbed, so the whole Feedback page was an empty grid; `surveys` was missing, so Couple type x outcomes drew its empty state; `dataQuality` was missing, so that strip read five dashes; and conflict answers only existed for half the people while the option index was that same number, so one side of every two-option conflict question was never stored. |
-| A133 | **The taxonomy is built, all six sections of it, and it is the Explore dropdowns too.** Open any tile's slicer: a coloured banner per section, an arrow into each, a back arrow top left. The rows that are not a stored column are computed, so "Children / No children", the score bands, "Household - aligned", the eight Rel Relf ends, aligned by intimacy dimension and the sixteen horsemen rows all work as cuts. Same control on the Explore pickers, with a search and your All questions row, and on the Feedback tiles. |
-| A133b | **Three things your taxonomy asked for that nothing stored.** "Two guardians of the same gender", "raised by someone other than a parent", and whether somebody kept, swapped or widened the roles they grew up with. All three are inferences from the name of a childhood role, which is the inference that file already makes and says so about. Tell me if you want any of the three worded differently. |
-| A116 | **All questions has a third view, Count.** Five cells per row, shaded by share, with the question's own poles either side. A column is where an answer sits between the poles, so on Me / Both / My partner it puts Both in the middle column, which an option number would not. |
-| A113 | **Both inheritance charts are a cluster per expectations category.** One bar per outcome over every item at once said whether arrangements changed and not where, and where is the half worth having. |
 | A107 | **Package split over time and revenue contribution sit side by side, four lines each.** A stack said how many altogether and hid how any one package was doing. |
-| A104 | **The orders table has the promo table's white head, titled All orders, with the filters in it.** Its search box offered to match a buyer's name, which left this payload when the Fulfilment page did. |
-| A114 | **The Expectations rows have eyebrow headings and no section title.** In mean mode the category was not even split off, which is why you were still seeing it: two renderers, one of them taught. |
-| A132 | **A slicer offers only what its own tile has.** Two faults with one symptom: the up-front fill locked the list before any tile knew its own rows, and every question explorer started from the whole cube, so the Conflict tab counted people who have never opened Conflict Patterns. Its slicer now offers 32 cuts where Communication's offers 44. |
-| A131 | **Order the aspects is rows, full width, every label on one line.** That reverses "I want column charts", so both quotes are in the code: five short answers read best as columns and eleven phrases do not. |
-| A130 | **The Feedback charts have their x axis line back.** It is the category axis's own border; the value axis stays gone. |
-| A129 | **UX Views has all five exercises.** It was four cards typed into the page while the product has had five since Conflict Patterns shipped, so the newest one was the one nobody could preview. Communication's dot was a violet; the registry says it is the brand orange. |
-| A117 | **You were right about All questions, and the cause was five sliders pinned to their right-hand end.** The admin draws the mean at val times 100 per cent, so val has to be a fraction, and five of the thirty-nine conflict fields sent the option's own number, 0 to 4. Everything above 1 clamps to the far right, and the far right of a horseman row says Often. |
-| A120 | **The two empty conflict tiles were three forced-choice questions stored three different ways.** The site stored A and B, the app stored 0 and 1, the admin read a and b. Anyone who answered that exercise in the app also got nothing for those three on their own results page. The reader understands all three spellings, because stored answers are never rewritten. |
-| A112 | **Those two figures were never in disagreement: they are two different measures.** The dashboard's 3 of 6 aligned is a communication figure, and the Expectations gap tiles split couples by expectations distance. Both tiles now say which alignment they mean, which was the whole of your question. |
-| A111 | **The two Expectations tiles take your wording**: avg gap among misaligned couples, avg gap among aligned couples. |
-| A119 | **Every chart in the admin has lost its value axis and its gridlines**, as one rule in the chart builder rather than a dozen per-tile copies. The category axis keeps its names, and a pie, doughnut or radar has no cartesian axis so it does not get one. |
-| A122 | **The three time-per-page charts scale to their own data.** One ceiling was computed across all five and handed to each, so a tall column anywhere flattened the rest. This reverses your earlier "five time charts to one height"; both quotes are beside the code, because that still holds between the web and app lines inside one tile. |
-| A125 | **A pill on a detailed results page changes only its own tile now.** Same cause as A122: the shared ceiling meant one pill rescaled four tiles it had nothing to do with. |
-| A123 | **Marketing pages are named, not pathed**: Home, Our Purpose, Packages, Registry, In Practice, FAQs. The label was the path because nothing had ever given it anything else. |
-| A124 | **Exercise and results labels abbreviate, derived from the names the product already uses rather than typed into a map.** That gives your list exactly for seven of eight. What Comes Next initials to WCN where you wrote WN; say the word and I will override that one. |
-| A126 | **Notes by section uses the same abbreviations**, taken from the groups the results chart already builds, so the two tiles cannot disagree about what a section is called. |
-| A101 | **Sorting by date sorted by weekday name.** That column's sort key is a Date object, and typeof a Date is 'object', so the comparator fell past its numeric branch and compared "Fri Oct 02 2026" against "Mon Sep 28 2026". Every sortable column in the admin was driven and read back; the Date was the only object. |
-| A105 | **Add-on order is Reflection, Intimacy, Conflict, Workbook, Budget, Checklist, and two add-ons were missing from that chart altogether.** Conflict Patterns at $40 and the Merging Lives Checklist never appeared in the one view about what people buy alongside a package: two copies of the list, and the first was dead. |
-| A106 | **The three exercise columns in add-on attachment are blues and indigos**, the three resources are other colours. |
-| A110 | **Expectations at-a-glance has its timeframe slicer, and the couples it averages now carry a date so the control can actually cut.** The date is the later of the two partners' completion dates, because a couple's distance does not exist until both halves are in. 74 per cent all time, 75 at 30 days. |
-| A109 | **Self v partner view gap has a slicer.** It never had one because that tile builds its own head instead of using the shared chart head. |
-| A108 | **Responses opens on Communication again**, rather than wherever you last were. |
-| A99 | **The paired dashboard tiles are one height.** The canvases were already identical; the cards were not, because the right-hand heads wrap to a second line and each card was sized to itself. |
-| A118 | **The two coded conflict charts are full width and stacked**, so the column labels are readable. |
-| A115 | **Relationship Reflection: what people wrote about and qualities most admired are swapped.** |
-| A121 | **Line chart legends are a dash, not an outlined box.** |
-| A127 | **The slicers on notes by section and notes by page are stacked**, so the titles are not squeezed. |
-| A128 | **"Not measured" has a buffer under it** instead of sitting flush against the tile edge. |
-| A100 | **The denominator line is gone from the understanding tile.** |
-| A103 | **The promo table's Uses column is Max uses.** |
-| A102 | **Keep the Waiting on a partner tile.** The app can accept an invite code and has never been able to send one, so a buyer who sets up in the app still ends with a code and no email sent. That is the path that made Rebecca's case and it is still open. |
-| A134 | **The survey's completion screen has a Back to dashboard button.** The words are in the copy module, so an edit of yours reaches them. |
-| V1 | **Site and app match, and here is what that rests on.** Both are current: the app bundle on production was published after the last app commit with nothing since, and the live website bundle contains the newest commit, checked with a string that commit removed and a control string that stayed. Scoring is identical over 400 answer sets. All 29 results sections render on the site and all 29 have an app screen. Every sentence in the site's results is reachable by the app. Plans, next steps, budget, section names, category colours and 1,138 links are each held by a gate. |
-| V2 | **Four sentences are on the site and deliberately not in the app**, and I read all four: the two that explain the inline storycard reel, the couple-type fallback, and the download fallback. Each describes something the app does a different way, so copying them over would describe a mechanism that is not there. |
 | V3 | **What I did not prove.** Nothing renders the same couple on both surfaces and compares the result. Every check above compares a rule or a list, not two pictures. Building that needs the app served through its web build, which is a real piece of work. Say the word if you want it. |
-| A95 | **"as read by partner" was backwards, not just unclear.** That field is a person's own guess about their partner, on the same 1-5 scale, not anyone's read of them. Anyone cutting by it was reading the wrong person's answer. It says "Their guess about their partner: Energy & Recharge" now. |
-| A85 | **097 is run, so the survey can save now. The proof is one number.** Finish a survey, then open the Feedback page: the line under the title counts responses and has read 0 since the day the feature shipped. If it still reads 0 after you finish one, tell me and I will chase the write itself. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -109,6 +77,45 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A133 | **The slicer taxonomy, six sections deep, as a drill-down with coloured banners and a back arrow, on every tile slicer, both Explore pickers and the Feedback tiles. Computed cuts for the rows no column stores.** |
+| A133b | **Three inferences the taxonomy needed and nothing stored: same-gender guardians, raised by someone other than a parent, and whether somebody kept, swapped or widened the roles they grew up with.** |
+| A116 | **A third view on All questions, Count: five cells per row shaded by share, with the question's own poles either side. A column is where an answer sits between them, so Both lands in the middle.** |
+| A113 | **Both inheritance charts became a cluster per expectations category. One bar per outcome over every item said whether arrangements changed and not where.** |
+| A104 | **The orders table got the promo table's white head, titled All orders, with the filters in it. Its search stopped offering to match a buyer's name, which this payload no longer carries.** |
+| A114 | **Expectations All questions: one eyebrow heading per category, no section title in the row. The mean renderer had never split it off, which is why it survived the first fix.** |
+| A132 | **Every slicer offers only what its own tile has. The up-front fill had locked the list, and each question explorer counted people who had never done that exercise.** |
+| A131 | **Order the aspects became rows at full width so all eleven labels fit, which reverses “I want column charts” for that one question.** |
+| A130 | **The Feedback charts got their x axis line back, as the category axis's own border. The value axis stays gone.** |
+| A129 | **UX Views lists all five exercises. It was four cards typed into the page while the registry has had five since Conflict Patterns shipped.** |
+| A117 | **All questions was wrong because five conflict sliders sent an option number where a fraction was expected, pinning all of them to the far right, which reads as Often.** |
+| A120 | **The two empty conflict tiles were three forced-choice questions stored three ways: A and B on the site, 0 and 1 in the app, a and b in the reader.** |
+| A112 | **The two figures were different measures rather than a disagreement: the dashboard's aligned is communication, the Expectations tiles split by expectations distance. Both say which now.** |
+| A111 | **The two Expectations tiles take your wording: avg gap among misaligned couples, and avg gap among aligned couples.** |
+| A119 | **Every chart lost its value axis and its gridlines, as one rule in the chart builder rather than a dozen per-tile copies.** |
+| A122 | **The three time-per-page charts scale to their own data. One shared ceiling had been flattening them.** |
+| A125 | **A pill on a detailed results page changes only its own tile. Same shared ceiling as A122.** |
+| A123 | **Marketing pages are named rather than pathed: Home, Our Purpose, Packages, Registry, In Practice, FAQs.** |
+| A124 | **Exercise and results labels abbreviate, derived from the product's own names. What Comes Next initials to WCN where you wrote WN.** |
+| A126 | **Notes by section uses the same abbreviations, taken from the groups the results chart already builds.** |
+| A101 | **Sorting by date sorted by weekday name. A Date is an object, so the comparator fell past its numeric branch and compared “Fri Oct 02” against “Mon Sep 28”.** |
+| A105 | **Add-on order is yours, and two add-ons were missing from that chart entirely, Conflict Patterns and the Merging Lives Checklist, from a dead second copy of the list.** |
+| A106 | **The three exercises in add-on attachment are blues and indigos; the three resources are other colours.** |
+| A110 | **Expectations at-a-glance has its timeframe slicer, and each couple carries the later of the two completion dates so the control can actually cut.** |
+| A109 | **Self v partner view gap has a slicer. That tile builds its own head rather than using the shared one, which is why it never had one.** |
+| A108 | **Responses opens on Communication again rather than wherever you last were.** |
+| A99 | **The paired dashboard tiles are one height. The canvases already matched; the cards did not, because the right-hand heads wrap to a second line.** |
+| A118 | **The two coded conflict charts are full width and stacked so their column labels can be read.** |
+| A115 | **Relationship Reflection: what people wrote about and qualities most admired are swapped.** |
+| A127 | **The slicers on notes by section and notes by page are stacked so the titles are not squeezed.** |
+| A128 | **“Not measured” has a buffer under it instead of sitting flush against the tile edge.** |
+| A100 | **The denominator line is gone from the understanding tile.** |
+| A103 | **The promo table's Uses column is Max uses.** |
+| A102 | **The Waiting on a partner tile stays. The app can accept an invite code and has never been able to send one, so the path that made Rebecca's case is still open.** |
+| A134 | **The survey's completion screen has a Back to dashboard button, with the words in the copy module so an edit of yours reaches them.** |
+| V1 | **Site and app confirmed to match: both current, scoring identical over 400 answer sets, all 29 sections on both surfaces, every results sentence reachable by the app.** |
+| V2 | **Four sentences are on the site and deliberately not in the app. Each describes a mechanism the app does a different way.** |
+| A95 | **The read-error field was backwards: it is a person's own guess about their partner, not anyone's read of them. Relabelled. You noted the row itself had gone stale.** |
+| A85 | **Migration 097 ran, so the survey saves. The response count under the Feedback title is the proof.** |
 | A72 | **Engagement: Refresh was an unstyled browser button, the Exercises chart drew three of five names, and the downloads caveat sat outside its tile.** The funnel and acquisition lines are your R9 spec and stayed. |
 | A92 | **The package tiles stay as they are.** Your call: clicking one centres it, and the Add to cart button is unchanged. |
 | A96 | **Expectations has a High level block**: alignment across categories, then one per category. The agreement rule now lives in one module both admin endpoints call. |
