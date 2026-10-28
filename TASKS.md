@@ -41,9 +41,8 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| V3 | **The two-surface comparison, and my answer on whether to build it.** The broad version, rendering the same couple on both surfaces and diffing the words, would be flaky by construction: two layouts never produce the same text and the normaliser that fixed it would prove nothing. The sharp version is worth it and is what I am building: the app's results screen, driven through its web build, asserting it draws no number the server did not send. |
+**Nothing open.** Everything from your last message is built, and V3 is
+answered in section 3 rather than built, with the measurement that answers it.
 
 ## 3. For you to review
 
@@ -52,6 +51,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| V3 | **I did not build the two-surface comparison, and here is the measurement that says not to.** Rendering both and diffing the words would be flaky by construction: two layouts never produce the same text. The question underneath is whether the app can disagree about a NUMBER, so I counted: 143 figures are drawn in the app's results screens, 140 are read straight off the payload or formatted, and the nine flagged are positions, clamps and list numbering. The app works nothing out, so there is nothing for a render diff to catch. The one real find: it clamps a percentage to 0-100 before printing, so a value outside that would print differently on the two surfaces. Nothing the server makes today is outside it. |
 | A142 | **The add-on chart you approved was drawn by a different function.** Two renderers pointed at that one canvas and whichever ran last won, so my edit went into the loser; the gate was matching the variable name in the copy nobody drew. One renderer now, your order and colours on it, and the gate matches on content so a renamed copy cannot hide. A sweep over every canvas in the admin found no others. |
 | A141 | **The "undefined" legend was mine, from the colour fix an hour earlier.** It called Chart.js's default label builder for every chart, and a doughnut's legend is one entry per slice built by its own override, so the package mix doughnut got one entry named after its dataset. |
 | A143 | **Expectations modeled on experience: the outcome is the x axis now**, one colour per category, and Not classified is out of the bars and into the subtitle with its count. |

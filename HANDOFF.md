@@ -4119,3 +4119,48 @@ missing (Couple type x outcomes drew its empty state), `dataQuality` was
 missing (five em dashes), and conflict answers existed only for even `i` while
 the option index was `i`, so one side of every two-option conflict question
 was never stored.
+
+## 2026-10-27, seventh round: her eighteen, and V3 answered rather than built
+
+**The one that matters most is A142**, because it is about trust rather than
+about a chart. She approved a reorder and a recolour of the add-on chart that
+never reached her screen: two renderers were pointed at `chart-pkg-addons`,
+mkChart destroys whatever is on a canvas first, so whichever ran last won, and
+the edit had gone into the loser. `check-admin-addon-list` passed throughout
+because it matched `const addons = [` and the live copy is spelled
+`const ADD=[`.
+
+That is the second time in a week a repair has landed in a dead copy by hand.
+Two things came out of it: the gate matches on CONTENT now (a run of add-on
+names with their capitalised labels, wherever it is and whatever it is
+called), and `sweep-two-renderers.mjs` asks the general question — every
+canvas in the admin, against how many places draw it. No others.
+
+**A140, the expectations alignment rule, was wrong and she said so.** It
+averaged a distance across forty-odd items and cut it at 0.2, a threshold that
+means something between two answers to one question. Everybody fell the wrong
+side and the aligned tile was empty. Her rule — under half aligned in two or
+more categories — is a different and better measure, and the per-category
+percentages come from the same function the Explore cuts use.
+
+**V3 is answered, not built.** `sweep-app-numbers.mjs` counts every expression
+the app's results screens draw inside a Text: 143, of which 140 are read off
+the payload or formatted, and the nine flagged are positions, clamps and list
+numbering. The app works nothing out, so a render diff between the two
+surfaces would be measuring something that cannot differ. One real find, small:
+highlight-cards clamps a percentage to 0..100 before printing it, so a payload
+value outside that range would print differently on the two surfaces.
+
+**Two gates had to be corrected rather than satisfied.** check-survey required
+`svCode(`, the manual theme box she asked to have removed: it was protecting
+the right rule by naming the wrong mechanism, and now checks that the endpoint
+reads a theme out of each answer. check-engagement-honesty kept an allowlist
+of spellings for "a measure", so a new renderer passing `detailed[chosen]`
+failed it; it matches the bug now — a literal `null` — rather than the right
+answer.
+
+**And A159's first version reset the sort order.** Every control on the
+Testimonials page wears the slicer class, and clearing a sort sets a value none
+of its options has, so the dropdown drew blank. A cut always offers a way out
+of itself and a sort does not; that test is in the markup rather than in a list
+of ids.
