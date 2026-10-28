@@ -820,14 +820,14 @@ const server = createServer((req, res) => {
     });
     const headline = (value, prev) => ({ available: true, value, prev, change: prev > 0 ? Math.round(((value - prev) / prev) * 100) : null });
     const unavailable = (why) => ({ available: false, why });
-    const clustered = (labels, seedSite, seedApp) => ({
+    const clustered = (labels, seedSite, seedApp, salt = 0) => ({
       available: true, labels,
-      site: labels.map((_, i) => seedSite ? Math.round(40 + ((i * 37) % 160)) : 0),
-      app: labels.map((_, i) => seedApp ? Math.round(30 + ((i * 53) % 220)) : 0),
+      site: labels.map((_, i) => seedSite ? Math.round(40 + (((i + salt) * 37) % 160)) : 0),
+      app: labels.map((_, i) => seedApp ? Math.round(30 + (((i + salt) * 53) % 220)) : 0),
       n: labels.length * 6,
       rows: labels.map((label, i) => ({ key: 'k' + i, label,
-        site: { seconds: seedSite ? Math.round(40 + ((i * 37) % 160)) : 0, n: seedSite ? 6 : 0 },
-        app: { seconds: seedApp ? Math.round(30 + ((i * 53) % 220)) : 0, n: seedApp ? 6 : 0 },
+        site: { seconds: seedSite ? Math.round(40 + (((i + salt) * 37) % 160)) : 0, n: seedSite ? 6 : 0 },
+        app: { seconds: seedApp ? Math.round(30 + (((i + salt) * 53) % 220)) : 0, n: seedApp ? 6 : 0 },
         unknown: { seconds: 0, n: 0 } })),
     });
     const groups = [
@@ -874,7 +874,20 @@ const server = createServer((req, res) => {
         exercises: clustered(['Communication', 'Expectations', 'Reflection', 'Physical Intimacy', 'Conflict'], true, true),
         resources: clustered(['Workbook', 'Budget', 'Checklist'], true, true),
         results: clustered(groups.map((g) => g.label), true, true),
-        detailed: Object.fromEntries(groups.filter((g) => g.pages > 1).map((g) => [g.id, clustered(['Overview', 'Detail A', 'Detail B'], false, true)])),
+        /* ── EACH GROUP ITS OWN NUMBERS ──────────────────────────────────
+         Every group got the same clustered() call, so the detailed tile drew
+         identical data whichever pill was on. A probe asking "did tapping a
+         pill change this chart" then answered no for the chart that is
+         supposed to change, and could not have told a working pill from a
+         dead one. The page names differ too, because a group's pages are not
+         called Detail A anywhere in the product. */
+      detailed: Object.fromEntries(groups.filter((g) => g.pages > 1).map((g, gi) => [
+        g.id,
+        clustered(
+          Array.from({ length: Math.min(4, g.pages) }, (_, i) => `${g.label} ${i + 1}`),
+          false, true, gi + 1,
+        ),
+      ])),
       },
       learning: { available: false, why: 'Not enough reads yet.' },
       groups, queryErrors: [],
@@ -1556,6 +1569,96 @@ if (process.env.NAMES) {
   console.log('  names ' + (name || PAGE) + ': ' + out.total + ' visible controls, ' + out.n + ' with no name'
     + (out.n ? ': ' + out.bad.join(', ') : ''));
   }
+}
+
+/* ── PILLPROBE= ────────────────────────────────────────────────────────────
+   Does tapping a pill change any chart but its own? Ellie has reported this
+   twice, and the first fix was real and was not the cause. Reads every chart
+   on the page as a fingerprint of its data, taps the second pill, and reads
+   them all again. */
+if (process.env.PILLPROBE) {
+  const snap = () => page.evaluate(() => {
+    const out = {};
+    for (const c of document.querySelectorAll('.page.active canvas')) {
+      const ch = window.Chart && Chart.getChart(c);
+      if (!ch) continue;
+      /* The instance id as well as the data. mkChart destroys the old chart
+         and builds a new one, so a tile that is redrawn with identical
+         numbers still gets a new id. That redraw, with its animation, is
+         what "the others are changing" looked like; data alone could not
+         see it. */
+      out[c.id] = ch.id + ':' + JSON.stringify((ch.data.datasets || []).map((d) => d.data));
+    }
+    return out;
+  });
+  const before = await snap();
+  const tapped = await page.evaluate(() => {
+    const pills = [...document.querySelectorAll('#eng-det-pills [data-pick]')];
+    const next = pills.find((p) => !p.classList.contains('on'));
+    if (!next) return null;
+    next.click();
+    return next.getAttribute('data-pick');
+  });
+  await new Promise((r) => setTimeout(r, 1200));
+  const after = await snap();
+  const changed = Object.keys(before).filter((k) => before[k] !== after[k]);
+  console.log('  pillprobe ' + JSON.stringify({ tapped, charts: Object.keys(before).length, changed }));
+}
+
+/* ── RESETPROBE= ───────────────────────────────────────────────────────────
+   Does a cut survive leaving the page and coming back? Ellie's words: very
+   important. Sets the first derived cut on a named slicer, navigates away,
+   navigates back, and reports what the slicer holds. */
+if (process.env.RESETPROBE) {
+  const [selId, other] = process.env.RESETPROBE.split(':');
+  /* The TILE, not just the dropdown. A reset that sets `.value` and does not
+     tell the tile leaves the control saying Everyone over a chart still
+     showing a cut, and reading the select alone cannot see that: the first
+     version of this probe passed a plant that removed the change event. */
+  const tileOf = (id) => page.evaluate((selId2) => {
+    const sel = document.getElementById(selId2);
+    const card = sel && sel.closest('.chart-card');
+    const canvas = card && card.querySelector('canvas');
+    const ch = canvas && window.Chart && Chart.getChart(canvas);
+    const sub = card && card.querySelector('.chart-subtitle');
+    return {
+      data: ch ? JSON.stringify((ch.data.datasets || []).map((d) => d.data)) : null,
+      sub: sub ? (sub.textContent || '').trim() : null,
+    };
+  }, id);
+  const uncut = await tileOf(selId);
+  const before = await page.evaluate((id) => {
+    const sel = document.getElementById(id);
+    if (!sel) return { err: 'no such slicer' };
+    const pick = [...sel.options].find((o) => o.value);
+    if (!pick) return { err: 'that slicer offers nothing' };
+    sel.value = pick.value;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    return { set: pick.value, label: (pick.textContent || '').trim().slice(0, 50) };
+  }, selId);
+  await new Promise((r) => setTimeout(r, 800));
+  const go = async (name) => {
+    await page.evaluate((id) => {
+      const el = [...document.querySelectorAll('.sb-item[onclick]')]
+        .find((a) => (a.getAttribute('onclick') || '').includes("showPage('" + id + "')"));
+      if (el) el.click();
+    }, name);
+    await new Promise((r) => setTimeout(r, 1200));
+  };
+  await go(other);
+  await go(PAGE);
+  const after = await page.evaluate((id) => {
+    const sel = document.getElementById(id);
+    if (!sel) return { err: 'the slicer is gone' };
+    const btn = sel.closest('.sd') && sel.closest('.sd').querySelector('.sd-btn-text');
+    return { value: sel.value, button: btn ? (btn.textContent || '').trim().slice(0, 50) : null };
+  }, selId);
+  const tileBack = await tileOf(selId);
+  console.log('  resetprobe ' + JSON.stringify({
+    ...before, after,
+    tileSame: uncut.data != null && tileBack.data === uncut.data,
+    uncutSub: uncut.sub, backSub: tileBack.sub,
+  }));
 }
 
 /* ── TREEAUDIT= ────────────────────────────────────────────────────────────

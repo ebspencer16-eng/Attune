@@ -28,6 +28,7 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 | `sweep-her-edits.mjs` | prose shapes Ellie has already rewritten once | eleven, in TASKS.md under W79 |
 | `sweep-nested-components.mjs` | a React component declared inside another | one holding state, fixed and now gated |
 | `sweep-swallowed-errors.mjs` | a catch that discards the error and says nothing | one cron reporting success after a failed read |
+| `sweep-two-renderers.mjs` | every canvas in the admin, against how many places draw it | one: two functions drew the add-on chart, and the edit Ellie approved went into the loser. Wrong twice first: counting the `<canvas>` markup as a renderer reported 38 of 48, and treating an indented `const x = (` as a function split one renderer into three |
 | `sweep-alignment-change.mjs` | both alignment rules over every real couple's stored answers | 19 rows the old rule called aligned that are not; every score that fell had been a 100 |
 | `sweep-alignment-floor.mjs` | whether the new measure can still score low, over every pair of answers two people can give | floor reachable: opposite couples read 0 everywhere; the one generous branch fires on no real row |
 | `sweep-uncleared-timers.mjs` | every timer and listener started in an effect | nothing, after it learned that an effect's implicit return IS the cleanup |

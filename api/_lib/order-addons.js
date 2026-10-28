@@ -50,6 +50,32 @@ import { bundledAddons } from './beta-codes.js';
  */
 export const ORDER_ADDONS = ['workbook', 'reflection', 'budget', 'checklist', 'intimacy', 'conflict'];
 
+/**
+ * The order Ellie reads them in, and the only place that order is written.
+ *
+ * ── WHY IT IS SEPARATE FROM ORDER_ADDONS ──────────────────────────────────
+ * That list is what an order can carry, in the order it grew. This is the
+ * order a person reads: "Reorder add-on category list, should be Reflection,
+ * Intimacy, Conflict, Workbook, Budget, Checklist." The three exercises, then
+ * the three resources, which is also what the colours say.
+ *
+ * ── WHY IT IS HERE AT ALL ─────────────────────────────────────────────────
+ * public/admin.html is static and cannot import, so its chart keeps a copy.
+ * It kept two, and the one a gate was watching was not the one being drawn:
+ * she approved a reorder that never reached her screen. The gate holds the
+ * admin to THIS, and fails on a second copy.
+ */
+export const ADDON_DISPLAY_ORDER = ['reflection', 'intimacy', 'conflict', 'workbook', 'budget', 'checklist'];
+
+/* Both lists are about the same six things, so a name added to one and not
+   the other is a mistake rather than a choice. */
+for (const a of ADDON_DISPLAY_ORDER) {
+  if (!ORDER_ADDONS.includes(a)) throw new Error(`ADDON_DISPLAY_ORDER names "${a}", which is not an add-on.`);
+}
+for (const a of ORDER_ADDONS) {
+  if (!ADDON_DISPLAY_ORDER.includes(a)) throw new Error(`ADDON_DISPLAY_ORDER has no place for "${a}".`);
+}
+
 /** `hasChecklist` → `checklist`. The join between PKG_CAPS and the names above. */
 function capName(key) {
   if (!key.startsWith('has')) return null;

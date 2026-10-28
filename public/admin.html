@@ -3133,7 +3133,23 @@ function drawTimePerPage() {
         + QX_ESC(g.label) + '</button>';
     }).join('');
     pills.querySelectorAll('[data-pick]').forEach(function (b) {
-      b.onclick = function () { window.__engDetPick = b.getAttribute('data-pick'); drawTimePerPage(); };
+      /* ── THE PILL DRAWS ITS OWN TILE AND NOTHING ELSE ─────────────────
+         Ellie, twice: "tapping a different pill in detailed results pages
+         chart is changing the others. That shouldn't happen."
+
+         The first fix was the shared ceiling, which was real and was not
+         this: the handler called drawTimePerPage, and that function draws
+         all five charts. Every one of them was destroyed and rebuilt, with
+         its animation, on every pill tap. The numbers were right and the
+         page moved, which is what she was seeing.
+
+         So the pill redraws the pills and the detailed tile. Nothing else is
+         touched, which is the thing she asked for rather than a smaller
+         version of it. */
+      b.onclick = function () {
+        window.__engDetPick = b.getAttribute('data-pick');
+        drawDetailedOnly();
+      };
     });
   }
   const detailed = (tp('det').detailed || {})[chosen];
@@ -3196,6 +3212,45 @@ function drawTimePerPage() {
   clustered('chart-eng-res', 'eng-res-n', t.resources, 'Mean seconds');
   clustered('chart-eng-rs', 'eng-rs-n', t.results, 'Mean seconds');
   clustered('chart-eng-det', 'eng-det-n', detailed, 'Mean seconds');
+}
+
+/**
+ * The detailed tile on its own, and the pills above it.
+ *
+ * Same two lines drawTimePerPage uses for that tile, called from one place
+ * rather than copied: a second way to draw one chart is a second answer to
+ * what it shows, and this file has paid for that twice this week.
+ */
+function drawDetailedOnly() {
+  const base = engFor('mk');
+  if (!base) return;
+  const groups = (base.groups || []).filter(function (g) { return g.pages > 1; });
+  const chosen = window.__engDetPick || (groups[0] && groups[0].id);
+  const pills = document.getElementById('eng-det-pills');
+  if (pills) {
+    pills.querySelectorAll('[data-pick]').forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-pick') === chosen);
+    });
+  }
+  const detailed = ((engFor('det') || {}).timePerPage || {}).detailed || {};
+  drawTimeTile('chart-eng-det', 'eng-det-n', detailed[chosen], 'seconds', function (v) {
+    return {
+      subtitle: 'Mean seconds' + (v.n ? (' \u00b7 n=' + v.n) : ' \u00b7 nothing timed yet'),
+      labels: v.labels,
+      data: v.site,
+      firstLabel: 'Web',
+      second: { label: 'App', data: v.app, colour: '#E8673A' },
+      colour: '#5C6DDA',
+      axis: 'seconds',
+      max: (function () {
+        let max = 0;
+        const c = detailed[chosen];
+        if (!c || c.available === false) return undefined;
+        (c.site || []).concat(c.app || []).forEach(function (x) { if (x > max) max = x; });
+        return max > 0 ? Math.ceil(max * 1.1) : undefined;
+      })(),
+    };
+  });
 }
 
 /** The two tables and the two note charts. */
@@ -4150,6 +4205,38 @@ async function postUnpublish() {
   await postsLoad();
 }
 
+/**
+ * ── EVERY SLICER GOES BACK TO EVERYONE WHEN A PAGE OPENS ──────────────────
+ * Ellie: "VERY important to me that slices reset when you navigate out of a
+ * page to a different one. Every time you open a page the slices should be
+ * reset to everyone."
+ *
+ * On ARRIVAL rather than on the way out, for the reason the Responses tab
+ * reset already gives: leaving has no single handler, and a page that resets
+ * on arrival is indistinguishable from one that reset on the way out.
+ *
+ * Only the ones that are actually cutting something are touched, and each one
+ * is given a real `change` so the tile it belongs to redraws through its own
+ * handler. Setting `.value` alone would leave a dropdown saying Everyone over
+ * a chart still showing a cut, which is worse than not resetting at all.
+ */
+function resetSlicersOn(pageId) {
+  const page = document.getElementById('page-' + pageId);
+  if (!page) return 0;
+  /* The hidden selects behind the drill-downs, and any plain one left. */
+  const sels = [...page.querySelectorAll('select.tile-slicer, .sd select, select.filter-select')];
+  let n = 0;
+  for (const sel of sels) {
+    if (!sel.value) continue;
+    sel.value = '';
+    sel.classList.remove('on');
+    if (sel.__sdLabel) sel.__sdLabel();
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    n += 1;
+  }
+  return n;
+}
+
 function showPage(id) {
   const pageEl = document.getElementById('page-'+id);
   if (!pageEl) return; // unknown id (e.g. stale hash) — ignore
@@ -4166,6 +4253,9 @@ function showPage(id) {
   if (navEl) navEl.classList.add('active');
   // Remember where we are so a refresh lands here, not back on the dashboard.
   try { if (('#'+id) !== location.hash) history.replaceState(null, '', '#'+id); } catch {}
+  /* Her reset, before anything draws, so a tile that is about to re-render
+     reads Everyone rather than redrawing its old cut and being reset after. */
+  resetSlicersOn(id);
   // Lazy-init charts
   if (!chartsInit[id]) { chartsInit[id]=true; initCharts(id); }
   // Demographics charts depend on async data; redraw on every open so they
@@ -5717,55 +5807,13 @@ async function loadRealResponses() {
   }
 }
 
-// Add-on attachment by package, moved here from Promo Analytics. Share of each
-// package's orders that include each add-on. Reads the global ORDERS set.
-let __pkgAddonChart = null;
-function renderAddonAttachment() {
-  const canvas = document.getElementById('chart-pkg-addons');
-  if (!canvas || typeof Chart === 'undefined') return;
-  const pkgs = ['core', 'newlywed', 'anniversary', 'premium'];
-  const pkgLabels = { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' };
-  /* ── ALL SIX, IN HER ORDER, AND COLOURED BY WHAT THEY ARE ─────────────
-     Ellie: "Reorder add-on category list, should be Reflection, Intimacy,
-     Conflict, Workbook, Budget, Checklist." And: "Make the 3 exercise columns
-     in the add-on attachment chart hues of blue/indigo and make the 3
-     resources different colors."
+/* A second renderer for the attachment chart stood here, and so did the bug.
+   It drew the SAME canvas as the addons branch of renderOrderChart, from the
+   global ORDERS rather than from the cube, and with no slicer. Whichever ran
+   last won, which was the other one, so a reorder and a recolour Ellie
+   approved never reached her screen: the gate was watching this copy and the
+   page was drawing that one. One renderer now, the one with the slicer. */
 
-     Her order is the three exercises and then the three resources, which is
-     what the colours now say as well. Two of the six were missing entirely:
-     Conflict Patterns is a $40 exercise and the Merging Lives Checklist is a
-     resource, and neither appeared in a chart about which add-ons attach to
-     which package. api/_lib/order-addons.js has listed all six the whole
-     time; this was a hand-typed four beside it. */
-  const addons = [
-    { key: o => !!o.addon_reflection, label: 'Reflection', color: '#2E3FA8' },
-    { key: o => !!o.addon_intimacy,   label: 'Intimacy',   color: '#5C6DDA' },
-    { key: o => !!o.addon_conflict,   label: 'Conflict',   color: '#8E9BEA' },
-    { key: o => !!o.addon_workbook,   label: 'Workbook',   color: '#C55329' },
-    { key: o => !!o.addon_budget,     label: 'Budget',     color: '#E5578C' },
-    { key: o => !!o.addon_checklist,  label: 'Checklist',  color: '#34D399' },
-  ];
-  const src = (typeof ORDERS !== 'undefined' ? ORDERS : []);
-  const byPkg = {}; pkgs.forEach(k => { byPkg[k] = src.filter(o => (o._raw?.pkg_key || o.pkgKey) === k); });
-  const present = pkgs.filter(k => byPkg[k].length > 0);
-  __pkgAddonChart = mkChart(canvas, {
-    type: 'bar',
-    data: {
-      labels: present.length ? present.map(k => pkgLabels[k]) : ['No orders yet'],
-      datasets: addons.map(a => ({
-        label: a.label, backgroundColor: a.color, borderRadius: 4,
-        data: present.length ? present.map(k => Math.round(byPkg[k].filter(a.key).length / byPkg[k].length * 100)) : [0],
-      })),
-    },
-    // Compact one-row legend: small swatch + small font keeps four items inline.
-    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, padding: 10, font: { size: 10 } } } }, scales: { y: { grid: { color: '#E6ECF6' }, ticks: { callback: v => v + '%' }, max: 100 }, x: { grid: { display: false } } } },
-  });
-}
-
-// Real package-mix trend: groups orders by pkg_key + month, produces a
-// 12-month stacked dataset (1 series per package). Replaces the static
-// `pkgTrendStacked` so the /packages page chart renders real data.
-// Also rebuilds `pkgMix` (the donut) from the full order set.
 async function loadRealPackageTrend(orders) {
   if (!orders || orders.length === 0) {
     pkgTrendStacked = null; // no orders: the chart draws twelve zeroes
@@ -5827,7 +5875,6 @@ async function loadRealPackageTrend(orders) {
     chartsInit.packages = false;
     if (document.getElementById('page-packages')?.classList.contains('active')) initCharts('packages');
   }
-  renderAddonAttachment();
   // Overview donut also depends on pkgMix
   if (chartsInit.overview) {
     chartsInit.overview = false;
@@ -8017,7 +8064,18 @@ async function renderOrderChart(opts){
        given rather than deciding again, because deciding again here is how the
        two answers drift. */
     const PK=[['core','Assessment'],['newlywed','Starting Out'],['anniversary','Anniversary'],['premium','Premium']];
-    const ADD=[['workbook','Workbook','#5C6DDA'],['reflection','Reflection','#F4B860'],['budget','Budget','#E36BAE'],['checklist','Checklist','#34D399'],['intimacy','Intimacy','#B5546E'],['conflict','Conflict','#C55329']];
+    /* ── HER ORDER, AND THE COLOURS THAT SAY WHY ────────────────────────
+       Ellie: "Reorder add-on category list, should be Reflection, Intimacy,
+       Conflict, Workbook, Budget, Checklist", and "make the 3 exercise
+       columns hues of blue/indigo and make the 3 resources different colors."
+
+       She approved that once already and it never reached her screen: the
+       edit went into a SECOND renderer pointed at this same canvas, and
+       whichever drew last won. That one is gone and this is the only one.
+       The order is ADDON_DISPLAY_ORDER in api/_lib/order-addons.js, which
+       check-admin-addon-list holds this list to, because a static page
+       cannot import it. */
+    const ADD=[['reflection','Reflection','#2E3FA8'],['intimacy','Intimacy','#5C6DDA'],['conflict','Conflict','#8E9BEA'],['workbook','Workbook','#C55329'],['budget','Budget','#E5578C'],['checklist','Checklist','#34D399']];
     const byPkg={}; PK.forEach(p=>byPkg[p[0]]=orders.filter(o=>o.order_pkg===p[0]));
     const present=PK.filter(p=>byPkg[p[0]].length);
     /* An older cube has no `addons` on its rows. Falling back to the columns
@@ -9027,7 +9085,27 @@ function mkChart(el, cfg) {
   o.interaction = Object.assign({ mode: 'index', intersect: false, axis: 'x' }, o.interaction);
   o.hover = Object.assign({ animationDuration: 0 }, o.hover);
   o.plugins = o.plugins || {};
-  o.plugins.tooltip = Object.assign({ animation: false, position: 'nearest' }, o.plugins.tooltip);
+  /* ── A HOVER OVER BLANK SPACE SAYS NOTHING ──────────────────────────────
+     Ellie: "Hovering should only show something if I'm over a populated bar.
+     If I'm passing a blank space it shouldn't give me the empty data."
+
+     The hover deliberately triggers anywhere in a column rather than on the
+     bar itself, which is what makes a one-pixel bar reachable. The cost was
+     that a column with nothing in it still answered, with a zero. Filtering
+     the empty entries out keeps the easy hover and drops the empty answer;
+     when every entry in a column is empty, Chart.js draws no tooltip at all,
+     which is the behaviour she is asking for.
+
+     A tile that sets its own filter keeps it. */
+  o.plugins.tooltip = Object.assign({
+    animation: false, position: 'nearest',
+    filter: (item) => {
+      const p = item && item.parsed;
+      if (p == null) return true;
+      const v = (typeof p === 'number') ? p : (item.chart.options.indexAxis === 'y' ? p.x : p.y);
+      return v != null && v !== 0;
+    },
+  }, o.plugins.tooltip);
 
   /* ── NO VALUE AXIS, NO GRIDLINES, ANYWHERE ─────────────────────────────
      Ellie: "I like the view of 'what lands best from a partner' with no y
@@ -9098,8 +9176,22 @@ function mkChart(el, cfg) {
          marker's default size, which is a dot. */
       usePointStyle: true, pointStyle: 'line', pointStyleWidth: 22, boxWidth: 22, boxHeight: 2, padding: 10, font: { size: 10 },
       generateLabels(chart) {
-        const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
         const chartType = chart.config && chart.config.type;
+        /* ── EACH KIND OF CHART HAS ITS OWN LIST ─────────────────────────
+           The first version of this called the DEFAULT generateLabels for
+           everything, which builds one item per dataset. A doughnut's legend
+           is one item per SLICE, built by an override on the controller, so
+           calling the default gave a doughnut one entry labelled with its
+           dataset's name: "undefined". Ellie saw it on the dashboard within
+           the hour.
+
+           Taking the chart's own list and then recolouring it keeps this a
+           colour fix rather than a legend of our own. */
+        const own = Chart.overrides && Chart.overrides[chartType]
+          && Chart.overrides[chartType].plugins && Chart.overrides[chartType].plugins.legend
+          && Chart.overrides[chartType].plugins.legend.labels
+          && Chart.overrides[chartType].plugins.legend.labels.generateLabels;
+        const items = (own || Chart.defaults.plugins.legend.labels.generateLabels).call(this, chart);
         items.forEach((it) => {
           const ds = (chart.data.datasets || [])[it.datasetIndex] || {};
           const type = ds.type || chartType;
