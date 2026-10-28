@@ -24,9 +24,19 @@ Every code block says which window it goes in, above the block.
 
 ### One thing to run, for A164
 
-**This goes in the Supabase SQL Editor, not Terminal.** Copy the whole block,
-paste it there, find `REPLACE_WITH_THEIR_EMAIL` in it, which appears once, put
-either of their email addresses there, and run it. It reads only; it writes nothing.
+**Step 1 goes in Terminal.** It puts the query on your clipboard, so you do not
+have to find or select anything. It prints `copied` and nothing else.
+
+```bash
+cd /Users/Ellie/Projects/unison && sed -n '/^with asked/,$p' supabase/diagnostics/results-will-not-open.sql | pbcopy && echo copied
+```
+
+**Step 2 goes in the Supabase SQL Editor, not Terminal.** Paste, then find
+`REPLACE_WITH_THEIR_EMAIL`, which appears once, put either of their email
+addresses there, and run it. It reads only; it writes nothing.
+
+The same query is printed in full below, so this document still holds
+everything you need if the clipboard step goes wrong.
 
 You get one row per person. The column to read is **`verdict`**, which says in
 words what is wrong; `exercises` beside it shows the five exercises and where
