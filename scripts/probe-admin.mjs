@@ -280,8 +280,28 @@ for (let i = 0; i < 40; i++) {
   const { withdrawScore, openScore } = axisScores(scores);
   const type = typeCodeFromAxes(withdrawScore, openScore);
 
+  /**
+   * ── TWO PEOPLE WITH NOBODY LINKED ───────────────────────────────────────
+   * Every row here used to have a couple, so three paths never ran: the
+   * funnel's `solo` count, the cube's unpaired reading, and a cut that keeps
+   * PEOPLE but no COUPLES. The last of those is a real case - the panel
+   * offers a value as soon as one person has it, and the response bundles
+   * count pairs - and it is the one that looks exactly like the bug Ellie
+   * reported if it is handled by putting the control back to Everyone.
+   *
+   * So the last pair is unpaired, and both of them are the only therapist
+   * referrals, which makes "Heard via - Therapist" a cut with two people and
+   * no couples in it.
+   */
+  const unpaired = i >= 38;
   const r = {
-    couple_id: 'c' + Math.floor(i / 2),
+    couple_id: unpaired ? null : 'c' + Math.floor(i / 2),
+    /* The per-person handle api/admin-explore.js mints with anonPersonId. The
+       Engagement page reads it off the row to say which people a cut keeps,
+       so a stub without it would send an empty list and report twelve working
+       slicers as dead. The value is opaque on both sides; what has to be true
+       is that this stub's engagement reply resolves the same handles. */
+    person: 'pp' + i,
     type,
     couple_type: pick(COUPLE_TYPES, Math.floor(i / 2)),
     axisEngage: type == null ? null : (type === 'W' || type === 'X' ? 'Engage' : 'Withdraw'),
@@ -292,7 +312,19 @@ for (let i = 0; i < 40; i++) {
     has_ex1: true,
     has_ex2: i % 3 !== 0,
     has_ex3: i % 4 === 0,
-    has_intimacy: i % 5 === 0,
+    /* ── A PERIOD THAT DOES NOT MATCH THE DEMOGRAPHICS ───────────────
+       This was `i % 5 === 0`, and `children` cycles through five values
+       starting at 'none', so every single intimacy responder had no
+       children. Cutting that tile by "No children" kept exactly the same
+       eight rows, the chart was byte-identical, and the probe reported a tile
+       that honours its slicer as one that ignores it.
+
+       Two moduli that share a factor is the same fixture fault as the
+       conflict answers landing only on even i with the option index also i,
+       and as the alignment group keyed on i%3 colliding with has_ex2. Seven
+       is coprime with the five demographic values, the four of has_ex3 and
+       the three of the alignment groups. */
+    has_intimacy: i % 7 === 1 || i % 7 === 4,
     pronouns: pronounLabel(pick(PRONOUNS, i)),
     /* Who raised them, so the new Growing up slicers have something to
        draw. Mixed on purpose: two-parent, single, grandparents and a
@@ -318,7 +350,11 @@ for (let i = 0; i < 40; i++) {
        here, so the regrouped "Children / No children" rows the slicer builds
        from 'none', '1', '2', '3+' matched nobody and never drew. */
     children: pick(['none', '1', '2', '3+', 'expecting'], i),
-    signup_source: pick(SOURCE, i),
+    /* An existing stored value, not an invented one: QX_VAL_LABELS and the
+       slicer's value order both name the four this product collects, and a
+       fifth would read as the raw key and might not be offered as a cut at
+       all. */
+    signup_source: unpaired ? 'therapist' : pick(SOURCE.slice(0, 3), i),
   };
   for (const dim of Object.keys(DIM_KEYS)) {
     r['dim_' + dim] = scores[dim] != null ? Number(Number(scores[dim]).toFixed(3)) : null;
@@ -432,6 +468,10 @@ for (let i = 0; i < 40; i++) {
    DRAWS what it is given. Whether the rule is right is check's job, not a
    picture's. */
 const { addonsOnOrder } = await import(`${ROOT}api/_lib/order-addons.js`);
+/* The segments both an order and a survey answer carry off their person, the
+   same set SEG_KEYS names in api/admin-explore.js. */
+const SURVEY_SEG_KEYS = ['pronouns', 'age_range', 'relationship_status', 'relationship_length',
+  'children', 'signup_source', 'type', 'axisEngage', 'axisOpen', 'couple_type', 'pkg'];
 const PKGS = ['core', 'newlywed', 'anniversary', 'premium'];
 const STUB_CODE = { includesIntimacy: true, includesBudget: true };
 const orders = [];
@@ -471,10 +511,24 @@ for (let i = 0; i < 48; i++) {
     /* Two orders per couple, which is the shape that matters here: the
        partner who paid carries the code and the other carries none. Without
        it withEffectivePromoCodes has nothing to join on and the stub would
-       claim the rule does nothing. */
-    couple_id: 'oc' + Math.floor(i / 2),
+       claim the rule does nothing. The couple is the BUYER's couple, so this
+       agrees with owner_row below rather than inventing a parallel set of
+       couples the rows know nothing about. */
+    couple_id: rows[i] ? rows[i].couple_id : null,
+    /* ── WHICH PERSON BOUGHT IT ────────────────────────────────────────
+       api/admin-explore.js sends the index of the buyer's cube row, and
+       every order-page slicer now cuts through it. There are 48 orders and
+       40 rows, so the last eight carry null, which is what an order the
+       profile join could not place looks like: those answer through their
+       own snapshot fields instead, and the chart stays honest about them. */
+    owner_row: rows[i] ? i : null,
     ...row,
     addons: addonsOnOrder(row, promo ? STUB_CODE : null),
+    /* The buyer's segments, copied onto the order the way the server copies
+       SEG_KEYS. This is what an unplaced order answers a cut with, and the
+       stub sent none of it, so the fallback branch in sliceJoined was
+       unreachable here. */
+    ...Object.fromEntries(SURVEY_SEG_KEYS.map((k) => [k, rows[i] && rows[i][k] != null ? rows[i][k] : null])),
   });
 }
 /* The real rule, not a restatement of it. api/admin-explore.js calls this
@@ -498,11 +552,16 @@ const _placed = placeAll(fields);
    reported neither. Built from the same question set the endpoint reads, and
    from the people already in this cube, so the segments on a survey row are
    the segments that person has everywhere else. */
-const SURVEY_SEG_KEYS = ['pronouns', 'age_range', 'relationship_status', 'relationship_length',
-  'children', 'signup_source', 'type', 'axisEngage', 'axisOpen', 'couple_type', 'pkg'];
-const surveys = rows.filter((_, i) => i % 3 !== 2).map((r, i) => {
+const surveys = rows.map((r, i) => [r, i]).filter(([, i]) => i % 3 !== 2).map(([r, ri], i) => {
   const row = {};
   for (const k of SURVEY_SEG_KEYS) row[k] = r[k] != null ? r[k] : null;
+  /* ── WHOSE ANSWER THIS IS ────────────────────────────────────────────
+     The index into `rows`, not into this filtered list. The first version
+     mapped with `.filter().map((r, i) => ...)`, where `i` counts the
+     survivors, so every row after the first dropped one would have claimed
+     the wrong person: a join that is off by one is worse than no join,
+     because every figure it produces is plausible. */
+  row.owner_row = ri;
   const when = new Date(Date.now() - (i * 5 + 2) * 86400000);
   row.month = when.toISOString().slice(0, 7);
   row.ts = when.toISOString();
@@ -820,32 +879,121 @@ const server = createServer((req, res) => {
       expCoupleDistances, alignedBand: 0.2, inheritance,
       reflectionCodes, conflictCodes, repairRank, intimacyStats,
     });
-    /* ── SEGMENTS THE SLICERS CAN ACTUALLY PICK ──────────────────────────
-       This was `{ '': responses }`, one key, so every cut fell back to the
-       whole population and the at-a-glance slicers looked wired and changed
-       nothing. A stub that cannot produce the case under test reports the
-       feature as working.
+    /* ── A CUT IS ASKED FOR, NOT PRE-COMPUTED ────────────────────────────
+       This stub used to carry a `responsesBySegment` map, one bundle per
+       value of a list of fields, because the endpoint did. Both lists were a
+       copy of which fields are sliceable, and the stub's was the shorter one
+       twice over: two fields against the endpoint's ten, so the eight tiles
+       that read these bundles offered eight cuts in the harness whatever the
+       product offered, and the thing Ellie reported was invisible here.
 
-       The keys are built from the rows the cube sends, in the same
-       `field::value` form populateSlicer puts in the options, so a value the
-       slicer offers is a value this answers to. The figures are shifted per
-       segment, by a fixed amount rather than at random, so a cut that does
-       nothing is visible as a number that did not move. */
-    const segBundles = {};
-    for (const dim of ['pronouns', 'relationship_status']) {
-      for (const v of [...new Set(rows.map((r) => r[dim]).filter(Boolean))]) {
-        const shift = (String(v).length % 7) - 3;
-        segBundles[dim + '::' + v] = {
-          ...responses,
-          pairs: Math.max(1, Math.round(responses.pairs / 3)),
-          intimacyStats: { ...responses.intimacyStats,
-            avgAlignment: responses.intimacyStats.avgAlignment + shift,
-            partnerInitiates: responses.intimacyStats.partnerInitiates + shift },
-          expCoupleDistances: (responses.expCoupleDistances || []).slice(0, 6),
-        };
-      }
+       api/admin-data.js now takes the couples a cut keeps and answers with
+       that bundle. The page works the list out from the cube's own rows, so
+       this has to answer the same question the same way: filter the rows by
+       the couple ids asked for, and shift the figures by how many couples
+       came back. A cut that changes nothing is then visible as a number that
+       did not move, which is what the probe is for.
+
+       `only=responses` is the one-bundle reply; without it the page has the
+       whole dashboard payload, as it does on first load. */
+    const wanted = (url.searchParams.get('couples') || '').split(',').filter(Boolean);
+    const unwanted = (url.searchParams.get('exclude') || '').split(',').filter(Boolean);
+    /* `empty=1` is the page saying the cut keeps nobody, which the endpoint
+       answers with the bundle over nobody. Without it here the harness would
+       answer such a cut with the whole population and the tile would look
+       uncut, which is the one case this parameter exists to tell apart. */
+    const cutEmpty = url.searchParams.get('empty') === '1';
+    let cutPairs = responses.pairs, shift = 0;
+    if (cutEmpty) { cutPairs = 0; shift = 0; }
+    else if (wanted.length || unwanted.length) {
+      const want = new Set(wanted), drop = new Set(unwanted);
+      const couples = [...new Set(rows.map((r) => r.couple_id).filter(Boolean))]
+        .filter((c) => (want.size ? want.has(c) : !drop.has(c)));
+      cutPairs = couples.length;
+      /* Deterministic, and derived from the cut rather than from a counter,
+         so the same cut gives the same figures on a redraw.
+         ── AND NEVER ZERO ────────────────────────────────────────────────
+         The first version was `(couples.length % 7) - 3`, which is 0 for a
+         cut of ten couples, and ten is what the probe's own cut comes to. So
+         four bundle-backed charts were handed figures identical to the whole
+         population's and reported as not moving on a click: the fixture
+         could not produce the case under test, for one value of one modulus.
+         The same shape as a stub whose Unknown bucket sat at an index it
+         never reached. */
+      shift = 1 + (couples.length % 5);
     }
-    res.end(JSON.stringify({ ok: true, orders, beta_codes, promoLink: { inherited: stubPromoLink.inherited, standalone: stubPromoLink.standalone }, responses, responsesBySegment: { '': responses, ...segBundles } }));
+    /* ── EVERY FIGURE A BUNDLE TILE DRAWS, MOVED ────────────────────────
+       The first version of this shifted `pairs` and the two intimacy numbers
+       and nothing else, so CLICKCUT reported the dimension chart, the
+       responsibilities chart, the big-questions chart and the relationship-
+       feel chart as not moving on a cut. All four read dimScores, expAlign,
+       lifeGaps and relationshipFeel, and those were byte-identical between
+       the cut and the whole: the measurement could not tell a tile that
+       honours its slicer from one that ignores it. Every array the shaper
+       reads is shifted now. */
+    const bump = (arr) => (Array.isArray(arr) ? arr.map((v) => (typeof v === 'number' ? Math.max(0, v + shift * 3) : v)) : arr);
+    /**
+     * Nobody at all, which is a different answer from a smaller group.
+     *
+     * The shift-based fake below moves every figure by a few points, and over
+     * an empty cut it would move them from 78 to 78 and the tile would print
+     * a percentage of nothing. api/admin-data.js runs its real aggregate over
+     * no profiles and the means come back null, so this says null too: the
+     * tiles have a dash for that and the harness should be able to show it.
+     */
+    if (cutEmpty && url.searchParams.get('only') === 'responses') {
+      res.end(JSON.stringify({
+        ok: true, demoFilterApplied: true, matched: 0, asked: null,
+        responses: {
+          ...responses,
+          pairs: 0,
+          dimScores: (responses.dimScores || []).map(() => null),
+          expAlign: (responses.expAlign || []).map(() => null),
+          relationshipFeel: (responses.relationshipFeel || []).map(() => 0),
+          lifeGaps: [], respAgreement: [], expCoupleDistances: [],
+          intimacyStats: { ...responses.intimacyStats,
+            avgAlignment: null, partnerInitiates: null, noveltyCloseness: null,
+            couples: 0, meanFor: {}, meanForPeople: 0 },
+        },
+      }));
+      return;
+    }
+    const cutResponses = (cutEmpty || wanted.length || unwanted.length) ? {
+      ...responses,
+      pairs: Math.max(0, cutPairs),
+      dimScores: bump(responses.dimScores),
+      expAlign: bump(responses.expAlign),
+      relationshipFeel: bump(responses.relationshipFeel),
+      lifeGaps: (responses.lifeGaps || []).map((g) => ({ ...g, pct: Math.max(0, g.pct + shift * 3) })),
+      respAgreement: (responses.respAgreement || []).map((g) => (
+        typeof g === 'object' && g && typeof g.pct === 'number' ? { ...g, pct: Math.max(0, g.pct + shift * 3) } : g
+      )),
+      /* `couples` and `meanForPeople` as well as the two percentages. The
+         Physical Intimacy at-a-glance tile prints `couples` as its n, and
+         without it the probe read "n=18" before and after a cut and reported
+         a tile that honours its slicer as one that ignores it. Every number
+         a tile prints, or the fixture cannot show the cut landing. */
+      intimacyStats: { ...responses.intimacyStats,
+        avgAlignment: responses.intimacyStats.avgAlignment + shift,
+        partnerInitiates: responses.intimacyStats.partnerInitiates + shift,
+        noveltyCloseness: responses.intimacyStats.noveltyCloseness + shift,
+        /* Allowed to reach nought, because that is what a cut with people and
+           no couples in it really answers and the tile has to be able to show
+           it. A floor of one here made the harness read "1 couple" where the
+           product reads none. */
+        couples: Math.round(responses.intimacyStats.couples * cutPairs / Math.max(1, responses.pairs)),
+        meanForPeople: Math.round(responses.intimacyStats.meanForPeople * cutPairs / Math.max(1, responses.pairs)) },
+      expCoupleDistances: (responses.expCoupleDistances || []).slice(0, cutPairs),
+    } : responses;
+    if (url.searchParams.get("only") === "responses") {
+      /* `demoFilterApplied` on the cut reply too, as the endpoint sends it:
+         the page routes this through noteDemoFilter like every other read,
+         and a reply without it raises the "figures may count demo accounts"
+         banner on the first slicer click. */
+      res.end(JSON.stringify({ ok: true, demoFilterApplied: true, responses: cutResponses, matched: cutPairs, asked: wanted.length || null }));
+      return;
+    }
+    res.end(JSON.stringify({ ok: true, orders, beta_codes, promoLink: { inherited: stubPromoLink.inherited, standalone: stubPromoLink.standalone }, responses: cutResponses }));
     return;
   }
   /* ── ENGAGEMENT ─────────────────────────────────────────────────────────
@@ -860,16 +1008,35 @@ const server = createServer((req, res) => {
       const d = new Date(); d.setMonth(d.getMonth() - (11 - i));
       return d.toLocaleDateString('en-US', { month: 'short' });
     });
-    const headline = (value, prev) => ({ available: true, value, prev, change: prev > 0 ? Math.round(((value - prev) / prev) * 100) : null });
+    /* ── THE CUT, HONOURED ──────────────────────────────────────────────
+       This stub sent `slice: null` and the same figures whatever was asked
+       for, so CLICKCUT reported every Engagement tile as not moving on a
+       click and could not tell a tile that honours its slicer from one that
+       ignores it. The endpoint's own cut is a list of person handles now, and
+       this resolves the same list against the stub's rows and scales every
+       figure by the share of people kept. A real cut on this page shows up as
+       smaller numbers, which is what the page is being asked to prove. */
+    const engKeep = (url.searchParams.get('people') || '').split(',').filter(Boolean);
+    const engDrop = (url.searchParams.get('exclude') || '').split(',').filter(Boolean);
+    let engPeople = rows.length;
+    if (engKeep.length || engDrop.length) {
+      const want = new Set(engKeep), drop = new Set(engDrop);
+      engPeople = rows.filter((r) => (want.size ? want.has(r.person) : !drop.has(r.person))).length;
+    }
+    /* Never 1 for a real cut and never 0, so "it moved" and "there is still
+       something to draw" are both testable. */
+    const engFrac = engPeople >= rows.length ? 1 : Math.max(0.1, engPeople / rows.length);
+    const cutN = (n) => Math.max(1, Math.round(n * engFrac));
+    const headline = (value, prev) => ({ available: true, value: cutN(value), prev: cutN(prev), change: prev > 0 ? Math.round(((value - prev) / prev) * 100) : null });
     const unavailable = (why) => ({ available: false, why });
     const clustered = (labels, seedSite, seedApp, salt = 0) => ({
       available: true, labels,
-      site: labels.map((_, i) => seedSite ? Math.round(40 + (((i + salt) * 37) % 160)) : 0),
-      app: labels.map((_, i) => seedApp ? Math.round(30 + (((i + salt) * 53) % 220)) : 0),
-      n: labels.length * 6,
+      site: labels.map((_, i) => seedSite ? cutN(40 + (((i + salt) * 37) % 160)) : 0),
+      app: labels.map((_, i) => seedApp ? cutN(30 + (((i + salt) * 53) % 220)) : 0),
+      n: cutN(labels.length * 6),
       rows: labels.map((label, i) => ({ key: 'k' + i, label,
-        site: { seconds: seedSite ? Math.round(40 + (((i + salt) * 37) % 160)) : 0, n: seedSite ? 6 : 0 },
-        app: { seconds: seedApp ? Math.round(30 + (((i + salt) * 53) % 220)) : 0, n: seedApp ? 6 : 0 },
+        site: { seconds: seedSite ? cutN(40 + (((i + salt) * 37) % 160)) : 0, n: seedSite ? cutN(6) : 0 },
+        app: { seconds: seedApp ? cutN(30 + (((i + salt) * 53) % 220)) : 0, n: seedApp ? cutN(6) : 0 },
         unknown: { seconds: 0, n: 0 } })),
     });
     const groups = [
@@ -883,7 +1050,9 @@ const server = createServer((req, res) => {
     res.end(JSON.stringify({
       ok: true, generatedAt: new Date().toISOString(), demoFilterApplied: true,
       window: { days: 30, from: new Date(Date.now() - 30 * 864e5).toISOString() },
-      slice: null,
+      slice: (engKeep.length || engDrop.length)
+        ? { asked: engKeep.length || null, people: engPeople }
+        : null,
       headlines: {
         siteVisits: { ...headline(412, 377), note: 'Visits, not unique visitors.' },
         appDownloads: unavailable('Only App Store Connect knows this, and the app is not in the store yet.'),
@@ -903,13 +1072,13 @@ const server = createServer((req, res) => {
          the renderers and from api/admin-engagement.js. */
       funnel: { available: true, months: MONTHS, note: 'Over 12 months · sign-ups counted twice, because a sign-up is one half of a couple.',
         series: [
-          { step: 'Visited', points: MONTHS.map((_, i) => 40 + ((i * 11) % 30)) },
-          { step: 'Signed up', points: MONTHS.map((_, i) => 14 + ((i * 7) % 12)) },
-          { step: 'Started', points: MONTHS.map((_, i) => 9 + ((i * 5) % 8)) },
-          { step: 'Finished', points: MONTHS.map((_, i) => 3 + ((i * 3) % 5)) },
+          { step: 'Visited', points: MONTHS.map((_, i) => cutN(40 + ((i * 11) % 30))) },
+          { step: 'Signed up', points: MONTHS.map((_, i) => cutN(14 + ((i * 7) % 12))) },
+          { step: 'Started', points: MONTHS.map((_, i) => cutN(9 + ((i * 5) % 8))) },
+          { step: 'Finished', points: MONTHS.map((_, i) => cutN(3 + ((i * 3) % 5))) },
         ] },
       acquisition: { available: true, months: MONTHS, note: 'Visits per month.',
-        visits: MONTHS.map((_, i) => 40 + ((i * 13) % 55)), downloads: null,
+        visits: MONTHS.map((_, i) => cutN(40 + ((i * 13) % 55))), downloads: null,
         downloadsNeeds: 'not collected. App Store Connect needs a key, and the app is not in the store yet.' },
       timePerPage: {
         marketing: clustered(['/home', '/offerings', '/practice', '/faq', '/purpose'], true, false),
@@ -933,7 +1102,7 @@ const server = createServer((req, res) => {
       },
       learning: { available: false, why: 'Not enough reads yet.' },
       groups, queryErrors: [],
-      rowsRead: { profiles: 40, notes: 12, tags: 7, articleReads: 38, events: 214 },
+      rowsRead: { profiles: engPeople, notes: cutN(12), tags: cutN(7), articleReads: cutN(38), events: cutN(214) },
     }));
     return;
   }
@@ -1056,6 +1225,13 @@ const server = createServer((req, res) => {
           children: r.children, age_range: r.age_range, pronouns: r.pronouns,
           signup_source: r.signup_source, pkg: r.pkg,
         },
+        /* ── WHICH COUPLE, SO THE TILE SLICERS CAN CUT AT ALL ──────────
+           api/admin-survey.js sends the cube's own anonymous couple key on
+           every response, and the Feedback page evaluates its cut against
+           the cube rather than against the seven demographic columns above.
+           A stub that left this off would answer every cut with nothing and
+           report eleven working slicers as dead. */
+        couple: r.couple_id || null,
         /* Coded by the real frame over the real answer, which is what the
            endpoint does. The stub used to hand-label one question "Money" on
            every fourth person, so the Testimonials category view drew one
@@ -1345,6 +1521,9 @@ const report = await page.evaluate(() => ({
       return `${el.tagName}.${(el.className || '').toString().split(' ')[0] || '-'} ${Math.round(r.width)}x${Math.round(r.height)} @${Math.round(r.top)}`;
     });
   })(),
+  /* The base bundle, which is the only one that arrives with the payload now.
+     Every cut is fetched when a slicer asks for it, so this is a check that
+     the payload shape still reaches the page rather than a list of cuts. */
   segDims: (window.__responsesBySeg && window.__responsesBySeg[''] && window.__responsesBySeg[''].dimScores) || null,
   visible: [...document.querySelectorAll('.page')]
     .filter((p) => getComputedStyle(p).display !== 'none').map((p) => p.id).join(',') || '(none)',
@@ -1356,7 +1535,7 @@ if (report.gated) {
   process.exit(1);
 }
 console.log(`page: ${PAGE} (${shown})  visible: ${report.visible}`);
-console.log('responsesBySeg keys: ' + JSON.stringify(report.seg) + '  dimScores: ' + JSON.stringify(report.segDims).slice(0,90));
+console.log('base response bundle keys: ' + JSON.stringify(report.seg) + '  dimScores: ' + JSON.stringify(report.segDims).slice(0,90));
 for (const g of report.geom) console.log('  geom ' + g);
 console.log('svp bars: ' + JSON.stringify(report.bars));
 console.log('charts: ' + report.charts.join('  '));
@@ -1437,6 +1616,36 @@ if (process.env.TAB) {
    itself: a screenshot of a closed select says nothing, and a native popup is
    painted outside the page. Prints the count and the values so two runs can
    be compared. */
+/* ── OPTSCAN= ──────────────────────────────────────────────────────────────
+   How many cuts every slicer in the admin offers, in one browser.
+
+   Ellie: "comp funnel only has a couple of slicer categories - it should have
+   way more. Be thorough and fix this throughout the site." A count per slicer
+   is the only way to tell which are narrow, and the top-level sections each
+   one offers is the quickest way to see WHY. */
+if (process.env.OPTSCAN) {
+  const pages = await page.evaluate(() => [...document.querySelectorAll('.sb-item[onclick]')]
+    .map((a) => (/showPage\('([^']+)'\)/.exec(a.getAttribute('onclick') || '') || [])[1]).filter(Boolean));
+  for (const name of pages) {
+    await page.evaluate((id) => {
+      const el = [...document.querySelectorAll('.sb-item[onclick]')]
+        .find((a) => (a.getAttribute('onclick') || '').includes("showPage('" + id + "')"));
+      if (el) el.click();
+    }, name);
+    await new Promise((r) => setTimeout(r, 1400));
+    const rows = await page.evaluate(() => [...document.querySelectorAll('.page.active .sd select')].map((sel) => {
+      const leaves = (nodes) => (nodes || []).reduce((n, x) => n + (x.children ? leaves(x.children) : 1), 0);
+      const tree = sel.__sliceTree || [];
+      return {
+        id: sel.id,
+        cuts: leaves(tree),
+        sections: tree.filter((n) => n.children).map((n) => n.label).join(' | ') || '(flat)',
+      };
+    }));
+    for (const r of rows) console.log(`  optscan ${name}/${r.id}  ${String(r.cuts).padStart(4)} cuts   ${r.sections}`);
+  }
+}
+
 if (process.env.OPTS) {
   const ids = process.env.OPTS.split(',').map((x) => x.trim()).filter(Boolean);
   if (process.env.OPTS_ALL) await page.evaluate(() => { window.__optsAll = true; });
@@ -1831,12 +2040,94 @@ if (process.env.CLICKCUT) {
       value: sel.value,
       button: btn ? (btn.textContent || '').trim() : null,
       options: sel.options.length,
-      data: ch ? JSON.stringify((ch.data.datasets || []).map((d) => d.data)) : null,
+      /**
+       * What the tile is SHOWING, whichever kind of tile it is.
+       *
+       * A chart's datasets when there is a chart. When there is not, the
+       * numbers printed on the card: four at-a-glance tiles on the Responses
+       * page are figures rather than charts, and this read null for them and
+       * reported "no chart", so a cut landing on one of those was invisible.
+       * Two of them drew four dashes on every cut for a while and nothing
+       * here could see it.
+       *
+       * Digits only, so a caption that happens to name the cut does not read
+       * as the figure moving.
+       */
+      /**
+       * ── THE BODY, NOT THE WHOLE CARD ──────────────────────────────────
+       * The first version scraped `card.textContent`, and the card's head
+       * holds the slicer: after a click the button reads "Demographics - Age
+       * - 18-24", which has digits in it. So five tiles whose figures had not
+       * moved an inch reported moved=true, and a plant that made the server
+       * accept a cut and ignore it passed this gate. The measurement was
+       * manufacturing the evidence it was written to look for, which is this
+       * repo's own warning about a matcher that matches too much.
+       *
+       * The body is where the figures are: `.chart-body` when there is one,
+       * otherwise everything in the card that is not its head.
+       */
+      data: ch ? JSON.stringify((ch.data.datasets || []).map((d) => d.data))
+        : (() => {
+          if (!card) return null;
+          const body = card.querySelector('.chart-body')
+            || [...card.children].filter((c) => !c.classList.contains('chart-head'))
+              .map((c) => c.textContent || '').join(' ');
+          const text = typeof body === 'string' ? body : (body.textContent || '');
+          return ((text.match(/[0-9.]+/g) || []).join(',') || null);
+        })(),
       sub: sub ? (sub.textContent || '').trim().slice(0, 60) : null,
     };
   }, selId);
 
+  /**
+   * ── TWO PASSES, BECAUSE THE FIRST ONE ONLY EVER TESTED HALF ───────────
+   * The walk below takes the first branch and the first leaf, which on every
+   * slicer in this admin is Demographics -> Age -> 18-24: a plain
+   * `field::value` cut. So twelve Engagement slicers offering a hundred and
+   * fifty cuts were driven only on the handful their endpoint could honour,
+   * and a DERIVED cut there matched nobody and drew every tile at zero. The
+   * measurement could not reach the broken half.
+   *
+   * A derived cut is a predicate held in the page - a band, a regroup, an
+   * alignment either side of a line - so its option label is the path to it,
+   * and the path is read off the option and then CLICKED, section by
+   * section. Still the control a person uses; aimed at the half that was
+   * never being aimed at.
+   *
+   * Both in one visit, because a gate that opens a second browser and walks
+   * all thirteen pages again spends minutes asking the other half of one
+   * question. DERIVED=only drives just the second pass.
+   */
+  const passes = process.env.DERIVED === 'only' ? ['derived']
+    : process.env.DERIVED ? ['value', 'derived'] : ['value'];
+  for (const pass of passes) {
   const before = await read();
+  /**
+   * ── THE CUT THIS PASS IS AIMING AT ────────────────────────────────────
+   * The walk below takes the first branch and the first leaf, which on every
+   * slicer in this admin is Demographics -> Age -> 18-24: a plain
+   * `field::value` cut. So twelve Engagement slicers offering a hundred and
+   * fifty cuts were driven only on the handful their endpoint could honour,
+   * and a derived cut there matched nobody and drew every tile at zero. The
+   * measurement could not reach the broken half.
+   *
+   * A derived cut is a predicate held in the page - a band, a regroup, an
+   * alignment either side of a line - and its option label is the path to it,
+   * so the path is read off the option and then CLICKED, section by section.
+   * Still the control a person uses; just aimed at the half that was never
+   * being aimed at.
+   */
+  const wantPath = pass === 'derived' ? await page.evaluate((id) => {
+    const sel = document.getElementById(id);
+    if (!sel) return null;
+    const o = [...sel.options].find((x) => x.value.indexOf('g::') === 0);
+    if (!o) return null;
+    return { value: o.value, path: (o.textContent || '').split(' \u00b7 ').map((t) => t.trim()).filter(Boolean) };
+  }, selId) : null;
+  if (pass === 'derived' && !wantPath) {
+    console.log('  derivedcut none ' + (pageName ? pageName + '/' : '') + selId + ' offers no derived cut');
+    continue;
+  }
   /* Open it the way a finger does. */
   const steps = [];
   const hit = (sel2) => page.evaluate((q) => {
@@ -1862,7 +2153,7 @@ if (process.env.CLICKCUT) {
 
   /* Walk down the first branch until a leaf, then take the first leaf. */
   for (let depth = 0; depth < 5; depth++) {
-    const what = await page.evaluate((id) => {
+    const what = await page.evaluate(([id, want, d]) => {
       const sel = document.getElementById(id);
       const panel = sel && sel.closest('.sd') && sel.closest('.sd').querySelector('.sd-panel');
       if (!panel || panel.hidden) return { done: 'the panel is not open' };
@@ -1874,18 +2165,45 @@ if (process.env.CLICKCUT) {
         && (r.textContent || '').trim() !== 'Everyone'
         && r.__sdValue !== '' && r.__sdValue != null);
       const branch = rows.find((r) => r.querySelector('.sd-chev'));
-      const target = leaf || branch;
+      /* Aiming at one particular cut: take the row this depth of its path
+         names, rather than the first of anything. A path step that is not on
+         screen is reported rather than silently falling back to the first
+         row, because a fallback here is the measurement quietly testing
+         something else. */
+      let target = leaf || branch;
+      if (want && want.path) {
+        const step = want.path[d];
+        /* ── THE CHEVRON IS PART OF THE ROW'S TEXT ──────────────────────
+           A branch row draws a chevron inside itself, so its textContent is
+           "Demographics\u203a" and never equals the option label's
+           "Demographics". The first run of this reported every slicer as
+           having no such row, which reads exactly like a broken panel: the
+           harness was wrong about the markup, which is the first thing to
+           suspect. innerText would not have helped either; this is a child
+           element rather than a text transform. */
+        const clean = (r) => (r.textContent || '').replace(/[\u203a\u276f\u00bb>]/g, '').trim();
+        const named = rows.find((r) => clean(r) === step);
+        if (!named) return { done: 'no row named ' + JSON.stringify(step) + ' at depth ' + d };
+        target = named;
+      }
       if (!target) return { done: 'nothing to click' };
       const label = (target.textContent || '').trim().slice(0, 40);
+      /* eslint-disable-next-line no-unused-vars */
       /* What the row is FOR, and whether the select can hold it. A leaf whose
          value is not among the options is the failure this was written to
          find, and it looks exactly like a click that did nothing. */
-      const want = leaf && leaf.__sdValue != null ? leaf.__sdValue : null;
+      const picked = target.__sdValue != null && !target.querySelector('.sd-chev') ? target.__sdValue : null;
       target.click();
-      return { clicked: label, leaf: !!leaf, want,
-        hasOption: want == null ? null : [...sel.options].some((o) => o.value === want),
+      return { clicked: label, leaf: picked != null, want: picked,
+        /* `picked`, not `want`: when the derived drive arrived, `want` became
+           the PATH object passed in, and comparing an option's value to an
+           object is false for every option. So every derived pick reported
+           "amongTheOptions=false" while the select was plainly holding the
+           value a moment later. A shadowed name turned the one assertion
+           this line exists for into a constant. */
+        hasOption: picked == null ? null : [...sel.options].some((o) => o.value === picked),
         optionCount: sel.options.length };
-    }, selId);
+    }, [selId, wantPath, depth]);
     if (what.done) { steps.push(what.done); break; }
     steps.push((what.leaf ? 'picked ' : 'into ') + what.clicked
       + (what.leaf ? ' [value=' + what.want + ' amongTheOptions=' + what.hasOption + ' of ' + what.optionCount + ']' : ''));
@@ -1894,12 +2212,17 @@ if (process.env.CLICKCUT) {
   }
   await new Promise((r) => setTimeout(r, 900));
   const after = await read();
-  const ok = !!after.value && after.button !== 'Everyone';
-  console.log('  clickcut ' + (ok ? 'ok   ' : 'FAIL ') + (pageName ? pageName + '/' : '') + selId + ' ' + JSON.stringify({
+  /* Aiming at one cut means the test is whether THAT cut landed, not whether
+     anything did. */
+  const ok = wantPath
+    ? after.value === wantPath.value
+    : (!!after.value && after.button !== 'Everyone');
+  console.log('  ' + (wantPath ? 'derivedcut ' : 'clickcut ') + (ok ? 'ok   ' : 'FAIL ') + (pageName ? pageName + '/' : '') + selId + ' ' + JSON.stringify({
     steps, button: after.button, value: after.value,
     sub: before.sub === after.sub ? 'unchanged: ' + after.sub : before.sub + ' -> ' + after.sub,
     tileMoved: before.data != null ? (after.data !== before.data) : 'no chart',
   }));
+  }
   }
   }
 }
@@ -2094,6 +2417,25 @@ if (process.env.SCROLL) {
     return el ? Math.round(window.scrollY) : null;
   }, process.env.SCROLL);
   await new Promise((r) => setTimeout(r, 400));
+}
+/**
+ * ── ERRORS THE PROBE ITSELF CAUSED ────────────────────────────────────────
+ * The report above reads window.__probeErrors once, before SET, CLICK,
+ * CLICKCUT and the rest have run. So anything those caused was collected and
+ * never printed: driving a slicer into a refusal logged a console.error and
+ * the run still ended with "no console errors", which is the harness unable
+ * to see what it did itself.
+ *
+ * Read again at the end, and print only what is new.
+ */
+{
+  const after = await page.evaluate(() => window.__probeErrors || []);
+  const before = (report.errors || []).length;
+  const fresh = after.slice(before);
+  if (fresh.length) {
+    console.log(`\nconsole.error while driving (${fresh.length}):`);
+    for (const e of fresh.slice(0, 8)) console.log('  ' + String(e).slice(0, 160));
+  }
 }
 const shot = await page.screenshot({ fullPage: process.env.FULL_PAGE === '1' });
 writeFileSync(OUT, Buffer.from(shot, 'base64'));

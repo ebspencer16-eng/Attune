@@ -2978,12 +2978,58 @@ async function adminAction(payload) {
 let __engBySlice = {};
 let __engTileSlice = {};
 
+/**
+ * ── THE CUT IS SENT AS PEOPLE ─────────────────────────────────────────────
+ * Ellie: "comp funnel only has a couple of slicer categories - it should have
+ * way more. Be thorough and fix this throughout the site."
+ *
+ * This sent `?slice=field::value`, and api/admin-engagement looked the field
+ * up on a profile row. Seven demographic columns could be honoured that way;
+ * the panel offers a hundred and fifty cuts and the rest are DERIVED - a band
+ * over a score, an alignment either side of a line, a horseman - so they are
+ * nobody's column. Those arrived as field `g`, matched no profile, and every
+ * tile on the page drew a zero. A click that answers zero is worse than one
+ * that does nothing, because a zero reads as a finding.
+ *
+ * The cut is evaluated here, where it is defined, and the people it keeps go
+ * over as the handle the cube puts on every row. Inverted past the halfway
+ * mark so the list in the URL is never longer than half of them.
+ */
+function engCutQuery(cut){
+  const cube = window.__CUBE_FOR_SLICERS;
+  if (!cut || !cube) return null;
+  const rows = cube.rows || [];
+  const all = rows.map((r) => r.person).filter(Boolean);
+  const keep = sliceFilter(rows, cut).map((r) => r.person).filter(Boolean);
+  /* A cut nobody falls into. Asking for it would come back as "nought people"
+     and read like a finding, so it is refused and the caller puts the control
+     back to Everyone. */
+  if (!keep.length) return null;
+  const kept = new Set(keep);
+  const q = keep.length * 2 <= all.length
+    ? 'people=' + encodeURIComponent(keep.join(','))
+    : 'exclude=' + encodeURIComponent(all.filter((h) => !kept.has(h)).join(','));
+  /* Just the people. A `label` was sent too, so the reply could say what was
+     cut, and nothing read it: the slicer's own button already says. A field
+     nothing reads is the kind of thing this page keeps mistaking for a
+     feature, so it is not sent. */
+  return q;
+}
+
 async function engFetch(slice, force) {
   if (__engBySlice[slice] && !force) return __engBySlice[slice];
-  const url = '/api/admin-engagement' + (slice ? ('?slice=' + encodeURIComponent(slice)) : '');
+  const q = slice ? engCutQuery(slice) : null;
+  if (slice && !q) throw new Error('nobody falls into that cut');
+  const url = '/api/admin-engagement' + (q ? ('?' + q) : '');
   const res = await fetch(url, { headers: window.adminAuthHeaders() });
   const j = noteDemoFilter(await res.json());
   if (!j || !j.ok) throw new Error((j && j.error) || ('request failed with ' + res.status));
+  /* Nought people against a cut that named some is the two ends disagreeing
+     about the handle. Reported rather than cached, because every tile on this
+     page would otherwise draw a zero and look like an answer. */
+  if (slice && j.slice && j.slice.asked && !j.slice.people) {
+    throw new Error('the cut named ' + j.slice.asked + ' people and the server matched none');
+  }
   __engBySlice[slice] = j;
   return j;
 }
@@ -2991,6 +3037,22 @@ async function engFetch(slice, force) {
 /** The payload a given tile is showing, which is the page default until cut. */
 function engFor(tile) {
   return __engBySlice[__engTileSlice[tile] || ''] || __engBySlice[''] || null;
+}
+
+/**
+ * The line under the page's heading, when nothing is wrong.
+ *
+ * Written once rather than inline, because a cut that is refused replaces it
+ * with a complaint and a cut that then works has to put it back. Blanking it
+ * instead was the first attempt and took the computed-at line with it: a page
+ * that has drawn correctly should not be left with less on it than before.
+ */
+function engNoticeNormal() {
+  const notice = document.getElementById('eng-notice');
+  const d = __engBySlice[''];
+  if (!notice || !d) return;
+  notice.textContent = 'Computed at ' + new Date(d.generatedAt).toLocaleString()
+    + ' · every tile can be cut on its own, and a cut leaves out anonymous visits because nothing attributes them to anybody.';
 }
 
 async function renderEngagementPage(force) {
@@ -3007,10 +3069,7 @@ async function renderEngagementPage(force) {
   const d = __engBySlice[''];
   if (!d) return;
 
-  if (notice) {
-    notice.textContent = 'Computed at ' + new Date(d.generatedAt).toLocaleString()
-      + ' · every tile can be cut on its own, and a cut leaves out anonymous visits because nothing attributes them to anybody.';
-  }
+  engNoticeNormal();
 
   wireEngagementSlicers();
   drawHeadlines();
@@ -3055,6 +3114,10 @@ async function wireEngagementSlicers() {
       try {
         await engFetch(want, false);
         __engTileSlice[tile] = want;
+        /* A cut that worked puts the ordinary line back. Without this an
+           error from a refused cut sits over a page that has since drawn
+           correctly, which is a page saying two things at once. */
+        engNoticeNormal();
         (ENG_TILE_DRAW[tile] || function () {})();
       } catch (e) {
         sel.value = __engTileSlice[tile] || '';
@@ -4377,49 +4440,52 @@ function svPeriod(rows, days) {
   return rows.filter((r) => svWhen(r) >= cutoff);
 }
 
-/** Cut by one segment, in the same `key::value` shape as every other slicer. */
+/**
+ * ── CUT A SURVEY ANSWER BY ANYTHING THE CUBE KNOWS ────────────────────────
+ * Ellie: "comp funnel only has a couple of slicer categories - it should have
+ * way more. Be thorough and fix this throughout the site."
+ *
+ * These eleven tiles offered seven dimensions, and seven is what a profile
+ * row stores. The other hundred and forty cuts in her taxonomy are derived
+ * from exercise answers, which /api/admin-survey does not read and should not
+ * start reading: it exists to hand over written answers without handing over
+ * who wrote them.
+ *
+ * So it sends the anonymous couple key instead, the same one the cube puts on
+ * every row, and the cut is evaluated against the CUBE. One registry of cuts,
+ * one control, and a tile here can be cut by depth band or by a horseman the
+ * same as a tile anywhere else.
+ *
+ * A response with no couple resolved is out of every cut. That is a couple of
+ * one, which no couple-level cut can describe either way.
+ */
 function svSlice(rows, val) {
   if (!val) return rows;
-  const i = val.indexOf('::');
-  const k = val.slice(0, i), v = val.slice(i + 2);
-  return rows.filter((r) => String((r.segment || {})[k]) === v);
+  const cube = window.__CUBE_FOR_SLICERS;
+  /* Nothing to cut against. Returning every row would answer a cut with the
+     whole population, which is the failure Ellie reported on the other page:
+     "Just made a slicer selection but the chart didnt change". */
+  if (!cube) return [];
+  const keep = new Set(sliceCouples(cube.rows || [], val).map((r) => r.couple_id).filter(Boolean));
+  return rows.filter((r) => r.couple && keep.has(r.couple));
 }
 
-/** Fill one tile's slicer from the segments that actually occur. */
 /**
- * The Feedback page's own tile slicers, as the same drill-down.
+ * Fill one tile's slicer from the people who have answered the survey.
  *
- * These cut a survey response rather than a cube row, so they cannot use
- * sliceTree: the segments arrive on the response itself. What they CAN share
- * is the control, because a page where some slicers drill and others drop a
- * native list is two answers to the same gesture.
- *
- * One branch per segment, which is the shape her taxonomy's first section has
- * and the most these seven fields can honestly be given.
+ * The population is the cube rows of the couples present in these responses,
+ * so a cut the panel offers is a cut at least one answer falls into:
+ * populateSlicer already drops a value nobody has, and this is that rule one
+ * join further out. It also means the Feedback page no longer carries its own
+ * tree builder, which was a second implementation of the drill-down and knew
+ * about seven fields.
  */
 function svFillSlicer(sel, rows) {
   if (!sel) return;
-  const tree = [];
-  for (const [key, label] of SV_DIMS) {
-    const vals = [...new Set(rows.map((r) => (r.segment || {})[key]).filter(Boolean))].sort();
-    if (!vals.length) continue;
-    tree.push({ label, children: vals.map((v) => ({ label: qxPretty(key, v), value: key + '::' + v })) });
-  }
-  let html = '<option value="">Everyone</option>';
-  tree.forEach((n) => n.children.forEach((c) => {
-    html += '<option value="' + svEsc(c.value) + '">' + svEsc(n.label + ' \u00b7 ' + c.label) + '</option>';
-  }));
-  /* Rebuilt only when the list itself changes, so a cut survives a redraw. */
-  const sig = html.length + ':' + html.charCodeAt(html.length >> 1);
-  if (sel.dataset.ready !== sig) {
-    const cur = sel.value;
-    sel.innerHTML = html;
-    sel.dataset.ready = sig;
-    try { sel.value = cur; } catch (e) {}
-    if (sel.value !== cur) sel.value = '';
-  }
-  sel.__sliceTree = tree;
-  mountSliceDrill(sel);
+  const cube = window.__CUBE_FOR_SLICERS;
+  if (!cube) return;
+  const have = new Set((rows || []).map((r) => r.couple).filter(Boolean));
+  populateSlicer(sel, null, (cube.rows || []).filter((r) => r.couple_id && have.has(r.couple_id)));
 }
 
 /* svCode and svCodeFromInput were here. They posted a theme somebody typed
@@ -4917,6 +4983,12 @@ async function renderFeedback() {
       + 'Could not load the survey: ' + svEsc(e.message) + '</div>';
     return;
   }
+
+  /* The tile slicers cut through the cube now, so it has to be loaded before
+     the first tile draws. A failure is not fatal: the charts still draw over
+     everybody, and svSlice answers a cut with nothing rather than with the
+     whole population, so a cut that cannot be honoured is visible. */
+  try { await ensureCube(); } catch (e) { console.error('[admin] feedback slicers have no cube:', e); }
 
   const period = document.getElementById('fb-period');
   if (period && !period.dataset.wired) {
@@ -5667,8 +5739,8 @@ async function loadRealFunnel(orders) {
 // Shape a raw responses aggregate into the client chart structures.
 /**
  * Every figure on the Responses pages comes from buildResponseAggregates in
- * api/admin-data.js, and the payload carries that bundle at `responses`, plus
- * once per segment value at `responsesBySegment`. Seven renderers here read
+ * api/admin-data.js, and the payload carries that bundle at `responses`. A
+ * cut asks for another one: see respCutReady. Seven renderers here read
  * `data.inheritance`, `data.intimacyStats` and five more off the TOP level,
  * which is a key nothing sets, so every one of those tiles drew its empty
  * state. Ellie reported it seven times in one message as missing data.
@@ -5688,18 +5760,39 @@ function respOf(d){ return (d && d.responses) || {}; }
  *
  * Ellie, of two at-a-glance tiles: "Data and slicers missing from at a glance."
  * The data was the payload bug above. The slicers could not have worked before
- * it either, for the same reason: api/admin-data.js has always sent a cut of
- * every one of these measures per segment value, under `responsesBySegment`,
- * and the page was reading none of it.
+ * it either, for the same reason: the cut of every one of these measures was
+ * arriving in the payload, one per stored field, and the page read none of it.
+ * It is fetched per cut now, by respCutReady, which is also what made every
+ * cut answerable rather than the ten a stored field can key.
  *
  * An unknown key falls back to the whole population rather than to an empty
  * object, because a tile drawing dashes looks identical to a measure that is
- * broken, and this is the one place that difference is invisible.
+ * broken, and this is the one place that difference is invisible. Every caller
+ * awaits the loader first, so an unknown key means the server could not answer
+ * that cut, and the caller has already put the control back to Everyone.
  */
 function respSegOf(d, key){
   if (!key) return respOf(d);
-  const seg = d && d.responsesBySegment;
-  return (seg && seg[key]) || respOf(d);
+  /**
+   * ── THE RAW BUNDLE, NOT THE SHAPED ONE ───────────────────────────────
+   * Two maps, because there are two readings of one answer and this file has
+   * been bitten by that before. `shapeResponses` turns a bundle into the five
+   * chart structures the tile charts draw, and drops everything else:
+   * intimacyStats, expCoupleDistances, inheritance and four more are not in
+   * its return. The at-a-glance tiles read those off the bundle itself.
+   *
+   * The first version of the on-demand cut stored only the shaped form under
+   * one name and had both readers take it, so Physical Intimacy and
+   * Expectations at a glance drew four dashes on every cut while reading
+   * correctly with no cut at all. Found by reading the tiles before and after
+   * a cut rather than by reading the code: `st` was simply undefined.
+   *
+   * Named for which half it is. Two similar names for two halves of one
+   * answer is how a reader takes the wrong one, which this codebase did with
+   * notes and annotations and has not forgotten.
+   */
+  const raw = window.__respRawBySeg || {};
+  return raw[key] || respOf(d);
 }
 
 /**
@@ -5708,19 +5801,30 @@ function respSegOf(d, key){
  * payload, which is the only thing that knows what they are. Shared by the two
  * at-a-glance tiles so the wiring is written once.
  */
+/**
+ * Wire a bundle-backed tile's slicer, and return the cut that is loaded.
+ *
+ * It returns the cut rather than nothing, because the caller then reads the
+ * bundle for it: a renderer that read `sel.value` itself would read the cut
+ * the server could not answer, one line after this put the control back.
+ */
 async function wireSummarySlicer(selId, redraw){
   const sel = document.getElementById(selId);
-  if (!sel) return;
+  if (!sel) return '';
   if (!sel.dataset.wired) {
     sel.dataset.wired = '1';
-    /* Both tiles this wires read a pre-computed bundle, so the cuts they can
-       honour are the bundle's own keys rather than this page's copy of the
-       server's field list. That copy had drifted to six of the ten, so four
-       cuts the server computes were never offered. */
-    try { const cube = await ensureCube(); populateSlicer(sel, null, cube.rows || [], null, { allowValues: respBundleCuts() }); } catch (e) {}
+    /* The whole taxonomy. These two read a server-computed bundle, and the
+       cut is now sent to the server rather than chosen from a list of bundles
+       it happened to have built, so there is nothing left to prune to. */
+    try { const cube = await ensureCube(); populateSlicer(sel, null, cube.rows || []); } catch (e) {}
     sel.onchange = () => { sel.classList.toggle('on', !!sel.value); redraw(); };
   }
-  sel.classList.toggle('on', !!sel.value);
+  /* The cut, loaded. respCut answers '' when the server could not cut by it
+     and puts the control back to Everyone, so the class is set from what
+     came back rather than from what was clicked. */
+  const cut = await respCut(sel);
+  sel.classList.toggle('on', !!cut);
+  return cut;
 }
 
 function shapeResponses(r){
@@ -5750,32 +5854,112 @@ function shapeResponses(r){
     pairs:(r&&r.pairs)||0,
   };
 }
-/* The couple-level cuts, for the one tile that filters rows itself and counts
-   couples: a person-level cut there would count one partner and not the other.
-   It is NOT the list of cuts the response bundles exist for; that is
-   respBundleCuts below, read from the payload. The two were the same list
-   once, which is how four of the server's segments stopped being offered. */
-const RESP_SLICE_DIMS=['relationship_status','relationship_length','children','couple_type','alignment_group','understanding_group'];
 /**
- * The cuts the response bundles were actually built for.
+ * ── THE BUNDLE FOR ONE CUT, FETCHED WHEN IT IS ASKED FOR ──────────────────
+ * Ellie: "comp funnel only has a couple of slicer categories - it should have
+ * way more. Be thorough and fix this throughout the site."
  *
- * `responsesBySegment` is computed on the server, one bundle per segment, and
- * a tile that reads it can only show a cut that has a bundle. RESP_SLICE_DIMS
- * above is this page's guess at that list and had drifted to six of the ten
- * the server sends, which is the copy-of-a-list failure this codebase is
- * named for. Asking the payload cannot drift.
+ * Seven tiles here read aggregates the server computes, because raw answers
+ * never reach the browser. api/admin-data.js used to pre-compute one bundle
+ * per value of a list of stored fields, which is why those seven offered ten
+ * cuts while every other tile on the page offered a hundred and fifty: the
+ * other hundred and forty are derived from exercise answers and are not a
+ * column on anybody.
+ *
+ * So the cut is sent instead of being guessed at. This page knows which
+ * couples a cut keeps, by the anonymous key the cube puts on every row, and
+ * the server answers with that bundle. The cache is keyed on the cut and
+ * holds the PROMISE, so two tiles sharing a slicer make one request.
+ *
+ * `exclude` is the same question inverted, sent when a cut keeps more than
+ * half the couples, so the list in the URL is never longer than half of them.
  */
-function respBundleCuts(){
-  const seg = window.__responsesBySeg || {};
-  return new Set(Object.keys(seg).filter(Boolean));
+const __respCuts = new Map();
+async function respCutReady(val){
+  if (!val) return true;
+  const seg = window.__responsesBySeg || (window.__responsesBySeg = {});
+  if (seg[val] && (window.__respRawBySeg || {})[val]) return true;
+  if (!__respCuts.has(val)) __respCuts.set(val, (async () => {
+    let cube; try { cube = await ensureCube(); } catch (e) { return false; }
+    const all = [...new Set((cube.rows || []).map(r => r.couple_id).filter(Boolean))];
+    const keep = [...new Set(sliceCouples(cube.rows || [], val).map(r => r.couple_id).filter(Boolean))];
+    /**
+     * ── A CUT WITH NO COUPLES IN IT IS STILL A CUT ──────────────────────
+     * The panel offers a value because at least one PERSON has it, and these
+     * tiles count pairs, so a value only unpaired people have keeps nobody.
+     *
+     * The first version put the control back to Everyone, which is the thing
+     * Ellie reported: "Just made a slicer selection but the chart didnt
+     * change and slicer still says everyone." Correct about the data and
+     * indistinguishable from the bug.
+     *
+     * So the server is asked for the bundle over nobody, and the tiles draw
+     * n=0. `empty=1` rather than an empty couples list, because an empty list
+     * is also what "no cut" looks like, and the server would answer with the
+     * whole population.
+     */
+    const q = !keep.length ? 'empty=1'
+      : keep.length * 2 <= all.length
+        ? 'couples=' + encodeURIComponent(keep.join(','))
+        : 'exclude=' + encodeURIComponent(all.filter(c => keep.indexOf(c) < 0).join(','));
+    let d = null;
+    try {
+      /* Through noteDemoFilter like every other read of this endpoint: the
+         cut reply carries `demoFilterApplied` too, and a cut computed before
+         migration 082 has run counts the demo accounts. A payload that skips
+         it draws figures that may include them and says nothing, which is
+         what the banner on this page promises it does not do. */
+      d = noteDemoFilter(await fetch('/api/admin-data?only=responses&' + q,
+        { headers: window.adminAuthHeaders() }).then(r => r.json()));
+    } catch (e) { d = null; }
+    /**
+     * `matched` is how many of the couples ASKED for the server resolved, so
+     * nought against a request that named some is the two ends disagreeing
+     * about the key: it would otherwise show up as a tile quietly drawing the
+     * figure for everybody.
+     *
+     * Against `asked`, not on its own. The first version tested `matched ===
+     * 0` and so refused the `empty=1` request too, which names no couples on
+     * purpose and correctly resolves none: a cut with people and no couples
+     * in it went back to Everyone, which is the exact symptom this whole
+     * round is about. The same comparison the Engagement cut makes.
+     */
+    if (!d || !d.ok || !d.responses || (d.asked && !d.matched)) {
+      console.error('[admin] could not cut the responses by ' + val);
+      return false;
+    }
+    /* Both forms, under their own names: the charts read the shaped one and
+       the at-a-glance tiles read the bundle. See respSegOf. */
+    seg[val] = shapeResponses(d.responses);
+    (window.__respRawBySeg || (window.__respRawBySeg = {}))[val] = d.responses;
+    return true;
+  })());
+  return __respCuts.get(val);
+}
+/**
+ * Fill a bundle-backed tile's slicer and load the cut it is set to.
+ *
+ * Returns the cut, or '' when the server could not answer it: the control
+ * goes back to Everyone rather than leaving a label that says one thing while
+ * the chart shows another.
+ */
+async function respCut(sel){
+  const val = sel ? sel.value : '';
+  if (!val) return '';
+  if (await respCutReady(val)) return val;
+  sel.value = '';
+  sel.classList.remove('on');
+  if (sel.__sdLabel) sel.__sdLabel();
+  return '';
 }
 async function renderResponseTile(opts){
   const el=document.getElementById(opts.target); if(!el) return;
   const sel=document.getElementById(opts.selId);
-  if(sel){ try{ const cube=await ensureCube(); populateSlicer(sel,null,cube.rows||[],null,{ allowValues: respBundleCuts() }); }catch(e){} sel.classList.toggle('on',!!sel.value);
+  if(sel){ try{ const cube=await ensureCube(); populateSlicer(sel,null,cube.rows||[]); }catch(e){} sel.classList.toggle('on',!!sel.value);
     if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderResponseTile(opts); } }
+  const cut=await respCut(sel);
   const seg=(window.__responsesBySeg||{});
-  const a=seg[sel?sel.value:'']||seg['']||null; if(!a) return;
+  const a=seg[cut]||seg['']||null; if(!a) return;
   setTileN(el, a.pairs);
   if(opts.kind==='radar'){
     /* Ellie: "No gridlines or x axis labels on the avg alignment score by
@@ -5912,10 +6096,12 @@ async function loadRealResponses() {
 
   const shaped = shapeResponses(r);
   dimScores = shaped.dimScores; expAlign = shaped.expAlign; relFeel = shaped.relFeel; responsePairs = r.pairs;
-  // Per-segment shaped aggregates for the tile slicers (couple-level cuts).
-  window.__responsesBySeg = {};
-  const bySeg = (d && d.responsesBySegment) || { '': r };
-  Object.keys(bySeg).forEach(k => { window.__responsesBySeg[k] = shapeResponses(bySeg[k]); });
+  /* Everybody. Every other cut is fetched when a slicer asks for it: see
+     respCutReady. The map is replaced rather than merged, because a reload is
+     new data and a cut cached against the old data is stale. */
+  window.__responsesBySeg = { '': shaped };
+  window.__respRawBySeg = { '': r };
+  __respCuts.clear();
   if (shaped.expGaps.length) {
     expGaps = shaped.expGaps;
     const gapEl = document.getElementById('exp-gap-bars');
@@ -6427,9 +6613,7 @@ async function renderIntimacySummary() {
   const host = document.getElementById('pisum-tiles');
   if (!host) return;
   const data = await fetchAdminData();
-  const sel = document.getElementById('slz-pisum');
-  await wireSummarySlicer('slz-pisum', renderIntimacySummary);
-  const st = respSegOf(data, sel ? sel.value : '').intimacyStats;
+  const st = respSegOf(data, await wireSummarySlicer('slz-pisum', renderIntimacySummary)).intimacyStats;
   const put = (id, v, sub) => { const e = document.getElementById(id); if (e) e.textContent = v;
     const sb = document.getElementById(id + '-sub'); if (sb) sb.textContent = sub; };
   if (!st) {
@@ -6878,8 +7062,7 @@ async function renderExpSummary() {
   const host = document.getElementById('expsum-tiles');
   if (!host) return;
   const data = await fetchAdminData();
-  const sel = document.getElementById('slz-expsum');
-  await wireSummarySlicer('slz-expsum', renderExpSummary);
+  const expCut = await wireSummarySlicer('slz-expsum', renderExpSummary);
   /* The period control. Each couple's distances now carry `at`, the later of
      the two partners' Expectations completion dates, because a dropdown that
      changes nothing is worse than no dropdown. A row with no date is left in
@@ -6895,7 +7078,7 @@ async function renderExpSummary() {
      different populations: the distances and the threshold have to come from
      the same cut or the "aligned" and "misaligned" groups are split by a line
      computed somewhere else. */
-  const bundle = respSegOf(data, sel ? sel.value : '');
+  const bundle = respSegOf(data, expCut);
   const couplesAll = Array.isArray(bundle.expCoupleDistances) ? bundle.expCoupleDistances : [];
   const since = days ? Date.now() - days * 86400000 : 0;
   const couples = since
@@ -7412,6 +7595,16 @@ function sliceTreeBuild(cube, rows, excludeKey, onlyKeys) {
    * tiles count couples and a derived cut over individuals would be counted
    * twice; and dropped when nobody in these rows matches, which is the same
    * rule the value rows follow.
+   */
+  /**
+   * A derived leaf: a cut that is a rule rather than a value.
+   *
+   * It was briefly given a list of the row keys its rule reads, so a tile
+   * joining a second dataset could keep only the cuts that dataset could
+   * answer. The join made that unnecessary - the cut is evaluated against the
+   * PEOPLE and sent to the server as the people it keeps - and nothing read
+   * the list, so it is gone rather than left standing. A declaration nobody
+   * reads is the thing this codebase keeps mistaking for a mechanism.
    */
   const pred = (id, label, test) => {
     if (onlyKeys) return null;
@@ -7936,39 +8129,29 @@ function mountSliceDrillUnsafe(sel) {
  */
 function populateSlicer(sel, excludeKey, rows, onlyKeys, opts){
   if (!sel) return;
-  const allow = opts && opts.allowValues ? opts.allowValues : null;
   const provisional = !!(opts && opts.provisional);
   /* A short, stable signature. The markup itself is the thing being compared
      and is far too big to park in a DOM attribute. */
   const sign = (t) => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return t.length + ':' + h; };
 
   const cube = window.__CUBE_FOR_SLICERS || null;
-  let tree = sliceTree(cube, rows || [], excludeKey, onlyKeys);
+  const tree = sliceTree(cube, rows || [], excludeKey, onlyKeys);
   /**
-   * ── ONLY THE CUTS THIS TILE CAN HONOUR ────────────────────────────────
-   * Ellie: "Just made a slicer selection but the chart didnt change and
-   * slicer still says everyone."
+   * ── THERE IS NOTHING LEFT TO PRUNE TO ─────────────────────────────────
+   * An `allowValues` option used to narrow the tree to the cuts a tile could
+   * honour, because eight tiles read a bundle the server pre-computed per
+   * stored field and could not answer anything else. Offering a cut with no
+   * bundle fell back to the whole population, which is what Ellie saw: "Just
+   * made a slicer selection but the chart didnt change and slicer still says
+   * everyone."
    *
-   * Some tiles do not filter anything: they read a bundle the server
-   * pre-computed per segment, and `responsesBySegment` carries ten fields and
-   * not the rest. Offering a cut there is offering something the tile will
-   * silently fall back from, and the fallback is the WHOLE population, which
-   * looks exactly like a click that did nothing.
-   *
-   * A caller that reads a bundle hands in the keys it has. The tree is pruned
-   * to those, so the panel cannot show a row the tile will ignore. The list
-   * comes from the payload rather than from a copy of the server's field
-   * list, which is what the page used to keep and which had already drifted
-   * to six of the ten.
+   * The cut is sent to the server now rather than chosen from a list of what
+   * it happened to have built, so every tile can honour every cut and the
+   * option had no caller left. Removed rather than kept for later: a
+   * parameter nothing passes, with a paragraph explaining a path nothing
+   * takes, is the kind of comment that sends the next person looking for a
+   * bug that is not there.
    */
-  if (allow) {
-    const prune = (nodes) => nodes.map((n) => {
-      if (!n.children) return allow.has(n.value) ? n : null;
-      const kids = prune(n.children);
-      return kids.length ? { ...n, children: kids } : null;
-    }).filter(Boolean);
-    tree = prune(tree);
-  }
 
   /* Every LEAF becomes an option, labelled with its whole path, so the select
      is still the thing that holds the answer and the button has something to
@@ -8032,11 +8215,91 @@ function sliceFilter(rows, val){
   const i=val.indexOf('::'); const k=val.slice(0,i), v=val.slice(i+2);
   return rows.filter(r=>String(r[k])===v);
 }
+/**
+ * ── A CUT OVER PEOPLE, APPLIED TO SOMETHING JOINED TO THEM ────────────────
+ * Ellie: "comp funnel only has a couple of slicer categories - it should have
+ * way more. Be thorough and fix this throughout the site."
+ *
+ * Orders and survey answers are not people, and the slicer taxonomy is about
+ * people. Each of those rows carried a snapshot of the fifteen fields the
+ * server copies off its buyer, so `sliceFilter` could answer a cut on one of
+ * those fifteen and nothing else, while the panel beside it offered the whole
+ * taxonomy. Every other cut fell through to "no row matched this field",
+ * which draws the tile at zero or at everybody depending on the tile: either
+ * way a click that looks like it did nothing.
+ *
+ * The figures, from one OPTSCAN run over the whole admin: 150 cuts offered on
+ * an order tile, and the eight tiles that could only answer from a snapshot
+ * measured 39.
+ *
+ * The server now sends `owner_row`, the index of the buyer's row in
+ * `cube.rows`, so the cut is evaluated against the PERSON and every derived
+ * leaf works unchanged. An item the profile join could not place keeps
+ * answering through its own snapshot, which is what keeps the retroactive
+ * promo-code couple types in the discount chart.
+ */
+function sliceJoined(list, rows, val){
+  if (!val) return list || [];
+  const hit = new Set(sliceFilter(rows || [], val));
+  const keep = new Set();
+  (rows || []).forEach((r, i) => { if (hit.has(r)) keep.add(i); });
+  const own = new Set(sliceFilter(list || [], val));
+  return (list || []).filter((o) => (
+    o && o.owner_row != null ? keep.has(o.owner_row) : own.has(o)
+  ));
+}
+/**
+ * The same cut, read as "the couples with somebody like this in them".
+ *
+ * The completion funnel counts COUPLES in every bar, and a person-level cut
+ * applied one partner at a time breaks that: filtering to she/her keeps one
+ * half of a mixed couple, the pair never reaches two, and "both finished"
+ * reads zero while "started" stands. So a cut keeps both partners of any
+ * couple where either matches, which is the reading every other tile gives it
+ * and the same rule api/admin-data.js applies to the response bundles.
+ */
+function coupleRowSet(rows, val){
+  const hit = sliceFilter(rows || [], val);
+  const direct = new Set(hit);
+  const couples = new Set(hit.map((r) => r.couple_id).filter(Boolean));
+  const out = new Set();
+  (rows || []).forEach((r, i) => {
+    if (direct.has(r) || (r.couple_id && couples.has(r.couple_id))) out.add(i);
+  });
+  return out;
+}
+function sliceCouples(rows, val){
+  if (!val) return rows || [];
+  const keep = coupleRowSet(rows, val);
+  return (rows || []).filter((r, i) => keep.has(i));
+}
+function sliceJoinedCouples(list, rows, val){
+  if (!val) return list || [];
+  const keep = coupleRowSet(rows, val);
+  const own = new Set(sliceFilter(list || [], val));
+  return (list || []).filter((o) => (
+    o && o.owner_row != null ? keep.has(o.owner_row) : own.has(o)
+  ));
+}
+/**
+ * The people behind a joined list, for filling that tile's slicer.
+ *
+ * A tile about orders should offer the cuts its ORDERS fall into, not every
+ * cut anybody falls into: populateSlicer already drops a value nobody has, and
+ * this is the same rule one join further out. Without it the panel would offer
+ * a hundred and fifty cuts of which some draw an empty chart, which the note
+ * above populateSlicer already says is worse than not offering them.
+ */
+function joinedOwnerRows(list, rows){
+  const seen = new Set();
+  (list || []).forEach((o) => { if (o && o.owner_row != null) seen.add(o.owner_row); });
+  return (rows || []).filter((r, i) => seen.has(i));
+}
 // Every slicer on the page, with its option-set rule. Populated up-front as soon
 // as the cube is available so no tile shows an empty (collapsed) dropdown while
-// waiting for its own chart to render. Couple-level tiles only offer couple-level
-// segments; distribution tiles exclude their own dimension.
-const COUPLE_LEVEL_DIMS=['relationship_status','relationship_length','children','couple_type','alignment_group','understanding_group'];
+// waiting for its own chart to render. Distribution tiles exclude their own
+// dimension; everything else offers the whole taxonomy, because every tile can
+// now honour a person-level cut (see sliceJoined above).
 const SLICER_CFG={
   'slz-age':{ex:'age_range'},'slz-pronouns':{ex:'pronouns'},'slz-relstatus':{ex:'relationship_status'},
   'slz-children':{ex:'children'},'slz-demorellen':{ex:'relationship_length'},'slz-ovrellen':{ex:'relationship_length'},
@@ -8174,8 +8437,8 @@ async function renderOrderChart(opts){
   const el=document.getElementById(opts.target); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
   const sel=opts.selId?document.getElementById(opts.selId):null;
-  if(sel){ populateSlicer(sel, null, cube.rows||[]); sel.classList.toggle('on', !!sel.value); }
-  const orders=sliceFilter(cube.orders||[], sel?sel.value:'');
+  if(sel){ populateSlicer(sel, null, joinedOwnerRows(cube.orders||[], cube.rows||[])); sel.classList.toggle('on', !!sel.value); }
+  const orders=sliceJoined(cube.orders||[], cube.rows||[], sel?sel.value:'');
   setTileN(el, orders.length);
   /* Everything, for the comparison line under each tile. Worked out here so a
      kind cannot forget which of the two it is holding. */
@@ -8433,10 +8696,13 @@ async function renderSatFunnel(selId){
   const el=document.getElementById('chart-funnel'); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
   const sel=document.getElementById(selId);
-  if(sel){ populateSlicer(sel,null,cube.rows||[],RESP_SLICE_DIMS); sel.classList.toggle('on',!!sel.value);
+  if(sel){ populateSlicer(sel,null,cube.rows||[]); sel.classList.toggle('on',!!sel.value);
     if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatFunnel(selId); } }
   const val=sel?sel.value:'';
-  const rows=sliceFilter(cube.rows||[], val), orders=sliceFilter(cube.orders||[], val);
+  /* Couples on both sides. `started` is over everybody who has taken
+     anything, so this tile's own population is the whole cube and its slicer
+     is filled from all of it; the orders are reached through their buyer. */
+  const rows=sliceCouples(cube.rows||[], val), orders=sliceJoinedCouples(cube.orders||[], cube.rows||[], val);
   // Count in COUPLES throughout so the funnel is one consistent unit (mixing
   // orders/couples with individuals is what made 'started' exceed 'ordered').
   const byCouple={}; let solo=0;
@@ -8476,7 +8742,7 @@ async function renderPromoDiscount(selId){
      where the couple link lives: this page is sent no profile ids, on purpose.
      Falling back to `promo_code` means a payload from before that shipped
      still draws, one order short per couple, rather than drawing nothing. */
-  const orders=sliceFilter(cube.orders||[], sel?sel.value:'').filter(o=>(o.promo_code_effective||o.promo_code));
+  const orders=sliceJoined(cube.orders||[], cube.rows||[], sel?sel.value:'').filter(o=>(o.promo_code_effective||o.promo_code));
   setTileN(el, orders.length);
   const cbn=window.__codeByName||{};
   const order=['100% off','75–99%','50–74%','25–49%','1–24%','Fixed $','Unknown'];
@@ -8554,9 +8820,9 @@ async function renderCoupleOutcomes(opts){
   const el=document.getElementById(opts.containerId); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
   const sel=document.getElementById(opts.selId);
-  if(sel){ populateSlicer(sel,'couple_type',cube.surveys||[]); sel.classList.toggle('on',!!sel.value);
+  if(sel){ populateSlicer(sel,'couple_type',joinedOwnerRows(cube.surveys||[], cube.rows||[])); sel.classList.toggle('on',!!sel.value);
     if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderCoupleOutcomes(opts); } }
-  const rows=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(r=>r.couple_type!=null&&r.couple_type!=='');
+  const rows=sliceJoined(cube.surveys||[], cube.rows||[], sel?sel.value:'').filter(r=>r.couple_type!=null&&r.couple_type!=='');
   setTileN(el, rows.length);
   if(!rows.length){ el.innerHTML='<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;text-align:center;">No survey answers with a couple type yet.</div>'; return; }
   const avg=(arr,k)=>{ const v=arr.map(r=>parseFloat(r[k])).filter(Number.isFinite); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; };
@@ -8684,7 +8950,10 @@ async function renderSelfPartnerGap(containerId){
          silently dropped, and the next line then filled the options with
          nothing selected: the chart came back uncut and the control said
          Everyone. The order is the whole fix. */
-      try { populateSlicer(sv, null, cube.rows || [], null, { allowValues: respBundleCuts() }); } catch (e) {}
+      /* This tile cuts the cube rows itself - see `cut` above - so it was
+         never limited to the pre-computed bundles, and pruning it to them
+         hid a hundred and eleven cuts it could always have honoured. */
+      try { populateSlicer(sv, null, cube.rows || []); } catch (e) {}
       sv.value = cut;
       if (sv.value !== cut) sv.value = '';
       sv.classList.toggle('on', !!sv.value);

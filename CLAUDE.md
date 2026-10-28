@@ -1547,6 +1547,73 @@ sits: the same three colours with the lighter two holding most of the height
 instead of the darkest one, 55 per cent down the page to 38. A gradient reads
 as dark mostly because its dark end owns more than half of it.
 
+**A control offering what the server happens to carry is a list, and it is
+always the short list.** Ellie: "comp funnel only has a couple of slicer
+categories - it should have way more. Be thorough and fix this throughout the
+site." Five groups of admin tiles were narrow, and all five for one reason:
+each asked which cuts the server had pre-computed, or which fields it had
+copied onto a joined row, and offered those. The funnel offered 23 of 150, the
+response tiles 39, the Feedback tiles 29.
+
+Widening those lists is the move that never finishes, because the other 120
+cuts are DERIVED. A score band, an alignment either side of a line, a
+horseman: a predicate the page holds, not a column anybody has. No list of
+field names can ever reach them.
+
+So the cut goes the other way. The page evaluates it, where it is defined, and
+sends the server the people or the couples it keeps, by a non-reversible
+handle the payload already carried. Every surface then answers every cut, the
+first load got smaller because nothing is pre-computed on spec, and three
+hand-kept field lists went in the bin. The shape to recognise: when a consumer
+asks a producer "what can you answer", the answer is a list, and this codebase
+is about not keeping lists.
+
+**The same mistake has a louder version: a cut nobody can honour answers
+zero.** api/admin-engagement took its cut as `field::value` and looked the
+field up on a profile row. A derived cut arrives with field `g`; no row has a
+`g`; nobody matched; every tile on the page drew nought. For months. A click
+that does nothing gets reported. A confident zero reads as a finding, so it
+does not. Both ends now compare what a cut ASKED for against what resolved,
+and refuse rather than draw.
+
+**A long job holding a backup will restore it over anything you change
+meanwhile.** A gate run that plants a bug does `cp file backup`, plants, runs,
+and copies the backup back. Three edits made to that file while it ran were
+reverted by that final copy, silently, and the tell was a harness whose
+behaviour did not match the code I had just written. This file records
+`git checkout --` destroying uncommitted work five times; this is the same
+thing wearing a job's clothes. Either leave the file alone until the job ends,
+or apply the edit to the backup as well.
+
+**And a tile's own slicer button is part of the tile's text.** The same gate
+reads what a tile is SHOWING before and after a cut. For a tile of figures
+rather than a chart it scraped the card's text and kept the digits, and the
+card's head holds the slicer, whose button then reads "Demographics - Age -
+18-24". Five tiles whose figures had not moved an inch reported that they had,
+and a plant making the server accept a cut and ignore it passed.
+
+A measurement that includes the control in the thing being measured will
+always see the thing change. Scrape the body, not the card. The general form
+this file already states about matchers, now pointed at a reading: a
+measurement that matches too much manufactures the evidence it was written to
+look for.
+
+**A test that always takes the first branch tests the one case that works.**
+check-slicer-click drove all 68 admin slicers the way a person does, which is
+the whole point of it, and walked to the first leaf every time: Demographics,
+Age, 18-24. A plain value cut, on every slicer, for every run. The half that
+was broken was never reached, and the gate said all 68 were fine throughout.
+
+It drives each one twice now, the second time to a derived cut, by reading the
+path off the option and clicking it section by section. Two measurement bugs
+in making that work, both this file's own rules: the branch row's text is
+"Demographics›" because the chevron is a child element, not a text
+transform, so an exact compare matched nothing and reported every panel as
+broken. And `want` inside the walk was shadowed by the path object passed in,
+so `options.some(o => o.value === want)` compared an option to an object and
+was false for every pick: the one assertion that line exists for had become a
+constant while reporting a plausible-looking false.
+
 **A gate that compares inputs is not comparing the thing.** check-scoring-mirror
 held the website's scorer to the engine on which questions belong to which
 dimension and which are reverse-worded, and never ran either of them. That is

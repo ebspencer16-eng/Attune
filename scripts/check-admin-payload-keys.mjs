@@ -58,6 +58,7 @@ function keysOf(obj) {
 }
 
 let payloadKeys = null;       // what json({...}) sends
+let cutKeys = null;           // what a ?only=responses cut answers with
 let responseKeys = null;      // what buildResponseAggregates returns
 traverse(serverAst, {
   CallExpression(path) {
@@ -65,9 +66,19 @@ traverse(serverAst, {
     if (callee.type !== 'Identifier' || callee.name !== 'json') return;
     if (!args.length || args[0].type !== 'ObjectExpression') return;
     const keys = keysOf(args[0]);
-    /* The one response that carries the whole dataset, identified by the two
-       keys only it has rather than by being the largest or the last. */
-    if (keys && keys.has('responses') && keys.has('responsesBySegment')) payloadKeys = keys;
+    /**
+     * The one response that carries the whole dataset.
+     *
+     * Identified by two keys only it has, rather than by being the largest or
+     * the last. It used to be `responses` with `responsesBySegment`, and that
+     * second key is gone: a slicer click now asks this endpoint for ONE
+     * bundle, so there are two replies here and the small one also carries
+     * `responses`. `orders` is what only the full payload has.
+     */
+    if (keys && keys.has('responses') && keys.has('orders')) payloadKeys = keys;
+    /* And the small one, so a key the page reads off a cut reply is a key
+       this endpoint sets. Both replies, or the new one is unwatched. */
+    if (keys && keys.has('responses') && keys.has('matched')) cutKeys = keys;
   },
   FunctionDeclaration(path) {
     if (path.node.id?.name !== 'buildResponseAggregates') return;
@@ -80,7 +91,18 @@ traverse(serverAst, {
   },
 });
 
-if (!payloadKeys) note('could not find the json({ ok, responses, responsesBySegment, ... }) response in api/admin-data.js, or a spread in it made its keys unknowable');
+if (!payloadKeys) note('could not find the json({ ok, responses, orders, ... }) response in api/admin-data.js, or a spread in it made its keys unknowable');
+if (!cutKeys) note('could not find the ?only=responses reply in api/admin-data.js, the one carrying `responses` and `matched`, so the cut a slicer sends is unwatched');
+else {
+  /* The page reads these three off a cut reply and nothing else would say so
+     if one were renamed: the cut would resolve nobody and the tile would go
+     back to Everyone, which looks like a working control. */
+  const pageSrc = readFileSync('public/admin.html', 'utf8');
+  for (const k of ['responses', 'matched']) {
+    if (!cutKeys.has(k)) note(`the cut reply no longer sets \`${k}\``);
+    if (!new RegExp('d\\.' + k + '\\b').test(pageSrc)) note(`public/admin.html no longer reads \`${k}\` off a cut reply`);
+  }
+}
 if (!responseKeys) note('could not find the object buildResponseAggregates returns in api/admin-data.js, or a spread in it made its keys unknowable');
 
 /* ── WHAT THE ADMIN READS ──────────────────────────────────────────────── */

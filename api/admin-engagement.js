@@ -34,8 +34,10 @@
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { EXERCISES } from './_exercises.js';
 import { resultsNav } from './_lib/results-sections.js';
-import { axisScores, calcDimScores, typeCodeFromAxes } from './_type-engine.js';
 import { fetchProfiles, ownedBy } from './_lib/demo-accounts.js';
+/* The person handle a cut arrives as. Minted by api/admin-explore.js onto
+   every cube row; one implementation, in couple-id.js. */
+import { anonPersonId } from './_lib/couple-id.js';
 import { marketingPageName, marketingPageShort, abbreviate } from './_lib/page-names.js';
 
 /**
@@ -112,21 +114,13 @@ async function all(url, key, path) {
  */
 
 /**
- * One segment value for one person.
- *
- * The demographic fields are columns. The type is scored from the answers with
- * the same functions api/admin-explore.js uses, rather than a second
- * implementation of the same maths.
+ * `typeOf` was here: one segment value for one person, by field name, with
+ * the communication type scored from the answers. Its only caller was the
+ * `field::value` cut, which is gone - the page sends the people a cut keeps
+ * and this endpoint no longer has an opinion about which fields are
+ * sliceable. Deleted rather than left standing: a function that reads like a
+ * feature is the thing this codebase keeps mistaking for one.
  */
-function typeOf(profile, field) {
-  if (field === 'type') {
-    const answers = profile.ex1_answers;
-    if (!answers || !Object.keys(answers).length) return null;
-    const { withdrawScore, openScore } = axisScores(calcDimScores(answers));
-    return typeCodeFromAxes(withdrawScore, openScore);
-  }
-  return profile[field] ?? null;
-}
 
 const DAY = 864e5;
 
@@ -597,16 +591,35 @@ export default async function handler(req) {
     // What it cannot cut: an anonymous visit. A marketing page view has no
     // account attached, by design, so a slice by age leaves it out rather than
     // guessing. The page says so on the tiles it affects.
-    const slice = (() => {
-      let raw = '';
-      try { raw = new URL(req.url).searchParams.get('slice') || ''; } catch { /* no url */ }
-      const at = raw.indexOf('::');
-      if (at < 0) return null;
-      const field = raw.slice(0, at);
-      const value = raw.slice(at + 2);
-      if (!/^[a-z_]+$/.test(field) || !value) return null;
-      return { field, value };
+    /**
+     * ── THE CUT ARRIVES AS PEOPLE, NOT AS A FIELD NAME ───────────────────
+     * Ellie: "comp funnel only has a couple of slicer categories - it should
+     * have way more. Be thorough and fix this throughout the site." And,
+     * earlier: "Just made a slicer selection but the chart didnt change."
+     *
+     * This read `?slice=field::value` and looked the field up on a profile
+     * row. The panel beside it offers a hundred and fifty cuts and all but a
+     * handful are DERIVED - a band over a score, an alignment either side of
+     * a line, a regroup - so they are not a column on anybody. Those arrived
+     * here with field `g`, no profile has a `g`, nobody matched, and every
+     * tile on the page drew a confident zero. Worse than a click that does
+     * nothing, because a zero reads as an answer.
+     *
+     * So the page evaluates the cut, where the cut is defined, and sends the
+     * people it keeps by the handle the cube already puts on every row. Any
+     * cut the panel can express is answerable, and this endpoint no longer
+     * has an opinion about which fields are sliceable.
+     *
+     * `exclude` is the same request inverted, which the page sends when a cut
+     * keeps more than half of them, so the longest list either way is half.
+     */
+    const params = (() => {
+      try { return new URL(req.url).searchParams; } catch { return new URLSearchParams(); }
     })();
+    const asHandles = (v) => String(v || '').split(',').map((x) => x.trim()).filter(Boolean);
+    const cutKeep = asHandles(params.get('people'));
+    const cutDrop = asHandles(params.get('exclude'));
+
 
     /**
      * Before anything is counted: a row belongs to the people the figures are
@@ -640,10 +653,12 @@ export default async function handler(req) {
 
     const people = new Set(profiles.map((p) => p.id));
     let sliced = forPeople(people);
-    if (slice) {
-      const keep = new Set(
-        profiles.filter((p) => String(typeOf(p, slice.field) ?? '') === slice.value).map((p) => p.id),
-      );
+    if (cutKeep.length || cutDrop.length) {
+      const want = new Set(cutKeep), drop = new Set(cutDrop);
+      const keep = new Set(profiles.filter((p) => {
+        const h = anonPersonId(p.id);
+        return want.size ? want.has(h) : !drop.has(h);
+      }).map((p) => p.id));
       sliced = forPeople(keep);
       // An event with no owner cannot be attributed to anybody, so a slice
       // drops it rather than counting it under whichever segment was picked.
@@ -676,7 +691,12 @@ export default async function handler(req) {
       /* False until migration 082 has run, and the page says so when it is. */
       demoFilterApplied,
       window: core.window,
-      slice: slice ? { ...slice, people: sliced.profiles.length } : null,
+      /* What was cut, and how many people came back. `people` of zero against
+         a cut that asked for some is the two ends disagreeing about the
+         handle, which the page reports rather than drawing as a zero. */
+      slice: (cutKeep.length || cutDrop.length)
+        ? { asked: cutKeep.length || null, people: sliced.profiles.length }
+        : null,
       headlines: core.headlines,
       funnel: core.funnel,
       acquisition: core.acquisition,

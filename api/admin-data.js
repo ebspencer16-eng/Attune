@@ -44,14 +44,21 @@ import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { pronounLabel } from './_lib/pronouns.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, guardiansOf } from './_questions.js';
-import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
-import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understandingBandFor } from './_lib/results.js';
+/* `blendedDimScores` was imported here and called by nothing, which in this
+   file reads as a claim: that the admin scores with the blend the app uses.
+   It scores with engineDimScores, self-report, like the rest of this
+   endpoint. An unused import of a scorer is the bug-shaped kind of clutter. */
+import { calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
+import { readAccuracy, ALIGNMENT_THRESHOLD } from './_lib/results.js';
 import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './_lib/expectations.js';
 import { withEffectivePromoCodes, coupleKeyFromProfiles } from './_lib/order-promo.js';
 import { genericLabel } from './_lib/generic-label.js';
 import { categoryAlignment, itemAgreement } from './_lib/resp-agreement.js';
 import { ordersWithoutIdentifying } from './_lib/admin-order-privacy.js';
+/* The anonymous couple key, minted by api/admin-explore.js and read back here
+   to answer a cut. One implementation, imported by both: see couple-id.js. */
+import { anonCoupleId } from './_lib/couple-id.js';
 import { DIM_META } from './_lib/dimensions.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
@@ -825,116 +832,119 @@ export default async function handler(req) {
       }
     }
 
-    const responses = buildResponseAggregates(profiles, sessions);
-    // Precompute the same aggregates for each couple-level segment value, reusing
-    // the exact formulas on a filtered profile set. Only couple-level fields
-    // (shared by both partners) are sliced — individual fields like pronouns/age
-    // don't have a single value for a couple, so slicing couple metrics by them
-    // would be ambiguous.
-    // Annotate each profile with its couple type (sorted pair of both partners'
-    // individual types) so the aggregates can be sliced by couple type. Uses the
-    // same type engine as the cube so values match the slicer's dropdown.
-    // Type with the partner-view blend (same shared engine the app uses), so the
-    // slicer's couple types match what couples see in their results.
-    // Scoring via api/_lib/results.js, the one implementation.
-    const _typeOf = (selfAns, partnerAns) => {
-      if (!selfAns || !Object.keys(selfAns).length) return null;
-      return personResults(selfAns, partnerAns).typeCode;
-    };
+    /**
+     * ── EVERY CUT THESE TILES CAN BE ASKED FOR ────────────────────────────
+     * Ellie: "comp funnel only has a couple of slicer categories - it should
+     * have way more. Be thorough and fix this throughout the site."
+     *
+     * Seven tiles on the Responses page do not filter anything themselves:
+     * raw answers never reach the browser, so they read a bundle computed
+     * here. This endpoint pre-computed one bundle per value of a list of
+     * fields it kept, and that list WAS the cuts those tiles could offer: ten
+     * of the hundred and fifty the taxonomy has, because all but a handful of
+     * cuts are derived from exercise answers rather than stored on anybody.
+     *
+     * Widening the list could never close that gap, and every version of it
+     * was a second copy of which fields are sliceable. So the page sends the
+     * COUPLES a cut keeps, by the anonymous key api/admin-explore.js already
+     * puts on every cube row, and this answers with that bundle. Any cut the
+     * page can express, derived ones included, is answerable now, and the
+     * ordinary load is smaller by however many bundles it used to carry.
+     *
+     * `exclude` is the same request inverted, which the page sends when a cut
+     * keeps more than half the couples: the longest list either way is half.
+     */
+    const coupleIdOf = new Map();
     {
-      const byIdT = {}; profiles.forEach(p => { byIdT[p.id] = p; });
-      const byInviteT = new Map(); sessions.forEach(s => { if (s.invite_code) byInviteT.set(s.invite_code, s); });
-      profiles.forEach(p => {
-        const partner = (p.partner_profile_id && byIdT[p.partner_profile_id]) || (p.invite_code && byInviteT.get(p.invite_code)) || null;
-        // Understanding: how accurately these two read each other, which is a
-        // different question from how different they are. Attached to the
-        // profile so the slicer can cut by it like any other segment.
-        // ── Regrouped cuts: aligned vs misaligned, in tune vs misunderstood ──
-        // Two different questions that are easy to conflate. ALIGNMENT is how
-        // similar their positions are. UNDERSTANDING is how accurately each
-        // reads the other. A couple can be far apart and read each other
-        // perfectly, or nearly identical and misread each other badly.
-        //
-        // Threshold: a gap of 1.0+ on the 1-5 scale, in 3 or more of the 10
-        // dimensions. Deliberately coarse and deliberately provisional. See
-        // the note in the admin UI: this needs revisiting against a real
-        // distribution rather than being treated as settled.
-        const GAP_THRESHOLD = ALIGNMENT_THRESHOLD.gap;
-        const DIM_COUNT_CUTOFF = ALIGNMENT_THRESHOLD.dims;
-        if (partner?.ex1_answers && p.ex1_answers) {
-          const mineScores = calcDimScores(p.ex1_answers);
-          const theirScores = calcDimScores(partner.ex1_answers);
-          let wideDims = 0, scored = 0;
-          for (const d of Object.keys(DIM_ITEMS)) {
-            const x = mineScores[d], y = theirScores[d];
-            if (x == null || y == null) continue;
-            scored++;
-            if (Math.abs(x - y) >= GAP_THRESHOLD) wideDims++;
-          }
-          if (scored) {
-            p.alignment_group = wideDims >= DIM_COUNT_CUTOFF ? 'Misaligned' : 'Aligned';
-            p.wide_gap_dims = wideDims;
-          }
-        }
-        if (partner?.ex1_answers && p.ex1_answers) {
-          const mine = readAccuracy(p.ex1_answers, partner.ex1_answers);      // how well I read them
-          const theirs = readAccuracy(partner.ex1_answers, p.ex1_answers);    // how well they read me
-          if (mine && theirs) {
-            const mean = (mine.meanError + theirs.meanError) / 2;
-            /* The band from the module that defines it, not a second copy of
-               its cut points. This read `mean < 0.5 ? ...` with its own
-               labels while readAccuracy was already returning a band, which is
-               the same shape as this file scoring with a plain average where
-               the engine weights: a figure Ellie trusts, computed by a second
-               rule. */
-            p.understanding = understandingBandFor(mean).label;
-            p.understanding_error = Number(mean.toFixed(2));
-            // How well this person reads their partner, separately from the
-            // couple average, so a lopsided pair is visible.
-            p.reads_partner = readBandFor(mine.meanError).label;
-            p.reads_partner_error = Number(mine.meanError.toFixed(2));
-            p.understanding_lopsided = Math.abs(mine.meanError - theirs.meanError) >= 0.4 ? 'Lopsided' : 'Even';
-            // Same shape as the alignment cut, applied to read error: how many
-            // dimensions either partner has the other wrong about by 1.0+.
-            let misreadDims = 0;
-            for (const d of Object.keys(mine.dimensions || {})) {
-              const a = mine.dimensions[d], b = theirs.dimensions[d];
-              if (!a || !b) continue;
-              if (a.error >= GAP_THRESHOLD || b.error >= GAP_THRESHOLD) misreadDims++;
-            }
-            p.understanding_group = misreadDims >= DIM_COUNT_CUTOFF ? 'Misunderstood' : 'In tune';
-            p.wide_misread_dims = misreadDims;
-            // The dimension this person has their partner most wrong about.
-            p.worst_misread_dim = mine.worst?.[0]?.dim || null;
-          }
-        }
-        const myType = _typeOf(p.ex1_answers, partner ? partner.ex1_answers : null);
-        if (!myType) return;
-        const partnerType = partner ? _typeOf(partner.ex1_answers, p.ex1_answers) : null;
-        if (myType && partnerType) p.couple_type = [myType, partnerType].sort().join('');
-      });
-    }
-    const COUPLE_SEG = ['relationship_status', 'relationship_length', 'children', 'couple_type',
-      // The two regrouped cuts. Both couple-level, so partners share a value.
-      'alignment_group', 'understanding_group',
-      // Understanding cuts. Couple-level, so both partners carry the same value.
-      'understanding', 'understanding_lopsided',
-      // Person-level: this individual's accuracy about their partner.
-      'reads_partner', 'worst_misread_dim'];
-    const responsesBySegment = { '': responses };
-    for (const fld of COUPLE_SEG) {
-      const vals = [...new Set(profiles.map(p => p[fld]).filter(v => v != null && v !== ''))];
-      for (const v of vals) {
-        responsesBySegment[fld + '::' + v] = buildResponseAggregates(profiles.filter(p => p[fld] === v), sessions);
+      const byIdC = {}; profiles.forEach((p) => { byIdC[p.id] = p; });
+      /* The same two facts api/admin-explore.js resolves, read from this
+         endpoint's own queries: is the linked partner in the list, and is
+         there an invited partner who has answered. Only the lookups are
+         local; the rule is in the shared module. */
+      const invited = new Set();
+      for (const sx of (sessions || [])) {
+        if (sx && sx.invite_code && sx.ex1_answers) invited.add(sx.invite_code);
+      }
+      for (const p of profiles) {
+        coupleIdOf.set(p.id, anonCoupleId(p, {
+          partnerPresent: !!(p.partner_profile_id && byIdC[p.partner_profile_id]),
+          invitePresent: !!(p.invite_code && invited.has(p.invite_code)),
+        }));
       }
     }
-
+    const _cutList = (v) => String(v || '').split(',').map((x) => x.trim()).filter(Boolean);
+    const cutWanted = _cutList(url.searchParams.get('couples'));
+    const cutUnwanted = _cutList(url.searchParams.get('exclude'));
+    /**
+     * A cut the page has worked out keeps nobody.
+     *
+     * Stated rather than inferred from an empty list, because an empty list is
+     * also what "no cut" looks like and would answer with everybody. The page
+     * offers a value as soon as one PERSON has it, and these measures count
+     * pairs, so a value only unpaired people have is a real and empty cut.
+     */
+    const cutEmpty = url.searchParams.get('empty') === '1';
+    let cutProfiles = profiles;
+    if (cutEmpty) cutProfiles = [];
+    else if (cutWanted.length || cutUnwanted.length) {
+      const want = new Set(cutWanted), drop = new Set(cutUnwanted);
+      cutProfiles = profiles.filter((p) => {
+        const c = coupleIdOf.get(p.id);
+        /* A couple of one cannot be named, and these measures are all about a
+           pair, so an unpaired person is out of every cut rather than in all
+           of them. */
+        if (!c) return false;
+        return want.size ? want.has(c) : !drop.has(c);
+      });
+    }
+    const responses = buildResponseAggregates(cutProfiles, sessions);
+    /**
+     * A cut asks for one thing, so it is sent one thing.
+     *
+     * Without this a slicer click fetches the orders, the promo codes and
+     * every other measure on the dashboard again in order to read one bundle
+     * out of it. The reads are the same either way; what this saves is the
+     * serialising and the transfer, which is the expensive half.
+     *
+     * It answers before the annotation pass below, which exists only for the
+     * figures the full payload carries.
+     */
+    if (url.searchParams.get('only') === 'responses') {
+      return json({
+        ok: true,
+        demoFilterApplied,
+        responses,
+        /* How many couples the request named were resolved. Two endpoints have
+           to agree about a hash for this to work, which is the exact shape
+           this codebase fails at, so the answer says. A disagreement resolves
+           nothing, and the tile can say it could not cut rather than quietly
+           drawing the figure for everybody. */
+        matched: new Set(cutProfiles.map((p) => coupleIdOf.get(p.id)).filter(Boolean)).size,
+        asked: cutWanted.length || null,
+      });
+    }
+    /**
+     * ── AND WHAT USED TO BE HERE ──────────────────────────────────────────
+     * Seventy lines that annotated every profile with its alignment band, its
+     * understanding band, who reads whom better, the dimension each person
+     * had their partner most wrong about, and their couple type. Nothing read
+     * any of it except the pre-computed bundles above, so it went with them.
+     *
+     * Worth saying what that was, because it was the shape this codebase is
+     * organised against: a SECOND implementation of the alignment and
+     * understanding banding, beside the one in api/admin-explore.js that the
+     * slicer taxonomy is actually built from. They agreed, which is why
+     * nobody had looked. CLAUDE.md records this same file keeping its own
+     * scorer once, differing from the engine by up to 1.25 of a point.
+     *
+     * The bands reach the page from the cube now, one implementation, and a
+     * cut over them is answered by the couple list the page sends.
+     */
     return json({
       ok: true,
       /* False until migration 082 has run, and the page says so when it is. */
       demoFilterApplied,
       responses,
-      responsesBySegment,
       /**
        * Stripped of everything that names a person. Ellie: "To ship a box?
        * What do you need?" Nothing: the Fulfilment page went in 92b3e2fb and

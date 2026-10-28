@@ -712,9 +712,21 @@ for (const name of SENDERS) {
     checked += 1;
     /* To the end of the statement that reads the body, not to the json() call
        itself: fetchAdminData reads it in one .then and checks it in the next,
-       and a window that stopped at the parenthesis called that a miss. */
+       and a window that stopped at the parenthesis called that a miss.
+
+       ── AND BACKWARD TO THE START OF THAT STATEMENT ─────────────────────
+       The window used to begin at the url, so it could only see a wrapper
+       written AFTER the fetch. `noteDemoFilter(await fetch(url).then(...))`
+       is the same rule honoured in the other order, and this reported it as
+       a miss: a matcher that knows one spelling, which is this repo's most
+       common gate fault. Bounded at the nearest `;` or `{` before the url so
+       it cannot reach into the previous statement and find somebody else's
+       call. */
+    const head = adminBare.slice(0, m.index);
+    const from = Math.max(head.lastIndexOf(';'), head.lastIndexOf('{')) + 1;
+    const before = adminBare.slice(from, m.index);
     const semi = after.indexOf(';', json.index);
-    const stmt = after.slice(0, semi < 0 ? json.index + json[0].length : semi);
+    const stmt = before + after.slice(0, semi < 0 ? json.index + json[0].length : semi);
     if (!/noteDemoFilter\s*\(/.test(stmt)) {
       const line = adminBare.slice(0, m.index).split('\n').length;
       fails.push(`admin.html line ${line} reads /api/${name} and does not pass the payload through noteDemoFilter, so that page draws figures that may count demos and says nothing.`);

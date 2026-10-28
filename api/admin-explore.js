@@ -64,6 +64,9 @@ import { demoOwners, ownedBy, selectProfiles, withoutDemoOrders } from './_lib/d
 import { addonsOnOrder, ORDER_ADDONS } from './_lib/order-addons.js';
 import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
 import { EXPLORE_SECTIONS, placeAll } from './_lib/explore-sections.js';
+/* The anonymous couple key. api/admin-data.js reads it back to answer a cut,
+   so the hash cannot live in either endpoint. */
+import { anonCoupleId, anonPersonId } from './_lib/couple-id.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -132,13 +135,6 @@ const shortPole = (t) => {
 };
 // Strip the {userName}/{partnerName} templates to a neutral, name-free label.
 
-// Tiny non-reversible hash of the sorted id pair → anonymous couple key.
-const coupleHash = (a, b) => {
-  const s = [a, b].filter(Boolean).sort().join('|');
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-  return 'c' + h.toString(36);
-};
 
 // Per-respondent "own" fields (the partner-denormalized p_* are added in a second pass).
 function ownFields(p) {
@@ -1045,9 +1041,25 @@ export default async function handler(req) {
         ..._u,
         type: ownType,
         role: p.joined_via_invite ? 'B' : 'A',
+        /**
+         * This person, by a non-reversible handle.
+         *
+         * api/admin-engagement counts what one person does, so a cut there
+         * keeps one partner where the couple key keeps both. It used to take
+         * the cut as `field::value` and look the field up on a profile row,
+         * which honoured seven demographic columns out of the hundred and
+         * fifty cuts the panel offers; a derived cut arrived as field `g` and
+         * matched nobody, so every tile on that page drew a zero.
+         *
+         * The page sends the handles a cut keeps instead. See couple-id.js
+         * for why this is no more revealing than the couple key beside it.
+         */
+        person: anonPersonId(p.id),
         // couple_id is set whenever a partner exists (so Ex2/Ex3 couple visuals
         // pair them), even when a communication type can't be computed.
-        couple_id: hasPartner ? coupleHash(p.id, coupleKey) : null,
+        couple_id: hasPartner
+          ? anonCoupleId(p, { partnerPresent: !!partnerRaw, invitePresent: coupleKey !== partnerId })
+          : null,
         /**
          * The day this account was made, so a tile can carry a period slicer.
          *
@@ -1117,6 +1129,26 @@ export default async function handler(req) {
        * funnel groups on.
        */
       _seg.couple_id = row.couple_id || null;
+      /**
+       * ── AND THE ROW ITSELF, BY INDEX ──────────────────────────────────
+       * Ellie: "comp funnel only has a couple of slicer categories - it
+       * should have way more. Be thorough and fix this throughout the site."
+       *
+       * SEG_KEYS is fifteen fields. A cube row carries about eighty, because
+       * every band, every regroup and every derived cut in the slicer
+       * taxonomy is computed onto it. So anything joined to a person through
+       * this snapshot - an order, a survey answer - could be cut fifteen ways
+       * while the tile beside it offered a hundred and fifty.
+       *
+       * Widening the list is the wrong fix twice over: it is a second copy of
+       * which fields are sliceable, and it would copy eighty values onto
+       * every order row to say what one integer says. The index of the row in
+       * `rows` is the join, and the page already has `rows` in full.
+       *
+       * Deliberately not a profile id. The page is sent none, and an index
+       * into a list it already holds names nobody.
+       */
+      _seg.row_i = rows.length - 1;
       segById[p.id] = _seg;
       if (p.email) segByEmail[String(p.email).toLowerCase()] = _seg;
     }
@@ -1211,6 +1243,10 @@ export default async function handler(req) {
              order whose buyer has no partner linked, which the funnel counts
              as one unit of its own. */
           couple_id: orderCouple,
+          /* Which cube row bought this, so a slicer over PEOPLE can cut
+             orders. Null for an order the profile join could not place, which
+             then answers only through the snapshot fields below. */
+          owner_row: seg.row_i != null ? seg.row_i : null,
           is_physical: !!o.is_physical,
           promo_code: o.promo_code || null,
           addon_workbook: o.addon_workbook || null,
@@ -1265,6 +1301,9 @@ export default async function handler(req) {
       const seg = segById[rid] || {};
       const row = {};
       for (const k of SEG_KEYS) row[k] = seg[k] != null ? seg[k] : null;
+      /* Same join as an order's: the cube row this answer belongs to, so the
+         outcomes tile can be cut by anything a person is. */
+      row.owner_row = seg.row_i != null ? seg.row_i : null;
       row.month = monthOfTs(payload._ts);
       row.ts = payload._ts || null;
       /* Every numeric answer, by its question id, and every choice as given. */

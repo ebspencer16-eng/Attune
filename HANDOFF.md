@@ -4194,3 +4194,70 @@ self-versus-partner value restored before its options exist, both fail the new
 gate. The third, a tile offering cuts it has no bundle for, does NOT fail it,
 because the six keys that list happens to contain all have bundles; that is
 written in the gate rather than papered over.
+
+## 2026-10-28: the cut goes to the server, instead of the server's list coming back
+
+Ellie: "comp funnel only has a couple of slicer categories - it should have
+way more. Be thorough and fix this throughout the site."
+
+**Measured first.** 68 slicers. Most offered 150 cuts. Five groups did not:
+the completion funnel 23, eight Responses tiles 39, Self v partner 39, Couple
+type x outcomes 39, the eleven Feedback tiles 29. `OPTSCAN=1 node
+scripts/probe-admin.mjs` walks the whole admin and prints the count per
+slicer, which is how to re-measure.
+
+**One cause in all five.** Each asked which cuts the server had pre-computed,
+or which fields it had copied onto a joined row, and offered those. Widening
+those lists never finishes: the other 120 cuts are DERIVED, a predicate the
+page holds, and no list of field names can reach them.
+
+**The fix is the direction.** The page evaluates the cut and sends the server
+the people or the couples it keeps, by a non-reversible handle:
+`api/_lib/couple-id.js`, `couple_id` for a pair and `person` for one person,
+minted onto every cube row by `api/admin-explore.js`. `api/admin-data.js`
+answers `?only=responses&couples=` with one bundle; `api/admin-engagement.js`
+takes `?people=`; `api/admin-survey.js` carries the couple key on every
+response so the Feedback page cuts through the cube. Each sends the inverted
+list past the halfway mark so the URL is never longer than half the list.
+
+**A bug found on the way, unreported.** The Engagement page answered every
+derived cut with a confident zero: it looked the field name up on a profile
+row and a derived cut has no field name, so nobody matched. Both ends now
+compare what a cut asked for against what resolved and refuse rather than
+draw.
+
+**Three things got deleted.** `responsesBySegment` and the 70 lines of
+profile annotation that existed only to key it, which was also a second
+implementation of the alignment and understanding banding; the Feedback
+page's own drill-down tree builder; and `typeOf` in admin-engagement.
+
+**The figures after, from one OPTSCAN run.** 68 controls: two are the Explore
+field pickers, which choose a field rather than a cut, and the other 66 offer
+between 115 and 150 cuts. The one at 115 is a tile about the people who did one
+particular exercise, so fewer values occur among them. Before: 23, 29 and 39.
+
+**What the gates say now.** `check-couple-id.mjs` holds the one
+implementation of both handles, the four field names on both sides, and the
+refusal. `check-slicer-click.mjs` drives each slicer TWICE, the second time to
+a derived cut, and fails a page where no tile's figures move at all.
+
+**A background job restored a backup over newer edits.** The clean/planted
+pair ran `cp probe-admin.mjs backup`, planted, ran, and copied the backup
+back. Three edits made to that file WHILE it ran were silently reverted by
+that last copy, and the tell was a probe whose behaviour did not match the
+code I had just written. CLAUDE.md records `git checkout --` destroying
+uncommitted work five times; this is the same thing wearing a job's clothes.
+If a long job holds a backup, either do not touch the file until it finishes,
+or fold the edit into the backup too, which is what fixed it here.
+
+**Harness faults fixed in the same sitting, all of them this file's own
+rules.** A branch row's text is "Demographics›" because the chevron is a
+child element, so an exact compare matched nothing. `want` inside the walk was
+shadowed by the path object, so the one assertion on that line compared an
+option to an object and was false for every pick. The stub's shift was
+`(n % 7) - 3`, which is zero for the ten couples the probe's own cut comes to.
+`has_intimacy` was `i % 5 === 0` while `children` cycles through five values,
+so every intimacy responder had no children and that tile's cut was a no-op in
+the fixture. And the probe read a tile's state only from a canvas, so four
+at-a-glance tiles of figures reported "no chart" and a cut landing on them was
+invisible; two of them drew four dashes on every cut before that was fixed.
