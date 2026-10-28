@@ -41,7 +41,10 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| A164 | **Rebecca and Abram's results will not generate because his exercises read as incomplete. Fixing the break first, then their account.** Your words: "They both completed exercises but their results aren't generating because it says his are incomplete... can we fix the break and fix their account specifically?" My list, in order. (1) Read the completion rule everywhere it is decided, because there are at least two: a `*_completed_at` column and a `completedAt` inside the answers themselves, and a record-shaped exercise uses the second. (2) Enumerate every way a profile can hold a full set of answers and still read as unfinished, rather than guessing which one hit him. (3) Fix whichever it is so that the answers decide, not a separate marker that can drift out of step with them. (4) Prove it by planting a profile with answers and no marker and watching results generate. (5) Only then write the migration for their two accounts, which you run in the Supabase SQL Editor as always. (6) Say precisely what stops this happening again, rather than assuming today's fix covers it. |
+| A164a | **One thing I will need from you before the migration, and it is not a paste of their data.** I cannot see the database, so I will give you a SELECT that answers which of the enumerated cases they are in and prints no names or emails, just counts and yes/no. You run it and tell me the answer. That is enough to write the fix exactly rather than defensively. |
 
 ## 3. For you to review
 
