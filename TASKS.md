@@ -41,7 +41,30 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.** Everything from your last message is built and in section 3.
+| # | What I am doing |
+|--|--|
+| A141 | **Dashboard: the "undefined" legend on how couples found Attune.** It appeared when legends got their colours back: that chart has one unnamed dataset, so Chart.js printed the only name it had. |
+| A142 | **The add-on chart's colours and order did not change, and you approved it anyway.** Correcting it, then re-reading all 36 items of your original list against the live page rather than against my own commits, and saying which others fell through. |
+| A143 | **Expectations modeled on experience: the clusters become the outcome.** Same, shared now one, one now shared, other on the x axis, one line of colour per category. Not classified leaves the chart. |
+| A144 | **Gender roles over generations: retitled, and the two confusing rows explained or renamed.** "Hands that role over" and "leaves that one to their partner" are the same action against two different starting points; if the wording cannot carry that, the rows change. Not classified leaves this one too. |
+| A145 | **Two explanations you asked for, in writing**: why anything is unclassified, and what "other change" actually counts. |
+| A146 | **Expectations All questions: "Responsibilities" after each part-2 section header.** The life and values categories keep their own names. |
+| A147 | **Overall relationship feel distribution: drop the (0), (1) from the column labels.** |
+| A148 | **Intimacy: "Where each group places itself" becomes Avg dimension results**, built like the Communication one so the poles show. Saying first what that tile is actually measuring, because the name should follow the measure. |
+| A149 | **When a disagreement starts: remove the pie's legend.** |
+| A150 | **In the middle of a disagreement, and when it touches something old, become pie charts.** |
+| A151 | **Rename the two written-answer conflict charts** to What makes conflict go better than expected, and What people appreciate about how conflict is handled. |
+| A152 | **Rewrite the code frames behind those two charts so each column reads as an answer to its question.** Two different lists. "Getting through something hard" says nothing, which is the fault to fix. |
+| A153 | **Explore resets to empty when you leave it.** |
+| A154 | **A swap button on Explore for the rows and columns.** |
+| A155 | **Marketing page labels abbreviate to H, OP, BP, WR, IP, FAQ.** |
+| A156 | **A hover over blank space says nothing.** Today an empty bar still answers, which reads as data where there is none. |
+| A157 | **Drop the cover page from the detailed results pages chart.** |
+| A158 | **The detailed results pills are STILL changing other tiles.** I reported this fixed as A125 and you are seeing it again, so the first fix was not the cause. Finding what actually links them, and checking the same for every slicer. |
+| A159 | **Slicers reset to Everyone when you open a page.** Your words: very important. |
+| A160 | **Testimonials: the manual "add a theme" box goes, and themes are applied automatically**, as many as fit. Then a tab of recommended content by category, which is the thing the themes are for. |
+| A140 | **Expectations alignment gets your rule: misaligned means under 50% alignment in two or more categories.** Today it is one distance across both halves against a 0.2 line, which is why nobody came out aligned. |
+| V3 | **The two-surface comparison, since you have left the call to me.** I will say what it would catch that the eighteen existing gates cannot before I build it, and build it if that answer is worth the work. |
 
 ## 3. For you to review
 
@@ -50,20 +73,6 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A135 | **Every banner takes white type.** What it costs, since you should have the number rather than my judgement: white reads 4.1 to 4.7 against the four darker bands, 3.5 on Relationship Reflection, 2.9 on Conflict Patterns and 1.9 on Engagement, where 4.5 is the readable line at that size. Darkening those three section colours is one line and would move them everywhere else that colour is drawn, so it is yours to call. |
-| A136 | **Engage/Withdraw and Open/Guarded are in Communication Styles > Typing**, beside the two types they make. |
-| A137 | **Other cuts is Engagement, with your four.** Depth in the portal as top 25%, middle 50% and bottom 25% by time on app pages; read an article or not; left a survey response or not; and NPS as promoter, passive or detractor. Somebody with no recorded time is left out of the bands rather than counted as a light user. |
-| A139 | **The legends have their colours back, and it was two faults at once.** A dash is painted in the line colour, which a bar chart has not got and a pie sets to white; and a bar's line width is zero, so even the right colour drew nothing. Every bar and pie legend on the page was affected, not only the inheritance charts. |
-| A138 | **A pole label that trails off gives you the whole thing on hover**, through the page's own tooltip rather than the browser's slow one, in all three views of All questions. |
-| A140 | **Your A112 question, and the answer is the other way round.** Expectations had no ALIGNED couples: every couple's expectations distance was over the line, which is why that tile was blank and the misaligned one was not. The dashboard's 3 of 6 is communication. Both tiles now name the threshold when a side is empty, so the next empty one explains itself. |
-| S81 | **Twenty kilobytes of the admin could not be reached, and two pieces of it mattered.** Seven functions left behind by the Beta Codes and Fulfilment pages, each writing into an element deleted months ago. One was the promo Status toggle's old twin: nothing could call it, and the fix I reported to you as A86 went into it rather than into the live toggle, which already worked. The other drew a buyer's name, address and phone, one missing id away from working, under the banner saying this page holds none of that. All seven are gone. |
-| S85 | **The Testimonials page printed stored values where every other page prints words.** "she/her", "none", "friend" against Woman, None, Friend/family, in the line under each answer and in the filter checkboxes. It was invisible to me because the test data invented pretty values, so the conversion had nothing to do; the test data now stores what the product stores. |
-| S85b | **165 controls in the admin had no name a screen reader could say**: 120 "add a theme" boxes, 35 question-weight sliders, 10 axis sliders. The rule exists and has only ever been applied to the 38 public pages, never to the admin, which is the surface with the most controls on it. Named, and a gate now walks all 13 admin pages. |
-| S85c | **A failed read of the journal table would have said nobody journals.** The error was never tested, the catch could not fire, and the comment excusing it named a migration that adds no column. It says so in the reply now, like every other read in that file, and the gate's exemption for "a documented migration window" is gone: nothing else used it. |
-| S82 | **Every slicer on every admin page, audited leaf by leaf: all clean.** 136 cuts on a demographics tile, 140 on Responses, 29 on Feedback, with no cut that matches nobody, none that matches everybody, no branch with nothing under it, and no computed cut whose rule was never registered. |
-| S81b | **Four holes in the test data, each of which hid a page from me.** The survey endpoint was never stubbed, so the whole Feedback page was an empty grid; `surveys` was missing, so Couple type x outcomes drew its empty state; `dataQuality` was missing, so that strip read five dashes; and conflict answers only existed for half the people while the option index was that same number, so one side of every two-option conflict question was never stored. |
-| A107 | **Package split over time and revenue contribution sit side by side, four lines each.** A stack said how many altogether and hid how any one package was doing. |
-| V3 | **What I did not prove.** Nothing renders the same couple on both surfaces and compares the result. Every check above compares a rule or a list, not two pictures. Building that needs the app served through its web build, which is a real piece of work. Say the word if you want it. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -75,6 +84,18 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A135 | **Every top-level banner takes white type. White reads 4.1 to 4.7 on the four darker bands, 3.5 on Relationship Reflection, 2.9 on Conflict Patterns and 1.9 on Engagement.** |
+| A136 | **Engage/Withdraw and Open/Guarded moved into Communication Styles, Typing, beside the two types they are the axes of.** |
+| A137 | **The catch-all section became Engagement, with depth by time in the portal, read an article, left a survey response, and NPS. No recorded time means no band rather than the bottom one.** |
+| A139 | **The legends lost their colour twice over: a dash is painted in the line colour, which a bar has not got, and a bar's line width is zero. Every bar and pie legend was affected.** |
+| A138 | **A pole label that trails off gives the whole thing on hover, in all three views of All questions, through the page's own tooltip.** |
+| A107 | **Package split over time and revenue contribution sit side by side, four lines each, instead of one stack that hid how any single package was doing.** |
+| S81 | **Twenty kilobytes of unreachable admin code removed. One piece was the promo toggle's dead twin, which had taken a repair meant for the live one; another drew a buyer's name and address.** |
+| S85 | **The Testimonials page printed stored values, she/her and none and friend, where every other page says Woman, None, Friend/family. The test data had hidden it by inventing pretty values.** |
+| S85b | **165 admin controls had no name a screen reader could say. The rule existed for the 38 public pages and had never been applied to the admin.** |
+| S85c | **A failed read of the journal table would have reported that nobody journals. The error was never tested and the comment excusing it named a migration that adds no column.** |
+| S82 | **Every slicer on every admin page audited leaf by leaf: no cut that matches nobody, none that matches everybody, no empty branch, no computed cut whose rule was never registered.** |
+| S81b | **Four holes in the test data, each hiding a page: no survey stub, no surveys array, no dataQuality, and conflict answers that existed only for half the people on the same parity as the option index.** |
 | A121 | **Line chart legends became a dash rather than an outlined box.** The colour it lost on bar and pie charts came back as A139. |
 | A133 | **The slicer taxonomy, six sections deep, as a drill-down with coloured banners and a back arrow, on every tile slicer, both Explore pickers and the Feedback tiles. Computed cuts for the rows no column stores.** |
 | A133b | **Three inferences the taxonomy needed and nothing stored: same-gender guardians, raised by someone other than a parent, and whether somebody kept, swapped or widened the roles they grew up with.** |
