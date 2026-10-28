@@ -2,6 +2,18 @@
 -- Attune — Supabase Schema
 -- Run this in the Supabase SQL Editor (Project → SQL Editor)
 -- Safe to run in order; each block is idempotent.
+--
+-- ── IT WAS NOT RUNNABLE AT ALL, AND SAID IT WAS ─────────────────────────
+-- Seven statements read `create policy if not exists`, which PostgreSQL has
+-- never had: CREATE POLICY takes no IF NOT EXISTS clause. So this file stopped
+-- at its first policy, on line 25, and the two lines above were the reason
+-- nobody checked. An eighth error sat behind the first: a FOR INSERT policy
+-- carrying a USING clause, which it may not.
+--
+-- Idempotence is DROP POLICY IF EXISTS followed by CREATE POLICY, which is
+-- what every policy here does now. Found by parsing every .sql file in the
+-- repo with libpg_query, the parser Postgres itself uses: 112 parsed and this
+-- one did not.
 -- ============================================================
 
 create table if not exists public.profiles (
@@ -22,9 +34,11 @@ create table if not exists public.profiles (
   updated_at            timestamptz default now()
 );
 alter table public.profiles enable row level security;
-create policy if not exists "profiles_self" on public.profiles
+drop policy if exists "profiles_self" on public.profiles;
+create policy "profiles_self" on public.profiles
   using (auth.uid() = id) with check (auth.uid() = id);
-create policy if not exists "profiles_service" on public.profiles using (true) with check (true);
+drop policy if exists "profiles_service" on public.profiles;
+create policy "profiles_service" on public.profiles using (true) with check (true);
 
 create table if not exists public.partner_sessions (
   invite_code       text primary key,
@@ -37,9 +51,14 @@ create table if not exists public.partner_sessions (
   created_at        timestamptz default now()
 );
 alter table public.partner_sessions enable row level security;
-create policy if not exists "partner_sessions_write" on public.partner_sessions
-  for insert using (true) with check (true);
-create policy if not exists "partner_sessions_service" on public.partner_sessions using (true) with check (true);
+drop policy if exists "partner_sessions_write" on public.partner_sessions;
+/* FOR INSERT takes WITH CHECK and never USING: there is no existing row to
+   test. It read `for insert using (true) with check (true)`, which is the
+   second syntax error in this file and was hidden behind the first. */
+create policy "partner_sessions_write" on public.partner_sessions
+  for insert with check (true);
+drop policy if exists "partner_sessions_service" on public.partner_sessions;
+create policy "partner_sessions_service" on public.partner_sessions using (true) with check (true);
 
 create table if not exists public.orders (
   id                        bigserial primary key,
@@ -68,7 +87,8 @@ create table if not exists public.orders (
   created_at                timestamptz default now()
 );
 alter table public.orders enable row level security;
-create policy if not exists "orders_service" on public.orders using (true) with check (true);
+drop policy if exists "orders_service" on public.orders;
+create policy "orders_service" on public.orders using (true) with check (true);
 
 create table if not exists public.feedback_submissions (
   id             bigserial primary key,
@@ -81,7 +101,8 @@ create table if not exists public.feedback_submissions (
   submitted_at   timestamptz default now()
 );
 alter table public.feedback_submissions enable row level security;
-create policy if not exists "feedback_service" on public.feedback_submissions using (true) with check (true);
+drop policy if exists "feedback_service" on public.feedback_submissions;
+create policy "feedback_service" on public.feedback_submissions using (true) with check (true);
 
 create table if not exists public.lmft_requests (
   id             bigserial primary key,
@@ -97,7 +118,8 @@ create table if not exists public.lmft_requests (
   created_at     timestamptz default now()
 );
 alter table public.lmft_requests enable row level security;
-create policy if not exists "lmft_requests_service" on public.lmft_requests using (true) with check (true);
+drop policy if exists "lmft_requests_service" on public.lmft_requests;
+create policy "lmft_requests_service" on public.lmft_requests using (true) with check (true);
 
 create index if not exists profiles_invite_code_idx on public.profiles(invite_code);
 create index if not exists profiles_checkin_6mo_idx on public.profiles(checkin_6mo_sent_at);

@@ -36,7 +36,33 @@ const TASKS = `${ROOT}TASKS.md`;
  */
 const OPEN = /<!-- SQL ([\w.-]+): written by scripts\/build-tasks-sql\.mjs\. Do not edit\. -->\n```sql\n([\s\S]*?)```\n<!-- \/SQL -->/g;
 
-export function fill(doc, read = (f) => readFileSync(`${ROOT}supabase/migrations/${f}`, 'utf8')) {
+/**
+ * Where a named block's SQL comes from.
+ *
+ * ── TWO FOLDERS, BECAUSE THERE ARE TWO KINDS OF PASTE ─────────────────────
+ * This read `supabase/migrations/` and nothing else, while the note above
+ * already said what the second block is for: "a new read-only question that
+ * cannot wait behind it". A read-only question is not a migration and does
+ * not belong in that folder; diagnostics live in supabase/diagnostics, which
+ * has its own gate holding every file there to writing nothing.
+ *
+ * So the resolver looks in both, migrations first, and says which folder it
+ * could not find the name in rather than throwing a bare ENOENT at somebody
+ * who mistyped a filename in an HTML comment.
+ */
+const SQL_DIRS = ['supabase/migrations', 'supabase/diagnostics'];
+function readNamedSql(file) {
+  const tried = [];
+  for (const dir of SQL_DIRS) {
+    const path = `${ROOT}${dir}/${file}`;
+    tried.push(`${dir}/${file}`);
+    try { return readFileSync(path, 'utf8'); } catch (e) { /* next folder */ }
+  }
+  throw new Error(`TASKS.md names the SQL block "${file}" and it is in neither `
+    + `${SQL_DIRS.join(' nor ')}. Tried: ${tried.join(', ')}`);
+}
+
+export function fill(doc, read = readNamedSql) {
   OPEN.lastIndex = 0;
   const names = [...doc.matchAll(OPEN)].map((m) => m[1]);
   if (!names.length) return { doc, name: null, names: [], changed: false };

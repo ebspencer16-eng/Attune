@@ -1014,6 +1014,37 @@ and the one that was not said nothing either way. If a scan's scope is
 deliberate, write the reason beside it, the way check-stripped-fields does:
 "Endpoints are the top level of api/. Underscore files are libraries."
 
+**A file that says it is safe to paste is a file nobody tries.**
+supabase/schema.sql opens with "Run this in the Supabase SQL Editor. Safe to
+run in order; each block is idempotent." It could not be run at all: seven
+statements read `create policy if not exists`, and PostgreSQL has never had an
+IF NOT EXISTS clause on CREATE POLICY, so it stopped at line 25. An eighth
+error sat behind the first, invisible until it was fixed, a FOR INSERT policy
+carrying a USING clause.
+
+Those two lines of header are the whole reason it survived. The only person who
+would ever paste that file is Ellie, setting up a new project, and what she
+would get is a syntax error she cannot act on. Idempotence for a policy is
+DROP POLICY IF EXISTS then CREATE POLICY, which is what they all do now.
+
+Found by installing pglast, which wraps libpg_query, the parser Postgres itself
+uses, and parsing every .sql file: 112 parsed and that one did not. The command
+is in HANDOFF.md rather than in the suite, because a Python parser in a
+JavaScript build is a worse trade than writing down how to take the figure
+again. check-schema-runnable holds the PROMISE instead of the typo: every
+CREATE in that file has to be idempotent by one of the two mechanisms
+PostgreSQL has. An unguarded CREATE TRIGGER fails it, which is the next version
+of the same mistake, because triggers have no IF NOT EXISTS either.
+
+And that gate passed for the wrong reason on its first run, which is the part
+worth keeping. It stripped `--` comments and not `/* */`, and the file has a
+block comment directly above a CREATE POLICY, so that statement's text began
+with the comment, `startsWith('create ')` was false, and the whole policy was
+skipped: it counted 18 CREATEs where there are 19. The plant that put the old
+syntax error back into that exact statement walked straight through. A gate
+passing for the wrong reason, inside the gate written to stop a FILE passing
+for the wrong reason, and only planting found it.
+
 **A gate that reads a comment as code punishes a file for saying what went
 wrong.** check-style-codes flagged track-type.js for carrying a four-letter code
 pattern, and the pattern it found was quoted inside the comment explaining that

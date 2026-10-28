@@ -10,6 +10,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A164 | **Run the query in the block below and tell me the `verdict` column for each of them. That is all I need.** It is in section 1 under "One thing to run", it goes in the Supabase SQL Editor, and it writes nothing: put either of their email addresses where it says `REPLACE_WITH_THEIR_EMAIL` and run it. **Why I am asking instead of just fixing it:** four different things produce "his are incomplete" and they need four different fixes, and `verdict` says which one it is in words. **What I expect it to say:** ANSWERED EVERYTHING, NEVER MARKED FINISHED. Reopening a finished Conflict Patterns or Physical Intimacy and answering one more question used to wipe the finished marker. That was possible from 17 June to 26 September and is shut now, so you are right, but an account damaged inside that window stays damaged until something repairs it. **If that is what it says**, the fix is code and not a database write: those two exercises would count as finished when all their questions are answered, 12 for Conflict and 16 for Intimacy, read from the question sets. Their results open the moment it deploys and there is nothing for you to run. |
+
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -19,6 +21,143 @@ Every code block says which window it goes in, above the block.
 | O16 | Download numbers need an App Store Connect key. After launch. |
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
+
+### One thing to run, for A164
+
+**This goes in the Supabase SQL Editor, not Terminal.** Copy the whole block,
+paste it there, find `REPLACE_WITH_THEIR_EMAIL` in it, which appears once, put
+either of their email addresses there, and run it. It reads only; it writes nothing.
+
+You get one row per person. The column to read is **`verdict`**, which says in
+words what is wrong; `exercises` beside it shows the five exercises and where
+each one stopped. Tell me those two and I will write the fix.
+
+<!-- SQL results-will-not-open.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- Why a couple's results will not open.
+--
+-- Run this in the Supabase SQL Editor. It reads only; it writes nothing, and
+-- it creates nothing: one SELECT, start to finish.
+--
+-- Find REPLACE_WITH_THEIR_EMAIL below, which appears once, and put either
+-- partner's email address there. Then run it. It finds the other half of the
+-- couple itself. One row per person, and the column that answers it is
+-- `verdict`.
+--
+-- It reports what the product reads and does not try to decide: the rule for
+-- when results open is api/_lib/results-gate.js and the rule for whether an
+-- exercise is finished is api/_exercises.js. The long version of why those two
+-- are not restated here is in HANDOFF.md.
+
+with asked as (select lower('REPLACE_WITH_THEIR_EMAIL') as email),
+
+-- Both halves of the couple, plus any duplicate account for either of them,
+-- because a signup outside the checkout path is how a second account happens.
+--
+-- The answer counts are taken here, once, each guarded on the value actually
+-- being an object. jsonb_object_keys raises on a scalar, and an error message
+-- in place of an answer is the worst outcome this query has; these accounts
+-- did not come through the normal path, which is where odd data lives.
+people as (
+  select
+    p.*,
+    case when jsonb_typeof(p.ex1_answers) = 'object'
+         then (select count(*)::int from jsonb_object_keys(p.ex1_answers)) else 0 end as n_ex1,
+    case when jsonb_typeof(p.ex2_answers) = 'object'
+         then (select count(*)::int from jsonb_object_keys(p.ex2_answers)) else 0 end as n_ex2,
+    case when jsonb_typeof(p.ex3_answers) = 'object'
+         then (select count(*)::int from jsonb_object_keys(p.ex3_answers)) else 0 end as n_ex3,
+    case when jsonb_typeof(p.intimacy_data -> 'answers') = 'object'
+         then (select count(*)::int from jsonb_object_keys(p.intimacy_data -> 'answers')) else 0 end as n_intimacy,
+    case when jsonb_typeof(p.conflict_data -> 'answers') = 'object'
+         then (select count(*)::int from jsonb_object_keys(p.conflict_data -> 'answers')) else 0 end as n_conflict
+  from public.profiles p, asked a
+  where lower(p.email) = a.email
+     or p.id in (select partner_profile_id from public.profiles q, asked b
+                 where lower(q.email) = b.email)
+     or p.partner_profile_id in (select id from public.profiles q, asked c
+                                 where lower(q.email) = c.email)
+),
+
+-- An exercise is finished when its answers column has any keys, except the two
+-- stored as a record, which are finished only when the record carries
+-- completedAt. Conflict Patterns is 12 questions and Physical Intimacy is 16;
+-- those two counts are a note, not the rule, and the lists live in
+-- api/_conflict-questions.js and api/_intimacy-questions.js.
+per_exercise as (
+  select p.id, 'Communication' as exercise, p.n_ex1 as answers, null::int as expected,
+         case when p.ex1_answers is null then 'NOT STARTED'
+              when p.n_ex1 = 0 then 'NOT AN ANSWER SET'
+              else 'FINISHED' end as state
+  from people p
+  union all
+  select p.id, 'Expectations', p.n_ex2, null,
+         case when p.ex2_answers is null then 'NOT STARTED'
+              when p.n_ex2 = 0 then 'NOT AN ANSWER SET'
+              else 'FINISHED' end
+  from people p
+  union all
+  select p.id, 'Reflection', p.n_ex3, null,
+         case when p.ex3_answers is null then 'NOT STARTED'
+              when p.n_ex3 = 0 then 'NOT AN ANSWER SET'
+              else 'FINISHED' end
+  from people p
+  union all
+  select p.id, 'Physical Intimacy', p.n_intimacy, 16,
+         case when p.intimacy_data is null then 'NOT STARTED'
+              when p.intimacy_data ->> 'completedAt' is not null then 'FINISHED'
+              else 'ANSWERED, NOT MARKED' end
+  from people p
+  union all
+  select p.id, 'Conflict Patterns', p.n_conflict, 12,
+         case when p.conflict_data is null then 'NOT STARTED'
+              when p.conflict_data ->> 'completedAt' is not null then 'FINISHED'
+              else 'ANSWERED, NOT MARKED' end
+  from people p
+)
+
+select
+  p.name,
+  p.email,
+  -- The one column to read. Anything but the last line is the answer.
+  case
+    when (select count(*) from public.profiles d where lower(d.email) = lower(p.email)) > 1
+      then 'TWO ACCOUNTS FOR THIS PERSON'
+    when p.partner_profile_id is null
+      then 'NO PARTNER LINKED'
+    when not exists (select 1 from public.profiles x where x.id = p.partner_profile_id)
+      then 'PARTNER LINK POINTS AT NOTHING'
+    when exists (select 1 from per_exercise e where e.id = p.id
+                   and e.state = 'ANSWERED, NOT MARKED' and e.answers >= e.expected)
+      then 'ANSWERED EVERYTHING, NEVER MARKED FINISHED'
+    when exists (select 1 from per_exercise e where e.id = p.id
+                   and e.state = 'ANSWERED, NOT MARKED')
+      then 'STOPPED PART WAY THROUGH'
+    when exists (select 1 from per_exercise e where e.id = p.id
+                   and e.state = 'NOT AN ANSWER SET')
+      then 'AN ANSWERS COLUMN HOLDS SOMETHING THAT IS NOT ANSWERS'
+    -- Not "all is well": it means this query found nothing, which is itself
+    -- worth knowing because it rules the others out.
+    else 'NOTHING THIS QUERY CAN SEE'
+  end as verdict,
+  -- And the detail behind it, one line per exercise.
+  (select string_agg(e.exercise || ': ' || e.state
+                     || case when e.expected is null then ''
+                             else ' (' || e.answers || ' of ' || e.expected || ')' end,
+                     '  |  ' order by e.exercise)
+     from per_exercise e where e.id = p.id) as exercises,
+  p.pkg,
+  p.is_comp,
+  p.joined_via_invite,
+  (select count(*) from public.partner_sessions s where s.invite_code = p.invite_code) as rows_in_old_table,
+  (select count(*) from public.orders o
+    where o.user_id = p.id
+       or (p.email is not null and lower(o.buyer_email) = lower(p.email))) as their_orders,
+  p.id
+from people p
+order by p.created_at;
+```
+<!-- /SQL -->
 
 
 ---
@@ -41,10 +180,7 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| A164 | **Rebecca and Abram's results will not generate because his exercises read as incomplete. Fixing the break first, then their account.** Your words: "They both completed exercises but their results aren't generating because it says his are incomplete... can we fix the break and fix their account specifically?" My list, in order. (1) Read the completion rule everywhere it is decided, because there are at least two: a `*_completed_at` column and a `completedAt` inside the answers themselves, and a record-shaped exercise uses the second. (2) Enumerate every way a profile can hold a full set of answers and still read as unfinished, rather than guessing which one hit him. (3) Fix whichever it is so that the answers decide, not a separate marker that can drift out of step with them. (4) Prove it by planting a profile with answers and no marker and watching results generate. (5) Only then write the migration for their two accounts, which you run in the Supabase SQL Editor as always. (6) Say precisely what stops this happening again, rather than assuming today's fix covers it. |
-| A164a | **One thing I will need from you before the migration, and it is not a paste of their data.** I cannot see the database, so I will give you a SELECT that answers which of the enumerated cases they are in and prints no names or emails, just counts and yes/no. You run it and tell me the answer. That is enough to write the fix exactly rather than defensively. |
+**Nothing open.**
 
 ## 3. For you to review
 
@@ -53,6 +189,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A164b | **Found on the way, and unrelated to them: the database schema file could not be run at all, and said it could.** `supabase/schema.sql` opens with "Run this in the Supabase SQL Editor. Safe to run in order; each block is idempotent." Seven of its statements used a form of CREATE POLICY that PostgreSQL has never had, so it stopped at line 25 with a syntax error, and an eighth error sat hidden behind the first. If you had ever pasted it, setting up a new project or restoring one, you would have got an error you could not act on. Fixed, and the file's own promise is now checked by a gate: every CREATE in it has to be safe to run twice. Six planted bugs fail it, including the next version of the same mistake. |
+
 | A163 | **Scan done. Five real bugs, all fixed, and one gap that needs your call.** Clean: all 314 gates, the app's typecheck, and every one of the 62 API routes asked from outside the live site with no credentials (28 answered "not allowed", 23 "wrong method", 9 public, 2 "bad request", and no server errors, which is the measurement that tells a rejection from a crash). The five are A163a to A163e below. |
 | A163a | **An exercise could un-finish itself, silently.** Saving progress on Conflict Patterns or Physical Intimacy first reads what is already stored, so a half-answered save cannot wipe a completion. That read's failure was not checked, and the database returns its errors here rather than throwing, so a rejected query read as "nothing was stored" and the completion was overwritten with the half-answered record. The couple's results would have closed again. It now saves nothing and says so, because the app autosaves again a moment later and an erased completion is not recoverable. |
 | A163b | **An invited partner could silently inherit less than you paid for.** Partner B's access is built by unioning every one of Partner A's orders, matched by account and also by email because a guest checkout has no account on it. The email lookup's failure was not checked while both order lookups beside it were, so a rejected query quietly dropped exactly the guest-checkout orders that branch exists to find. Both now fail loudly instead. |

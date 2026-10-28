@@ -4337,3 +4337,84 @@ reads looked for `data = []` defaults, which is not how these files are
 written: zero hits, and the honest spelling (`{ data: name }` with no error
 bound) had seventeen. Before believing a zero, print how the thing being
 counted is usually spelled.
+
+## 2026-10-28: Rebecca and Abram, and a schema file that could not be run
+
+Ellie: "They both completed exercises but their results aren't generating
+because it says his are incomplete... can we fix the break and fix their
+account specifically?"
+
+**Blocked on one read-only query, deliberately.** Four different things produce
+"his are incomplete" and they need four different fixes, so
+`supabase/diagnostics/results-will-not-open.sql` prints the facts the gate
+reads and stops there. It does NOT re-implement resultsGate in SQL: a second
+implementation that agreed on the day it was written would drift, and the SQL
+would be the copy nobody re-checked. The four causes are in its header.
+
+**The rule, for the next person.** `isExerciseDone` in api/_exercises.js is the
+one answer. A plain answers column is finished when it has any keys at all; a
+RECORD column, which is Physical Intimacy and Conflict Patterns, is finished
+only when `completedAt` is set. So a record can hold a complete set of answers
+and read as unfinished for ever, and that is the likely cause here.
+
+**The window, which answers her third question.** Reopening a finished
+record-shaped exercise and answering one question used to write a record with
+no completedAt over the top. The guard against that shipped 2026-09-26
+(96b52d73); intimacy shipped 2026-06-17 and Conflict Patterns 2026-09-01. So
+the window was 17 June to 26 September, it is shut, and today's fix to
+save-exercise closed the remaining case where the guard's own read failed. An
+account damaged inside the window stays damaged until something repairs it,
+which is why this is a repair job and not a regression.
+
+**The fix that is ready but not written.** For that cause, code rather than a
+migration: a record-shaped exercise counts as finished when every one of its
+questions is answered, 12 for conflict and 16 for intimacy, read from the
+question sets. It repairs everyone in the window on deploy with nothing for
+Ellie to run. Not written yet, because writing a fix for a cause nobody has
+established is how the wrong thing gets fixed confidently.
+
+**Found on the way: supabase/schema.sql could not be run at all.** Its header
+says "Run this in the Supabase SQL Editor. Safe to run in order; each block is
+idempotent." Seven statements used `create policy if not exists`, which
+PostgreSQL has never had, so the file stopped at line 25 on a syntax error, and
+an eighth error was hidden behind the first: a FOR INSERT policy carrying a
+USING clause. Both fixed, with every policy now DROP IF EXISTS then CREATE,
+which is the idempotence PostgreSQL actually offers. The parse tree confirms
+all seven policies kept their name, table, command and clauses.
+
+Found by installing pglast, which wraps libpg_query, the parser Postgres
+itself uses, and parsing every .sql file in the repo. 112 parsed and schema.sql
+did not. It is NOT wired into the suite, because this is a JavaScript project
+and a Python parser in the build is a worse trade than writing the command
+down:
+
+    python3 -m pip install --user pglast
+    python3 - <<'PY'
+    import glob, pglast
+    for p in sorted(glob.glob('supabase/**/*.sql', recursive=True)):
+        try: pglast.parse_sql(open(p, encoding='utf8').read())
+        except Exception as e: print(p, str(e).splitlines()[0])
+    PY
+
+113 of 113 parse today. `check-schema-runnable.mjs` holds the promise rather
+than the typo: every CREATE in schema.sql has to be idempotent, by IF NOT
+EXISTS or by a DROP IF EXISTS immediately before. Six plants fail it, including
+an unguarded CREATE TRIGGER, which is the next version of the same mistake
+because triggers have no IF NOT EXISTS either.
+
+**And the gate I wrote for that passed for the wrong reason first.** It
+stripped `--` comments and not `/* */`, and schema.sql has a block comment
+directly above a CREATE POLICY. So that statement's text began with the
+comment, `startsWith('create ')` was false, the policy was skipped entirely,
+the count read 18 CREATEs where there are 19, and the plant putting the old
+syntax error back into that exact statement walked through. A gate passing for
+the wrong reason, inside the gate written to stop a file passing for the wrong
+reason. Only planting found it.
+
+**Two other things worth keeping.** `check-migration-diagnostic` held one file
+to "this only reads" while three files in that folder make the claim; it holds
+the folder now, and a write planted into either of the other two fails it. And
+`build-tasks-sql.mjs` resolved block names from `supabase/migrations/` only,
+while its own header said the second block is for "a new read-only question":
+it reads both folders now, so a diagnostic can be inline in TASKS.md without
+being a hand-pasted copy.

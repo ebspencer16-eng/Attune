@@ -128,31 +128,63 @@ if (rows.length && rows.length < named.size - 1) {
 }
 
 /**
- * The file must read and never write. It is handed to Ellie to paste.
+ * A diagnostic must read and never write. They are handed to Ellie to paste.
  *
  * Checked on each statement's LEADING keyword, not by looking for a verb beside
  * a noun. The first version asked for `update` followed by one of into/table/
  * from, and `update public.profiles set is_comp = true` sailed past it, which was
  * the plant. A statement's kind is its first word.
+ *
+ * ── EVERY FILE IN THE FOLDER, NOT JUST THIS ONE ───────────────────────────
+ * This held `migrations-actually-run.sql` alone, because that is the file the
+ * rest of the gate is about. Two others sit beside it and each one's header
+ * makes the same promise in the same words, "it reads only; it writes
+ * nothing", with nothing checking either. A rule enforced for one file is not
+ * enforced: this repo's most repeated finding, and the reason the mobile menu
+ * was unreachable on every phone while 29 pages of chrome matched.
+ *
+ * The folder is the surface, so the folder is what is checked.
  */
 const WRITES = /^(insert|update|delete|drop|alter|truncate|create|grant|revoke|call|do)\b/i;
-const statements = sql
-  .split('\n')
-  .filter((l) => !/^\s*--/.test(l))
-  .join('\n')
-  .split(';')
-  .map((x) => x.trim())
-  .filter(Boolean);
-for (const st of statements) {
-  if (WRITES.test(st)) {
-    fails.push(`${DIAGNOSTIC} contains a statement that writes:\n      `
-      + `${st.split('\n')[0].slice(0, 80)}\n      Diagnostics are pasted into the`
-      + ' SQL editor to find out what is true, and a write in one is a change'
-      + ' nobody asked for.');
+const readsOnly = (name, text) => {
+  const statements = text
+    .split('\n')
+    .filter((l) => !/^\s*--/.test(l))
+    .join('\n')
+    .split(';')
+    .map((x) => x.trim())
+    .filter(Boolean);
+  if (!statements.length) {
+    fails.push(`${name} has no statements in it at all.`);
+    return 0;
   }
+  for (const st of statements) {
+    if (WRITES.test(st)) {
+      fails.push(`${name} contains a statement that writes:\n      `
+        + `${st.split('\n')[0].slice(0, 80)}\n      Diagnostics are pasted into the`
+        + ' SQL editor to find out what is true, and a write in one is a change'
+        + ' nobody asked for.');
+    }
+  }
+  return statements.length;
+};
+
+let checkedFiles = 0;
+let checkedStatements = 0;
+for (const f of readdirSync(join(ROOT, 'supabase/diagnostics')).sort()) {
+  if (!f.endsWith('.sql')) continue;
+  checkedFiles += 1;
+  checkedStatements += readsOnly(
+    `supabase/diagnostics/${f}`,
+    f === DIAGNOSTIC.split('/').pop() ? sql : readFileSync(join(ROOT, 'supabase/diagnostics', f), 'utf8'),
+  );
 }
-if (!statements.length) {
-  fails.push(`${DIAGNOSTIC} has no statements in it at all.`);
+/* A folder that has lost its files would otherwise pass every assertion in
+   this gate by having nothing to make. */
+if (checkedFiles < 2) {
+  fails.push(`only ${checkedFiles} diagnostic(s) found under supabase/diagnostics.`
+    + ' This gate has lost its subject, and a gate that has lost its subject must'
+    + ' never report success.');
 }
 
 if (fails.length) {
@@ -161,4 +193,5 @@ if (fails.length) {
   process.exit(1);
 }
 console.log(`[check-migration-diagnostic] all ${tolerated.size} migrations the code`
-  + ' tolerates being absent are asked about, every one exists, and the diagnostic only reads.');
+  + ' tolerates being absent are asked about, every one exists, and all'
+  + ` ${checkedFiles} diagnostics (${checkedStatements} statements) only read.`);
