@@ -1394,6 +1394,14 @@ the first one I tried was a colour that is still used in seven other places.
 Her own replies are evidence too, and cheaper. She had approved two items from
 the newest commit, which she could only have seen on a current site.
 
+And the bundle is not on the home page. The website's React app is served at
+`/app`; `/` and the other static pages load `_flags.js`, `_track.js` and
+`cart.js` and no `/assets/index-*.js` at all. A marker script that greps the
+HOMEPAGE for the asset path finds nothing, falls through to curling the page
+itself, and counts zero occurrences of the marker in 93KB of markup. That
+reads exactly like "the deploy has not landed", which is the worst possible
+false negative for this particular question. Take the asset path from `/app`.
+
 **A green build here is not a deploy.** `npx vite build` passed every time
 while Vercel had been failing for two commits, so two rounds of Ellie's fixes
 were not on the site and the only symptom was that they were not there.

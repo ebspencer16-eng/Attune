@@ -4590,3 +4590,13 @@ phrase exists; she writes all customer-facing copy.
 And A166's confirmation loop: one of them opens their results, she runs
 `supabase/diagnostics/results-did-generate.sql` from the block in TASKS.md and
 pastes the row.
+
+**Confirmed live**, by marker rather than by hash. `inheritedHasGrant` does not
+appear anywhere in the previous commit's source, so it cannot be in its bundle;
+it appears 3 times in this commit's local build and 3 times in
+`/assets/index-DqTu7J81.js`, which is what www.attune-relationships.com/app
+serves. The server half deploys with the same commit.
+
+Note for next time: the bundle is linked from `/app`, not from `/`. A marker
+script pointed at the homepage finds no asset path, curls the page itself, and
+reports zero, which looks identical to an undeployed fix.
