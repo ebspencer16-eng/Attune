@@ -1,4 +1,4 @@
-# Tasks
+| A191 | **Yes, that works, and here is the delete you asked for: migration 100, below.** Run 100 first. It removes the account the app made for Mya: her login, her profile, and everything attached to them. Then she buys with her promo code and makes her account on the website, under either Gmail address. Then she signs in to the app with that same address and the same way she signed up (the email and password she just set, or Continue with Google under that address), and it opens. Order matters: if she signs in to the app with Google under the old address before buying, it makes a fresh empty account, which the app now turns away. Harmless, but it would show up on the no-purchase list. 100 deletes nothing if more than one account matches its description or if she has already bought something, and it tells you so. **Still yours whenever you like:** the words on the "No Attune package" screen are mine. |
 
 Everything you need is in this file. Commands are written to be copied whole,
 including the part that moves to the right folder, so you never have to know
@@ -24,59 +24,86 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### Two things to run, for A192
+### Two things to run, for A191 and A192
 
-**Step 1. Paste this into Terminal.** It copies migration 099 and prints `copied`.
+**For A191. Paste this into Terminal.** It copies migration 100 and prints `copied`.
 
 ```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/099_close_partner_sync_policy.sql | pbcopy && echo copied
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/100_remove_app_account_made_without_purchase.sql | pbcopy && echo copied
 ```
 
-**Step 2. Paste that into the Supabase SQL Editor**, not Terminal, and run it.
-It should say "Success. No rows returned."
+**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned." If it says "Expected exactly one account", nothing was deleted: paste me the message.
 
-<!-- SQL 099_close_partner_sync_policy.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 100_remove_app_account_made_without_purchase.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 099: close the last open rule the 098 check found.
+-- 100: remove the one account the app made without a purchase (A191).
 --
--- After 098, supabase/diagnostics/open-policies.sql printed one row:
+-- Ellie: "Can we delete her account that she made on the app and shouldn't
+-- have been able to?" Before the A191 fix, the app's Continue with Google
+-- made an account for any address and let it set up a profile. The
+-- accounts-with-no-purchase check found exactly one: made with Google on
+-- 29 October, a profile, nobody joined on its invite code, nothing bought.
 --
---   policy | partner_sync | service role only lets public ALL
+-- No address is written here: this file is in a public repository. The
+-- account is found by that description instead, which is the same rule as
+-- supabase/diagnostics/accounts-with-no-purchase.sql.
 --
--- Its name says it is for the server, and its test is `true` for the role
--- every browser holds, so anybody with the site's public key can read and
--- change every row of partner_sync. No file in this repo creates that table
--- or reads it: it was made by hand in the dashboard, and the server reaches
--- every table with the service key, which ignores these rules altogether.
--- So the rule grants the server nothing and the public everything.
+-- ── WHY IT REFUSES RATHER THAN GUESSES ──────────────────────────────────────
+-- It deletes only if the description matches exactly one account. Zero means
+-- she has since bought something under that address, or the account is
+-- already gone, and either way it must be left alone. Two or more means
+-- somebody else fits too, and deleting a person by accident is not something
+-- a re-run undoes. Both stop with a message and change nothing.
 --
--- ── SAFE TO RUN AGAIN, AND ON A DATABASE WITHOUT THE TABLE ──────────────────
--- DROP POLICY IF EXISTS skips a missing rule but still fails on a missing
--- table (that is what stopped the first 098), so the drop runs only when the
--- table is there. It writes no rows and reads none.
+-- ── WHAT GOES WITH IT ───────────────────────────────────────────────────────
+-- Deleting the login removes the profile (profiles.id cascades from
+-- auth.users), and the profile takes her notes, tags, folders, saved and read
+-- articles, notifications and push tokens with it. Anonymous page visits and
+-- any survey answer keep their row with the owner cleared, which is what
+-- happens when anybody deletes their own account.
 --
--- Afterwards, run open-policies.sql again. It should print nothing.
+-- Safe to run twice: the second run finds nobody and stops.
 -- ============================================================================
 
 do $$
+declare
+  target uuid;
+  n int;
 begin
-  if to_regclass('public.partner_sync') is not null then
-    drop policy if exists "service role only" on public.partner_sync;
+  select count(*), min(u.id::text)::uuid into n, target
+  from auth.users u
+  join public.profiles p on p.id = u.id
+  where coalesce(u.raw_app_meta_data->>'provider', 'email') = 'google'
+    and u.created_at::date = date '2026-10-29'
+    and p.partner_profile_id is null
+    and not coalesce(p.is_comp, false)
+    and not coalesce((p.entitlements->>'hasGrant')::boolean, false)
+    and not exists (
+      select 1 from public.orders o
+      where o.user_id = u.id or lower(o.buyer_email) = lower(u.email))
+    and not exists (
+      select 1 from public.profiles j
+      where j.invite_code = p.invite_code and j.id <> p.id);
+
+  if n <> 1 then
+    raise exception 'Expected exactly one account made in the app without a purchase on 29 October, found %. Nothing was deleted.', n;
   end if;
+
+  delete from auth.users where id = target;
+  raise notice 'Removed one account made in the app without a purchase.';
 end
 $$;
 ```
 <!-- /SQL -->
 
-**Step 3. Paste this into Terminal.** It copies the same check you ran after 098 and prints `copied`.
+**For A192. Paste this into Terminal.** It copies the open-rules check and prints `copied`.
 
 ```bash
 cd /Users/Ellie/Projects/unison && cat supabase/diagnostics/open-policies.sql | pbcopy && echo copied
 ```
 
-**Step 4. Paste that into the Supabase SQL Editor** and run it. It reads only.
-This time it should come back with no rows. If it shows any, paste them to me.
+**Then paste that into the Supabase SQL Editor** and run it. It reads only. It should come back with no rows now. If it shows any, paste them to me.
 
 <!-- SQL open-policies.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
