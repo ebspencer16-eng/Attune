@@ -69,6 +69,18 @@ for (const r of rows) {
 }
 if (checked < 20) fails.push(`only ${checked} prompts and items read. The rows are not what this gate thinks they are.`);
 
+/* ── THE WEBSITE READS THE SAME FUNCTION ─────────────────────────────────
+   Ellie, A172: "Yes, match to app's more detailed view." The website's
+   Experienced column printed the stored word, so where the app said "Usually
+   Mum, sometimes Dad" it said "Both". Both now go through childhoodDisplay,
+   and each of the website's two Experienced cells must be built by it. */
+{
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  const calls = (app.match(/const (myChild|partChild) = childhoodDisplay\(/g) || []).length;
+  if (calls !== 2) fails.push(`the website builds ${calls} of its 2 Experienced cells through childhoodDisplay; the other reads the stored word and says "Both" where the app gives the detail.`);
+}
+
 if (fails.length) {
   console.error('check-childhood-detail FAILED');
   for (const f of fails) console.error('  - ' + f);

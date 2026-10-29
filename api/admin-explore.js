@@ -531,8 +531,12 @@ function buildCatalog(fbCatOptions) {
   /* One field per horseman, so the Explore page can cut by it too and every
      slicer has a label and an option list to draw from. */
   for (const h of HORSEMAN_KEYS) {
+    /* Not a row in All questions. Ellie: "Remove the 'shows [horseman]' rows
+       from conflict all questions, we have the real question text below and
+       we have the visualization above." Still a field, so Explore and the
+       slicers can cut by it. */
     f.push({ key: h.key, label: 'Shows ' + h.label, group: 'Conflict Patterns', kind: 'cat',
-      options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true });
+      options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true, allQuestions: false });
   }
   /* The wording someone answered under, as something to cut by. Two groups and
      no order, so a plain category. */

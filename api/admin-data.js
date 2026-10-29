@@ -554,7 +554,11 @@ function buildResponseAggregates(profiles, sessions) {
     return tt ? Math.round(100 * ac / tt) : 0;
   });
 
-  // ── Life & Values: % of couples whose answers differ, per life question ──
+  // ── Life & Values: % of couples whose answers MATCH, per life question ──
+  // Ellie: "Responsibilities and life and values are misleading because
+  // responsibilities is alignment and life and values is gap size. Change
+  // both to alignment." So this is the same measure as expAlign beside it:
+  // the share aligned, higher is more aligned.
   // Life answers are stored as plain option strings under ex2_answers.life, so
   // no name resolution is needed (unlike the responsibility items).
   const lifeAgree = {}, lifeTotal = {};
@@ -569,10 +573,10 @@ function buildResponseAggregates(profiles, sessions) {
       if (va === vb) lifeAgree[q.id]++;
     });
   });
-  const lifeGaps = LIFE_QUESTIONS
+  const lifeAlign = LIFE_QUESTIONS
     // Neutral, name-free phrasing for the family questions (and any other
     // {userName}/{partnerName} templates) so the overview reads clearly.
-    .map(q => ({ label: genericLabel(q.topic || q.text), pct: lifeTotal[q.id] ? Math.round(100 * (lifeTotal[q.id] - lifeAgree[q.id]) / lifeTotal[q.id]) : 0, n: lifeTotal[q.id] }))
+    .map(q => ({ label: genericLabel(q.topic || q.text), pct: lifeTotal[q.id] ? Math.round(100 * lifeAgree[q.id] / lifeTotal[q.id]) : 0, n: lifeTotal[q.id] }))
     .filter(g => g.n > 0)
     .sort((x, y) => y.pct - x.pct);
 
@@ -676,7 +680,7 @@ function buildResponseAggregates(profiles, sessions) {
     expLabels: RESPONSIBILITY_CATEGORIES.map(c => c.label),
     expAlign,
     relationshipFeel: feel,
-    lifeGaps,
+    lifeAlign,
     respAgreement,
     respPairs,
     expCoupleDistances,

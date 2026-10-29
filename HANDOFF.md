@@ -4717,3 +4717,18 @@ the app shows the follow-up).
 - diagnostics/open-policies.sql also lists public storage buckets.
 - No views, security definer functions, grants or storage policies in the
   repo's SQL (A170m).
+
+## 29 October: Ellie's fourteen admin items (A171 to A186)
+
+All built and in TASKS.md section 3. Points worth knowing:
+- 098 rewritten: each drop sits inside a to_regclass guard in a DO block,
+  because lmft_requests does not exist on the live database. Ellie re-runs it.
+- Explore presets: RECOMMENDED_PRESETS in public/admin.html, held to the real
+  catalogue by check-explore-presets. The seeded is_default rows are hidden
+  rather than deleted, so no migration.
+- admin-data sends lifeAlign (share aligned) where it sent lifeGaps.
+- Marketing time per page folds every path through marketingPageKey in
+  api/_lib/page-names.js; clustered() now sends fullLabels for the hover.
+- The A180 title is fixed while its dropdown still offers eight questions:
+  asked Ellie in the row.
+- The simulator had crashed on a nine-day-old Metro; restarted with --clear.

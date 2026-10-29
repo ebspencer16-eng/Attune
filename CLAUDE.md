@@ -785,6 +785,17 @@ fixed the syntax and from then pasting it would have reopened profiles and
 orders. When repairing a file nobody could run, read what it will DO now that
 it can. check-no-open-policies replays every SQL file in both orders.
 
+**`DROP POLICY IF EXISTS` is not `IF EXISTS` about the table.** Migration 098
+dropped nine rules and failed on the live database with "relation
+public.lmft_requests does not exist": IF EXISTS skips a missing policy and
+still errors on a missing table, and that table was only ever made by a setup
+file nobody ran there. The SQL Editor runs a paste as one transaction, so
+nothing in it applied. Every replay gate here passed, because they replay the
+repo's files, where the table does exist. Anything that touches a table not
+created by a numbered migration goes inside `if to_regclass('public.x') is not
+null then ... end if;` in a DO block. The drop stays written out, so the
+policy gates still read it.
+
 **The database answers a thousand rows, whatever you ask for.** Supabase cuts
 every request to its max rows, and `.limit(100000)` is cut to it without an
 error or a header saying so. Every admin read but Engagement's took one

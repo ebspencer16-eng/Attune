@@ -35,7 +35,7 @@ import {
 // cannot alter which values reach the maths.
 const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerName) =>
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
-import { normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL, respDistance, lifeDistance, expectationsSummary } from "../api/_lib/expectations.js";
+import { normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL, respDistance, lifeDistance, expectationsSummary, childhoodDisplay } from "../api/_lib/expectations.js";
 // How close two answers are, and what that means. One module for the whole
 // product; see api/_lib/alignment.js. Ellie: "One source of truth for every
 // alignment score, wherever it appears."
@@ -6618,7 +6618,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               return val;
             };
             const hasAnyChildhood = thisCatGaps.some(g => {
-              const ck = `${fc.id}__${g.item}`;
+              const ck = g.key || `${fc.id}__${g.item}`;
               return myAnswers?.childhood?.[ck] || partnerAnswers?.childhood?.[ck];
             });
             const gridCols = hasAnyChildhood ? "1.6fr 1fr 1fr 1fr 1fr" : "1.6fr 1fr 1fr";
@@ -6659,9 +6659,15 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                 {/* Rows */}
                 {/* block: exp-conversation/questions */}
                 {thisCatGaps.map((g, gi) => {
-                  const ck = `${fc.id}__${g.item}`;
-                  const myChild = myAnswers?.childhood?.[ck];
-                  const partChild = partnerAnswers?.childhood?.[ck];
+                  const ck = g.key || `${fc.id}__${g.item}`;
+                  /* Ellie, of the app showing "Usually Mum, sometimes Dad"
+                     where this showed "Both": "Yes, match to app's more
+                     detailed view." The server's own childhoodDisplay, which
+                     is what the app is sent as youExperienced, so the two
+                     surfaces cannot word the same answer differently. Each
+                     person's answer read with their own two adults. */
+                  const myChild = childhoodDisplay(myAnswers?.childhood?.[ck], myAnswers?.childhoodBothDetail?.[ck], myAnswers?.childhoodAdults);
+                  const partChild = childhoodDisplay(partnerAnswers?.childhood?.[ck], partnerAnswers?.childhoodBothDetail?.[ck], partnerAnswers?.childhoodAdults);
                   // What "Both of us" turned out to mean, shown under the
                   // answer it refines. Asked every time and shown nowhere
                   // until now.

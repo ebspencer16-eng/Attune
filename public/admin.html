@@ -1494,12 +1494,17 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
            so the two sit as a pair at half width each. -->
       <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment" aria-label="Slz rexp"><option value="">Everyone</option></select></div>
-          <div class="chart-body"><canvas id="chart-exp-align"></canvas></div>
+          <div class="chart-head"><div><div class="chart-title">Responsibilities Alignment</div><div class="chart-subtitle">Who handles what · % of couples aligned per area, most to least</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment" aria-label="Slz rexp"><option value="">Everyone</option></select></div>
+          <!-- Ellie: "Life and values should be a bar chart so that I can read
+               all the category labels. If it doesn't fit in this tile, make the
+               tile and the one to the left taller to fit." Twelve rows need
+               about 330 points, so both bodies are 340 and the canvas cap that
+               every other chart body carries is lifted here. -->
+          <div class="chart-body" style="height:340px"><canvas id="chart-exp-align" style="max-height:none"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment" aria-label="Slz rgap"><option value="">Everyone</option></select></div>
-          <div class="chart-body"><div id="exp-gap-bars"></div></div>
+          <div class="chart-head"><div><div class="chart-title">Life &amp; Values Alignment</div><div class="chart-subtitle">The big questions · % of couples who gave the same answer, most to least</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment" aria-label="Slz rgap"><option value="">Everyone</option></select></div>
+          <div class="chart-body" style="height:340px"><div id="exp-gap-bars"></div></div>
         </div>
       </div>
       <div class="chart-card" style="margin-top:1.25rem"><div class="chart-head"><div><div class="chart-title">Who-does-what agreement by question</div><div class="chart-subtitle">% of couples who name the same person (one “Me” + one “Partner” = agreement) · directional items</div></div><select class="tile-slicer" id="slz-ragree" title="Cut this tile by a couple-level segment" aria-label="Slz ragree"><option value="">Everyone</option></select></div><div class="chart-body"><div class="insight-list" id="resp-agree-bars" style="margin-top:.5rem;"></div></div></div>
@@ -1516,11 +1521,11 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
            told us. -->
       <div class="chart-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.25rem">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Expectations modeled on experience</div><div class="chart-subtitle">Did the arrangement change shape: shared between two, done by one, or nobody. Other change is an arrangement that appeared or disappeared rather than moving between shared and one person.</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Expectations modeled on experience</div><div class="chart-subtitle">Did the arrangement change shape: shared between two, or done by one. Each colour is one category's answers, adding to 100%.</div></div><select class="tile-slicer" id="slz-inhshape" title="Cut this tile by a segment" aria-label="Slz inhshape"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-inherit-shape"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Gender roles over generations</div><div class="chart-subtitle">The first and last bars are the pattern repeating, the middle two are it swapping. Gender is read from pronouns and a childhood role from its name: both are inferences, not answers.</div></div></div>
+          <div class="chart-head"><div><div class="chart-title">Gender roles over generations</div><div class="chart-subtitle">Each colour is one category's answers, adding to 100%. Gender is read from pronouns and a childhood role from its name: both are inferences, not answers.</div></div><select class="tile-slicer" id="slz-inhgen" title="Cut this tile by a segment" aria-label="Slz inhgen"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-inherit-gender"></canvas></div>
         </div>
       </div>
@@ -1586,7 +1591,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
            is a distribution and nothing has to be coded to draw it. -->
       <div class="chart-card" style="margin-top:1.25rem">
           <div class="chart-head">
-            <div><div class="chart-title">What people wrote about</div><div class="chart-subtitle" id="refcode-sub">Themes across the written answers</div></div>
+            <div><div class="chart-title">What recent memories evoke joy</div><div class="chart-subtitle" id="refcode-sub">Themes across the written answers</div></div>
             <select class="tile-slicer" id="refcode-q" title="Which written question" aria-label="Written question"></select>
           </div>
           <div class="chart-body"><canvas id="chart-refcodes"></canvas></div>
@@ -1983,7 +1988,7 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
   <p style="font-size:.76rem;color:var(--muted);margin:0 0 .75rem;line-height:1.55;max-width:760px;">Compare any two things about the people who took Attune. Each cell is the number of individuals who match that row <em>and</em> column. Start from a preset, then adjust the dropdowns.</p>
   <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center;">
     <span style="font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);align-self:center;margin-right:.15rem;">Presets</span>
-    <span id="xp-presets" style="display:contents;"></span>
+    <span id="xp-presets" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;flex-basis:100%;"></span>
     <button class="xp-btn" id="xp-save-preset" title="Save the current rows × columns × cells × filters as a shared preset" style="border-style:dashed;">+ Save this view</button>
   </div>
   <div class="xp-controls">
@@ -2035,6 +2040,13 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
   <div class="xp-viz" id="xp-viz">
     <div class="xp-viz-head">
       <span class="xp-viz-label" id="xp-viz-why">Chart</span>
+      <!-- Ellie: "a toggle to switch between count and percentages." The same
+           switch as Cells below, made one click: % is each colour's share of
+           its own answers, so every colour adds to 100. -->
+      <span class="xp-unit" role="group" aria-label="Count or percent" style="margin-left:auto;display:inline-flex;gap:0;">
+        <button type="button" class="xp-btn" id="xp-unit-count" aria-pressed="true" style="border-radius:8px 0 0 8px;">Count</button>
+        <button type="button" class="xp-btn" id="xp-unit-pct" aria-pressed="false" style="border-radius:0 8px 8px 0;border-left:0;">%</button>
+      </span>
       <select id="xp-viz-type" aria-label="Chart type">
         <option value="auto">Chosen for this cut</option>
         <option value="bar">Clustered column</option>
@@ -2245,6 +2257,12 @@ window.adminAuthHeaders = function(extra){
     const rowField = $('xp-row-field').value, rowSide = 'self';
     const colField = $('xp-col-field').value, colSide = 'self';
     const cellMode = $('xp-cell').value;
+    {
+      const pc = $('xp-unit-pct'), cc = $('xp-unit-count');
+      const isPct = /^pct/.test(cellMode);
+      if (pc) { pc.setAttribute('aria-pressed', String(isPct)); pc.classList.toggle('xp-btn-primary', isPct); }
+      if (cc) { cc.setAttribute('aria-pressed', String(cellMode === 'count')); cc.classList.toggle('xp-btn-primary', cellMode === 'count'); }
+    }
     const measField = $('xp-measure-field').value, measSide = 'self';
     $('xp-measure-wrap').style.display = (cellMode === 'mean') ? '' : 'none';
 
@@ -2341,7 +2359,7 @@ window.adminAuthHeaders = function(extra){
     $('xp-output').innerHTML = h;
     LAST = csv;
     updateTitle(rowField,rowSide,colField,colSide,cellMode,grand.n);
-    drawViz({ rLabels, cLabels, matrix, rowTot, cellMode, rowField, rowSide, colField, colSide, grand });
+    drawViz({ rLabels, cLabels, matrix, rowTot, colTot, cellMode, rowField, rowSide, colField, colSide, grand });
   }
 
   /**
@@ -2427,7 +2445,11 @@ window.adminAuthHeaders = function(extra){
       if (!cell) return 0;
       if (ctx.cellMode === 'mean') return cell.sumN ? Number((cell.sum / cell.sumN).toFixed(2)) : null;
       if (ctx.cellMode === 'count') return cell.n || 0;
-      const base = ctx.cellMode === 'pctRow' ? (ctx.rowTot[r] || {}).n : ctx.grand.n;
+      /* Each mode's own denominator, the same three the table uses. pctCol
+         fell to the grand total here, so the chart and the table under it
+         disagreed for every "% of column" view. */
+      const base = ctx.cellMode === 'pctRow' ? (ctx.rowTot[r] || {}).n
+        : ctx.cellMode === 'pctCol' ? (ctx.colTot[c] || {}).n : ctx.grand.n;
       return base ? Number((100 * (cell.n || 0) / base).toFixed(1)) : 0;
     };
 
@@ -2601,6 +2623,16 @@ window.adminAuthHeaders = function(extra){
         render();
       };
       $('xp-add-filter').onclick = () => { FILTERS.push({ field:'', value:'', side:'self' }); renderFilters(); };
+      /* The toggle writes Cells and lets its own change listener redraw, so
+         there is one place the mode lives. With columns, % is each column's
+         share (each colour adds to 100); with none, it is the share of all. */
+      const setUnit = (pct) => {
+        const cell = $('xp-cell'); if (!cell) return;
+        cell.value = pct ? ($('xp-col-field').value ? 'pctCol' : 'pctTotal') : 'count';
+        cell.dispatchEvent(new Event('change'));
+      };
+      if ($('xp-unit-count')) $('xp-unit-count').onclick = () => setUnit(false);
+      if ($('xp-unit-pct')) $('xp-unit-pct').onclick = () => setUnit(true);
       $('xp-export').onclick = exportCSV;
       // Shared Explore presets (via /api/admin-presets). Apply restores the full
       // view (row, col, cell, measure, filters); save writes the current view;
@@ -2630,14 +2662,89 @@ window.adminAuthHeaders = function(extra){
         render();
       }
       window.__xpPreset = (r,c) => applyPreset({row:r,col:c,cell:'count'});
+      /* ── RECOMMENDED VIEWS, IN THE PAGE RATHER THAN THE DATABASE ────────
+         Ellie: "I don't like the current preset options in explore. Based on
+         interesting data with our teeny sample size, build me a list of
+         recommended presets (what should we be keeping an eye on, what might
+         change our approach, what interesting insights are already
+         surfacing)."
+
+         The six seeded by migration 036 are the database rows marked
+         is_default, and they are hidden below rather than deleted, so this
+         needs no migration and her own saved views are untouched. These live
+         here because they are a choice about the product, made in a commit,
+         and every field key is one admin-explore.js sends.
+
+         Mostly % of row: with a handful of couples a count says who signed
+         up, and a share says what they are like. */
+      const RECOMMENDED_PRESETS = [
+        { group: 'Keep an eye on', name: 'Alignment by time together',
+          why: 'Do couples drift apart, or grow together, the longer they have been together? Our premise depends on which.',
+          config: { row: 'relationship_length', col: 'alignment_group', cell: 'pctRow' } },
+        { group: 'Keep an eye on', name: 'Package by signup source',
+          why: 'Which channel brings the buyers of the bigger packages.',
+          config: { row: 'signup_source', col: 'pkg', cell: 'pctRow' } },
+        { group: 'Keep an eye on', name: 'NPS by depth in the portal',
+          why: 'Whether people who use more of the product recommend it more, or the opposite.',
+          config: { row: 'depth_band', col: 'nps_group', cell: 'pctRow' } },
+        { group: 'Keep an eye on', name: 'Couple type by package',
+          why: 'Which dynamics buy which package.',
+          config: { row: 'couple_type', col: 'pkg', cell: 'pctRow' } },
+        { group: 'Could change our approach', name: 'Misunderstood by aligned',
+          why: 'If misunderstanding is common among aligned couples, the story is how partners see each other, not how different they are.',
+          config: { row: 'alignment_group', col: 'understanding_group', cell: 'pctRow' } },
+        { group: 'Could change our approach', name: 'Article readers and NPS',
+          why: 'Whether In Practice earns its place in the experience.',
+          config: { row: 'read_article', col: 'nps_group', cell: 'pctRow' } },
+        { group: 'Could change our approach', name: 'Expectations alignment by status',
+          why: 'Engaged versus married versus dating: who comes in least aligned on who does what. Shapes who we sell to.',
+          config: { row: 'relationship_status', cell: 'mean', measure: 'expalign_overall' } },
+        { group: 'Could change our approach', name: 'Most misread dimension by gender',
+          why: 'Where partners read each other wrong, and whether it splits by gender.',
+          config: { row: 'worst_misread_dim', col: 'pronouns', cell: 'pctCol' } },
+        { group: 'Already surfacing', name: 'Engage by Open',
+          why: 'The two axes of the type, crossed: whether the four types are evenly filled.',
+          config: { row: 'axisEngage', col: 'axisOpen', cell: 'count' } },
+        { group: 'Already surfacing', name: 'Individual type by gender',
+          why: 'The type mix for women and for men, each adding to 100.',
+          config: { row: 'type', col: 'pronouns', cell: 'pctCol' } },
+        { group: 'Already surfacing', name: 'Guardians and expectations alignment',
+          why: 'Whether who raised someone shows in how aligned they are on who does what.',
+          config: { row: 'guardian_pair', cell: 'mean', measure: 'expalign_overall' } },
+        { group: 'Already surfacing', name: 'How disagreements start, by couple type',
+          why: 'Keep talking or pause first, for each couple type.',
+          config: { row: 'couple_type', col: 'cq_c1', cell: 'pctRow' } },
+      ];
+      function drawRecommended(box){
+        let last = '';
+        RECOMMENDED_PRESETS.forEach((pr) => {
+          if (pr.group !== last) {
+            last = pr.group;
+            const h = document.createElement('span');
+            h.textContent = pr.group;
+            h.style.cssText = 'flex-basis:100%;font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:.35rem;';
+            box.appendChild(h);
+          }
+          const b = document.createElement('button');
+          b.className = 'xp-btn'; b.textContent = pr.name; b.title = pr.why;
+          b.onclick = () => applyPreset({ row: '', col: '', cell: 'count', measure: '', filters: [], ...pr.config });
+          box.appendChild(b);
+        });
+      }
       async function loadPresets(){
         const box=$('xp-presets'); if(!box) return;
+        box.innerHTML='';
+        drawRecommended(box);
         try{
           const res=await fetch('/api/admin-presets',{headers:window.adminAuthHeaders()});
           const data=await res.json();
-          const list=(data && data.presets)||[];
-          box.innerHTML='';
-          if(!list.length){ box.innerHTML='<span style="font-size:.68rem;color:var(--dim);align-self:center;">none yet \u2014 build a view and save it</span>'; return; }
+          /* The seeded six are the ones she asked to replace. */
+          const list=((data && data.presets)||[]).filter((pr)=>!pr.is_default);
+          if(!list.length) return;
+          const h=document.createElement('span');
+          h.textContent='Saved';
+          h.style.cssText='flex-basis:100%;font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:.35rem;';
+          box.appendChild(h);
           list.forEach(pr=>{
             const b=document.createElement('button');
             b.className='xp-btn'; b.textContent=pr.name; b.title='Click to apply \u00b7 right-click to remove';
@@ -2645,7 +2752,7 @@ window.adminAuthHeaders = function(extra){
             b.oncontextmenu=(e)=>{ e.preventDefault(); if(confirm('Remove preset "'+pr.name+'"?')) removePreset(pr.id); };
             box.appendChild(b);
           });
-        }catch(e){ box.innerHTML='<span style="font-size:.68rem;color:var(--dim);align-self:center;">presets unavailable</span>'; }
+        }catch(e){ box.insertAdjacentHTML('beforeend','<span style="font-size:.68rem;color:var(--dim);align-self:center;">saved views unavailable</span>'); }
       }
       async function savePreset(){
         const name=(prompt('Name this preset:')||'').trim(); if(!name) return;
@@ -3396,6 +3503,7 @@ function drawLearning() {
   const table = function (hostId, subId, rows, cols, subtitle, show) {
     const host = document.getElementById(hostId);
     if (!host) return;
+    ensureQxTooltip();
     setTileText(subId, subtitle);
     if (!rows.length) {
       host.innerHTML = '<p style="font-size:.78rem;color:var(--dim);padding:.5rem 0">Nothing yet.</p>';
@@ -3408,7 +3516,12 @@ function drawLearning() {
           const text = String(c.get(r));
           const clip = c.num ? ''
             : 'max-width:0;width:99%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
-          return '<td title="' + QX_ESC(text) + '" style="text-align:' + (c.num ? 'right' : 'left')
+          /* Ellie: "Hovering over the article name in in practice reads
+             table should show the full article name." It carried a native
+             title, which the browser shows after a second's still hover and
+             not at all on some setups. The page's own tooltip shows at once,
+             the same one A138 used for pole labels. */
+          return '<td' + (c.num ? '' : ' data-tip="' + QX_ESC(text) + '"') + ' style="text-align:' + (c.num ? 'right' : 'left')
             + ';font-size:.78rem;padding:.42rem .5rem;border-top:1px solid var(--border);' + clip + '">'
             + QX_ESC(text) + '</td>';
         }).join('') + '</tr>';
@@ -3566,7 +3679,14 @@ function drawTimeTile(canvasId, subId, measure, unit, shape) {
       datasets: v.labels && v.labels.length ? datasets : [{ label: v.axis, data: [0], backgroundColor: '#E6ECF6' }],
     },
     options: {
-      plugins: { legend: { display: datasets.length > 1, position: 'bottom' } },
+      plugins: { legend: { display: datasets.length > 1, position: 'bottom' },
+        /* The whole name in the hover when the axis is abbreviated: OP is Our
+           Purpose. The server sends it beside the short labels. */
+        tooltip: { callbacks: { title: function (items) {
+          var i = items && items[0] ? items[0].dataIndex : -1;
+          var full = measure.fullLabels && measure.fullLabels[i];
+          return full || (items && items[0] ? items[0].label : '');
+        } } } },
       scales: {
         x: { grid: { display: false }, stacked: !!v.stacked },
         y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 }, beginAtZero: true, max: v.max, stacked: !!v.stacked },
@@ -4655,7 +4775,13 @@ const svMonthOf = (r) => {
  */
 function svTileSpecs(questions) {
   const specs = [];
+  /* Ellie: "Swap placement of NPS over time and what is behind that charts on
+     feedback page." So the NPS trend waits for the question after NPS, its
+     "What is behind that?", and goes in after it. Held rather than named, so
+     renaming the follow-up does not move the trend back. */
+  let after = null;
   for (const q of questions) {
+    const held = after; after = null;
     if (q.kind === 'text') specs.push({ kind: 'themes', q });
     /* A ranking is the one question with eleven answers rather than five, and
        every one of them is a phrase. Ellie: "Order the aspects should be a bar
@@ -4667,8 +4793,10 @@ function svTileSpecs(questions) {
        ranking over time with one line per aspect; Ellie asked for it out. It
        was eleven lines on one chart, which is a legend rather than a finding. */
     if (q.id === 'rating') specs.push({ kind: 'trend-avg', q, title: 'Average rating over time' });
-    if (q.id === 'nps') specs.push({ kind: 'trend-nps', q, title: 'NPS over time' });
+    if (held) specs.push(held);
+    if (q.id === 'nps') after = { kind: 'trend-nps', q, title: 'NPS over time' };
   }
+  if (after) specs.push(after);
   return specs;
 }
 
@@ -5376,7 +5504,6 @@ const commTypes = [{l:'Balanced pair',v:0},{l:'Expressive + Reserved',v:0},{l:'B
 let expAlign = {labels:['Household','Financial','Career','Extended family','Emotional'],data:[0,0,0,0,0]};
 let relFeel = [0,0,0,0,0];
 let responsePairs = 0;
-let expGaps = [{l:'Children',v:0},{l:'Finances',v:0},{l:'Where you live',v:0},{l:'Conflict',v:0},{l:'Repair',v:0}];
 const storyGaps = [{l:'Fun & lightness',v:0},{l:'Communication ease',v:0},{l:'Day-to-day connection',v:0},{l:'Overall feel',v:0}];
 let funnelData = [0,0,0,0];
 /* ratingsData, npsData and the four real* overrides were here. They fed the
@@ -5846,7 +5973,7 @@ function shapeResponses(r){
       data: dimKeys.map(k => (r && r.dimScores && r.dimScores[idx[k]] != null) ? r.dimScores[idx[k]] : 0) },
     expAlign:{ labels:(r&&r.expLabels)||['Household','Financial','Career','Extended family','Emotional'], data:(r&&r.expAlign)||[0,0,0,0,0] },
     relFeel:(r&&r.relationshipFeel)||[0,0,0,0,0],
-    expGaps:(r&&Array.isArray(r.lifeGaps))? r.lifeGaps.map(g=>({l:g.label,v:g.pct})) : [],
+    lifeAlign:(r&&Array.isArray(r.lifeAlign))? r.lifeAlign.map(g=>({l:g.label,v:g.pct,n:g.n})) : [],
     respAgreement:(r&&Array.isArray(r.respAgreement))? r.respAgreement.map(a=>({l:a.label,v:a.pct,cat:a.category,n:a.n})) : [],
     respPairs:(r&&typeof r.respPairs==='number')? r.respPairs : null,
     pairs:(r&&r.pairs)||0,
@@ -5981,8 +6108,10 @@ async function renderResponseTile(opts){
        well. It is the pairing that decided this: two tiles side by side
        showing the same kind of measurement in two different shapes is the
        thing she asked not to have. Say the word and it goes back. */
+    /* Ellie: "Change both to alignment, order from most to least aligned." */
+    const ord=a.expAlign.labels.map((l,i)=>({l,v:a.expAlign.data[i]})).sort((x,y)=>y.v-x.v);
     mkChart(el,{type:'bar',
-      data:{labels:a.expAlign.labels,datasets:[{data:a.expAlign.data,backgroundColor:'#C55329',borderRadius:4,maxBarThickness:46}]},
+      data:{labels:ord.map(x=>x.l),datasets:[{data:ord.map(x=>x.v),backgroundColor:'#C55329',borderRadius:4,maxBarThickness:46}]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.y+'% aligned'}}},
         scales:{y:{beginAtZero:true,max:100,ticks:{stepSize:50,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
@@ -5994,31 +6123,31 @@ async function renderResponseTile(opts){
        already says which end it is. */
       labels:['Needs work','Rough patch','Solid','Really good','Better than ever'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){
-    /* ── THE SAME SHAPE AS THE SELF VS PARTNER GAP ─────────────────────
-       Ellie: "I want life and values gap visual on expectations responses page
-       to be the same format as the self v partner view gap visual on comms
-       response page."
+    /* ── ALIGNMENT, AS ROWS, SO EVERY LABEL READS ──────────────────────
+       Ellie: "Life and values should be a bar chart so that I can read all the
+       category labels." Twelve questions as columns had their names turned to
+       45 degrees and cut off. Horizontal bars give each name a line.
 
-       That one is a column chart with no grid and no tick labels, each column
-       carrying its own number. This was a stack of HTML rows, which is the
-       same measurement drawn a second way on a neighbouring page. */
-    const gaps=(a.expGaps||[]).length?a.expGaps:[{l:'\u2014',v:0}];
-    const sorted=gaps.slice().sort((x,y)=>y.v-x.v);
+       And: "Responsibilities and life and values are misleading because
+       responsibilities is alignment and life and values is gap size. Change
+       both to alignment, order from most to least aligned." The server sends
+       the share of couples who gave the same answer now (lifeAlign), the same
+       measure as Responsibilities beside it. */
+    const rows=(a.lifeAlign||[]).length?a.lifeAlign:[{l:'\u2014',v:0}];
+    const sorted=rows.slice().sort((x,y)=>y.v-x.v);
     const host=document.getElementById(opts.target);
     if(host){
-      /* 170 points tall, which is what the self versus partner gap uses. */
-      host.innerHTML='<div style="height:170px"><canvas id="'+opts.target+'-canvas"></canvas></div>';
+      /* 300 inside a 340 body, which pads 20 each side: 330 overflowed and
+         the last row was cut off. */
+      host.innerHTML='<div style="height:300px"><canvas id="'+opts.target+'-canvas" style="max-height:none"></canvas></div>';
       mkChart(document.getElementById(opts.target+'-canvas'),{
         type:'bar',
         data:{labels:sorted.map(x=>x.l),datasets:[{data:sorted.map(x=>x.v),
-          backgroundColor:'#F87171',borderRadius:4,maxBarThickness:34}]},
-        options:{responsive:true,maintainAspectRatio:false,
-          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+sorted[c.dataIndex].l+': '+c.parsed.y+'%'}}},
-          /* The same axes as the self versus partner gap, at her word: "I want
-             this to be the same size as the other, with the x and y axes
-             labels." Same height too, set on the box below. */
-          scales:{y:{beginAtZero:true,max:100,ticks:{stepSize:50,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
-                  x:{ticks:{font:{size:9},maxRotation:45,minRotation:45},grid:{display:false}}}}});
+          backgroundColor:'#F87171',borderRadius:4,maxBarThickness:18}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.x+'% aligned'+(sorted[c.dataIndex].n!=null?' \u00b7 '+sorted[c.dataIndex].n+' couple'+(sorted[c.dataIndex].n===1?'':'s'):'')}}},
+          scales:{x:{beginAtZero:true,max:100,ticks:{stepSize:50,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
+                  y:{ticks:{font:{size:10},autoSkip:false},grid:{display:false}}}}});
     }
   } else if(opts.kind==='respagree'){
     const items=(a.respAgreement||[]).slice().sort((x,y)=>x.v-y.v);
@@ -6100,11 +6229,6 @@ async function loadRealResponses() {
   window.__responsesBySeg = { '': shaped };
   window.__respRawBySeg = { '': r };
   __respCuts.clear();
-  if (shaped.expGaps.length) {
-    expGaps = shaped.expGaps;
-    const gapEl = document.getElementById('exp-gap-bars');
-    if (gapEl) renderBars('exp-gap-bars', expGaps, '#F87171');
-  }
 
   const note = document.getElementById('responses-sample-note');
   if (note) note.textContent = r.pairs + (r.pairs === 1 ? ' couple' : ' couples') + ' with both partners complete';
@@ -6948,112 +7072,113 @@ async function renderReflectionCodes() {
 }
 
 async function renderInheritance() {
-  const shapeEl = document.getElementById('chart-inherit-shape');
-  const genEl = document.getElementById('chart-inherit-gender');
-  if (!shapeEl && !genEl) return;
+  /* Ellie: "Expectations modeled on experience and gender roles over
+     generations need the slicers." Each tile has its own, and each reads the
+     inheritance figures off its own cut's bundle, the way the at-a-glance
+     tiles do. */
+  await Promise.all([
+    drawInheritanceTile('chart-inherit-shape', 'slz-inhshape', 'shape'),
+    drawInheritanceTile('chart-inherit-gender', 'slz-inhgen', 'gendered'),
+  ]);
+}
+async function drawInheritanceTile(canvasId, selId, half) {
+  const el = document.getElementById(canvasId);
+  if (!el) return;
   const data = await fetchAdminData();
-  const inh = respOf(data).inheritance;
+  const cut = await wireSummarySlicer(selId, () => drawInheritanceTile(canvasId, selId, half));
+  const inh = respSegOf(data, cut).inheritance;
   if (!inh) {
-    for (const el of [shapeEl, genEl]) {
-      if (el && el.parentElement) el.parentElement.innerHTML =
-        '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">This measure was not sent.</div>';
-    }
+    if (el.parentElement) el.parentElement.innerHTML =
+      '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">This measure was not sent.</div>';
     return;
   }
-  if (shapeEl) setTileN(shapeEl, inh.people || 0);
-  if (genEl) setTileN(genEl, inh.people || 0);
+  setTileN(el, inh.people || 0);
 
   /**
    * ── THE OUTCOME IS THE QUESTION, SO IT IS THE AXIS ────────────────────
    * Ellie: "I want the clusters to be the outcome (same, shared now one, one
-   * now shared, other) should be the x axis."
+   * now shared, other) should be the x axis." The categories are the colours.
    *
-   * It was the other way round: a cluster per category with a bar per
-   * outcome, which answers "what happened in Household" and makes "how often
-   * does one person's job become shared" something you read across five
-   * tiles. Her way answers the second, which is the question the chart is
-   * for, and the categories become the colours.
+   * ── A SHARE OF EACH CATEGORY, NOT A COUNT ─────────────────────────────
+   * Ellie: "Rather than a count of answers, the expectations modeled on
+   * experience and gender roles over generation bars should be a % of that
+   * category's answers that fall into each bucket." Household has seven
+   * items and Career three, so counts made Household the tallest bar in
+   * every cluster whatever people did. Each colour's bars add to 100 now,
+   * over the outcomes this tile shows.
    *
-   * ── AND NOT CLASSIFIED LEAVES THE CHART ───────────────────────────────
-   * Ellie: "for anything that's not classified let's leave it out." It was
-   * the tallest bar on the gendered chart by a distance, which made the four
-   * real answers unreadable. It is not hidden, though: the count goes in the
-   * subtitle, because a chart that silently drops a third of its answers is
-   * reporting on a population it does not name.
+   * ── WHAT IS LEFT OUT, AND SAID ────────────────────────────────────────
+   * Not classified: "for anything that's not classified let's leave it out."
+   * Other change: "Remove 'other change' from expectations modeled on
+   * experience." Neither is in the 100; both are counted in the subtitle,
+   * because a chart that silently drops answers is reporting on a population
+   * it does not name.
    */
   const CAT_COLOURS = ['#5C6DDA', '#C55329', '#34D399', '#FBBF24', '#9B5DE5', '#22A5C4', '#E5578C'];
   const cats = (inh.categories && inh.categories.length)
     ? inh.categories
     : [{ id: '__all__', label: 'All categories' }];
   const byCat = inh.byCat || {};
-  const cell = (half, catId, key) => {
+  const cell = (catId, key) => {
     if (catId === '__all__') return (inh[half] || {})[key] || 0;
     return (((byCat[catId] || {})[half]) || {})[key] || 0;
   };
-  /* How many answers the rule could not place, for the subtitle. */
-  const unknownIn = (half) => cats.reduce((n, c) => n + cell(half, c.id, 'unknown'), 0);
-  const sayUnknown = (el, half, why) => {
-    const card = el && el.closest('.chart-card');
-    const sub = card && card.querySelector('.chart-subtitle');
-    const n = unknownIn(half);
-    if (!sub || !n) return;
-    if (sub.dataset.unk === String(n)) return;
-    sub.dataset.unk = String(n);
-    sub.textContent = (sub.textContent || '').split(' \u00b7 Left out:')[0]
-      + ' \u00b7 Left out: ' + n + ' answer' + (n === 1 ? '' : 's') + ' ' + why;
-  };
+  const sum = (catId, keys) => keys.reduce((n, k) => n + cell(catId, k), 0);
 
-  const clustered = (el, half, series, why) => {
-    if (!el) return;
-    sayUnknown(el, half, why);
-    mkChart(el, {
-      type: 'bar',
-      data: {
-        /* The outcomes are the columns now, and the categories the colours. */
-        labels: series.map((sx) => sx[0]),
-        datasets: cats.map((c, i) => ({
+  /* Each outcome is one or more stored keys. Ellie: "Confused as to why gender
+     roles over generations isn't just 3 column clusters: Keeps their gender's
+     role, Abandons gender's role, assumes other gender's role." The fourth
+     stored outcome, leaving the other gender's role to the partner, is the
+     same pattern repeating from the other side, so it counts as keeping. */
+  const series = half === 'shape'
+    ? [['Same as they saw', ['same']], ['Shared, now one', ['sharedToOne']], ['One, now shared', ['oneToShared']]]
+    : [['Keeps their gender\u2019s role', ['keepsSameGenderRole', 'handsOffOtherGenderRole']],
+       ['Abandons their gender\u2019s role', ['handsOffSameGenderRole']],
+       ['Assumes the other gender\u2019s role', ['takesOnOtherGenderRole']]];
+  const dropped = half === 'shape'
+    ? [['unknown', 'where one half of the pair was missing or unreadable'], ['other', 'where an arrangement appeared or disappeared']]
+    : [['unknown', 'where one adult, a gendered role name, a gendered pronoun or a named person was missing']];
+
+  const sub = el.closest('.chart-card')?.querySelector('.chart-subtitle');
+  if (sub) {
+    const base = (sub.dataset.base || (sub.dataset.base = sub.textContent.split(' \u00b7 Left out:')[0]));
+    const notes = dropped.map(([k, why]) => [cats.reduce((n, c) => n + cell(c.id, k), 0), why])
+      .filter(([n]) => n > 0).map(([n, why]) => n + ' answer' + (n === 1 ? '' : 's') + ' ' + why);
+    sub.textContent = base + (notes.length ? ' \u00b7 Left out: ' + notes.join('; ') : '');
+  }
+
+  const shown = series.flatMap((sx) => sx[1]);
+  mkChart(el, {
+    type: 'bar',
+    data: {
+      labels: series.map((sx) => sx[0]),
+      datasets: cats.map((c, i) => {
+        const total = sum(c.id, shown);
+        return {
           label: c.label,
           backgroundColor: CAT_COLOURS[i % CAT_COLOURS.length],
           borderRadius: 4,
           maxBarThickness: 16,
-          data: series.map((sx) => cell(half, c.id, sx[1])),
-        })),
+          counts: series.map((sx) => sum(c.id, sx[1])),
+          data: series.map((sx) => total ? Math.round(1000 * sum(c.id, sx[1]) / total) / 10 : 0),
+        };
+      }),
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => {
+          const n = c.dataset.counts[c.dataIndex];
+          return ' ' + c.dataset.label + ': ' + c.parsed.y + '% (' + n + ' answer' + (n === 1 ? '' : 's') + ')';
+        } } },
       },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom' },
-          tooltip: { callbacks: { label: (c) => ' ' + c.dataset.label + ': ' + c.parsed.y + ' answer' + (c.parsed.y === 1 ? '' : 's') } },
-        },
-        scales: {
-          y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { display: false } },
-          x: { ticks: { font: { size: 9 } }, grid: { display: false } },
-        },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + '%', font: { size: 10 } }, grid: { display: false } },
+        x: { ticks: { font: { size: 9 } }, grid: { display: false } },
       },
-    });
-  };
-
-  clustered(shapeEl, 'shape', [
-    ['Same as they saw', 'same'],
-    ['Shared, now one', 'sharedToOne'],
-    ['One, now shared', 'oneToShared'],
-    ['Other change', 'other'],
-  ], 'where one half of the pair was missing or unreadable');
-
-  /* ── THE FOUR GENDERED OUTCOMES, NAMED SO THE PAIRS SHOW ──────────────
-     Ellie: "I don't understand what the difference is between hands that role
-     over and leaves that one to their partner."
-
-     Fair, because the old names describe the same action twice. Both mean
-     their partner does it; what differs is WHOSE gender held it growing up.
-     Read as pairs: the first and the last are the gendered pattern
-     repeating, the middle two are it swapping. */
-  clustered(genEl, 'gendered', [
-    ['Keeps their gender\u2019s role', 'keepsSameGenderRole'],
-    ['Hands their gender\u2019s role over', 'handsOffSameGenderRole'],
-    ['Takes the other gender\u2019s role', 'takesOnOtherGenderRole'],
-    ['Leaves the other gender\u2019s role', 'handsOffOtherGenderRole'],
-  ], 'where one adult, a gendered role name, a gendered pronoun or a named person was missing');
+    },
+  });
 }
 
 async function renderExpSummary() {
@@ -9006,7 +9131,10 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
   try { cube = await ensureCube(); } catch (e) { el.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;">Question-level data unavailable right now.</div>'; return; }
   const allRows = cube.rows || [];
   const highFields   = (highPrefixes || []).length ? cube.fields.filter(f => highPrefixes.some(g => (f.group || '').indexOf(g) === 0)) : [];
-  const detailFields = cube.fields.filter(f => groupPrefixes.some(g => (f.group || '').indexOf(g) === 0));
+  /* A field the server marks allQuestions:false is a cut, not a question:
+     the five "Shows [horseman]" fields restate the conflict questions below
+     them and the chart above (A181). */
+  const detailFields = cube.fields.filter(f => f.allQuestions !== false && groupPrefixes.some(g => (f.group || '').indexOf(g) === 0));
   const qFields = [...highFields, ...detailFields];
   if (!qFields.length) { el.innerHTML = ''; return; }
   /**
@@ -9252,6 +9380,33 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
        text does not carry. */
     const header = QX_ESC(qTextOf(f));
     const barRow = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">' + segs + naSeg + '</div>';
+
+    /* ── TWO ANSWERS: ONE AT EACH POLE ─────────────────────────────────
+       Ellie: "The when a disagreement starts and in the middle of a
+       disagreement questions should be bars like the other rows in all
+       questions, and should have one pole as each answer then the bar should
+       be filled in appropriately... Can only be used on the ones with 2
+       answer choices."
+
+       So the first answer is the left pole and fills from the left, the
+       second is the right pole and fills from the right, and anybody who
+       answered neither sits grey between them. The same track and pole
+       columns as every scale row, so the rows line up. */
+    if (f.kind !== 'scale' && cats.length === 2) {
+      const [ca, cb] = cats;
+      const na = counts[ca] || 0, nb = counts[cb] || 0;
+      const seg = (cnt, color, lbl) => cnt
+        ? '<div data-tip="' + QX_ESC(lbl + ' \u2014 ' + (n ? Math.round(cnt / n * 100) : 0) + '% of responses (' + cnt + ' of ' + n + ')') + '" style="flex:' + cnt + ' 0 0;background:' + color + ';height:100%;cursor:default;"></div>'
+        : '';
+      const two = '<div style="display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--surface);">'
+        + seg(na, CAT_RAMP[CAT_RAMP.length - 1], optLabel[ca] || ca) + naSeg + seg(nb, CAT_RAMP[0], optLabel[cb] || cb) + '</div>';
+      return qRow(header,
+        '<div class="qrow-track">' +
+          poleSpan('lo', '', optLabel[ca] || ca) +
+          '<div style="flex:1 1 auto;min-width:0;">' + two + '</div>' +
+          poleSpan('hi', '', optLabel[cb] || cb) +
+        '</div>');
+    }
 
     if (f.kind === 'scale') {
       // Pole labels either side of the bar (what 1 and 5 mean for THIS question).

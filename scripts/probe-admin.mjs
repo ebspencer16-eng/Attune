@@ -153,7 +153,7 @@ const fields = [
      frequency answers by the module that owns those questions; the alignment
      is the real categoryAlignment over this person and the next one. */
   ...HORSEMAN_KEYS.map((h) => ({ key: h.key, label: 'Shows ' + h.label, group: 'Conflict Patterns',
-    kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true })),
+    kind: 'cat', options: [{ v: 'Yes', label: 'Yes' }, { v: 'No', label: 'No' }], partnerable: true, allQuestions: false })),
   /* The four engagement cuts, as the endpoint declares them. */
   { key: 'depth_band', label: 'Depth in the portal', group: 'Engagement', kind: 'cat',
     options: ['Bottom 25%', 'Middle 50%', 'Top 25%'].map((v) => ({ v, label: v })),
@@ -633,7 +633,7 @@ const server = createServer((req, res) => {
      identical to a chart that drew nothing. */
   if (url.pathname.startsWith('/api/admin-data')) {
     /* The exact shape shapeResponses reads: dimLabels + dimScores by index,
-       expLabels + expAlign, lifeGaps, respAgreement, relationshipFeel. Read
+       expLabels + expAlign, lifeAlign, respAgreement, relationshipFeel. Read
        off that function rather than invented, because a stub that does not
        match leaves the tiles blank and looks like the product being broken. */
     const payload = {
@@ -649,11 +649,9 @@ const server = createServer((req, res) => {
       expLabels: ['Household', 'Financial', 'Career', 'Extended family', 'Emotional'],
       expAlign: [72, 58, 81, 64, 49],
       relationshipFeel: [2, 5, 11, 14, 8],
-      lifeGaps: [
-        { label: 'Children', pct: 41 }, { label: 'Faith', pct: 33 },
-        { label: 'Where to live', pct: 28 }, { label: 'Money', pct: 22 },
-        { label: 'Social life', pct: 17 },
-      ],
+      /* Every life question, from the exercise, as A174 has to fit all of
+         them. Five typed labels could not show whether twelve rows fit. */
+      lifeAlign: LIFE_QUESTIONS.map((q, k) => ({ label: String(q.topic || q.text).replace(/\{\w+\}/g, 'Partner'), pct: 90 - k * 6, n: 18 })),
       /* ── ALL TWENTY, FROM THE EXERCISE ITSELF ──────────────────────────
          Five labels typed by hand, all of them filed under Household. Ellie
          asked for this tile to become "a 5x4 grid", and five items cannot
@@ -927,7 +925,7 @@ const server = createServer((req, res) => {
        and nothing else, so CLICKCUT reported the dimension chart, the
        responsibilities chart, the big-questions chart and the relationship-
        feel chart as not moving on a cut. All four read dimScores, expAlign,
-       lifeGaps and relationshipFeel, and those were byte-identical between
+       lifeAlign and relationshipFeel, and those were byte-identical between
        the cut and the whole: the measurement could not tell a tile that
        honours its slicer from one that ignores it. Every array the shaper
        reads is shifted now. */
@@ -950,7 +948,7 @@ const server = createServer((req, res) => {
           dimScores: (responses.dimScores || []).map(() => null),
           expAlign: (responses.expAlign || []).map(() => null),
           relationshipFeel: (responses.relationshipFeel || []).map(() => 0),
-          lifeGaps: [], respAgreement: [], expCoupleDistances: [],
+          lifeAlign: [], respAgreement: [], expCoupleDistances: [],
           intimacyStats: { ...responses.intimacyStats,
             avgAlignment: null, partnerInitiates: null, noveltyCloseness: null,
             couples: 0, meanFor: {}, meanForPeople: 0 },
@@ -964,7 +962,7 @@ const server = createServer((req, res) => {
       dimScores: bump(responses.dimScores),
       expAlign: bump(responses.expAlign),
       relationshipFeel: bump(responses.relationshipFeel),
-      lifeGaps: (responses.lifeGaps || []).map((g) => ({ ...g, pct: Math.max(0, g.pct + shift * 3) })),
+      lifeAlign: (responses.lifeAlign || []).map((g) => ({ ...g, pct: Math.max(0, g.pct + shift * 3) })),
       respAgreement: (responses.respAgreement || []).map((g) => (
         typeof g === 'object' && g && typeof g.pct === 'number' ? { ...g, pct: Math.max(0, g.pct + shift * 3) } : g
       )),

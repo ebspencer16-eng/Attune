@@ -56,6 +56,27 @@ export const MARKETING_PAGE_SHORT = {
   '/faq': 'FAQ',
 };
 
+/**
+ * Which of the six marketing pages a recorded path is, or null.
+ *
+ * Ellie, after A155 named the columns: "Marketing pages time per page view
+ * still does not show the columns I asked for." The columns were whatever
+ * paths had been recorded, so a page nobody had timed yet had no column, the
+ * home page was recorded as "/" and an article as "/practice/<slug>", and any
+ * other page anybody opened, checkout or sign-in, became a column under its
+ * raw path. The chart is the six pages, always, in the nav's order: an
+ * article counts towards In Practice and anything else is not a marketing
+ * page.
+ */
+export function marketingPageKey(path) {
+  if (path == null) return null;
+  let p = String(path).split(/[?#]/)[0].replace(/\.html$/, '').replace(/\/+$/, '');
+  if (p === '' || p === '/index') p = '/home';
+  if (!p.startsWith('/')) p = '/' + p;
+  if (p === '/practice' || p.startsWith('/practice/')) return '/practice';
+  return Object.prototype.hasOwnProperty.call(MARKETING_PAGE_NAMES, p) ? p : null;
+}
+
 /** The name for a recorded path, or the path when it has no name yet. */
 export function marketingPageName(path) {
   if (!path) return path;

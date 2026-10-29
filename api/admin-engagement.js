@@ -38,7 +38,7 @@ import { fetchProfiles, ownedBy } from './_lib/demo-accounts.js';
 /* The person handle a cut arrives as. Minted by api/admin-explore.js onto
    every cube row; one implementation, in couple-id.js. */
 import { anonPersonId } from './_lib/couple-id.js';
-import { marketingPageName, marketingPageShort, abbreviate } from './_lib/page-names.js';
+import { marketingPageName, marketingPageShort, marketingPageKey, MARKETING_PAGE_NAMES, abbreviate } from './_lib/page-names.js';
 import { restAll } from './_lib/page-all.js';
 
 /**
@@ -167,6 +167,9 @@ function clustered(events, entries) {
   return {
     available: true,
     labels: rows.map((r) => r.label),
+    /* The long name for the hover, where a column is abbreviated. It was
+       passed in and dropped here, so the hover had only ever said "OP". */
+    fullLabels: entries.map((e) => e.full || e.label),
     site: rows.map((r) => r.site.seconds),
     app: rows.map((r) => r.app.seconds),
     n: rows.reduce((t, r) => t + r.site.n + r.app.n + r.unknown.n, 0),
@@ -294,9 +297,13 @@ function engagementFromEvents(events, { profiles, notes, tags, noteTags, reads, 
   };
 
   // ── Time per page ───────────────────────────────────────────────────────
-  const marketingKeys = [...new Set(events
+  /* The six pages, in the nav's order, whether or not anybody has been timed
+     on one yet. Every recorded path is folded onto one of them or dropped;
+     see marketingPageKey for why. */
+  const marketingEvents = events
     .filter((e) => e.kind === 'page_time' && String(e.key || '').startsWith('/'))
-    .map((e) => e.key))].sort();
+    .map((e) => ({ ...e, key: marketingPageKey(e.key) }))
+    .filter((e) => e.key);
 
   /* Abbreviated, at her ask: five full exercise names will not sit under five
      columns in a third-width tile. The long name is still in the hover. */
@@ -317,7 +324,7 @@ function engagementFromEvents(events, { profiles, notes, tags, noteTags, reads, 
          labels still make no sense... We can abbreviate to H, OP, BP, WR, IP,
          FAQ." Six full names will not sit under six columns in a third-width
          tile, which is the same reason the exercises abbreviate. */
-      ? clustered(events, marketingKeys.map((k) => ({ key: k, label: marketingPageShort(k), full: marketingPageName(k) })))
+      ? clustered(marketingEvents, Object.keys(MARKETING_PAGE_NAMES).map((k) => ({ key: k, label: marketingPageShort(k), full: marketingPageName(k) })))
       : notYet,
     exercises: measured ? clustered(events, exerciseEntries) : notYet,
     resources: measured ? clustered(events, RESOURCE_VIEWS) : notYet,

@@ -10,7 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A171 | **Please run migration 098. It closes your promo codes to the public.** Two old setup steps let anybody holding the site's public key read every promo code, including the free ones. Nothing in a browser needs that any more, because codes are checked on the server now. This reverses an earlier decision that the codes were fine to be public; my reason is that it let anyone list the free ones. 098 removes both, and one other open door into an old feedback table. It also removes six more that our setup file would have recreated if anyone had pasted it, a mistake I made last week fixing that file, now corrected. It only removes access rules: no data is read, changed or deleted, and it is safe to run twice. Steps below, then one check that should come back empty. |
+| A171 | **Please run migration 098 again. The fixed version is below.** Your run stopped on "relation public.lmft_requests does not exist": that table was never created on your database, and the first version tried to change a rule on it anyway. Supabase runs the whole file as one step, so nothing applied and nothing changed. The new version skips any table your database does not have. What it does is unchanged: it closes the promo codes and the other open access rules, and changes no data. Same four steps, then the check, which should come back empty. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -72,22 +72,43 @@ It should say "Success. No rows returned."
 -- Every statement is DROP POLICY IF EXISTS. A policy that is not there is
 -- skipped. It writes no rows and reads none.
 --
+-- And a TABLE that is not there is skipped too. The first version failed on
+-- the live project with "relation public.lmft_requests does not exist": IF
+-- EXISTS covers the policy and not the table, and that table was never created
+-- there. Supabase runs a pasted file as one transaction, so nothing applied.
+-- Each drop now runs only if its table exists.
+--
 -- Afterwards, supabase/diagnostics/open-policies.sql lists anything still
 -- open. It should print nothing.
 -- ============================================================================
 
-drop policy if exists "beta_codes_anon_select"  on public.beta_codes;
--- And the same open read from supabase/beta_codes_setup.sql, the script that
--- created the table, which no migration ever removed.
-drop policy if exists "beta_codes_read_all"     on public.beta_codes;
-drop policy if exists "feedback_anon_insert"    on public.feedback_submissions;
-
-drop policy if exists "profiles_service"         on public.profiles;
-drop policy if exists "partner_sessions_write"   on public.partner_sessions;
-drop policy if exists "partner_sessions_service" on public.partner_sessions;
-drop policy if exists "orders_service"           on public.orders;
-drop policy if exists "feedback_service"         on public.feedback_submissions;
-drop policy if exists "lmft_requests_service"    on public.lmft_requests;
+do $$
+begin
+  if to_regclass('public.beta_codes') is not null then
+    drop policy if exists "beta_codes_anon_select"  on public.beta_codes;
+    -- And the same open read from supabase/beta_codes_setup.sql, the script
+    -- that created the table, which no migration ever removed.
+    drop policy if exists "beta_codes_read_all"     on public.beta_codes;
+  end if;
+  if to_regclass('public.feedback_submissions') is not null then
+    drop policy if exists "feedback_anon_insert"    on public.feedback_submissions;
+    drop policy if exists "feedback_service"        on public.feedback_submissions;
+  end if;
+  if to_regclass('public.profiles') is not null then
+    drop policy if exists "profiles_service"         on public.profiles;
+  end if;
+  if to_regclass('public.partner_sessions') is not null then
+    drop policy if exists "partner_sessions_write"   on public.partner_sessions;
+    drop policy if exists "partner_sessions_service" on public.partner_sessions;
+  end if;
+  if to_regclass('public.orders') is not null then
+    drop policy if exists "orders_service"           on public.orders;
+  end if;
+  if to_regclass('public.lmft_requests') is not null then
+    drop policy if exists "lmft_requests_service"    on public.lmft_requests;
+  end if;
+end
+$$;
 ```
 <!-- /SQL -->
 
@@ -143,9 +164,7 @@ order by 1, 2;
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| A170 | **Sweeps, your ask: "keep going". Five rounds done: A170a to A170m in section 3, and A171 above needs you.** Say "keep going" for another round. |
+**Nothing open.** Your 29 October list is built: A172 to A186 are in section 3.
 
 ## 3. For you to review
 
@@ -154,25 +173,22 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A170l | **A copied workbook link worked for a week, and the website rebuilt the workbook every time one expired.** Workbook links are meant to last an hour, so a link pasted somewhere isn't a lasting copy of a couple's results. But the step that builds the workbook made its own seven-day link and saved it, and that's the one people were given. All workbook links now last an hour, taken from one setting. When a link has expired, the website now asks for a fresh one to the same file, as the app does, instead of making the outside service rebuild the whole workbook. The A171 check now also says whether the workbook storage is set to public; it should not be. |
-| A170m | **Checked and clean.** The database has no views, privileged functions or extra grants that would let it be read outside the access rules. Every stored file is only ever handed out through a signed link. |
-| A170j | **A typo-sized mistake had silently switched off two website saves.** A database request was written to swallow its errors in a way the database library doesn't support, so instead it failed before sending. One linked a customer's order to their account at sign-in, and that link has never been saved. Nothing broke as a result, because the server also matches orders by email, which is why nobody noticed. The other was in the retired gift box sign-up page, where it made every sign-up fail before the partner's invite went out. That page was unreachable once gift cards were retired in G17, so I removed it rather than fix it. A new check finds this mistake anywhere in the product. |
-| A170k | **Someone with more than 1,000 notes would have lost sight of their oldest ones.** The Notes list stopped at the 1,000 most recent, and the journal and tag counts are worked out from that same list. Nobody is near it yet. It now reads every note. A failed read also now says it couldn't load instead of showing an empty list. |
-| A170g | **Three scheduled messages could repeat themselves.** The six-month and one-year check-in emails, the two survey nudges, and phone notifications each record "sent" so the next run leaves that person alone. All three recorded it after sending, without checking the record saved. If it didn't save, the same message went out again on every run. Now the record is made first and the message only goes if it saved. A failed send clears the record so it's retried. If something still goes wrong, a person misses one message rather than getting it twice. |
-| A170h | **Engagement figures could count a row twice and miss another.** That page reads big tables a thousand rows at a time without saying what order to read them in, so the database could hand back an overlapping set, most likely on page views, which are written while they're read. Every paged read now names its order, and the check requires it. |
-| A170a | **Saving an edit to a live In Practice article could unpublish it.** Saving reads the stored post first, to keep its publish date. If that read failed, the save treated the article as new: it wrote no publish date, which takes it off the site and the app, and gave every paragraph a new id, which detaches readers' notes on it. Proven by running it, not just by reading the code. A failed read now changes nothing and tells you to save again. |
-| A170b | **A failed read was shown as a statement about a person in eight places.** Each turned "we could not find out" into something untrue: your partner has done nothing (home), your partner's account is gone (results), your partner has not finished (Conflict Patterns), you never opted out of research (privacy choices), your partner shares no notes (Notes), you have answered nothing (survey, and exercises in the app). Each now says it could not check. Two of them also wrote over real data: the survey's next save replaced every answer someone had given, and the Shared Budget and Starting Out checklist could put an older copy over the couple's current one. |
-| A170c | **Two things would have stopped working as you grow, without any error.** The admin's Feedback page looked up every survey respondent in one request, and the request has a length limit, so past a few hundred it would fail. The journal-streak and new-article phone notifications did the same with everyone who has notifications on, so past a couple of hundred both would have stopped for everybody. Both now go 100 at a time, and the notification job reads past the 1,000-row limit. |
-| A170d | **Smaller ones.** The detailed time-per-page chart in Engagement was drawn from two hand copies of the same settings; it is one now. A test tool reported the admin's scoring as broken on every input, but the fault was in the tool; fixed, and the admin agrees with the engine on all 8,000 scores it checked. |
-| A170e | **The checks that would have caught these now exist.** 22 bugs planted against them; all 22 caught. The results and static-page checks now also reject "[object Object]" on screen, which is what A169a looked like. Three new checks: check-row-cap, check-childhood-detail and check-unread-is-not-no. |
-| A170f | **One question, no rush.** In Expectations, the app shows what both partners grew up with in full ("Usually Mum, sometimes Dad"). The website shows just "Both". Want them to match? |
-| A169 | **Sweep done. Results generate, and three real bugs are fixed: A169a to A169c.** What I drove: all 5 exercises in a real browser, their stored answers through the real results endpoint as 4 different couples (5,788 strings, 59 section checks), all 29 results sections, 38 static pages, 24 carts, the app's 5 covers on 6 iPhones, all 62 live routes from outside (no server errors), and every gate. |
-| A169a | **Expectations stored nonsense for six days on the website.** From 22 to 28 October, answering Both to who did a task growing up offered two buttons that both read "Usually [object Object], sometimes [object Object]", and that is what was saved. Fixed, so it stores the names you typed for the adults again. For anyone who answered in that window, results show "Both" there, because the two buttons were identical and which one they meant cannot be recovered. **Nothing for you to do** unless you want those people asked that follow-up again. |
-| A169b | **The admin would have stopped updating once any table passed 1,000 rows.** The database answers at most 1,000 rows per request and every admin page but Engagement read in one request, so each figure would have frozen at the first thousand with no error. Page views were the closest to that line. Every whole-table read in the admin, the CSV exports, the digest and the daily push now pages through. The survey nudge had the same problem with its "already answered" list, which past 1,000 respondents would have emailed people who had answered. |
-| A169c | **Featuring a quote said "on the homepage now" while visitors saw the old one for up to ten minutes.** The homepage's quote list was cached for five minutes, at Vercel and again in each visitor's browser. Now 30 seconds at Vercel and none in the browser. |
-| A169d | **Why the checks missed A169a, and what changed.** The exercise check counted what was stored and never read it, so it reported Expectations "stored correctly" all week. It now fails on a stored answer containing "[object Object]", "undefined", "NaN" or an unfilled {name}. Planting the old bug back fails it on 14 answers. Two new checks hold A169a and A169b, eleven planted bugs between them. Also fixed: two Expectations prompts were sent with {userName} still in them. Nothing draws them yet, so nobody saw it. |
-| A148 | **Avg dimension results, built like the Communication one.** It is neither alignment nor the most common answer: it is where the average answer sits between each dimension's two ends. The poles are on the tile now, and the two groups are two dots on one track. |
-| A154 | **A swap button between Rows and Columns.** |
+| A172 | **The website's Experienced column now shows the full answer, like the app ("Usually Mum, sometimes Dad" rather than "Both").** Both now use the same server function, and a check fails if the website goes back to the plain word. |
+| A173 | **Explore has 12 recommended views, in your three groups: Keep an eye on, Could change our approach, Already surfacing.** Hover a button for why it's there. Honest caveat: I'm not allowed to read your live data, so I picked these from what the product measures, not from current results. Use Already surfacing to tell me which ones show something, and I'll reshuffle. The six old presets are hidden, not deleted. Views you've saved still show, under Saved. |
+| A174 | **Life & Values is now horizontal bars, so every label reads in full.** It and Responsibilities beside it are both taller (340), to fit all twelve rows. |
+| A175 | **Both tiles now show alignment (% of couples who answered the same), sorted most to least aligned.** Titles: "Responsibilities Alignment" and "Life & Values Alignment". Life & Values used to show the % who differed. |
+| A176 | **Both inheritance charts now show percentages: each colour (category) adds to 100%.** Hover shows the count behind each bar. |
+| A176b | **Explore's chart has a Count / % toggle.** % means each colour's share of its own answers. While building it I found the "% of column" chart was dividing by the overall total, so the chart and table disagreed. Fixed. |
+| A177 | **Both inheritance charts have slicers.** |
+| A178 | **"Other change" is gone from Expectations modeled on experience.** Its count is listed in the subtitle under "Left out" with the unclassified answers, so nothing disappears silently. |
+| A179 | **Gender roles over generations is now three clusters: Keeps, Abandons, Assumes the other gender's role.** The old fourth bucket, leaving the other gender's role to your partner, is the same pattern repeating, so it now counts under Keeps. |
+| A180 | **Retitled "What recent memories evoke joy".** One thing to know: that tile's dropdown still switches to the other seven written questions (proudest moment, a challenge, and so on), and the title stays the same when you pick them. Want the dropdown removed, or the title to follow the question? |
+| A181 | **The five "Shows [horseman]" rows are out of Conflict All questions.** They can still be used to slice data in Explore. |
+| A182 | **Every two-answer question in All questions is now a bar between its two answers.** The first answer is on the left and fills from the left, the second fills from the right, and anyone who answered neither shows grey in the middle. That covers both disagreement questions and every other two-choice row. |
+| A183 | **Marketing time per page now always shows H, OP, BP, WR, IP and FAQ, in that order, with the full name on hover.** It used to make one column per page anyone had visited, under its web address, so pages nobody had timed were missing and checkout or sign-in showed up instead. Articles count under IP. |
+| A184 | **Hovering an article name in In Practice reads shows the full name straight away.** |
+| A185 | **NPS over time now sits after "What is behind that?"** |
+| A186 | **The simulator wasn't frozen. The app had crashed on start ("Cannot find native module 'ExpoAsset'") after the dev server ran for nine days.** I restarted it with a clean cache and the app opens on Home again. If it happens again, closing Expo Go and reopening it fixes it. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -184,6 +200,25 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A170 | **Five sweep rounds, A170a to A170m: failed reads no longer shown as facts about people, sends claimed before sending, every big read paged, open database rules found (A171).** |
+| A170a | **Saving an edit to a live In Practice article could unpublish it when the read failed. Now refuses.** |
+| A170b | **Eight places showed a failed read as a statement about a person; two also wrote over real data. All now say they could not check.** |
+| A170c | **Feedback respondents and two phone notifications looked everyone up in one request with a length limit. Now 100 at a time.** |
+| A170d | **One renderer for the detailed time-per-page chart; a test tool's false alarm on admin scoring fixed.** |
+| A170e | **Gates for all of it: 22 planted bugs, 22 caught.** |
+| A170g | **Check-in emails, survey nudges and phone notifications record "sent" before sending, so a failure cannot repeat a message.** |
+| A170h | **Engagement's paged reads name their order, so no row is counted twice or missed.** |
+| A170j | **Two website saves were switched off by an unsupported error handler: the order link at sign-in, and the retired gift form (removed).** |
+| A170k | **The Notes list reads every note, not the newest 1,000.** |
+| A170l | **Workbook links last an hour everywhere, and an expired one is refreshed rather than rebuilt.** |
+| A170m | **No views, privileged functions or grants open the database outside its rules. Checked and clean.** |
+| A169 | **Results sweep: all 5 exercises driven through to results for 4 couples, 29 sections, 38 pages, 62 live routes.** |
+| A169a | **Expectations stored "[object Object]" for 22 to 28 October. Fixed; those answers show "Both"; your call: no re-ask.** |
+| A169b | **Every whole-table admin read pages past the 1,000-row limit.** |
+| A169c | **A featured quote reaches the homepage within 30 seconds, not ten minutes.** |
+| A169d | **The exercise check reads what it stores and fails on "[object Object]", "undefined", "NaN" or an unfilled {name}.** |
+| A148 | **Avg dimension results: where the average answer sits between each dimension's poles, two groups as two dots on one track.** |
+| A154 | **Swap button between Rows and Columns in Explore.** |
 | A168 | **Admin slicer lists reach their last option on short tiles. Gated on every admin page.** |
 | A167 | **Partner rows say "Not loaded yet" until the site has heard about the partner; a failed read keeps saying it.** |
 | A163f | **App exercise covers fit SE to 16 Pro Max with Start above the tab bar. Gated in the smoke run.** |
