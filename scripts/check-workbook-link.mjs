@@ -89,6 +89,29 @@ if (!/signedUrlIsLive/.test(app)) {
   problems.push('src/App.jsx never checks a signed URL, so either the download moved or the check was dropped.');
 }
 
+/* ── ONE LIFETIME ──────────────────────────────────────────────────────────
+   The link helper signed for an hour, "short enough to be a link and not a
+   copy", and the builder signed for seven days and stored the result, so the
+   week-long one is the one couples were handed (A170). Every signed workbook
+   link takes its lifetime from TTL; a number typed beside expiresIn is a
+   second copy of the rule. Comments blanked first. */
+{
+  const { readdirSync } = await import('node:fs');
+  const strip = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  const dirs = ['api', 'api/_lib'];
+  let signers = 0;
+  for (const d of dirs) {
+    for (const f of readdirSync(new URL(`../${d}`, import.meta.url)).filter((x) => x.endsWith('.js'))) {
+      const src = strip(readFileSync(new URL(`../${d}/${f}`, import.meta.url), 'utf8'));
+      for (const m of src.matchAll(/expiresIn\s*:\s*([^,}\s]+)/g)) {
+        signers += 1;
+        if (/^\d/.test(m[1])) problems.push(`${d}/${f} signs a link for ${m[1]} seconds, typed out. Use TTL from api/_lib/workbook-link.js.`);
+      }
+    }
+  }
+  if (signers < 2) problems.push(`only ${signers} signed-link lifetimes found in api/; there are two signers. The scan has lost them.`);
+}
+
 if (problems.length) {
   console.error('[check-workbook-link] a workbook download can hand over a dead link:\n');
   for (const p of problems) console.error('  ' + p);

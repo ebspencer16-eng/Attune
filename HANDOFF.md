@@ -4707,3 +4707,13 @@ the app shows the follow-up).
   /portal could reach them). The login order link uses a real query.
   check-no-builder-catch (new).
 - notes: full lists page through restAll; a failed list read is a 503.
+
+### Round five (A170l, A170m)
+- store-workbook-pdf signed for 604800s and stored it; workbook-link's TTL
+  (3600) is exported and used by both. src/workbook-download.js asks
+  /api/tool-data for a fresh link before rebuilding when the stored one has
+  expired and the content version is current. check-workbook-link fails a
+  typed-out expiresIn.
+- diagnostics/open-policies.sql also lists public storage buckets.
+- No views, security definer functions, grants or storage policies in the
+  repo's SQL (A170m).

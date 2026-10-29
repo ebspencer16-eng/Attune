@@ -112,18 +112,32 @@ It should come back with no rows. If it shows any, paste them to me.
 --
 -- ── WHAT ITS ANSWER MEANS ─────────────────────────────────────────────────
 --   no rows        nothing is open. This is the answer after migration 098.
---   any row        that table is open to that command. Paste it back.
+--   a policy row   that table is open to that command. Paste it back.
+--   a bucket row   that bucket's files download without a signed link.
+--                  Paste it back; it is a switch in Storage, not a migration.
 
 select
-  tablename                         as "table",
-  policyname                        as "policy",
-  cmd                               as "lets them",
-  array_to_string(roles, ', ')      as "who"
+  'policy'                          as "kind",
+  tablename                         as "name",
+  policyname || ' lets ' || array_to_string(roles, ', ') || ' ' || cmd as "what is open"
 from pg_policies
 where schemaname = 'public'
   and (coalesce(qual, '') = 'true' or coalesce(with_check, '') = 'true')
   and roles && array['public', 'anon', 'authenticated']::name[]
-order by tablename, policyname;
+
+union all
+
+-- A storage bucket marked public serves its files to anybody with the address,
+-- signed or not. The workbooks bucket holds each couple's full results, and the
+-- code only ever hands out signed links, which is only private if the bucket is.
+select
+  'bucket',
+  id,
+  'public: anybody with a file address can download it'
+from storage.buckets
+where public
+
+order by 1, 2;
 ```
 <!-- /SQL -->
 
@@ -131,7 +145,7 @@ order by tablename, policyname;
 
 | # | What I am doing |
 |--|--|
-| A170 | **Sweeps, your ask: "keep going". Four rounds done: A170a to A170k in section 3, and A171 above needs you.** Say "keep going" for another round. |
+| A170 | **Sweeps, your ask: "keep going". Five rounds done: A170a to A170m in section 3, and A171 above needs you.** Say "keep going" for another round. |
 
 ## 3. For you to review
 
@@ -140,6 +154,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A170l | **A copied workbook link worked for a week, and the website rebuilt the workbook every time one expired.** Workbook links are meant to last an hour, so a link pasted somewhere isn't a lasting copy of a couple's results. But the step that builds the workbook made its own seven-day link and saved it, and that's the one people were given. All workbook links now last an hour, taken from one setting. When a link has expired, the website now asks for a fresh one to the same file, as the app does, instead of making the outside service rebuild the whole workbook. The A171 check now also says whether the workbook storage is set to public; it should not be. |
+| A170m | **Checked and clean.** The database has no views, privileged functions or extra grants that would let it be read outside the access rules. Every stored file is only ever handed out through a signed link. |
 | A170j | **A typo-sized mistake had silently switched off two website saves.** A database request was written to swallow its errors in a way the database library doesn't support, so instead it failed before sending. One linked a customer's order to their account at sign-in, and that link has never been saved. Nothing broke as a result, because the server also matches orders by email, which is why nobody noticed. The other was in the retired gift box sign-up page, where it made every sign-up fail before the partner's invite went out. That page was unreachable once gift cards were retired in G17, so I removed it rather than fix it. A new check finds this mistake anywhere in the product. |
 | A170k | **Someone with more than 1,000 notes would have lost sight of their oldest ones.** The Notes list stopped at the 1,000 most recent, and the journal and tag counts are worked out from that same list. Nobody is near it yet. It now reads every note. A failed read also now says it couldn't load instead of showing an empty list. |
 | A170g | **Three scheduled messages could repeat themselves.** The six-month and one-year check-in emails, the two survey nudges, and phone notifications each record "sent" so the next run leaves that person alone. All three recorded it after sending, without checking the record saved. If it didn't save, the same message went out again on every run. Now the record is made first and the message only goes if it saved. A failed send clears the record so it's retried. If something still goes wrong, a person misses one message rather than getting it twice. |

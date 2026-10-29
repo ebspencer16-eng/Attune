@@ -26,8 +26,11 @@
  * surface says "generating" or offers the generate path, as it did before.
  */
 
-/** Seconds a minted link is good for. Long enough to click, short enough to be a link and not a copy. */
-const TTL = 3600;
+/** Seconds a minted link is good for. Long enough to click, short enough to be a link and not a copy.
+    Exported because the builder signs its own link too, and signed it for
+    seven days while this said one hour: the week-long one is the one that was
+    stored and handed out (A170). One number now. */
+export const TTL = 3600;
 
 /**
  * @returns {Promise<string|null>} a fresh signed URL, or null if there is no

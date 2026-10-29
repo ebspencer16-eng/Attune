@@ -22,6 +22,7 @@
 import { capabilitiesFor } from './_lib/ownership.js';
 
 import { WORKBOOK_EXT, WORKBOOK_MIME } from './_lib/workbook-format.js';
+import { TTL as LINK_TTL } from './_lib/workbook-link.js';
 import { payloadToCouple } from './_couple-shape.js';
 import { payloadForCouple } from './_lib/workbook-couple.js';
 import { safeError } from './_lib/http.js';
@@ -273,7 +274,10 @@ export default async function handler(req, res) {
       throw new Error(`Storage upload failed: ${err}`);
     }
 
-    // Generate a signed URL (7 days)
+    // A signed link, for as long as every other workbook link: see TTL in
+    // api/_lib/workbook-link.js. This was seven days, stored on both
+    // profiles and the order and reused while it lived, so the link a couple
+    // copied anywhere opened their whole workbook for a week.
     const signedRes = await fetch(
       `${supabaseUrl}/storage/v1/object/sign/workbooks/${orderId}/${encodeURIComponent(filename)}`,
       {
@@ -283,7 +287,7 @@ export default async function handler(req, res) {
           'apikey': serviceKey,
           'Authorization': `Bearer ${serviceKey}`,
         },
-        body: JSON.stringify({ expiresIn: 604800 }),
+        body: JSON.stringify({ expiresIn: LINK_TTL }),
       }
     );
     const signedData = await signedRes.json();

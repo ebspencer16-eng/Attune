@@ -117,9 +117,28 @@ export async function getWorkbookUrl({ storedUrl = null, storedIsCurrent = true,
     } catch { /* gone from storage; build a new one */ }
   }
 
+  const token = await authToken();
+
+  /* ── A FRESH LINK BEFORE A REBUILD ─────────────────────────────────────
+     A stored link that has merely expired does not mean the workbook has
+     gone: the file is still in storage. This went straight to a rebuild,
+     which has the external service render the whole workbook again, so every
+     download a week after the last one was a wait for a document that
+     already existed. /api/tool-data mints a fresh short link to the file the
+     server holds, which is how the app gets one. Only when this device's
+     copy was made from the current content: otherwise the file on the
+     server may be the old version, and a rebuild is the right answer (A170). */
+  if (storedIsCurrent && token) {
+    try {
+      const r = await fetch('/api/tool-data', { headers: { Authorization: `Bearer ${token}` } });
+      const j = r.ok ? await r.json().catch(() => null) : null;
+      const url = j?.ok ? j.workbook?.url : null;
+      if (url && isWorkbookUrl(url)) return { url, fresh: true };
+    } catch { /* fall through to a build */ }
+  }
+
   try { onBuilding?.(); } catch { /* a caller's toast is not worth failing over */ }
 
-  const token = await authToken();
   let resp;
   try {
     resp = await fetch('/api/store-workbook-pdf', {

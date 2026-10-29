@@ -27,7 +27,7 @@ export const NOTIFICATION_TRIGGERS = {
   ],
   "results_ready": [],
   "workbook_ready": [
-    "api/store-workbook-pdf.js:372"
+    "api/store-workbook-pdf.js:376"
   ],
   "journal_streak": [],
   "exercise_unfinished": [],

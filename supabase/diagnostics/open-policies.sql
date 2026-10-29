@@ -8,15 +8,29 @@
 --
 -- ── WHAT ITS ANSWER MEANS ─────────────────────────────────────────────────
 --   no rows        nothing is open. This is the answer after migration 098.
---   any row        that table is open to that command. Paste it back.
+--   a policy row   that table is open to that command. Paste it back.
+--   a bucket row   that bucket's files download without a signed link.
+--                  Paste it back; it is a switch in Storage, not a migration.
 
 select
-  tablename                         as "table",
-  policyname                        as "policy",
-  cmd                               as "lets them",
-  array_to_string(roles, ', ')      as "who"
+  'policy'                          as "kind",
+  tablename                         as "name",
+  policyname || ' lets ' || array_to_string(roles, ', ') || ' ' || cmd as "what is open"
 from pg_policies
 where schemaname = 'public'
   and (coalesce(qual, '') = 'true' or coalesce(with_check, '') = 'true')
   and roles && array['public', 'anon', 'authenticated']::name[]
-order by tablename, policyname;
+
+union all
+
+-- A storage bucket marked public serves its files to anybody with the address,
+-- signed or not. The workbooks bucket holds each couple's full results, and the
+-- code only ever hands out signed links, which is only private if the bucket is.
+select
+  'bucket',
+  id,
+  'public: anybody with a file address can download it'
+from storage.buckets
+where public
+
+order by 1, 2;
