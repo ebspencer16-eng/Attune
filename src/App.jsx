@@ -9718,6 +9718,24 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             )}
           </div>
 
+          {/* BEHAVIOR TO TRY ───────────────────────────────────────────────
+              Ellie (A190): "a 'Behavior to try' above the phrases to try, with
+              one shaded tile that reads something like 'Given your unique
+              approaches, Rebecca can do X and Abram can do Y'." The sentence
+              is api/_couple-types.js's, in the same shaded tile as the
+              phrases, so the two sections read as one family. */}
+          {ct.behavior ? (
+            <div style={{ marginBottom: "1.25rem" }}>
+              <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>
+                Behavior to try
+              </div>
+              <div style={{ background: `${ct.color}14`, border: `1px solid ${ct.color}3d`, borderRadius: 12, padding: "0.9rem 1.1rem" }}>
+                {/* block: couple-type/behavior */}
+                <p style={{ fontSize: "0.85rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.6, margin: 0 }}>{interp(ct.behavior)}</p>
+              </div>
+            </div>
+          ) : null}
+
           {/* 9. PHRASES TO TRY ───────────────────────────────────────────
               Ellie: "Remove the larger, white tiles and keep only the interior
               tiles with the phrase to try. Delete the bold label entirely, and

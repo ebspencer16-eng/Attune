@@ -33,18 +33,18 @@
 // but which pole is data-dependent, so each line works for either.
 export const ALIGNED_ADVICE = {
   reassurance: {
-    low:  "You both want where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that it becomes common and stops carrying weight. Name the specific thing, not the category.",
-    high: "You both take security as a given, so it rarely gets said. That is a settled place to be. The issue is that silence carries no information, so a hard stretch looks exactly like an easy one. Say it out loud after the next rough week.",
+    low:  "You both want reassurance to be shared aloud, and you tend to share freely. The risk is that vocalizing reassurance can feel casual since it happens regularly, and that may mean you don't trust that it is meaningful. Try to name the specific thing you value in each other, rather than stating general reassurances.",
+    high: "You both take security as a given, so you rarely vocalize reassurances. You are both on the same page about this, which is good, but silence carries no information, so a hard stretch looks exactly like an easy one. After the next rough week, tell each other out loud how you are feeling about each other.",
   },
-  energy:     "You recharge in similar ways. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it.",
+  energy:     "You recharge in similar ways. That makes it easy to assume the other person always wants what you want. Combat these assumptions by asking before you plan something (like a weekend) around your own preference.",
   // Direction-dependent: which pole the couple is aligned toward changes the copy.
   expression: {
-    low:  "You both process emotion inwardly. That gives feelings room to settle before they're spoken. It also means nothing forces the deeper thing to the surface, so neither of you pushes the other toward the part that's harder to say. Ask for it sometimes, even when neither of you offers first.",
+    low:  "You both process emotion inwardly, which gives feelings room to settle before they're spoken. It also means nothing is pushing the harder feelings to the surface, which can lead to feelings of being disconnected. Try to ask the other about heavy feelings sometimes, even when neither of you is actively being vulnerable.",
     high: "You both process emotion out loud. Feelings are shared readily, which is good. If you're both expressing at once, be sure to pause and actively listen to your partner.",
   },
   needs: {
     low:  "You both ask directly. Needs are rarely buried, which is great. The thing to watch for is tone rather than clarity. When you're tired, directness can read sharper than you mean it. Same ask, softer.",
-    high: "You both tend to hint. That keeps things gentle, but when neither of you says it straight, the ask gets missed by both of you. Say the direct version sometimes anyway.",
+    high: "You both tend to hint at needs rather than asking explicitly. That keeps things gentle, but when neither of you says what you need plainly, needs are missed by both of you. Try to occasionally ask for what you need in plain words even if it feels uncomfortable.",
   },
   bids: {
     low:  "You're both reserved with the small reaches for connection. Neither of you makes a show of them, which keeps things low-key. It also means they can pass unnoticed. Name one out loud now and then. The reach only lands when the other person knows it happened.",

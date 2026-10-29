@@ -4886,6 +4886,26 @@ function CoupleType({ results, you, them, title }: {
             only use the shaded tiles. From those tiles, remove the 'phrase to
             try' eyebrow since that's what the section is titled. There should
             just be 3, colored tiles with a phrase in each." */}
+        {/* ── BEHAVIOR TO TRY ─────────────────────────────────────────
+            Ellie (A190): one shaded tile above Phrases to try, "Given your
+            unique approaches, Rebecca can do X and Abram can do Y". The
+            server resolves the names; the tile is the phrases' own shape. */}
+        {type.behavior ? (
+          <View style={{ marginTop: Spacing.xl }}>
+            <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+              {/* block: couple-type/behavior */}
+              Behavior to try
+            </Text>
+            <View
+              style={{
+                borderRadius: Radius.md,
+                backgroundColor: `${accent}14`, borderColor: `${accent}3D`, borderWidth: 1,
+                paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+              }}>
+              <Prose style={{ ...Type.body, color: c.text }}>{interp(type.behavior, you, them)}</Prose>
+            </View>
+          </View>
+        ) : null}
         {type.tips?.some((t) => t.phraseTry) ? (
           <View style={{ marginTop: Spacing.xl }}>
             <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>

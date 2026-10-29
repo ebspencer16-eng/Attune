@@ -9,8 +9,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A187 | **Going through the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** Your ask: "As I go through and click use this once I'm done with the edit, please remove that tile from my view and apply that change to the live site and app." Edit the box if you want to, then press Use this, or Keep current. The tile leaves your list, and about every 20 minutes while this session is open I put your decisions live on the site and in the app. They then show "· live" under All. Text you are partway through is kept as a draft until you press a button. One thing to know: a highlight someone made on a sentence you change loses its marker. The note itself stays in their Notes. Look first at the couple type sentences that name the wrong person (The translators description, The orbit's third tip). |
-| A190 | **Review the ten Behavior to try tiles, same page, Behavior to try tab.** One per couple type, in your shape: "Given your unique approaches, {name} can … and {name} can …". The names fill in from who is more open or guarded, or who reaches first. The four same-type couples (both Initiators, both Anchors, and so on) can't split into two jobs, because nothing says which person is which, so each of those is one behavior you both do. Once you approve them, I add the tile above Phrases to try and in What Comes Next under Things to consider. |
+| A187 | **Going through the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** Your ask: "As I go through and click use this once I'm done with the edit, please remove that tile from my view and apply that change to the live site and app." Edit the box if you want to, then press Use this, or Keep current. The tile leaves your list, and about every 20 minutes while this session is open I put your decisions live on the site and in the app. They then show "· live" under All. Text you are partway through is kept as a draft until you press a button. One thing to know: a highlight someone made on a sentence you change loses its marker. The note itself stays in their Notes. **So far: 5 sentences live, none failed.** One to look at again: the WZ behavior you approved reads "say it before while I'm thinking about it", which looks like two edits overlapping. Look first at the couple type sentences that name the wrong person (The translators description, The orbit's third tip). |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -23,7 +22,7 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.** A187 and A190 are waiting on you in section 1; A188, A189 and A193 are in section 3.
+**Nothing open.** A187 is waiting on you in section 1; A188, A189 and A193 are in section 3.
 
 ## 3. For you to review
 
@@ -62,6 +61,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A190 | **Behavior to try: your ten tiles are live on the couple type page above Phrases to try, in the app and on the website, and first under Things to consider in What Comes Next.** |
 | A191 | **The app no longer lets anyone in without a purchase (Google and Apple sign-in used to make a free account). Mya's stray app account removed by migration 100; she buys, then signs in with the same address.** |
 | A192 | **Migration 099 closed the last open database rule (partner_sync); the open-rules check now comes back empty.** |
 | A171 | **Migration 098 ran and closed the promo codes and the other open rules. Its check found one more, partner_sync, which is A192.** |

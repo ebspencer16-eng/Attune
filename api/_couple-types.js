@@ -48,6 +48,9 @@ export const COUPLE_TYPES = [
       "Both partners have a lot of emotional energy, which can be wonderful and occasionally overwhelming.",
       "Arguments between you are probably not subtle. The work is making sure what comes out is accurate, not just loud.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given how alike your approaches are, you can share one rule: when you are both upset at the same time, whoever notices first says \"Let's pause for ten minutes,\" and you both come back to the conversation after.",
     tips: [
       { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it can break the cycle before it needs to get bigger.", phraseTry: "I think we're both escalating things right now, can we both take a breath before we keep going?" },
       { title: "Not every feeling needs an audience", body: "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space.", phraseTry: "I need a minute with this before I put it out there. Give me twenty minutes." },
@@ -80,6 +83,9 @@ export const COUPLE_TYPES = [
       "Arguments between you tend to be structured. You can usually find your way to a logical conclusion.",
       "The emotional texture of hard moments can sometimes get skipped in the move toward resolution.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given how alike your approaches are, you can both add one step before you close a disagreement: each of you says how you feel about the outcome, not only what you decided.",
     tips: [
       { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The risk is ending a conversation or apologizing before things are fully settled.", phraseTry: "Are we actually okay, or are we both just ready to be done?" },
       { title: "Ask what's going on underneath the plan", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question to get at the emotional weight underneath the practical action. This changes the quality of the conclusion.", phraseTry: "How does this actually feel for you, beyond what it means?" },
@@ -112,6 +118,9 @@ export const COUPLE_TYPES = [
       "The coming-back-together step can take longer than it needs to, because neither of you naturally initiates it.",
       "When the conversation does happen, it tends to be calmer and more complete than it would have been without the space.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given how alike your approaches are, you can both give a return time whenever you step away, like \"I need until tonight.\" Whoever is ready first goes to the other and says so.",
     tips: [
       { title: "Someone has to come back first", body: "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step.", phraseTry: "I'm ready to talk when you are. No rush, just wanted you to know." },
       { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tonight. I'll come find you after dinner." },
@@ -144,6 +153,9 @@ export const COUPLE_TYPES = [
       "When something is hard, it may be days before either of you brings it up, if it gets brought up at all.",
       "The relationship is probably more stable-looking than many. Worth noting that feelings can still accumulate beneath that stability.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given how alike your approaches are, it may benefit your relationship to keep a 15-minute check-in each week, and each bring one thing you have not shared yet, even if you are still working out your feelings.",
     tips: [
       { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in, even 15 minutes, creates a structure for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy. I just want to know how you're actually doing." },
       { title: "Share the rougher draft", body: "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed.", phraseTry: "I'm still figuring out how I feel about this, but I wanted to say it out loud anyway." },
@@ -178,6 +190,9 @@ export const COUPLE_TYPES = [
       "{EXP} tends to process out loud. {GRD} needs to think it through first, then bring it. Same conversation, different way in.",
       "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given your unique approaches, {EXP} should ask {GRD} once how something feels for {GRD_obj} and then wait for the answer, and {GRD} should try to share something, even if it's just \"I'm still figuring out how I feel about this.\"",
     tips: [
       { title: "Name which mode you're in", body: "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early in the process.", phraseTry: "I need to process this out loud, bear with me. I don't have it figured out yet." },
       { title: "Guarded partner: share the half-formed version", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by this. Not sure why yet." },
@@ -210,6 +225,9 @@ export const COUPLE_TYPES = [
       "What reads as pulling away is usually just needing space to process. What reads as pressure is usually just care.",
       "The conflict clock mismatch doesn't mean one person cares more. It means you're wired differently, which requires understanding from each partner.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given your unique approaches, {WDR} should try to state a timeframe before stepping away, like \"I need an hour,\" and {RCH} should respect that by leaving the conversation alone until that hour is up.",
     tips: [
       { title: "Name the pattern before you're in it", body: "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance. I'll come back." },
       { title: "Make space bounded, not open-ended", body: "When {WDR} needs time, give a return. 'I need an hour' is different from silence. It lets {RCH} stop the worried waiting.", phraseTry: "I need an hour. I'll be back at eight." },
@@ -242,6 +260,9 @@ export const COUPLE_TYPES = [
       "Understanding each other has taken real effort, and usually more conversation than you'd expect.",
       "When {U} and {P} are communicating well, it's because you're both actively working to understand each other, rather than assuming you already do.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given your unique approaches, {RCH} should ask once what is on {WDR_pos} mind and then give {WDR} time to think, and {WDR} should do their best to share feelings out loud, something like \"This has been on my mind and I want to say it before while I'm thinking about it.\"",
     tips: [
       { title: "Expressiveness isn't depth, and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that dynamic directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
       { title: "Reaching partner: give the withdrawing partner room to process", body: "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
@@ -274,6 +295,9 @@ export const COUPLE_TYPES = [
       "What reads as pulling away is usually just needing room to process. What reads as pressure is usually just care.",
       "The gap between your instincts is not a character flaw. It means you're wired differently, which requires understanding from each partner.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given your unique approaches, {RCH} should try to pause heavy conversations until {WDR} is ready to talk, and {WDR} should try to assign a timeframe, like \"I need until tomorrow morning.\"",
     tips: [
       { title: "{RCH}: resolution doesn't mean resolved", body: "{WDR} needs the space first, and then the conversation. Moving fast to 'let's talk' before {WDR} is ready doesn't get to resolution faster. It delays it.", phraseTry: "I know you're not ready. I'll wait, but can you tell me when you think you will be?" },
       { title: "{WDR}: say when you'll be back", body: "The uncertainty is harder for {RCH} than the wait. 'I need until tonight' lets {RCH} stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
@@ -306,6 +330,9 @@ export const COUPLE_TYPES = [
       "{RCH} has a low-level push toward getting things resolved. {WDR} tends to need more time before the conversation is fully possible.",
       "When you do talk through something, it tends to be calmer and more considered than it would be for more expressive pairings.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given your unique approaches, {RCH} should try to ask a question, like \"What's actually going on for you right now?\", and {WDR} should do their best to give an honest answer, even without fully understanding the feeling.",
     tips: [
       { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share their feelings.", phraseTry: "What's actually going on for you right now? How are you feeling?" },
       { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the structure that neither of you will naturally generate on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
@@ -338,6 +365,9 @@ export const COUPLE_TYPES = [
       "The coming-back-together step sometimes takes longer than it needs to because neither of you naturally initiates it.",
       "When the conversation does happen, it tends to be more complete than it would have been earlier. The depth just required time.",
     ],
+    /* Behavior to try (A190): one tile above Phrases to try, and the same
+       sentence in What Comes Next under Things to consider. Ellie's words. */
+    behavior: "Given your unique approaches, {EXP} can say plainly how {EXP} feels so that {GRD} does not have to guess, and {GRD} may need time to process but should set a time to engage, like \"Let's talk after dinner.\"",
     tips: [
       { title: "Agree on who brings it back", body: "Neither of you moves to reopen things quickly, so the silence can stretch. Decide the pattern in advance. Whoever tends to settle first signals when they are ready, and the other gets the full space until then.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
       { title: "Bound the space with a time", body: "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come find you then." },

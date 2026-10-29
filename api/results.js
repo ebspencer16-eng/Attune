@@ -394,6 +394,8 @@ export function withContent(results, viewer, contentVersion, pronouns = {}) {
           title: role(t.title), body: role(t.body),
           phraseTry: t.phraseTry ? role(t.phraseTry) : null,
         })),
+        /* Behavior to try (A190), resolved like every other line here. */
+        behavior: type.behavior ? role(type.behavior) : null,
       } : null,
       dimensions,
       names: { a: a?.name || null, b: b?.name || null },

@@ -31,7 +31,7 @@ import { COUPLE_TYPES } from '../api/_couple-types.js';
 import { resolveRoleTokens } from '../api/_lib/role-tokens.js';
 
 /** The fields /api/results forwards. Keep in step with withContent. */
-const FORWARDED = ['description', 'nuance'];
+const FORWARDED = ['description', 'nuance', 'behavior'];
 // `patterns` joined the forwarded set when the couple-type page started
 // printing it, so its tokens have to resolve too.
 const FORWARDED_LISTS = ['strengths', 'stickingPoints', 'patterns'];

@@ -50,7 +50,7 @@ export const BUCKETS = [
     id: 'keep-in-mind',
     label: 'Things to\nconsider',
     /* The three that describe how you already are with each other. */
-    from: ['comm', 'conflict', 'reflection'],
+    from: ['couple-type-behavior', 'comm', 'conflict', 'reflection'],
     color: '#E8673A',
   },
   {
@@ -122,6 +122,25 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
   // 1. The couple type's own tips. First because they are about the dynamic
   //    everything else sits inside.
   const type = COUPLE_TYPES.find((t) => t.id === coupleTypeId);
+  /**
+   * ── BEHAVIOR TO TRY ─────────────────────────────────────────────────────
+   * Ellie (A190): "couple type needs a 'Behavior to try' above the phrases to
+   * try, with one shaded tile that reads something like 'Given your unique
+   * approaches, Rebecca can do X and Abram can do Y'... they should fit in
+   * the things to consider section of what comes next."
+   *
+   * The same sentence the couple type page shows, with the same names in it,
+   * first under Things to consider. It names both people, so it is for both.
+   */
+  if (type?.behavior) {
+    groups.push({
+      id: 'couple-type-behavior',
+      color: '#9B5DE5',
+      label: 'Couple type',
+      section: 'couple-type',
+      items: [{ title: 'Behavior to try', body: named(type.behavior), section: 'couple-type', forWhom: 'both' }],
+    });
+  }
   if (type?.tips?.length) {
     groups.push({
       id: 'couple-type',

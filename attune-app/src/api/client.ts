@@ -173,6 +173,8 @@ export type ResultsContent = {
     strengths?: string[];
     /** "What's worth being aware of". Same placeholders. */
     stickingPoints?: string[];
+    /** Behavior to try (A190): one sentence, names already filled in. */
+    behavior?: string | null;
     /** "Phrase to try": a title and the words to say. */
     tips?: { title: string; body: string   /** The quoted line, for the nested tile. */
     phraseTry?: string | null;

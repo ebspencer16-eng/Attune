@@ -322,6 +322,7 @@ export const SECTION_BLOCKS = {
     { id: 'name', note: 'The type name and its tagline.' },
     { id: 'strengths', optional: true, note: 'What comes naturally.' },
     { id: 'sticking-points', optional: true, note: "What's worth being aware of." },
+    { id: 'behavior', optional: true, note: 'Behavior to try: one shaded tile above the phrases (A190).' },
     { id: 'tips', optional: true, note: 'Phrase to try.' },
   ],
 
