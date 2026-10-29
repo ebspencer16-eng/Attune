@@ -26,9 +26,10 @@ import { Pressable } from '@/components/pressable';
 
 import {
   createProfile, fetchProfileSetupCopy, joinInvite, lookUpInvite,
-  type AboutYou, type ApiError, type ProfileSetupCopy,
+  type AboutYou, type ApiError, type NoPurchaseCopy, type ProfileSetupCopy,
 } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import NoPurchase from '@/components/no-purchase';
 import { LOADING } from '@/constants/loading-copy';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
@@ -38,6 +39,17 @@ import { SAVE_FAILED } from '@/constants/save-copy';
 const c = Colors.light;
 
 export default function ProfileSetup({ onDone }: { onDone: () => void }) {
+  /**
+   * ── NOTHING BOUGHT, NO SETUP ─────────────────────────────────────────
+   * Ellie (A191): "you cannot sign in or create an account on the app
+   * without first purchasing a package." Continue with Google or Apple makes
+   * an account for any address, and this screen then made it a profile. The
+   * server says whether this account owns anything before the form is drawn,
+   * and refuses the save regardless. An invited partner never pays, so the
+   * invite field stays, and a confirmed code opens the rest of the form.
+   */
+  const [purchase, setPurchase] = useState<{ owns: boolean; email: string | null; copy: NoPurchaseCopy } | null>(null);
+  const [refused, setRefused] = useState<{ email?: string | null; copy?: NoPurchaseCopy } | null>(null);
   const [copy, setCopy] = useState<ProfileSetupCopy | null>(null);
   const [about, setAbout] = useState<AboutYou | null>(null);
   // Answers to the five demographic questions, keyed the way the endpoint
@@ -97,7 +109,7 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
     let live = true;
     fetchProfileSetupCopy().then((r) => {
       if (!live) return;
-      if (r.ok) { setCopy(r.data.copy); setAbout(r.data.aboutYou ?? null); setCopyError(null); }
+      if (r.ok) { setCopy(r.data.copy); setAbout(r.data.aboutYou ?? null); setPurchase(r.data.purchase ?? null); setCopyError(null); }
       else setCopyError(r.error);
     });
     return () => { live = false; };
@@ -140,6 +152,7 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
       return;
     }
     setSaving(false);
+    if (r.error.kind === 'no_purchase') { setRefused({ email: r.error.email, copy: r.error.copy }); return; }
     setFailed(
       r.error.kind === 'offline'
         ? 'No connection. Your answers are still here; try again in a moment.'
@@ -219,26 +232,7 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
     </View>
   );
 
-  return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: c.background }}
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{
-        paddingHorizontal: Spacing.xl, paddingTop: Spacing.xxl,
-        paddingBottom: Spacing.xxxl, maxWidth: MaxContentWidth,
-        width: '100%', alignSelf: 'center',
-      }}>
-      <Text style={{ ...Type.hero, color: c.textStrong }}>{copy.title}</Text>
-      <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 24 }}>
-        {copy.why}
-      </Text>
-
-      {/* ── WERE YOU INVITED ────────────────────────────────────────────
-          Above the name, because it changes what the rest of the form has to
-          ask: a confirmed invite fills in their partner's name.
-
-          Paste the whole link or type the code. Both work, and the first is
-          what someone with the email open will actually do. */}
+  const inviteField = (
       <View style={{ marginTop: Spacing.xl }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.xs }}>{INVITE_LABEL}</Text>
         <View style={{ flexDirection: 'row', gap: Spacing.sm, alignItems: 'center' }}>
@@ -284,6 +278,46 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
           <Text style={{ ...Type.small, color: c.accent, marginTop: Spacing.xs }}>{INVITE_TAKEN}</Text>
         ) : null}
       </View>
+  );
+
+  /* Refused at save, or known to own nothing and not yet holding a confirmed
+     invite: the no-purchase screen, with the invite field kept on it. Signing
+     out reloads the tab, which then finds no session and draws sign-in. */
+  const blocked = refused || (purchase && !purchase.owns && !invite);
+  if (blocked) {
+    const why = refused || purchase;
+    return (
+      <NoPurchase
+        copy={why?.copy}
+        email={why?.email ?? null}
+        onRetry={() => { setRefused(null); setPurchase(null); setAttempt((n) => n + 1); }}
+        onSignedOut={onDone}>
+        {inviteField}
+      </NoPurchase>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: c.background }}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{
+        paddingHorizontal: Spacing.xl, paddingTop: Spacing.xxl,
+        paddingBottom: Spacing.xxxl, maxWidth: MaxContentWidth,
+        width: '100%', alignSelf: 'center',
+      }}>
+      <Text style={{ ...Type.hero, color: c.textStrong }}>{copy.title}</Text>
+      <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 24 }}>
+        {copy.why}
+      </Text>
+
+      {/* ── WERE YOU INVITED ────────────────────────────────────────────
+          Above the name, because it changes what the rest of the form has to
+          ask: a confirmed invite fills in their partner's name.
+
+          Paste the whole link or type the code. Both work, and the first is
+          what someone with the email open will actually do. */}
+      {inviteField}
 
       {field(copy.yourName, copy.yourNamePlaceholder, name, setName)}
       {field(copy.partnerName, copy.partnerNamePlaceholder, partnerName, setPartnerName)}

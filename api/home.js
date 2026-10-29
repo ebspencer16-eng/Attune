@@ -64,6 +64,7 @@ import { JOURNAL_ANCHOR } from './_lib/tags.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { shareFooter } from './_lib/share-footer.js';
 import { userForRequest } from './_lib/verify-token.js';
+import { purchaseStatus, NO_PURCHASE_COPY } from './_lib/purchase-gate.js';
 import { phases, withTiming } from './_lib/server-timing.js';
 
 /**
@@ -304,6 +305,26 @@ export default async function handler(req) {
            genuinely gone still comes back empty and reads as absent. Same
            family as A167. Found in the A170 sweep. */
         if (partnerUnread) return json({ ok: false, error: 'could not read your partner just now' }, 503);
+      }
+    }
+
+    /**
+     * ── NOBODY GETS IN WITHOUT A PURCHASE ───────────────────────────────
+     * Ellie (A191): "you cannot sign in or create an account on the app
+     * without first purchasing a package." Mya had made one through Continue
+     * with Google and was using the whole app with no order behind it.
+     *
+     * Every app tab loads this first, so this is the door. The fast answer is
+     * the profiles' own `purchased`, which leans towards yes; only a no is
+     * asked again of the orders themselves, live, because a new buyer's order
+     * can be ahead of what their profile says (the header of
+     * capabilitiesFor says exactly this). A check that could not finish lets
+     * them in.
+     */
+    if (!(capabilitiesFor(me).purchased || (partner && capabilitiesFor(partner).purchased))) {
+      const st = await t.mark('purchase', () => purchaseStatus({ supabaseUrl, serviceKey, userId: user.id, email: me.email || user.email || null }));
+      if (st.ok && !st.owns) {
+        return json({ ok: false, reason: 'no_purchase', error: 'no purchase on this account', copy: NO_PURCHASE_COPY, email: me.email || user.email || null }, 403);
       }
     }
 

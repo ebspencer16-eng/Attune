@@ -67,6 +67,7 @@ import ScreenFrame from '@/components/screen-frame';
 import { showSection } from '@/components/results';
 import { showPost } from '@/app/resources';
 import SignIn from '@/components/sign-in';
+import NoPurchase from '@/components/no-purchase';
 import Journal, { JOURNAL_ANCHOR, journalDay, journalStreak, lockAvailable } from '@/components/journal';
 import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
@@ -381,6 +382,9 @@ export default function NotesScreen() {
         setStandard(t.data.standard ?? []);
         setTagPlaceholder(t.data.tagPlaceholder || 'Add a tag');
       }
+      /* Notes reads its own endpoint first, so home's refusal of an account
+         with nothing bought has to be carried over by hand (A191). */
+      if (!h.ok && h.error.kind === 'no_purchase') { setError(h.error); return; }
       if (h.ok) {
         /* The word this tab defines today, from api/_words.js by way of
            /api/home. Copy lives on the server so it is one copy. */
@@ -730,6 +734,20 @@ export default function NotesScreen() {
    */
   if (loading && !word) return <Shell><ScreenLoading label={LOADING.notes} /></Shell>;
 
+  /* Signed in with nothing bought (A191). Before the signed-out branch's
+     neighbours, so no tab draws the platform behind it. */
+  if (error?.kind === 'no_purchase') {
+    return (
+      <Shell>
+        <NoPurchase
+          copy={error.copy}
+          email={error.email}
+          onRetry={() => { setLoading(true); load(); }}
+          onSignedOut={() => { setLoading(true); load(); }}
+        />
+      </Shell>
+    );
+  }
   if (error?.kind === 'unauthorized') {
     return (
       <Shell>

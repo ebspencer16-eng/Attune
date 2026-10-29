@@ -34,6 +34,7 @@ import ConflictExercise from '@/components/conflict-exercise';
 import ReflectionExercise from '@/components/reflection-exercise';
 import IntimacyExercise from '@/components/intimacy-exercise';
 import SignIn from '@/components/sign-in';
+import NoPurchase from '@/components/no-purchase';
 import MoreExercises from '@/components/more-exercises';
 import {
   Colors, MaxContentWidth, OrangeGround, Palette, Radius, Spacing, StatusColor, Type,
@@ -300,6 +301,20 @@ export default function InsightsScreen() {
      ScreenLoading. */
   if (loading) return <Shell><ScreenLoading label={LOADING.insights} /></Shell>;
 
+  /* Signed in with nothing bought (A191). Before the signed-out branch's
+     neighbours, so no tab draws the platform behind it. */
+  if (error?.kind === 'no_purchase') {
+    return (
+      <Shell>
+        <NoPurchase
+          copy={error.copy}
+          email={error.email}
+          onRetry={() => { setLoading(true); load(); }}
+          onSignedOut={() => { setLoading(true); load(); }}
+        />
+      </Shell>
+    );
+  }
   if (error?.kind === 'unauthorized') {
     return (
       <Shell>

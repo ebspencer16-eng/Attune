@@ -32,6 +32,25 @@ export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { safeError, jsonBody } from './_lib/http.js';
 import { newInviteCode, needsInviteCode } from './_lib/invite-code.js';
+import { purchaseStatus, NO_PURCHASE_COPY } from './_lib/purchase-gate.js';
+
+/**
+ * The signed-in caller, from a token, or null. The app always sends one; the
+ * website never does, because it calls this before it has a session.
+ */
+async function callerFor(req, supabaseUrl, serviceKey) {
+  const bearer = (req.headers.get('authorization') || req.headers.get('Authorization') || '')
+    .replace(/^Bearer\s+/i, '').trim();
+  if (!bearer) return { bearer: '' };
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
+  const uRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: { apikey: anonKey, Authorization: `Bearer ${bearer}` },
+  });
+  if (!uRes.ok) return { bearer, invalid: true };
+  const who = await uRes.json().catch(() => null);
+  if (!who?.id) return { bearer, invalid: true };
+  return { bearer, id: who.id, email: (who.email || '').toLowerCase() || null };
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -47,7 +66,23 @@ export default async function handler(req) {
   if (req.method === 'GET') {
     // aboutYou rides along so the app can ask the five demographic questions
     // the website's signup asks. Nothing here is a secret: it is field labels.
-    return new Response(JSON.stringify({ ok: true, copy: PROFILE_SETUP_COPY, aboutYou: ABOUT_YOU }), { status: 200, headers: CORS });
+    /* And, for a signed-in caller, whether this account may set up at all
+       (A191). Asked before the form is drawn, so nobody fills in a profile
+       to be refused at the end of it. `null` when it could not be checked,
+       which the app treats as yes. */
+    let purchase = null;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+    if (supabaseUrl && serviceKey) {
+      try {
+        const who = await callerFor(req, supabaseUrl, serviceKey);
+        if (who.id) {
+          const st = await purchaseStatus({ supabaseUrl, serviceKey, userId: who.id, email: who.email });
+          if (st.ok) purchase = { owns: st.owns, email: who.email, copy: NO_PURCHASE_COPY };
+        }
+      } catch { /* unknown: leave it null */ }
+    }
+    return new Response(JSON.stringify({ ok: true, copy: PROFILE_SETUP_COPY, aboutYou: ABOUT_YOU, purchase }), { status: 200, headers: CORS });
   }
 
   if (req.method !== 'POST') {
@@ -80,23 +115,15 @@ export default async function handler(req) {
    * either way: this can create a profile that is missing, never change one
    * that is there.
    */
-  const bearer = (req.headers.get('authorization') || req.headers.get('Authorization') || '')
-    .replace(/^Bearer\s+/i, '').trim();
+  const caller = await callerFor(req, supabaseUrl, serviceKey);
+  const bearer = caller.bearer;
 
   let userId = (body || {}).userId;
   if (bearer) {
-    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
-    const uRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: { apikey: anonKey, Authorization: `Bearer ${bearer}` },
-    });
-    if (!uRes.ok) {
+    if (caller.invalid) {
       return new Response(JSON.stringify({ error: 'invalid auth token' }), { status: 401, headers: CORS });
     }
-    const who = await uRes.json().catch(() => null);
-    if (!who?.id) {
-      return new Response(JSON.stringify({ error: 'invalid auth token' }), { status: 401, headers: CORS });
-    }
-    userId = who.id;
+    userId = caller.id;
   }
 
   if (!userId || !UUID_RE.test(userId)) {
@@ -243,6 +270,30 @@ export default async function handler(req) {
        id, derived from the token they just sent, so this tells them nothing
        they did not already prove. */
     return new Response(JSON.stringify({ ok: true, existed: true, userId }), { status: 200, headers: CORS });
+  }
+
+  /**
+   * ── NO PURCHASE, NO PROFILE: THE APP'S PATH ─────────────────────────────
+   * Ellie (A191): "Please go fix this so that you cannot sign in or create an
+   * account on the app without first purchasing a package."
+   *
+   * The app always signs in first and sends its token; the website never
+   * does, because it calls this the moment after auth.signUp, before it has a
+   * session, and only after a checkout or on an invite link. So the token path
+   * is the app, and it is refused here unless the account, or the buyer whose
+   * invite code it is joining on, has bought something. See
+   * api/_lib/purchase-gate.js. A check that could not finish lets it through:
+   * /api/home asks again on every load.
+   */
+  if (bearer) {
+    const st = await purchaseStatus({
+      supabaseUrl, serviceKey, userId,
+      email: authEmail || caller.email,
+      inviteCode: body.joinedViaInvite && typeof body.inviteCode === 'string' ? body.inviteCode.trim().slice(0, 32) : null,
+    });
+    if (st.ok && !st.owns) {
+      return new Response(JSON.stringify({ ok: false, reason: 'no_purchase', copy: NO_PURCHASE_COPY }), { status: 403, headers: CORS });
+    }
   }
 
   let { error } = await admin.from('profiles').insert(profile);

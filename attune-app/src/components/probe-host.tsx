@@ -2,6 +2,8 @@ import { Platform, View } from 'react-native';
 import { SafeAreaFrameContext, SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import { ExerciseOpening, ExerciseShell } from '@/components/exercise-chrome';
+import NoPurchase from '@/components/no-purchase';
+import type { NoPurchaseCopy } from '@/api/client';
 
 /**
  * A screen mounted on its own, in the web build, for a browser check to
@@ -45,6 +47,11 @@ type CoverProbe = {
 
 export default function ProbeHost() {
   const name = probeName();
+  /* The no-purchase screen (A191), drawn with the server's own words. */
+  if (name === 'no-purchase') {
+    const np = (globalThis as { __PROBE__?: { copy: NoPurchaseCopy; email: string } }).__PROBE__;
+    return np ? <NoPurchase copy={np.copy} email={np.email} onRetry={() => {}} onSignedOut={() => {}} /> : null;
+  }
   const data = (globalThis as { __PROBE__?: CoverProbe }).__PROBE__;
   if (name !== 'cover' || !data) return null;
 

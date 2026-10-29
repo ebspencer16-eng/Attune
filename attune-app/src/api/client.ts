@@ -23,7 +23,14 @@ export type ApiError =
   | { kind: 'offline' }
   | { kind: 'unauthorized'; detail?: string }
   | { kind: 'not_found'; detail?: string }
+  /** Signed in, and nothing bought: see api/_lib/purchase-gate.js (A191). */
+  | { kind: 'no_purchase'; email?: string | null; copy?: NoPurchaseCopy }
   | { kind: 'server'; status: number; message?: string };
+
+/** The words for the no-purchase screen: NO_PURCHASE_COPY on the server. */
+export type NoPurchaseCopy = {
+  title: string; body: string; getStarted: string; invited: string; signOut: string; retry: string;
+};
 
 // ── Shapes returned by the server. These mirror api/_lib/results.js and
 //    api/home.js. If either changes, change these in the same commit.
@@ -1181,7 +1188,17 @@ async function request<T>(path: string, init: RequestInit = {}, retrying = false
     // other failure, so a 500 arrived as a bare status with the server's own
     // explanation discarded. That is the exact moment the explanation matters.
     let message;
-    try { const b = await res.json(); if (b?.error) message = String(b.error); } catch { /* no body */ }
+    let b: { error?: unknown; reason?: unknown; email?: unknown; copy?: unknown } | null = null;
+    try { b = await res.json(); if (b?.error) message = String(b.error); } catch { /* no body */ }
+    /* A signed-in account with no purchase behind it. Its own kind, so every
+       tab can draw the one screen for it rather than "something went wrong". */
+    if (res.status === 403 && b?.reason === 'no_purchase') {
+      return { ok: false, error: {
+        kind: 'no_purchase',
+        email: typeof b.email === 'string' ? b.email : null,
+        copy: (b.copy as NoPurchaseCopy) || undefined,
+      } };
+    }
     return { ok: false, error: { kind: 'server', status: res.status, message } };
   }
 
@@ -1711,8 +1728,11 @@ export type AboutYou = {
  * told it has no profile, so nothing else it can call will answer.
  */
 export function fetchProfileSetupCopy() {
-  return request<{ ok: true; copy: ProfileSetupCopy; aboutYou: AboutYou }>(
-    '/api/create-profile', { method: 'GET' });
+  return request<{
+    ok: true; copy: ProfileSetupCopy; aboutYou: AboutYou;
+    /** Whether this account may set up at all. Null when it could not be checked. */
+    purchase?: { owns: boolean; email: string | null; copy: NoPurchaseCopy } | null;
+  }>('/api/create-profile', { method: 'GET' });
 }
 
 /**

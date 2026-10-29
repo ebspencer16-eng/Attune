@@ -4749,3 +4749,16 @@ All built and in TASKS.md section 3. Points worth knowing:
 - Expo Go on the simulator crashes ("Cannot find native module
   'ExpoAsset'") on an in-place reload after a code change. A cold start
   works: terminate host.exp.Exponent and reopen the exp:// URL.
+
+## 29 October, evening: A191, no account without a purchase
+
+- api/_lib/purchase-gate.js is the rule; /api/home answers 403
+  {reason:'no_purchase'} and /api/create-profile refuses the app's token
+  path for an account with nothing bought. Invitees pass through the buyer.
+  A failed read lets people in. The website's create-profile path (no token)
+  is unchanged.
+- The app draws components/no-purchase.tsx on every tab for that error, and
+  profile setup shows it with the invite field kept.
+- Ellie runs supabase/diagnostics/accounts-with-no-purchase.sql to see who
+  the rule turns away. The tester who reported it buys under the same email
+  she signed in with, and her order is then found by email.

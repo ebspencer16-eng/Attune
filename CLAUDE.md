@@ -785,6 +785,23 @@ fixed the syntax and from then pasting it would have reopened profiles and
 orders. When repairing a file nobody could run, read what it will DO now that
 it can. check-no-open-policies replays every SQL file in both orders.
 
+**"The app has no sign-up form" is not "the app cannot make an account."**
+Ellie, of a tester who used the whole app without buying anything: "I
+thought we fixed this." The fix everyone remembered was the missing form.
+Continue with Google and Continue with Apple go through Supabase's
+/authorize, which creates an auth user for any address it has not seen, and
+the app then drew its own profile setup for the account it found without a
+profile. Nothing on that path asked whether anybody had paid. The rule is
+api/_lib/purchase-gate.js, asked by /api/home (every tab's first load) and
+by /api/create-profile on the app's token path; check-purchase-gate runs
+both doors. When a door is closed by removing a control, ask what else
+opens it.
+
+**A customer's email address never goes into the repo.** Not in TASKS.md,
+HANDOFF.md, a diagnostic or a commit message. A query that needs to find one
+person finds the set they belong to instead, and the address shows up in the
+results in her SQL editor, not in git.
+
 **`DROP POLICY IF EXISTS` is not `IF EXISTS` about the table.** Migration 098
 dropped nine rules and failed on the live database with "relation
 public.lmft_requests does not exist": IF EXISTS skips a missing policy and

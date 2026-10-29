@@ -138,7 +138,7 @@ if (!colsBlock) {
       const ok = (v) => new Response(JSON.stringify(v), { status: 200, headers: { 'content-type': 'application/json' } });
       if (u.includes('/auth/v1/user')) return ok({ id: ME, email: 't@example.invalid' });
       /* The pair read brings back only the viewer, so the fallback runs. */
-      if (u.includes('/rest/v1/profiles') && u.includes('or=')) return ok([{ id: ME, partner_profile_id: PT, name: 'A', pkg: 'core' }]);
+      if (u.includes('/rest/v1/profiles') && u.includes('or=')) return ok([{ id: ME, partner_profile_id: PT, name: 'A', pkg: 'core', entitlements: { hasGrant: true } }]);
       if (u.includes(`/rest/v1/profiles?id=eq.${PT}`)) return fallback();
       return ok([]);
     };

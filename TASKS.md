@@ -10,6 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A191 | **Fixed: the app now refuses any account with nothing bought, so it can't be used without a purchase. One query below for you to run.** How Mya got in: the app's "Continue with Google" and "Continue with Apple" create an account for any email, and the app then let her set up a profile. Now the server checks for a purchase before setup and on every app launch, and an account with none sees a "No Attune package on this account yet" screen with Get started (opens the website) and Sign out. Invited partners still get in through the buyer's order. **For Mya:** buy on the website with her promo code, using the same email she signed in to the app with. If the website then says the email is already registered, sign in the way she did in the app (Google, Apple, or reset the password). Then open the app and tap "I just bought one". It opens as soon as the order exists under that email, even if she skips the website's account step. One exception: if she used Apple and chose "Hide My Email", her app account is under an Apple relay address, not her Gmail. The query shows that. In that case, tell her to sign out in the app and sign back in with Google or her email. **The words on the new screen are mine, standing in for yours:** "No Attune package on this account yet" / "Attune starts with a package, bought on our website. Use the same email you signed in with here, and this account opens as soon as the order is through." / "I just bought one". Edit them whenever you like. |
 | A187 | **Review the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** 543 sentences where "it", "this" or "that" points at nothing, or a position is described without naming its two ends, each with a proposed rewrite. Your example is there: "once a week, name one thing you actually need" (Communicating Needs). For each row, take the proposal, edit it in the box, or keep what is live. Your choices save as you go, and I apply them when you say you're done. Filter by area to work through it in sittings. Two things to look at first. Several couple type sentences describe the wrong person for about half of readers: they use the reader's name where they mean "the one who reaches first" (The translators description, The orbit's third tip), and two sticking points open with a bare "her"/"his". And some rows are copy no screen shows today (the reflection insights, Communication action items); they're marked "not shown" in the "where" line, so you can keep those as they are. |
 | A190 | **Review the ten Behavior to try tiles, same page, Behavior to try tab.** One per couple type, in your shape: "Given your unique approaches, {name} can … and {name} can …". The names fill in from who is more open or guarded, or who reaches first. The four same-type couples (both Initiators, both Anchors, and so on) can't split into two jobs, because nothing says which person is which, so each of those is one behavior you both do. Once you approve them, I add the tile above Phrases to try and in What Comes Next under Things to consider. |
 | A171 | **Please run migration 098 again. The fixed version is below.** Your run stopped on "relation public.lmft_requests does not exist": that table was never created on your database, and the first version tried to change a rule on it anyway. Supabase runs the whole file as one step, so nothing applied and nothing changed. The new version skips any table your database does not have. What it does is unchanged: it closes the promo codes and the other open access rules, and changes no data. Same four steps, then the check, which should come back empty. |
@@ -23,7 +24,7 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### Two things to run, for A171
+### Three things to run, for A171 and A191
 
 **Step 1. Paste this into Terminal.** It copies the migration and prints `copied`.
 
@@ -164,9 +165,76 @@ order by 1, 2;
 ```
 <!-- /SQL -->
 
+**For A191. Paste this into Terminal.** It copies the query and prints `copied`.
+
+```bash
+cd /Users/Ellie/Projects/unison && cat supabase/diagnostics/accounts-with-no-purchase.sql | pbcopy && echo copied
+```
+
+**Then paste that into the Supabase SQL Editor** and run it. It reads only. It lists every account the app now turns away. Mya should be on it until her order goes through, and her row shows how she signed up. Anyone else on it who should be able to get in, paste their row back to me.
+
+<!-- SQL accounts-with-no-purchase.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- Which accounts have nothing bought behind them? (A191)
+--
+-- Run this in the Supabase SQL Editor. It reads only; it writes nothing.
+--
+-- The app now turns away any account that has not bought something. This
+-- lists every account that rule turns away, so you can see who they are
+-- before anybody tells you. Mya's should be here until her order goes through.
+--
+-- An account counts as bought when ANY of these is true, the same rule as
+-- api/_lib/purchase-gate.js:
+--   an order under its id or its email; a comp account; its stored
+--   entitlements say so; its linked partner bought; or it joined on the
+--   invite code of somebody who bought.
+--
+-- ── WHAT ITS ANSWER MEANS ─────────────────────────────────────────────────
+--   no rows       nobody is shut out.
+--   a row         that account cannot get into the app. "how they signed up"
+--                 says google, apple or email. A row for somebody who should
+--                 get in is a gap in the rule: paste it back.
+
+with acct as (
+  select u.id, lower(u.email) as email, u.created_at,
+         coalesce(u.raw_app_meta_data->>'provider', 'email') as provider,
+         p.id is not null as has_profile, p.name, p.pkg, p.is_comp, p.entitlements,
+         p.partner_profile_id, p.invite_code, p.joined_via_invite
+  from auth.users u
+  left join public.profiles p on p.id = u.id
+),
+bought as (
+  select a.id from acct a
+  where exists (select 1 from public.orders o where o.user_id = a.id or lower(o.buyer_email) = a.email)
+     or coalesce(a.is_comp, false)
+     or coalesce((a.entitlements->>'hasGrant')::boolean, false)
+     or coalesce((a.entitlements->>'comp')::boolean, false)
+)
+select
+  a.email                                        as "email",
+  a.provider                                     as "how they signed up",
+  a.created_at::date                             as "account made",
+  case when a.has_profile then 'yes' else 'no' end as "profile",
+  coalesce(a.name, '')                           as "name on profile",
+  coalesce(a.invite_code, '')                    as "their invite code",
+  (select count(*) from public.profiles j
+     where j.invite_code = a.invite_code and j.id <> a.id) as "people joined on their code"
+from acct a
+where a.id not in (select id from bought)
+  -- a partner who bought
+  and not exists (select 1 from bought b where b.id = a.partner_profile_id)
+  -- the inviter whose code they joined on
+  and not (coalesce(a.joined_via_invite, false) and exists (
+        select 1 from public.profiles i
+        join bought b on b.id = i.id
+        where i.invite_code = a.invite_code and i.id <> a.id))
+order by a.created_at desc;
+```
+<!-- /SQL -->
+
 ## 2. Open
 
-**Nothing open.** A187 and A190 are waiting on you in section 1; A188 and A189 are in section 3.
+**Nothing open.** A187, A190 and A191 are waiting on you in section 1; A188 and A189 are in section 3.
 
 ## 3. For you to review
 

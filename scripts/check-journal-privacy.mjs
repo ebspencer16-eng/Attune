@@ -119,7 +119,7 @@ globalThis.fetch = async (url, init = {}) => {
   calls.push({ url: u, method: init.method || 'GET', body: init.body || null });
   const ok = (v) => new Response(JSON.stringify(v), { status: 200, headers: { 'content-type': 'application/json' } });
   if (u.includes('/auth/v1/user')) return ok({ id: ME, email: 'test@example.invalid' });
-  if (u.includes('/rest/v1/profiles')) return ok([{ id: ME, partner_profile_id: PARTNER, name: 'Test', pronouns: null }]);
+  if (u.includes('/rest/v1/profiles')) return ok([{ id: ME, partner_profile_id: PARTNER, name: 'Test', pronouns: null, entitlements: { hasGrant: true } }]);
   const scripted = script(u, init);
   return ok(scripted === null || scripted === undefined ? [] : scripted);
 };

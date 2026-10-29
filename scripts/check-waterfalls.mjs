@@ -223,7 +223,8 @@ const PROFILE = {
  * Core owns the two exercises both of them have answers for, so this one is
  * finished without inventing three more sets of answers.
  */
-const FINISHED = { ...PROFILE, pkg: 'core' };
+/* A core buyer: core with no order behind it is refused at home (A191). */
+const FINISHED = { ...PROFILE, pkg: 'core', entitlements: { hasGrant: true } };
 
 /** Which profile the stub answers with, set per case before driving. */
 let profileFixture = PROFILE;

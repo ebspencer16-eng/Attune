@@ -39,6 +39,7 @@ import { fetchHome, fetchSurvey, markNotificationRead, nudgePartner, SITE_URL, i
 import type { ApiError, HomeAlert, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
+import NoPurchase from '@/components/no-purchase';
 import Survey from '@/components/survey';
 import Settings from '@/components/settings';
 import { forgetLastSection, showResultsFromStart } from '@/components/results';
@@ -416,6 +417,20 @@ export default function HomeScreen() {
 
   if (loading) return <Shell><ScreenLoading label={LOADING.home} /></Shell>;
 
+  /* Signed in with nothing bought (A191). Before the signed-out branch's
+     neighbours, so no tab draws the platform behind it. */
+  if (error?.kind === 'no_purchase') {
+    return (
+      <Shell>
+        <NoPurchase
+          copy={error.copy}
+          email={error.email}
+          onRetry={() => { setLoading(true); load(); }}
+          onSignedOut={() => { setLoading(true); load(); }}
+        />
+      </Shell>
+    );
+  }
   if (error?.kind === 'unauthorized') {
     return (
       <Shell>
