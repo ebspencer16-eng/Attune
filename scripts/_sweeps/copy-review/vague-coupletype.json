@@ -660,7 +660,7 @@
   "key": "COUPLE_TYPES XY tips[2].body",
   "where": "Couple type page, tip body under its heading",
   "current": "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.",
-  "proposed": "When you are both calm, try to tell each other what you each need during an argument. That one conversation can change how the next argument goes.",
+  "proposed": "When you are both calm, try to tell each other what you each need during a disagreement. Having that conversation can change how your next disagreement goes.",
   "why": "'what you need' when; 'things'"
  },
  {
@@ -772,7 +772,7 @@
   "key": "COUPLE_TYPES YZ tips[1].title",
   "where": "Couple type page, tip heading",
   "current": "Bound the space with a time",
-  "proposed": "Give your space an end time",
+  "proposed": "Set a time to come back",
   "why": "'Bound the space' abstract. Same string in YY"
  },
  {
@@ -780,7 +780,7 @@
   "key": "COUPLE_TYPES YZ tips[1].body",
   "where": "Couple type page, tip body under its heading",
   "current": "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.",
-  "proposed": "'I need some time' is not as useful as 'I need until tonight.' Giving a specific time to come back lets your partner stop worrying while they wait for you.",
+  "proposed": "'I need some time' is not as useful as 'I need until tonight.' Naming a time to come back lets your partner stop worrying while they wait.",
   "why": "'trust the process' vague. Same string in YY"
  },
  {
@@ -828,7 +828,7 @@
   "key": "nextActions use-resource started body",
   "where": "Home screen card \"Complete your budget\" / \"Complete your checklist\"",
   "current": "This exercise is in progress and status has been saved",
-  "proposed": "Your progress in this tool has been saved",
+  "proposed": "Your progress has been saved, so you can pick up where you left off.",
   "why": "'This exercise' on a card for a tool, not an exercise; 'status' vague"
  },
  {
@@ -836,15 +836,18 @@
   "key": "nextActions new-post body",
   "where": "Home screen card \"New publication to explore\"",
   "current": "View this and others in your Learn tab",
-  "proposed": "Read the new article and other In Practice articles in your Learn tab",
-  "why": "'this and others' unnamed"
+  "proposed": "Read the new article and the rest of In Practice in your Learn tab.",
+  "why": "'this and others' unnamed",
+  "also_in": [
+   "api/_lib/pick-up.js"
+  ]
  },
  {
   "file": "api/_lib/next-action.js",
   "key": "nextActions revisit body (top-gap branch, template literal)",
   "where": "Home screen card \"Revisit <dimension>\"",
   "current": "Your widest difference. Worth rereading together.",
-  "proposed": "You differ most on this dimension. Try to reread its results together.",
+  "proposed": "You differ most on this dimension. Try to reread these results together.",
   "why": "fragment with no subject: difference in what"
  },
  {
@@ -860,7 +863,7 @@
   "key": "IDLE_PROMPTS[2].body",
   "where": "Home screen idle card \"Pick one conversation to have this week\"",
   "current": "Every section ends with something to try.",
-  "proposed": "Every results section ends with an action to try.",
+  "proposed": "Every results section ends with an idea to try together.",
   "why": "'section' of what; 'something' vague"
  },
  {
@@ -868,7 +871,7 @@
   "key": "IDLE_PROMPTS[3].body",
   "where": "Home screen idle card \"Read something from In Practice\"",
   "current": "Short pieces on the things that impact relationships.",
-  "proposed": "Short articles on what shapes a relationship.",
+  "proposed": "Short articles on what affects relationships.",
   "why": "'the things' vague"
  },
  {
@@ -876,7 +879,7 @@
   "key": "WAITING.LOCKED_BY_YOU (also NOT_FILLED_IN)",
   "where": "A locked results section you have not finished; also any page that fills in as you finish",
   "current": "Finish your exercises to open this.",
-  "proposed": "Finish your exercises to open this section.",
+  "proposed": "Finish your exercises to open these results.",
   "why": "'this' unnamed. File header says these are Ellie's verbatim"
  },
  {
@@ -908,7 +911,7 @@
   "key": "JOURNAL_COPY.saveFailed",
   "where": "Insight of the day save sheet, on failure",
   "current": "That did not save. Try again in a moment.",
-  "proposed": "Your journal entry did not save. Try again in a moment.",
+  "proposed": "Your insight did not save to your journal. Try again in a moment.",
   "why": "'That' unnamed"
  },
  {
@@ -916,7 +919,7 @@
   "key": "exerciseIntro intimacy body[1]",
   "where": "Physical Intimacy exercise cover, second paragraph",
   "current": "This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.",
-  "proposed": "This exercise is a tool for talking about expectations, not therapy. If any of these questions brings up a heavier issue, it is worth talking that issue through with someone qualified.",
+  "proposed": "This exercise is a tool for talking about expectations. It is not therapy. If any of these questions brings up a heavier issue, it is worth talking through with someone qualified.",
   "why": "'This', 'anything here', 'something heavier', 'that'"
  }
 ]

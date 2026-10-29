@@ -1579,7 +1579,8 @@
  },
  "v-coupletype-104": {
   "files": [
-   "api/_lib/next-action.js"
+   "api/_lib/next-action.js",
+   "api/_lib/pick-up.js"
   ],
   "current": "View this and others in your Learn tab"
  },

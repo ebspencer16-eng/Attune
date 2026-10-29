@@ -24,7 +24,7 @@ for f, area in AREA.items():
         rid = 'v-' + f.split('-', 1)[1].split('.')[0] + '-' + str(i)
         rows.append({'id': rid, 'area': area, 'file': r.get('file', ''), 'key': r.get('key', ''),
                      'where': r.get('where', ''), 'current': cur, 'proposed': (r.get('proposed') or '').strip(),
-                     'why': r.get('why', ''), 'files': [r.get('file', '')]})
+                     'why': r.get('why', ''), 'files': [r.get('file', '')] + list(r.get('also_in') or [])})
         seen[cur] = rows[-1]
 beh = json.load(open(f'{D}/behaviors.json'))
 for b in beh:
