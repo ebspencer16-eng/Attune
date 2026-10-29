@@ -54,7 +54,7 @@ export const ALIGNED_ADVICE = {
   conflict:   "You handle conflict in similar ways. If you both engage, feelings can escalate fast. If you both step back, things can go unsaid. Try to find a happy medium together where feelings can be shared freely, while at the same time calmly and safely.",
   repair: {
     low:  "You both repair deliberately, by taking a real reset. That can increase the effectiveness of those attempts to repair, but it can also leave small, unresolved feelings that rise up in meaningful moments. It is fine to let some repairs be smaller and sooner so that you can avoid unresolved feelings.",
-    high: "You both repair casually, without much ceremony. Because it comes so naturally, it's easy to skip naming that a repair even happened. Say it landed.",
+    high: "You both repair casually, without much ceremony. Because repair comes so naturally, it's easy to not acknowledge that intentional repair even happened. Tell each other when an apology or a reset helped you move forward.",
   },
   love:       "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
   feedback:   "You handle feedback in similar ways. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
