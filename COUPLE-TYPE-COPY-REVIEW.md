@@ -10,7 +10,7 @@ types. A couple only ever sees their own six, and you only ever see your own,
 which is why it reads as four or six rather than sixty.
 
 This is what ships. You rewrote all 60 of them on 17 October and they went
-into the module the same day, word for word: **53 characters each, where the
+into the module the same day, word for word: **55 characters each, where the
 paragraphs they replaced averaged 128**.
 
 Two of your lines I left exactly as you wrote them and asked about in TASKS.md
@@ -44,13 +44,13 @@ of them to a name before anyone reads them.
 | WX | 3 | Your relationship has warmth and steadiness |
 | WY | 1 | Friction can be easily removed for this pairing |
 | WY | 2 | You have complementary instincts, attentive and stabilizing |
-| WY | 3 | Genuinely beneficial repair systems are attainable here |
+| WY | 3 | You can build a way of repairing after conflict that works for you both |
 | WZ | 1 | Together, you encourage emotional safety and depth |
 | WZ | 2 | Genuine feelings are received well between you |
 | WZ | 3 | You have learned to stretch toward each other |
-| XY | 1 | Named and managed, your instincts produce repair that works |
+| XY | 1 | When you name your different conflict instincts and plan for them, your repairs tend to work |
 | XY | 2 | You are emotionally complementary, logical and feeling |
-| XY | 3 | The dynamic is highly solvable once it is understood |
+| XY | 3 | Your difference in conflict timing is very solvable once you both understand it |
 | XZ | 1 | Silence between you is comfortable rather than tense |
 | XZ | 2 | You both think through feelings before sharing |
 | XZ | 3 | Your relationship respects each other's interior life |
@@ -79,18 +79,18 @@ of them to a name before anyone reads them.
 | WX | 3 | {GRD}'s private processing can feel like withholding to {EXP} |
 | WY | 1 | Urgency reads as pressure, distance reads as avoidance |
 | WY | 2 | When one presses and the other retreats, things can escalate |
-| WY | 3 | Repair starts on the initiator's timeline |
+| WY | 3 | Repair tends to start on {RCH}'s timeline |
 | WZ | 1 | {RCH} can feel like the one always making the first move |
 | WZ | 2 | {GRD} can feel pressure to match an expressiveness that is not natural |
 | WZ | 3 | What {U} means and what {P} hears can differ |
-| XY | 1 | The conversation can start before {WDR} is ready |
-| XY | 2 | {WDR_pos} visible emotion can look like something to fix |
-| XY | 3 | It can look like one of you cares more |
+| XY | 1 | A hard conversation can start before {WDR} is ready |
+| XY | 2 | {WDR}'s visible emotion can look like something {RCH} needs to fix |
+| XY | 3 | Your different timing can make it look like one of you cares more |
 | XZ | 1 | Neither of you offers much emotional visibility |
 | XZ | 2 | When something is wrong, neither of you reaches first |
 | XZ | 3 | You can coexist without reaching emotional depth |
 | YZ | 1 | Both of you can wait a long time for the other to reengage |
-| YZ | 2 | {EXP_pos} visible emotion is hard to read during withdrawal |
+| YZ | 2 | {EXP}'s visible emotion can be hard to read while you each take space |
 | YZ | 3 | Hard things can sit a long time before either of you raises them |
 
 ## The ten types, by id

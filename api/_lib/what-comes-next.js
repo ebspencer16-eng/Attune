@@ -369,7 +369,7 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
             /* Her words for the row: "they should be titled Life and values
                discussions, household discussions, etc." */
             title: `${cat.label} discussions`,
-            body: `${topics.length} ${topics.length === 1 ? 'thing' : 'things'} here you each pictured differently.`,
+            body: `${topics.length} ${topics.length === 1 ? 'topic' : 'topics'} in this area that you each pictured differently.`,
             say: null,
             section: cat.section,
             /**
@@ -383,7 +383,7 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
         })
         : [{
           title: 'Keep your expectations current',
-          body: 'You matched across every area. Revisit this when something changes.',
+          body: 'You matched across every area of Expectations, which means you are on the same page. Try to revisit your expectations together when something in your life changes.',
           say: null,
         }],
     });
@@ -572,7 +572,7 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
         // One sentence and no line under it, which is how every conflict row
         // reads since B111, and it opens the same page: a row with no way out
         // is the thing the arrows replaced.
-        title: 'Reread your patterns before the next hard conversation',
+        title: 'Reread your conflict patterns before your next hard conversation',
         body: null,
         say: null,
         section: 'conflict-overview',

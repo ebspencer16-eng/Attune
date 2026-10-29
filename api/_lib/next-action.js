@@ -326,7 +326,7 @@ export function nextActions(state = {}) {
       : 'a couple of details';
     add({ id: 'profile', kind: 'profile_setup', priority: 12,
       title: 'Finish setting up your profile',
-      body: 'We need info to properly set up your exercises',
+      body: 'We need your profile details to set up your exercises',
       deepLink: '/?view=profile' });
   }
 

@@ -195,16 +195,16 @@ export const COUPLE_TYPES = [
     behavior: "Given your unique approaches, {EXP} should ask {GRD} once how something feels for {GRD_obj} and then wait for the answer, and {GRD} should try to share something, even if it's just \"I'm still figuring out how I feel about this.\"",
     tips: [
       { title: "Say whether you need to talk or think first", body: "At the start of a hard conversation, try to say 'I need to process this out loud' or 'I need to think before I talk.' That one sentence tells your partner how to support you.", phraseTry: "I need to process this out loud, bear with me. I don't have it figured out yet." },
-      { title: "Guarded partner: share feelings before they are fully formed", body: "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by this. Not sure why yet." },
-      { title: "Expressive partner: give the guarded partner room to process", body: "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
+      { title: "Guarded partner: share feelings before they are fully formed", body: "You don't have to wait until a feeling is fully formed before you share it. Saying 'I'm still figuring out how I feel about this' is a form of sharing, and that is usually exactly what {EXP} needs to hear.", phraseTry: "I'm still working through it, but I think I'm bothered by this. Not sure why yet." },
+      { title: "Expressive partner: give the guarded partner room to process", body: "Pressing {GRD} to share before {GRD} is ready doesn't create connection, but it does create pressure. Try to ask once how {GRD} is feeling, and then give {GRD_obj} time to share.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
     ],
   },
   {
     id: "WY", typeA: "W", typeB: "Y",
     name: "The orbit",
-    tagline: "You have different conflict clocks. One is ready before the other, recognizing that changes everything.",
-    description: "When things get hard, {U} moves toward resolution and {P} pulls back, or vice versa, depending on your individual types. The reaching can feel like pressure. The withdrawal can feel like abandonment. Neither is true, you're just wired differently for when the conversation becomes possible.",
-    nuance: "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct, it's naming it out loud before the hard moment arrives. A simple agreement, 'I need a few hours, let's talk at 9', short-circuits the loop that otherwise runs on its own.",
+    tagline: "You have different reactions to conflict, and one of you is sometimes ready to talk before the other. Recognizing that difference changes the way you react to each other.",
+    description: "When things get hard, {RCH} tends to engage to resolve the issue, while {WDR} needs to withdraw first. Engaging can feel like pressure to {WDR}, and withdrawing can feel like abandonment to {RCH}. Neither is true, you are simply wired differently for when you are ready to talk.",
+    nuance: "Engaging versus withdrawing is one of the most common and most solvable friction points in relationships. The answer isn't changing your instinct, but telling each other which one you tend to do before a hard moment arrives. A simple agreement, like 'I need a few hours, let's talk at 9', can break the cycle of one of you pressing while the other pulls away.",
     color: "#E8673A", shade: "#FCE4EC",
     famousDuos: [
       { names: "Ross & Rachel", show: "Friends", note: "One wanted to resolve everything immediately; the other needed time and space first. Without the right mindset to approach it, they kept colliding at the wrong moments." },
@@ -213,12 +213,12 @@ export const COUPLE_TYPES = [
     strengths: [
       "Friction can be easily removed for this pairing",
       "You have complementary instincts, attentive and stabilizing",
-      "Genuinely beneficial repair systems are attainable here",
+      "You can build a way of repairing after conflict that works for you both",
     ],
     stickingPoints: [
       "Urgency reads as pressure, distance reads as avoidance",
       "When one presses and the other retreats, things can escalate",
-      "Repair starts on the initiator's timeline",
+      "Repair tends to start on {RCH}'s timeline",
     ],
     patterns: [
       "When something is off, {U} and {P} are usually not in the same place at the same time. {RCH} is ready to engage. {WDR} isn't there yet.",
@@ -229,17 +229,17 @@ export const COUPLE_TYPES = [
        sentence in What Comes Next under Things to consider. Ellie's words. */
     behavior: "Given your unique approaches, {WDR} should try to state a timeframe before stepping away, like \"I need an hour,\" and {RCH} should respect that by leaving the conversation alone until that hour is up.",
     tips: [
-      { title: "Name the pattern before you're in it", body: "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance. I'll come back." },
-      { title: "Make space bounded, not open-ended", body: "When {WDR} needs time, give a return. 'I need an hour' is different from silence. It lets {RCH} stop the worried waiting.", phraseTry: "I need an hour. I'll be back at eight." },
-      { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {U} presses for resolution, that's care, not control. When {P} needs space, that's the process, not withdrawal. Say what you need in the moment, and be open to the fact that your needs are different.", phraseTry: "I know this is hard for you to sit with. I'm not gone. I'm processing. I'll be back." },
+      { title: "Talk about how you each handle conflict before a hard moment", body: "When you are both calm, try to tell each other what you each need during an argument. That conversation can change how the next argument goes.", phraseTry: "When I'm upset, I need a few minutes before I can talk. It's not avoidance. I'll come back." },
+      { title: "Give your space an end time", body: "When {WDR} needs time, {WDR} should try to name a time to come back. 'I need an hour' is different from silence, because a set time lets {RCH} stop worrying while waiting.", phraseTry: "I need an hour. I'll be back at eight." },
+      { title: "Urgency isn't pressure; silence isn't avoidance", body: "When {RCH} presses for resolution, that comes from care, not control. When {WDR} needs space, that is time to think, not avoidance. Try to say what you need in the moment, and accept that your needs are different.", phraseTry: "I know this is hard for you to sit with. I'm not gone. I'm processing. I'll be back." },
     ],
   },
   {
     id: "WZ", typeA: "W", typeB: "Z",
     name: "The opening",
-    tagline: "One reaches. One holds. Understanding what you each need bridges the gap.",
-    description: "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously, different conflict timing and different expressiveness, which means there's more translation work here than in most pairings.",
-    nuance: "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness that isn't natural to {GRD}. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
+    tagline: "One of you engages and shares openly, and one of you withdraws and keeps feelings private. Understanding what you each need helps bridge that gap.",
+    description: "{RCH} engages to resolve conflict and shares feelings openly, while {WDR} withdraws and keeps feelings private. You differ both in conflict timing and in how openly you share, which means you have more translating to do for each other than most couples.",
+    nuance: "{RCH} often doesn't know what {GRD} is feeling until long after the fact, which can feel like withholding. {GRD} often feels pressure to be emotionally open in a way that doesn't come naturally to {GRD_obj}. The most useful thing {U} and {P} can do is see this gap as a difference, not a deficiency.",
     color: "#E8673A", shade: "#FFF4F0",
     famousDuos: [
       { names: "Elizabeth & Philip Mountbatten (early years)", show: "The Crown", note: "Wildly different in emotional register and expression. The relationship survived because both parties kept choosing it, gaps and all." },
@@ -256,7 +256,7 @@ export const COUPLE_TYPES = [
       "What {U} means and what {P} hears can differ",
     ],
     patterns: [
-      "{U} and {P} sometimes find that you mean something the other doesn't quite receive. The signal and the interpretation don't always match.",
+      "{U} and {P} sometimes find that what one of you means is not quite what the other hears.",
       "Understanding each other has taken real effort, and usually more conversation than you'd expect.",
       "When {U} and {P} are communicating well, it's because you're both actively working to understand each other, rather than assuming you already do.",
     ],
@@ -264,31 +264,31 @@ export const COUPLE_TYPES = [
        sentence in What Comes Next under Things to consider. Ellie's words. */
     behavior: "Given your unique approaches, {RCH} should ask once what is on {WDR_pos} mind and then give {WDR} time to think, and {WDR} should do their best to share feelings out loud, something like \"This has been on my mind and I want to say it before while I'm thinking about it.\"",
     tips: [
-      { title: "Expressiveness isn't depth, and silence isn't emptiness", body: "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that dynamic directly.", phraseTry: "There's more going on for me than I'm showing. I just need to get it in order before I share it." },
-      { title: "Reaching partner: give the withdrawing partner room to process", body: "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
-      { title: "Reserved partner: share the earlier draft", body: "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear.", phraseTry: "I don't have this figured out, but something's been sitting with me and I wanted to say it before I lose it." },
+      { title: "Expressiveness isn't depth, and silence isn't emptiness", body: "{GRD}'s inner life is not less rich because {GRD_pos} feelings aren't expressed as often. {RCH}'s sharing isn't less valuable because sharing comes more easily. Try to say both of these things to each other out loud.", phraseTry: "There's more going on for me than I'm showing. I just need to sort out my feelings before I share them." },
+      { title: "Reaching partner: give the withdrawing partner room to process", body: "Pressing {GRD} to share before {GRD} is ready doesn't create connection, but it does create pressure. Try to ask once how {GRD} is feeling, and then give {GRD_obj} time to share.", phraseTry: "I can wait until you are ready to share. Thank you for being willing to talk." },
+      { title: "Reserved partner: share feelings before they are fully formed", body: "You don't have to wait until a feeling is fully formed before you share it. Even saying 'I'm still figuring out how I feel about this' is a form of sharing, and that is usually exactly what {RCH} needs to hear.", phraseTry: "I don't have this figured out, but something's been sitting with me and I wanted to say it before I lose it." },
     ],
   },
   {
     id: "XY", typeA: "X", typeB: "Y",
     name: "The translators",
-    tagline: "Strong instincts on both sides, pointed differently. Moving forward together takes understanding and intention.",
-    description: "{U} pushes toward resolution while processing internally; {P} needs space before the conversation is possible, and carries visible feeling in the meantime. They can read each other as simultaneously too much and not enough, the driving toward resolution can close off the space, and the visible feeling during withdrawal can look like something that needs fixing right now.",
-    nuance: "{RCH_pos} urgency toward resolution can feel like pressure to {WDR}, who isn't ready yet. {WDR_pos} emotional visibility during withdrawal can look like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong.",
+    tagline: "You both have strong conflict instincts, but one of you engages and one of you withdraws. Moving forward together takes understanding and intention.",
+    description: "{RCH} pushes toward resolution and keeps feelings private, while {WDR} needs space before talking and shows feelings openly in the meantime. This means you can each read the other as too much and not enough at once. {RCH}'s push toward resolution can cut short the space {WDR} needs, and {WDR}'s visible feelings during that space can look like a problem {RCH} needs to fix right now.",
+    nuance: "{RCH}'s urgency to resolve conflict can feel like pressure to {WDR}, who isn't ready yet. {WDR}'s visible emotion while taking space can look like an invitation to engage, when {WDR} is actually signaling a need to wait. Both readings are understandable, but both are wrong.",
     color: "#7C3AED", shade: "#F5F0FF",
     famousDuos: [
       { names: "Hermione & Ron", show: "Harry Potter", note: "She analyzed and pushed; he felt his way through and needed to breathe. They drove each other crazy in exactly the ways that made them better." },
       { names: "Ted & Robin", show: "How I Met Your Mother", note: "He pushed toward resolution; she pulled toward distance. Neither was wrong, but they needed a way to say so." },
     ],
     strengths: [
-      "Named and managed, your instincts produce repair that works",
+      "When you name your different conflict instincts and plan for them, your repairs tend to work",
       "You are emotionally complementary, logical and feeling",
-      "The dynamic is highly solvable once it is understood",
+      "Your difference in conflict timing is very solvable once you both understand it",
     ],
     stickingPoints: [
-      "The conversation can start before {WDR} is ready",
-      "{WDR_pos} visible emotion can look like something to fix",
-      "It can look like one of you cares more",
+      "A hard conversation can start before {WDR} is ready",
+      "{WDR}'s visible emotion can look like something {RCH} needs to fix",
+      "Your different timing can make it look like one of you cares more",
     ],
     patterns: [
       "When something is hard, {U} and {P} are usually not in the same place at the same time. {RCH} is ready to engage. {WDR} needs the space.",
@@ -299,17 +299,17 @@ export const COUPLE_TYPES = [
        sentence in What Comes Next under Things to consider. Ellie's words. */
     behavior: "Given your unique approaches, {RCH} should try to pause heavy conversations until {WDR} is ready to talk, and {WDR} should try to assign a timeframe, like \"I need until tomorrow morning.\"",
     tips: [
-      { title: "{RCH}: resolution doesn't mean resolved", body: "{WDR} needs the space first, and then the conversation. Moving fast to 'let's talk' before {WDR} is ready doesn't get to resolution faster. It delays it.", phraseTry: "I know you're not ready. I'll wait, but can you tell me when you think you will be?" },
-      { title: "{WDR}: say when you'll be back", body: "The uncertainty is harder for {RCH} than the wait. 'I need until tonight' lets {RCH} stop the worried waiting and trust the process.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
-      { title: "Name the pattern out loud before you're in it", body: "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.", phraseTry: "When I go quiet, it's not over, it's processing. Give me space and I'll come back." },
+      { title: "{RCH}: pushing to talk doesn't resolve conflict faster", body: "{WDR} needs space first, and then the conversation. Pushing to talk before {WDR} is ready usually slows down a resolution rather than speeding up the process.", phraseTry: "I know you're not ready. I'll wait, but can you tell me when you think you will be?" },
+      { title: "{WDR}: say when you'll be back", body: "Not knowing when {WDR} will come back is harder for {RCH} than the wait itself. Saying 'I need until tonight' lets {RCH} stop worrying while waiting.", phraseTry: "I need until tomorrow morning. I'll come to you then." },
+      { title: "Talk about how you each handle conflict before a hard moment", body: "When you are both calm, try to tell each other what you each need during an argument. That conversation can change how the next argument goes.", phraseTry: "When I go quiet, the conversation isn't over, I'm just processing. Give me space and I'll come back." },
     ],
   },
   {
     id: "XZ", typeA: "X", typeB: "Z",
     name: "The stethoscope",
-    tagline: "Both of you think before you speak, the real work happens before the conversations begin.",
-    description: "{U} and {P} both hold things privately and both process what's going on before it comes out, if it comes out at all. The dynamic is low-temperature and rarely explosive. The practical machinery of the relationship runs smoothly. The emotional layer tends to stay quiet.",
-    nuance: "Neither partner is offering a lot of emotional visibility to the other. The relationship can run on logic, shared purpose, and good-enough communication while the emotional texture goes largely unaddressed. That gap tends to show up during life transitions, when something that's been running quietly needs to be named.",
+    tagline: "You both think before you speak, so you tend to sort through your feelings privately before you talk.",
+    description: "{U} and {P} both keep feelings private and both think them through before saying anything, if you say anything at all. Your dynamic is calm and rarely explosive, and the practical side of your relationship runs smoothly, but your feelings tend to stay unspoken.",
+    nuance: "Neither of you shows the other much of what you feel. Your relationship can run on logic, shared purpose, and good-enough communication while your feelings go largely unaddressed. This gap tends to show up during life transitions, when feelings that have stayed quiet need to be said out loud.",
     color: "#1B5FE8", shade: "#EFF1FF",
     famousDuos: [
       { names: "Joel & Ellie", show: "The Last of Us", note: "Both held things close. Both processed privately. What passed between them was real and deep, it just required the other person to ask rather than assume." },
@@ -335,16 +335,16 @@ export const COUPLE_TYPES = [
     behavior: "Given your unique approaches, {RCH} should try to ask a question, like \"What's actually going on for you right now?\", and {WDR} should do their best to give an honest answer, even without fully understanding the feeling.",
     tips: [
       { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share their feelings.", phraseTry: "What's actually going on for you right now? How are you feeling?" },
-      { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the structure that neither of you will naturally generate on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
-      { title: "The quiet isn't a problem, until it is", body: "Calm is a wonderful quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
+      { title: "Schedule the emotional check-in", body: "{U} and {P} can both go long stretches without saying how you feel. Try to set aside a short weekly conversation about how you each feel, because neither of you is likely to start one on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
+      { title: "A calm relationship is a good thing, as long as nothing is going unsaid", body: "Calm is a wonderful quality, but it is worth making sure the calm isn't covering for avoided conversations. Every so often, try to ask each other whether the calm is genuine or whether something is going unsaid.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
     ],
   },
   {
     id: "YZ", typeA: "Y", typeB: "Z",
     name: "The sanctuary",
-    tagline: "You both need space when things get hard. The difference is how much it shows, and that gap is worth understanding.",
-    description: "When things get hard, {U} and {P} both pull back. {EXP} carries the emotional weight visibly while withdrawn. {GRD} holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
-    nuance: "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces, because neither of you naturally initiates the opening. Agree on who brings it back, and when. A named pattern gives you both the full space, without indefinite silence.",
+    tagline: "You both need space when things get hard, but one of you shows feelings openly and one of you keeps them private. That difference is worth understanding.",
+    description: "When things get hard, {U} and {P} both withdraw. {EXP} shows feelings openly while taking space, and {GRD} keeps feelings private. Coming back together tends to be slow for both of you, which means hard moments can sit for a long time before either of you raises them.",
+    nuance: "There is real depth in your relationship, often more than either of you shows. The risk is that your feelings never get said, because neither of you naturally starts the conversation. Try to agree on who restarts the conversation after a hard moment, and when, so you each get the space you need without a silence that has no end.",
     color: "#7C3AED", shade: "#F5F0FF",
     famousDuos: [
       { names: "Joel & Clementine", show: "Eternal Sunshine of the Spotless Mind", note: "He held everything privately; she expressed the weight of everything she was feeling. Both needed space. Both took it in different ways." },
@@ -357,7 +357,7 @@ export const COUPLE_TYPES = [
     ],
     stickingPoints: [
       "Both of you can wait a long time for the other to reengage",
-      "{EXP_pos} visible emotion is hard to read during withdrawal",
+      "{EXP}'s visible emotion can be hard to read while you each take space",
       "Hard things can sit a long time before either of you raises them",
     ],
     patterns: [
@@ -369,9 +369,9 @@ export const COUPLE_TYPES = [
        sentence in What Comes Next under Things to consider. Ellie's words. */
     behavior: "Given your unique approaches, {EXP} can say plainly how {EXP} feels so that {GRD} does not have to guess, and {GRD} may need time to process but should set a time to engage, like \"Let's talk after dinner.\"",
     tips: [
-      { title: "Agree on who brings it back", body: "Neither of you moves to reopen things quickly, so the silence can stretch. Decide the pattern in advance. Whoever tends to settle first signals when they are ready, and the other gets the full space until then.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
+      { title: "Agree on who restarts the conversation", body: "Neither of you tends to reopen a hard conversation quickly, so the silence can stretch. Try to decide in advance who reaches out first. Whoever tends to settle first should signal when they are ready, and the other gets the full space until then.", phraseTry: "I'm ready when you are. Take your time. I'll be here." },
       { title: "Give your space an end time", body: "'I need some time' is not as useful as 'I need until tonight.' Giving a specific time to come back lets your partner stop worrying while they wait for you.", phraseTry: "I need until tomorrow morning. I'll come find you then." },
-      { title: "Create a regular time for openness", body: "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific. I just want to check in." },
+      { title: "Create a regular time for openness", body: "{U} and {P} need a set time to share feelings. A weekly check-in, even for 10 minutes, gives you a time to talk that neither of you would usually create on your own.", phraseTry: "Can we do ten minutes on Sunday? Not about anything specific. I just want to check in." },
     ],
   },
 ];

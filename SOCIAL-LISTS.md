@@ -23,7 +23,7 @@ whether their results are ready, and what they have bought and not used.
 | 3 | undefined | Complete your exercises | Your results unlock once you and James complete your exercises | undefined |
 | 4 | undefined | Continue Communication | You've completed 12/30 questions | undefined |
 | 5 | undefined | Explore build-a-budget | Build your budget with a customizable tool | undefined |
-| 6 | undefined | Finish setting up your profile | We need info to properly set up your exercises | undefined |
+| 6 | undefined | Finish setting up your profile | We need your profile details to set up your exercises | undefined |
 | 7 | undefined | Look back at your tags | What you marked is a record of what mattered to you. | undefined |
 | 8 | undefined | New publication to explore | View this and others in your Learn tab | undefined |
 | 9 | undefined | Pick one conversation to have this week | Every section ends with something to try. | undefined |
