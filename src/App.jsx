@@ -3317,9 +3317,6 @@ function CouplePortraitBubble({ portrait, size = 32, dark = false, uid, onClick,
     </div>
   );
 }
-// ── GIFT LANDING SCREEN ──────────────────────────────────────────────────────
-// Shown when someone scans a QR card from a physical gift box.
-// ?gift=1&p1=Sarah&p2=James&pkg=X&order=ATT-xxx
 function InlineSpinner({ light = true }) {
   return (
     <>
@@ -3329,200 +3326,14 @@ function InlineSpinner({ light = true }) {
   );
 }
 
-function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
-  const [step, setStep] = React.useState('welcome'); // 'welcome' | 'who' | 'email' | 'signup'
-  const [chosenPartner, setChosenPartner] = React.useState(null); // 'p1' | 'p2'
-  const [partnerEmail, setPartnerEmail] = React.useState('');
-  const [emailErr, setEmailErr] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
-
-  const myName = chosenPartner === 'p1' ? p1 : p2;
-  const theirName = chosenPartner === 'p1' ? p2 : p1;
-
-  const C = { orange: '#E8673A', indigo: '#1B5FE8', ink: '#0E0B07', muted: '#7A6753', stone: '#E8DDD0', warm: '#FFFDF9' };
-  const inp = { width: '100%', padding: '0.78rem 1rem', border: `1.5px solid ${C.stone}`, borderRadius: 11, fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", color: C.ink, background: C.warm, outline: 'none', boxSizing: 'border-box' };
-
-  return (
-    <div style={{ minHeight: '100vh', background: '#F3EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
-      <link href={FONT_LINK} rel="stylesheet"/>
-      <div style={{ background: C.warm, borderRadius: 22, padding: '2.25rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)' }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
-          <AttuneMark width={28} />
-          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
-        </div>
-
-        {step === 'welcome' && (
-          <>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.35rem', fontSize: '1.6rem', color: 'white' }}>✦</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', fontWeight: 700, color: C.ink, marginBottom: '0.5rem', lineHeight: 1.2 }}>Welcome to your Attune experience.</div>
-            <p style={{ fontSize: '0.85rem', color: C.muted, marginBottom: '1.75rem', lineHeight: 1.7 }}>
-              Someone gave you this as a gift. Two assessments. One conversation. Built from your answers.
-            </p>
-            <button onClick={() => setStep('who')}
-              style={{ width: '100%', padding: '0.9rem', border: 'none', borderRadius: 12, background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.02em' }}>
-              Set up your profile →
-            </button>
-          </>
-        )}
-
-        {step === 'who' && (
-          <>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', fontWeight: 700, color: C.ink, marginBottom: '0.4rem', lineHeight: 1.2 }}>Welcome to Attune.</div>
-            <p style={{ fontSize: '0.82rem', color: C.muted, marginBottom: '1.75rem', lineHeight: 1.65 }}>Someone sent you this as a gift. Let's get you set up. First, who are you?</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {[{name: p1, key: 'p1'}, {name: p2, key: 'p2'}].filter(x => x.name).map(({ name, key }) => (
-                <button key={key} onClick={() => { setChosenPartner(key); setStep('email'); }}
-                  style={{ width: '100%', padding: '1rem', border: `1.5px solid ${C.stone}`, borderRadius: 12, background: 'white', cursor: 'pointer', textAlign: 'left', fontSize: '1rem', fontWeight: 600, color: C.ink, fontFamily: "'DM Sans', sans-serif", transition: 'border-color 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = C.orange}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = C.stone}>
-                  I'm {name} →
-                </button>
-              ))}
-              {!p2 && (
-                <button onClick={() => { setChosenPartner('p1'); setStep('email'); }}
-                  style={{ width: '100%', padding: '1rem', border: `1.5px solid ${C.stone}`, borderRadius: 12, background: 'white', cursor: 'pointer', textAlign: 'left', fontSize: '1rem', fontWeight: 600, color: C.ink, fontFamily: "'DM Sans', sans-serif" }}>
-                  I'm {p1} →
-                </button>
-              )}
-            </div>
-          </>
-        )}
-
-        {step === 'email' && (
-          <>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.15rem', fontWeight: 700, color: C.ink, marginBottom: '0.4rem', lineHeight: 1.2 }}>Hi, {myName}.</div>
-            <p style={{ fontSize: '0.82rem', color: C.muted, marginBottom: '1.5rem', lineHeight: 1.65 }}>
-              {theirName ? `Let's invite ${theirName} so you can do this together.` : "Let's invite your partner so you can do this together."}
-            </p>
-            <div style={{ fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: C.muted, fontWeight: 700, marginBottom: '0.35rem' }}>
-              {theirName ? `${theirName}'s email` : "Your partner's email"}
-            </div>
-            <input
-              type="email"
-              placeholder={theirName ? `${theirName}@example.com` : "partner@example.com"}
-              value={partnerEmail}
-              onChange={e => { setPartnerEmail(e.target.value); setEmailErr(''); }}
-              style={inp}
-            />
-            {emailErr && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.4rem' }}>{emailErr}</p>}
-            <div style={{ display: 'flex', gap: '0.65rem', marginTop: '1.25rem' }}>
-              <button onClick={() => setStep('who')} style={{ flex: 1, padding: '0.75rem', border: `1.5px solid ${C.stone}`, borderRadius: 11, background: 'transparent', cursor: 'pointer', fontSize: '0.85rem', fontFamily: "'DM Sans', sans-serif", color: C.muted }}>← Back</button>
-              <button onClick={() => {
-                if (!partnerEmail.includes('@')) return setEmailErr('Please enter a valid email.');
-                setStep('signup');
-              }} style={{ flex: 2, padding: '0.75rem', border: 'none', borderRadius: 11, background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', fontFamily: "'DM Sans', sans-serif" }}>
-                {theirName ? `Invite ${theirName} →` : 'Send invite →'}
-              </button>
-            </div>
-            <button onClick={() => setStep('signup')} style={{ width: '100%', marginTop: '0.75rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", textDecoration: 'underline' }}>
-              Skip for now. I'll invite them later
-            </button>
-          </>
-        )}
-
-        {step === 'signup' && (
-          <GiftSignupForm
-            myName={myName}
-            theirName={theirName}
-            theirEmail={partnerEmail}
-            pkg={pkg}
-            orderId={orderId}
-            onCreateAccount={onCreateAccount}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── GIFT SIGNUP FORM ─────────────────────────────────────────────────────────
-function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateAccount }) {
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [err, setErr] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
-  const C = { orange: '#E8673A', indigo: '#1B5FE8', ink: '#0E0B07', muted: '#7A6753', stone: '#E8DDD0', warm: '#FFFDF9' };
-  const inp = { width: '100%', padding: '0.78rem 1rem', border: `1.5px solid ${C.stone}`, borderRadius: 11, fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", color: C.ink, background: C.warm, outline: 'none', marginBottom: '0.65rem', boxSizing: 'border-box' };
-  const genInvite = () => Math.random().toString(36).slice(2, 10).toUpperCase();
-
-  const handleCreate = async () => {
-    if (!email.includes('@')) return setErr('Please enter a valid email.');
-    if (password.length < 6) return setErr('Password must be at least 6 characters.');
-    setLoading(true); setErr('');
-
-    // Check if order is already claimed (prevents QR code sharing)
-    if (orderId) {
-      try {
-        const { supabase: sb, hasSupabase } = await import('./supabase.js');
-        if (hasSupabase()) {
-          const { data: ord } = await sb.from('orders').select('claimed').eq('order_num', orderId).maybeSingle();
-          if (ord?.claimed) {
-            setLoading(false);
-            return setErr('This gift has already been redeemed. If you think this is an error, contact hello@attune-relationships.com');
-          }
-        }
-      } catch {}
-    }
-
-    // Create account
-    try {
-      const { supabase: sb, hasSupabase } = await import('./supabase.js');
-      const inviteCode = genInvite();
-      if (hasSupabase()) {
-        const { data: authData, error: authErr } = await sb.auth.signUp({ email: email.trim().toLowerCase(), password, options: { data: { name: myName }, emailRedirectTo: `${window.location.origin}/app` } });
-        if (authErr) { setLoading(false); return setErr(authErr.message); }
-        await fetch('/api/create-profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: authData.user.id, name: myName, partnerName: theirName || '',
-            partnerEmail: theirEmail || '', emailOptIn: true, inviteCode,
-            pkg: pkg || 'core',
-          }),
-        }).catch(() => {});
-        // Mark order as claimed
-        if (orderId) {
-          await sb.from('orders').update({ claimed: true, buyer_email: email.trim().toLowerCase() }).eq('order_num', orderId).catch(() => {});
-        }
-        // Send partner invite email if email provided. Uses retry helper
-        // (Issue 4.7) so a transient failure doesn't permanently lose the
-        // invite — Partner B never gets the link otherwise.
-        if (theirEmail) {
-          const inviteUrl = `${window.location.origin}/app?invite=${inviteCode}&from=${encodeURIComponent(myName)}&pae=${encodeURIComponent(email.trim().toLowerCase())}${theirEmail ? `&iie=${encodeURIComponent(theirEmail.trim().toLowerCase())}` : ''}`;
-          sendEmailWithRetry({ type: 'partner_invite', fromName: myName, toEmail: theirEmail, toName: theirName || 'Your partner', inviteUrl });
-        }
-        // Welcome email now fires on first dashboard view (Issue 2.6),
-        // not at signup.
-
-        const account = { id: authData.user.id, email: email.trim().toLowerCase(), name: myName, partnerName: theirName || '', partnerEmail: theirEmail || '', emailOptIn: true, inviteCode, partnerJoined: false, pkg: pkg || 'core', createdAt: Date.now(), isGiftRecipient: true };
-        // Clear stale data from prior users on this browser (e.g. another
-        // demo session, a previous account). Single source of truth at module
-        // top; see USER_LOCALSTORAGE_KEYS.
-        clearAllUserLocalStorage();
-        try { localStorage.setItem('attune_account', JSON.stringify(account)); } catch {}
-        setLoading(false);
-        onCreateAccount(account);
-      }
-    } catch (e) { setLoading(false); setErr('Something went wrong. Please try again.'); }
-  };
-
-  return (
-    <>
-      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.1rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.35rem' }}>Create your account</div>
-      <p style={{ fontSize: '0.78rem', color: C.muted, marginBottom: '1.25rem', lineHeight: 1.55 }}>
-        {theirEmail ? `We've sent ${theirName || 'your partner'} an invite. Create your account to get started.` : 'Create your account to begin the exercises.'}
-      </p>
-      <input type="email" placeholder="Your email" value={email} onChange={e => { setEmail(e.target.value); setErr(''); }} style={inp} />
-      <input type="password" placeholder="Choose a password" autoComplete="new-password" value={password} onChange={e => { setPassword(e.target.value); setErr(''); }} style={inp} />
-      {err && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginBottom: '0.75rem' }}>{err}</p>}
-      <button onClick={handleCreate} disabled={loading}
-        style={{ width: '100%', padding: '0.9rem', background: `linear-gradient(135deg, ${C.orange}, ${C.indigo})`, color: 'white', border: 'none', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: "'DM Sans', sans-serif" }}>
-        {loading ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem' }}><InlineSpinner /> Creating account…</span> : 'Create account →'}
-      </button>
-    </>
-  );
-}
+/* ── THE GIFT BOX LANDING WAS HERE ─────────────────────────────────────────
+   GiftLandingScreen and GiftSignupForm were the page a QR card in a physical
+   gift box opened. Ellie retired the gift cards in G17 and nothing was ever
+   printed, so nothing produced the ?p1= link that reached them; only
+   /portal's forwarder passed one through. They were removed in the A170
+   sweep, which found the sign-up form could not have worked: it called
+   `.catch` on a Supabase query, which has `then` and no `catch`, so every
+   sign-up through it threw before sending the partner's invite. */
 
 // ── PROFILE SETUP TILE ────────────────────────────────────────────────────────
 // Shown on dashboard until user completes profile setup. Per-person.
@@ -12867,7 +12678,13 @@ function AuthModal({ mode, onClose, onSuccess }) {
           // Link the order to the auth user so future cross-device logins
           // can find it by user_id (faster + works even if email changes).
           if (!orderRow.user_id) {
-            await sb.from('orders').update({ user_id: user.id }).eq('id', orderRow.id).catch(() => {});
+            /* A Supabase query has `then` and no `catch`, so the `.catch(() =>
+               {})` this ended in threw a TypeError before the request was
+               ever made, into the catch around it: the link was never
+               written, on any login, and nothing said so. It returns its
+               error like every other query here (A170). */
+            const { error: linkErr } = await sb.from('orders').update({ user_id: user.id }).eq('id', orderRow.id);
+            if (linkErr) console.warn('[Attune] could not link the order to this account:', linkErr.message);
           }
         }
       } catch {}
@@ -14654,10 +14471,6 @@ export default function App() {
   }, []);
   const urlIsReset = params.get("reset") === "1" || _hashIsRecovery || recoveryEvent;
   // Gift box QR flow params
-  const urlIsGift = params.get("gift") === "1";
-  const urlGiftP1 = params.get("p1") ? decodeURIComponent(params.get("p1")) : null;
-  const urlGiftP2 = params.get("p2") ? decodeURIComponent(params.get("p2")) : null;
-  const urlGiftOrder = params.get("order") || null;
 
   // ── AUTH STATE (localStorage-backed for now, ready for real backend) ──────
   const loadAccount = () => {
@@ -17342,18 +17155,6 @@ export default function App() {
         }}
       />
     );
-  }
-
-  // ── GIFT BOX QR ROUTING ──────────────────────────────────────────────────
-  // When someone scans a QR card from a physical box: ?gift=1&p1=Sarah&p2=James&order=ATT-xxx
-  if (urlIsGift && urlGiftP1 && !account) {
-    return <GiftLandingScreen
-      p1={urlGiftP1}
-      p2={urlGiftP2}
-      pkg={_urlPkg}
-      orderId={urlGiftOrder}
-      onCreateAccount={(acct) => { setAccount(acct); saveAccount(acct); }}
-    />;
   }
 
   // ── PARTNER B INVITE ROUTING ─────────────────────────────────────────────

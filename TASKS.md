@@ -10,6 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A171 | **Please run migration 098. It closes your promo codes to the public.** Two old setup steps let anybody holding the site's public key read every promo code, including the free ones. Nothing in a browser needs that any more, because codes are checked on the server now. This reverses an earlier decision that the codes were fine to be public; my reason is that it let anyone list the free ones. 098 removes both, and one other open door into an old feedback table. It also removes six more that our setup file would have recreated if anyone had pasted it, a mistake I made last week fixing that file, now corrected. It only removes access rules: no data is read, changed or deleted, and it is safe to run twice. Steps below, then one check that should come back empty. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -20,11 +21,117 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
+### Two things to run, for A171
+
+**Step 1. Paste this into Terminal.** It copies the migration and prints `copied`.
+
+```bash
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/098_close_open_policies.sql | pbcopy && echo copied
+```
+
+**Step 2. Paste that into the Supabase SQL Editor**, not Terminal, and run it.
+It should say "Success. No rows returned."
+
+<!-- SQL 098_close_open_policies.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 098: nothing outside the server may read or write a table it does not own.
+--
+-- ── WHAT IS OPEN ────────────────────────────────────────────────────────────
+-- 010 removed the original wide-open policies, `using (true) with check
+-- (true)` with no role, which grant the table to anybody holding the public
+-- key, and that key is in every visitor's browser. It also added two of its
+-- own, and nothing since has taken them away:
+--
+--   beta_codes_anon_select   every promo code, free ones included, readable
+--                            by anybody. Opened "so client-side validation
+--                            works"; validation moved to /api/validate-promo
+--                            on the server, and nothing in a browser reads
+--                            this table any more.
+--   feedback_anon_insert     anybody may write rows into feedback_submissions.
+--                            Nothing writes that table from a browser now: the
+--                            questionnaire it held is retired.
+--
+-- beta_codes_setup.sql, which created that table, made a second open read of
+-- it, beta_codes_read_all. If it was run, both are live.
+--
+-- ── AND WHAT schema.sql WOULD HAVE REOPENED ─────────────────────────────────
+-- supabase/schema.sql still created the six policies 010 removed. It could
+-- not be run until A164b made it runnable, so from then until this commit,
+-- pasting it into the live project reopened profiles, orders, partner_sessions,
+-- feedback_submissions and lmft_requests to anybody. Nothing suggests it was
+-- pasted. They are dropped here too, so this one file closes them whichever
+-- way the database got to where it is. schema.sql no longer creates them.
+--
+-- ── WHY NOTHING BREAKS ──────────────────────────────────────────────────────
+-- Every endpoint uses the service key, which bypasses row level security, so
+-- a "service" policy never granted the server anything. The scoped policies
+-- 010 and 019 created for a signed-in person's own rows are untouched.
+--
+-- ── SAFE TO RUN AGAIN ───────────────────────────────────────────────────────
+-- Every statement is DROP POLICY IF EXISTS. A policy that is not there is
+-- skipped. It writes no rows and reads none.
+--
+-- Afterwards, supabase/diagnostics/open-policies.sql lists anything still
+-- open. It should print nothing.
+-- ============================================================================
+
+drop policy if exists "beta_codes_anon_select"  on public.beta_codes;
+-- And the same open read from supabase/beta_codes_setup.sql, the script that
+-- created the table, which no migration ever removed.
+drop policy if exists "beta_codes_read_all"     on public.beta_codes;
+drop policy if exists "feedback_anon_insert"    on public.feedback_submissions;
+
+drop policy if exists "profiles_service"         on public.profiles;
+drop policy if exists "partner_sessions_write"   on public.partner_sessions;
+drop policy if exists "partner_sessions_service" on public.partner_sessions;
+drop policy if exists "orders_service"           on public.orders;
+drop policy if exists "feedback_service"         on public.feedback_submissions;
+drop policy if exists "lmft_requests_service"    on public.lmft_requests;
+```
+<!-- /SQL -->
+
+**Step 3. Paste this into Terminal.** It copies the check and prints `copied`.
+
+```bash
+cd /Users/Ellie/Projects/unison && cat supabase/diagnostics/open-policies.sql | pbcopy && echo copied
+```
+
+**Step 4. Paste that into the Supabase SQL Editor** and run it. It reads only.
+It should come back with no rows. If it shows any, paste them to me.
+
+<!-- SQL open-policies.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- Which tables can anybody holding the public key read or write?
+--
+-- Run this in the Supabase SQL Editor. It reads only; it writes nothing.
+--
+-- A policy whose test is always true, for a role a browser can be, opens its
+-- table to anybody: the public key is in every visitor's browser. The server
+-- uses the service key, which bypasses these rules, so it needs none of them.
+--
+-- ── WHAT ITS ANSWER MEANS ─────────────────────────────────────────────────
+--   no rows        nothing is open. This is the answer after migration 098.
+--   any row        that table is open to that command. Paste it back.
+
+select
+  tablename                         as "table",
+  policyname                        as "policy",
+  cmd                               as "lets them",
+  array_to_string(roles, ', ')      as "who"
+from pg_policies
+where schemaname = 'public'
+  and (coalesce(qual, '') = 'true' or coalesce(with_check, '') = 'true')
+  and roles && array['public', 'anon', 'authenticated']::name[]
+order by tablename, policyname;
+```
+<!-- /SQL -->
+
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
-| A170 | **Sweeps, your ask: "keep going". Three rounds done: A170a to A170h in section 3.** Say "keep going" for another round; nothing waits on you. |
+| A170 | **Sweeps, your ask: "keep going". Four rounds done: A170a to A170k in section 3, and A171 above needs you.** Say "keep going" for another round. |
 
 ## 3. For you to review
 
@@ -33,6 +140,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A170j | **A typo-sized mistake had silently switched off two website saves.** A database request was written to swallow its errors in a way the database library doesn't support, so instead it failed before sending. One linked a customer's order to their account at sign-in, and that link has never been saved. Nothing broke as a result, because the server also matches orders by email, which is why nobody noticed. The other was in the retired gift box sign-up page, where it made every sign-up fail before the partner's invite went out. That page was unreachable once gift cards were retired in G17, so I removed it rather than fix it. A new check finds this mistake anywhere in the product. |
+| A170k | **Someone with more than 1,000 notes would have lost sight of their oldest ones.** The Notes list stopped at the 1,000 most recent, and the journal and tag counts are worked out from that same list. Nobody is near it yet. It now reads every note. A failed read also now says it couldn't load instead of showing an empty list. |
 | A170g | **Three scheduled messages could repeat themselves.** The six-month and one-year check-in emails, the two survey nudges, and phone notifications each record "sent" so the next run leaves that person alone. All three recorded it after sending, without checking the record saved. If it didn't save, the same message went out again on every run. Now the record is made first and the message only goes if it saved. A failed send clears the record so it's retried. If something still goes wrong, a person misses one message rather than getting it twice. |
 | A170h | **Engagement figures could count a row twice and miss another.** That page reads big tables a thousand rows at a time without saying what order to read them in, so the database could hand back an overlapping set, most likely on page views, which are written while they're read. Every paged read now names its order, and the check requires it. |
 | A170a | **Saving an edit to a live In Practice article could unpublish it.** Saving reads the stored post first, to keep its publish date. If that read failed, the save treated the article as new: it wrote no publish date, which takes it off the site and the app, and gave every paragraph a new id, which detaches readers' notes on it. Proven by running it, not just by reading the code. A failed read now changes nothing and tells you to save again. |

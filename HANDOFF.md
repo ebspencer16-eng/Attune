@@ -4695,3 +4695,15 @@ the app shows the follow-up).
   answers rows, as PostgREST does with return=representation.
 - admin-engagement: every `all()` path names `order=`; check-row-cap fails a
   restAll or all() path without one.
+
+### Round four (A170j, A170k, A171)
+- A171 for Ellie: migration 098 drops beta_codes_anon_select and
+  feedback_anon_insert (from 010) and the six open policies schema.sql
+  recreated; diagnostics/open-policies.sql should then print nothing. I tried
+  to read the live tables with the public key to confirm exposure and the
+  permission check refused it; that is her call.
+- schema.sql creates no open policy now; check-no-open-policies (new).
+- GiftLandingScreen and GiftSignupForm removed (G17 retired gift cards; only
+  /portal could reach them). The login order link uses a real query.
+  check-no-builder-catch (new).
+- notes: full lists page through restAll; a failed list read is a 503.

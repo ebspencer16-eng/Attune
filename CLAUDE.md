@@ -770,6 +770,21 @@ and the empty string is one. A plant against check-send-claimed-first "failed"
 by crashing the harness, which proves nothing. Use `null` for a bodiless
 status, and read the failure message before counting a plant as caught.
 
+**A Supabase query has `then` and no `catch`.** It is a PromiseLike, so
+`sb.from('x').update(y).eq(...).catch(() => {})` throws "catch is not a
+function" before the request is made: the write never happens, and the throw
+usually lands in a surrounding catch. The website had three. One meant an
+order was never linked to its account at login; one failed every gift box
+sign-up. check-no-builder-catch parses for it. Read the error instead:
+`const { error } = await sb.from(...)...`.
+
+**Making a setup file runnable can make it dangerous.** schema.sql could not
+run, so its six `using (true)` policies, which migration 010 had removed for
+handing tables to anybody with the public key, never reached a database. A164b
+fixed the syntax and from then pasting it would have reopened profiles and
+orders. When repairing a file nobody could run, read what it will DO now that
+it can. check-no-open-policies replays every SQL file in both orders.
+
 **The database answers a thousand rows, whatever you ask for.** Supabase cuts
 every request to its max rows, and `.limit(100000)` is cut to it without an
 error or a header saying so. Every admin read but Engagement's took one

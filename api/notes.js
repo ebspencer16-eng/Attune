@@ -52,6 +52,7 @@ import { recordNotification } from './_lib/notifications.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { coupleKeyOf } from './_lib/couple-key.js';
 import { userForRequest } from './_lib/verify-token.js';
+import { restAll } from './_lib/page-all.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
@@ -152,8 +153,16 @@ export default async function handler(req) {
     const listing = req.method === 'GET'
       && (url.searchParams.get('action') || 'list') === 'list';
     const narrowed = !!url.searchParams.get('limit') || !!url.searchParams.get('tagId');
+    /* Every row, in pages. One request stopped at the 1,000 most recently
+       touched, so somebody with more saw their oldest notes vanish and their
+       journal and tag counts stop growing (A170). Wrapped as a Response so
+       the code below reads it the way it reads every other list; a failed
+       page is a 503, which the check below refuses on. */
+    const everyRow = (path) => restAll(supabaseUrl, serviceKey, path).then((r) => (r.error
+      ? new Response(JSON.stringify({ message: r.error }), { status: 503 })
+      : new Response(JSON.stringify(r.rows), { status: 200, headers: { 'content-type': 'application/json' } })));
     const myNotes = listing && !narrowed
-      ? rest(`notes?owner_id=eq.${me}&select=${NOTE_COLS}&order=updated_at.desc`, { headers: svc }).catch(() => null)
+      ? everyRow(`notes?owner_id=eq.${me}&select=${NOTE_COLS}&order=updated_at.desc,id`).catch(() => null)
       : null;
 
     const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,name,pronouns,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
@@ -253,8 +262,10 @@ export default async function handler(req) {
         ? rest(`notes?owner_id=eq.${me}&${notJournal}&select=${NOTE_COLS}&order=updated_at.desc${onlyThese}${cap}`, { headers: counting })
         : myNotes;
       const sharedSoon = coupleKey
-        ? rest(`notes?couple_key=eq.${encodeURIComponent(coupleKey)}&visibility=eq.shared&owner_id=neq.${me}&select=${NOTE_COLS}&order=updated_at.desc${onlyThese}${cap}`,
-          { headers: narrow ? counting : svc })
+        ? (narrow
+          ? rest(`notes?couple_key=eq.${encodeURIComponent(coupleKey)}&visibility=eq.shared&owner_id=neq.${me}&select=${NOTE_COLS}&order=updated_at.desc${onlyThese}${cap}`,
+            { headers: counting })
+          : everyRow(`notes?couple_key=eq.${encodeURIComponent(coupleKey)}&visibility=eq.shared&owner_id=neq.${me}&select=${NOTE_COLS}&order=updated_at.desc,id`))
         : null;
       /**
        * Three things a limited caller cannot work out for itself, and an
@@ -292,13 +303,17 @@ export default async function handler(req) {
         : null;
 
       const mineRes = await mineSoon;
-      let mine = mineRes ? await mineRes.json().catch(() => []) : [];
+      /* A list that failed is not an empty list: it drew as somebody with no
+         notes. Refused, like the profile read above (A170). */
+      if (!mineRes || !mineRes.ok) return json({ ok: false, error: 'could not read your notes just now' }, 503);
+      let mine = await mineRes.json().catch(() => []);
       const mineTotal = totalOf(mineRes);
 
       let shared = [];
       let sharedTotal = null;
       if (sharedSoon) {
         const sRes = await sharedSoon;
+        if (!sRes || !sRes.ok) return json({ ok: false, error: 'could not read your partner\'s shared notes just now' }, 503);
         shared = await sRes.json().catch(() => []);
         sharedTotal = totalOf(sRes);
       }

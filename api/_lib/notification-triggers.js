@@ -19,8 +19,8 @@ export const NOTIFICATION_TRIGGERS = {
     "api/partner-sync.js:314"
   ],
   "partner_shared": [
-    "api/notes.js:663",
-    "api/notes.js:768"
+    "api/notes.js:678",
+    "api/notes.js:783"
   ],
   "partner_deleted": [
     "api/delete-account.js:406"

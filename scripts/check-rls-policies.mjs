@@ -50,8 +50,10 @@
  *     select policyname, cmd, qual from pg_policies
  *     where schemaname = 'public';
  *
- * Not INSERT or UPDATE policies. Those matter too, and the bug this came from
- * was a read.
+ * Not INSERT or UPDATE policies, and not schema.sql pasted AFTER the
+ * migrations. check-no-open-policies holds both: no always-true policy on any
+ * table, for any command, in either order the files could be run. The split
+ * is by what: this one is reads of personal data, that one is doors left open.
  *
  * Not tables that are meant to be world-readable. Those are named below, each
  * with the reason, and adding one is a decision rather than a formality.
@@ -77,11 +79,25 @@ const PERSONAL = new Set([
 /**
  * Tables anyone may read, each for a reason.
  *
- * beta_codes  is a list of codes to check one against. Knowing a code is the
- *             point of having one; the rows carry nothing about a person.
  * posts       is the In Practice library, published on the website.
+ *
+ * beta_codes was here: "a list of codes to check one against. Knowing a code
+ * is the point of having one; the rows carry nothing about a person." True of
+ * checking a code you were given, and not of reading the list, which is how
+ * somebody finds a free code nobody gave them. Codes are checked on the server
+ * by /api/validate-promo now and nothing in a browser reads the table, so
+ * migration 098 closes it (A170). Both reasons are kept because reopening it
+ * is a decision, not a fix.
  */
-const WORLD_READABLE = new Set(['beta_codes', 'posts']);
+const WORLD_READABLE = new Set(['posts']);
+
+/**
+ * Tables that are about nobody and still must not be read by a stranger.
+ * Held to the same read rule as PERSONAL.
+ *
+ * beta_codes  every promo code, the free ones included. See above.
+ */
+const SERVER_ONLY = new Set(['beta_codes']);
 
 /** Expressions that tie a row to the caller. */
 const TIES_TO_CALLER = /auth\.uid\(\)|auth\.jwt\(\)|auth\.role\(\)|current_setting\s*\(|auth\.email\(\)/i;
@@ -143,8 +159,10 @@ for (const rel of files) {
   }
 }
 
-if (created < 15) {
-  console.error(`[check-rls-policies] only parsed ${created} policies; there were 25 when this was written, so the parser has gone blind.`);
+/* 25 when this was written. 14 after A170 took six always-true policies out of
+   schema.sql, which is a real fall rather than a blind parser. */
+if (created < 12) {
+  console.error(`[check-rls-policies] only parsed ${created} policies; there were 14 after A170, so the parser has gone blind.`);
   process.exit(1);
 }
 
@@ -159,11 +177,11 @@ for (const [table, rel] of tables) {
 }
 
 for (const p of live.values()) {
-  if (!PERSONAL.has(p.table)) {
+  if (!PERSONAL.has(p.table) && !SERVER_ONLY.has(p.table)) {
     if (!WORLD_READABLE.has(p.table)) {
       problems.push(
         `${p.file}: policy "${p.name}" is on ${p.table}, which is in neither list in this file.\n`
-        + `      Say whether its rows are about a person, in PERSONAL or in WORLD_READABLE.`);
+        + `      Say whether its rows are about a person, in PERSONAL, SERVER_ONLY or WORLD_READABLE.`);
     }
     continue;
   }
@@ -172,7 +190,7 @@ for (const p of live.values()) {
   problems.push(
     `${p.file}: policy "${p.name}" lets anyone read ${p.table}.\n`
     + `      USING (${p.using})\n`
-    + `      Nothing there ties the row to the caller, and ${p.table} holds personal data.\n`
+    + `      Nothing there ties the row to the caller, and ${p.table} ${SERVER_ONLY.has(p.table) ? 'is for the server only' : 'holds personal data'}.\n`
     + `      Every client of this database holds the publishable key: it is printed on the site.`);
 }
 

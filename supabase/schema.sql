@@ -14,6 +14,21 @@
 -- what every policy here does now. Found by parsing every .sql file in the
 -- repo with libpg_query, the parser Postgres itself uses: 112 parsed and this
 -- one did not.
+--
+-- ── AND MAKING IT RUNNABLE MADE IT DANGEROUS ────────────────────────────
+-- It created six policies that test `true` for every role, which hands the
+-- table to anybody holding the public key, and that key is in every
+-- visitor's browser. Migration 010 removed exactly these for that reason.
+-- While the file could not run, they never reached a database; once A164b
+-- fixed the syntax, pasting this into the live project would have reopened
+-- profiles, orders, partner_sessions, feedback_submissions and
+-- lmft_requests. The server uses the service key, which bypasses row level
+-- security, so they never granted the server anything.
+--
+-- They are dropped here now and never created. The scoped policies a
+-- signed-in person uses for their own rows live in migrations 010 and 019.
+-- check-no-open-policies replays every SQL file in order and fails if any
+-- table ends open (A170).
 -- ============================================================
 
 create table if not exists public.profiles (
@@ -38,7 +53,6 @@ drop policy if exists "profiles_self" on public.profiles;
 create policy "profiles_self" on public.profiles
   using (auth.uid() = id) with check (auth.uid() = id);
 drop policy if exists "profiles_service" on public.profiles;
-create policy "profiles_service" on public.profiles using (true) with check (true);
 
 create table if not exists public.partner_sessions (
   invite_code       text primary key,
@@ -52,13 +66,7 @@ create table if not exists public.partner_sessions (
 );
 alter table public.partner_sessions enable row level security;
 drop policy if exists "partner_sessions_write" on public.partner_sessions;
-/* FOR INSERT takes WITH CHECK and never USING: there is no existing row to
-   test. It read `for insert using (true) with check (true)`, which is the
-   second syntax error in this file and was hidden behind the first. */
-create policy "partner_sessions_write" on public.partner_sessions
-  for insert with check (true);
 drop policy if exists "partner_sessions_service" on public.partner_sessions;
-create policy "partner_sessions_service" on public.partner_sessions using (true) with check (true);
 
 create table if not exists public.orders (
   id                        bigserial primary key,
@@ -88,7 +96,6 @@ create table if not exists public.orders (
 );
 alter table public.orders enable row level security;
 drop policy if exists "orders_service" on public.orders;
-create policy "orders_service" on public.orders using (true) with check (true);
 
 create table if not exists public.feedback_submissions (
   id             bigserial primary key,
@@ -102,7 +109,6 @@ create table if not exists public.feedback_submissions (
 );
 alter table public.feedback_submissions enable row level security;
 drop policy if exists "feedback_service" on public.feedback_submissions;
-create policy "feedback_service" on public.feedback_submissions using (true) with check (true);
 
 create table if not exists public.lmft_requests (
   id             bigserial primary key,
@@ -119,7 +125,6 @@ create table if not exists public.lmft_requests (
 );
 alter table public.lmft_requests enable row level security;
 drop policy if exists "lmft_requests_service" on public.lmft_requests;
-create policy "lmft_requests_service" on public.lmft_requests using (true) with check (true);
 
 create index if not exists profiles_invite_code_idx on public.profiles(invite_code);
 create index if not exists profiles_checkin_6mo_idx on public.profiles(checkin_6mo_sent_at);

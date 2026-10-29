@@ -22,10 +22,12 @@ create table if not exists public.beta_codes (
 -- and allow the serverless payment API (service role) to upsert.
 alter table public.beta_codes enable row level security;
 
+-- No read policy. This created "beta_codes_read_all" with USING (true),
+-- which let anybody holding the public key list every promo code, the free
+-- ones included. Codes are checked on the server by /api/validate-promo, which
+-- uses the service key and needs no policy. Migration 098 drops it from a
+-- database where this already ran (A170).
 drop policy if exists "beta_codes_read_all" on public.beta_codes;
-create policy "beta_codes_read_all"
-  on public.beta_codes for select
-  using (true);
 
 drop policy if exists "beta_codes_service_write" on public.beta_codes;
 create policy "beta_codes_service_write"

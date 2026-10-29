@@ -110,6 +110,39 @@ const call = async (handler, path, route, init = {}) => {
   if (fine.status >= 500) fails.push(`notes answered ${fine.status} for a profile it could read.`);
 }
 
+// ── notes: the full list is every row, not the newest thousand ────────────
+/* One request stopped at 1,000, so somebody with more saw their oldest notes
+   vanish and their counts stop growing (A170). The stub answers the way the
+   server does: at most 1,000 rows, whatever is asked, honouring Range. */
+{
+  const notes = (await import('../api/notes.js')).default;
+  const N = 2500;
+  const ROWS = Array.from({ length: N }, (_, i) => ({ id: `n${i}`, owner_id: ME, body: 'x', visibility: 'private',
+    anchor_type: null, anchor_key: null, kind: 'note', updated_at: '2026-10-01T00:00:00Z', created_at: '2026-10-01T00:00:00Z' }));
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, opts = {}) => {
+    const u = String(url);
+    if (u.includes('/auth/v1/user')) return ok({ id: ME, email: 't@example.invalid' });
+    if (u.includes('/rest/v1/profiles')) return ok([{ partner_profile_id: null, name: 'A' }]);
+    if (u.includes('/rest/v1/notes?owner_id=eq.')) {
+      const m = /^(\d+)-(\d+)$/.exec((opts.headers || {}).Range || '');
+      const from = m ? Number(m[1]) : 0;
+      return ok(ROWS.slice(from, from + 1000));
+    }
+    return ok([]);
+  };
+  let body = {};
+  try {
+    const res = await quiet(() => notes(new Request(`${SITE_URL}/api/notes`, { headers: { authorization: 'Bearer t' } })));
+    body = await res.json().catch(() => ({}));
+  } finally { globalThis.fetch = realFetch; }
+  const got = (body.notes || []).length + (body.annotations || []).length;
+  if (got !== N) {
+    fails.push(`the notes list came back with ${got} of ${N} notes through a server that answers 1,000 at a time.`
+      + ' Past a thousand, somebody\'s oldest notes vanish from their own list.');
+  }
+}
+
 // ── exercise questions: what the reader has already answered ───────────────
 {
   const questions = (await import('../api/questions.js')).default;
