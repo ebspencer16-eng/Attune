@@ -65,7 +65,11 @@ const HI = '«HI»';
  * against all 150 sentences, which is the only way that showed.
  */
 const INSTRUCTS = (who) => new RegExp(
-  `${who}\\s+(?:can|could|should|shouldn't|commits\\b|commits to|gets to|must)\\b`,
+  `${who}\\s+(?:can|could|should|shouldn't|commits\\b|commits to|gets to|must)\\b`
+  /* Ellie's own way of asking, from her A187 edits: "It is completely fine
+     for X to ask outright." Without it, "Y can miss X's need" was the only
+     modal in that sentence and the item went to the wrong person. */
+  + `|\\bfine for ${who} to\\b`,
 );
 
 /** A sentence that asks the pair, which makes the whole entry theirs. */
@@ -75,6 +79,8 @@ const JOINT = [
   /\beach of you\b/i,
   /\bthe two of you\b/i,
   /\bagree (that|on|in advance|to)\b/i,
+  /* "It is fine to let some repairs be smaller": an invitation to the pair. */
+  /\b(it is|it's) (completely )?fine to\b/i,
   /* Case-insensitive on purpose: "The shift: agree that..." puts the joint
      instruction mid-sentence and in lower case, and a capitals-only version of
      this list read one of those as an instruction to one partner. */

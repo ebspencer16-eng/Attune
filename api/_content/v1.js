@@ -56,8 +56,8 @@ export const ALIGNED_ADVICE = {
     low:  "You both repair deliberately, by taking a real reset. That can increase the effectiveness of those attempts to repair, but it can also leave small, unresolved feelings that rise up in meaningful moments. It is fine to let some repairs be smaller and sooner so that you can avoid unresolved feelings.",
     high: "You both repair casually, without much ceremony. Because repair comes so naturally, it's easy to not acknowledge that intentional repair even happened. Tell each other when an apology or a reset helped you move forward.",
   },
-  love:       "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
-  feedback:   "You handle feedback in similar ways. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
+  love:       "Love lands in similar ways for both of you, which is rare. Try to keep showing love in that shared way on purpose, rather than only out of habit.",
+  feedback:   "You handle feedback in similar ways. Try to keep feedback kind and mention small things early, so that nothing turns into resentment.",
 };
 
 // SHIFTS was nested inside getDimShift and its template literals close over
@@ -69,20 +69,20 @@ export const SHIFTS = (loName, hiName) => ({
   // DRAFT copy, in the prose approval doc. Every other dimension's shift
   // prose was reviewed; this one postdates that pass.
   reassurance: {
-    '1_1': `You both need where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that it turns into a routine and stops carrying weight. Make it specific this week: name the thing, not the category.`,
-    '1_2': `${loName} needs it said plainly; ${hiName} leans the same way. Close match, so neither of you is left waiting. The one gap: when life gets busy, the saying is the first thing to drop. Put it somewhere it survives a hard week.`,
-    '1_3': `${loName} needs where they stand said out loud; ${hiName} is steady either way. That steadiness can read as not needing to say it. It costs ${hiName} very little to say it anyway, and it lands.`,
-    '1_4': `${loName} needs it voiced; ${hiName} treats it as settled and does not think to say it. The quiet is not withholding, and the asking is not doubt. The shift: ${hiName} says it once this week unprompted, before ${loName} has to ask.`,
-    '1_5': `${loName} needs where they stand said out loud. ${hiName} takes it as given and rarely says it. This is the gap where a long quiet stretch means two completely different things. Agree on a small, regular way it gets said. It matters more to one of you than the other, and that is fine.`,
-    '2_2': `You both like hearing it, without needing much. Comfortable match. Watch for it thinning out over time, since neither of you will chase it. Say it when you notice it, not only when it is asked for.`,
-    '2_3': `${loName} likes it said; ${hiName} is comfortable either way. No real strain here. ${hiName} can be the one who says it first, since it costs them less.`,
-    '2_4': `${loName} likes hearing it; ${hiName} assumes it and moves on. The shift: ${hiName} answers the unasked question sometimes, rather than waiting for a prompt.`,
-    '2_5': `${loName} wants it said now and then; ${hiName} treats it as long since settled. ${hiName} may not hear the ask, because it arrives quietly. ${loName} can ask outright, and ${hiName} can take the ask at face value.`,
-    '3_3': `Neither of you needs it said, and neither of you goes looking for it. That is a low-maintenance place to be. The gap shows up after a rough patch, when neither of you names that you are okay. Say it once out loud after the next hard week.`,
-    '3_4': `${loName} is steady either way; ${hiName} takes it as given. Nothing is straining. The one thing worth doing is saying it during a good stretch, so it is available during a bad one.`,
-    '3_5': `${loName} does not need much; ${hiName} needs none at all. You will rarely talk about where you stand. That works until something is actually off and there is no signal either way. Build one small check-in you both do on purpose.`,
-    '4_4': `You both take it as settled and rarely say it. Secure and uncomplicated. The risk is that silence carries no information, so a hard stretch looks exactly like an easy one. Name it out loud once a month, even when nothing prompts it.`,
-    '4_5': `${loName} assumes it; ${hiName} assumes it more. Neither of you will bring it up. That is fine while things are steady. Pick one moment, an anniversary or the start of a month, and say it then.`,
+    '1_1': `You both need reassurance shared aloud, and you both share it freely. The risk is that reassurance can start to feel routine since it happens regularly, and then it may not feel meaningful. This week, try to name the specific thing you value in each other, rather than stating general reassurances.`,
+    '1_2': `${loName} needs reassurance said plainly, and ${hiName} leans the same way. You are both on the same page about this, so neither of you is left waiting. The one gap is that when life gets busy, reassurance is usually the first thing to drop. Try to tie it to a fixed moment in your schedules, so it holds up during a hard week.`,
+    '1_3': `${loName} needs reassurance said out loud, and ${hiName} feels steady either way. That steadiness can make reassurance feel unnecessary to ${hiName}. Telling ${loName} how you feel about them costs ${hiName} very little, and it helps ${loName} feel secure.`,
+    '1_4': `${loName} needs reassurance said out loud. ${hiName} treats the relationship as settled and does not think to say so. ${hiName}'s quiet is not withholding, and ${loName}'s asking is not doubt. Once this week, ${hiName} can try to reassure ${loName} without being asked, before ${loName} has to ask.`,
+    '1_5': `Reassurance matters more to one of you than the other, and that is completely fine. ${loName} needs reassurance said out loud, while ${hiName} takes the relationship's security as given. This means that a long quiet stretch can mean two completely different things to each of you. Try to agree on a small, regular way to reassure each other.`,
+    '2_2': `You both like hearing reassurance, without needing much of it. Since neither of you will ask for reassurance, it can become few and far between over time. Try to reassure each other when feelings come up, not only when someone asks.`,
+    '2_3': `${loName} likes reassurance said out loud, and ${hiName} is comfortable either way. There is no real strain here. Since reassuring comes more easily to ${hiName}, ${hiName} should try to be the one to offer it first sometimes.`,
+    '2_4': `${loName} likes hearing reassurance, and ${hiName} assumes the relationship is secure and moves on. Try for ${hiName} to occasionally reassure ${loName} before ${loName} asks, rather than waiting to be prompted.`,
+    '2_5': `${loName} wants reassurance now and then, and ${hiName} treats the relationship as steady and not in need of reassurance. ${hiName} can miss ${loName}'s need for reassurance, because ${loName} tends to ask quietly. It is completely fine for ${loName} to ask outright.`,
+    '3_3': `Neither of you needs reassurance said out loud, and neither of you goes looking for it. That is a low-maintenance place to be. Issues can show up after a rough patch, when neither of you says that you are okay. After the next hard week, try to tell each other out loud that you are okay.`,
+    '3_4': `${loName} feels steady either way, and ${hiName} takes the relationship's security as given. Nothing is straining, but one thing worth doing is reassuring each other during a good stretch, so those words are easier to find during a bad one.`,
+    '3_5': `${loName} does not need much reassurance, and ${hiName} needs none at all. You might rarely talk about how you feel about each other. That works until something is actually wrong and neither of you can tell. Try to pick one small, regular moment where you each say how things feel between you.`,
+    '4_4': `You both feel secure in the relationship and rarely say so. This is stable, but the risk is that silence carries no information, so a hard stretch looks exactly like an easy one. Once a month, try to tell each other out loud how you are feeling about each other, even when nothing prompts it.`,
+    '4_5': `${loName} assumes the relationship is secure, and ${hiName} assumes so even more. Neither of you will usually bring up reassurance, and that is fine while things are steady. Try to pick one moment, like an anniversary or the start of a month, to tell each other how you feel about each other.`,
     '5_5': `You both treat security as a given and neither of you asks for confirmation. Genuinely settled. The only thing to watch: after something hard, neither of you will be the one to say you are okay. Decide now who says it first next time.`,
   },
 
