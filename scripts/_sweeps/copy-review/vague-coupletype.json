@@ -1,922 +1,922 @@
 [
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "{U} and {P} both move toward resolution and process outward. High warmth and emotional availability in both directions. Neither partner has to coax the other into the conversation or wait for the signal that it's okay to share what's going on.",
-    "proposed": "{U} and {P} both engage to resolve conflict and both share feelings openly. High warmth and emotional availability in both directions. Neither partner has to coax the other into a hard conversation or wait for a signal that it's okay to share how they feel.",
-    "why": "'the conversation', 'what's going on' unnamed; poles abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "The risk here is feedback loops rather than disconnection. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're both escalating things right now', is usually enough to break the loop.",
-    "proposed": "The risk for you two is strong feelings feeding each other, not distance. When both of you feel something strongly, the intensity can build rather than settle. One of you saying out loud, 'I think we're both escalating things right now', is usually enough to bring the intensity down.",
-    "why": "'naming that', 'the loop' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW strengths[2]",
-    "where": "Couple type page, a strengths tile (one line on its own)",
-    "current": "Hard conversations aren't avoided as often",
-    "proposed": "You two avoid hard conversations less than most couples",
-    "why": "'as often' as what: comparison unstated"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW patterns[2]",
-    "where": "Couple type page, a pattern line",
-    "current": "Arguments between you are probably not subtle. The work is making sure what comes out is accurate, not just loud.",
-    "proposed": "Arguments between you are not subtle. The work is making sure what you each say in an argument is accurate, not just loud.",
-    "why": "'what comes out' unnamed; hedge 'probably'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "When both of you are feeling something strongly, the loop can escalate. One person naming it can break the cycle before it needs to get bigger.",
-    "proposed": "When both of you feel something strongly, each reaction can raise the other's. One of you saying 'we're both escalating' out loud can stop the argument before it gets bigger.",
-    "why": "core target: 'the loop', 'naming it', 'before it needs to get bigger'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space.",
-    "proposed": "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice holding a feeling to yourself for a few minutes before you tell your partner about that feeling.",
-    "why": "'something', 'it', 'the shared space' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW tips[1].phraseTry",
-    "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
-    "current": "I need a minute with this before I put it out there. Give me twenty minutes.",
-    "proposed": "I need some time with this feeling before I talk about it. Give me twenty minutes.",
-    "why": "'put it out there' vague; 'a minute' then 'twenty minutes'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW tips[2].title",
-    "where": "Couple type page, tip heading",
-    "current": "The visibility is a gift",
-    "proposed": "Seeing each other's feelings is a gift",
-    "why": "'the visibility' of what"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it is what makes real closeness possible.",
-    "proposed": "Most couples guess at what the other feels. {U} and {P} don't have to. Appreciate being able to see each other's feelings, even when that is uncomfortable. Seeing each other this clearly is what makes real closeness possible.",
-    "why": "'that', 'it's', 'it' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WW tips[2].phraseTry",
-    "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
-    "current": "I know this is a lot right now, but I'm glad we can actually see each other in it.",
-    "proposed": "I know this conversation is a lot right now, but I'm glad we can actually see how each other feels.",
-    "why": "'see each other in it': 'it' unclear"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX tagline",
-    "where": "Couple type page, under the type name",
-    "current": "Resolution is the shared instinct. Privacy is the shared method of processing.",
-    "proposed": "You both engage to resolve conflict. You both keep feelings private while you work through them.",
-    "why": "positions abstract; name Engage and Guarded"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made and disagreements get worked through. The practical machinery of the relationship runs efficiently, and quietly.",
-    "proposed": "{U} and {P} both move toward resolving conflict and both work through feelings privately before sharing them. Decisions get made and disagreements get worked through. The practical side of the relationship runs efficiently, and quietly.",
-    "why": "'the feeling', 'before it comes out' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "Efficient repair can mean ending the conversation before it is actually settled. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly.",
-    "proposed": "Efficient repair can mean ending an argument before the issue is actually settled. Two people who both move fast toward resolution can fix the visible problem without addressing the feelings underneath it. The same argument then comes back, because the real conversation happened too quickly.",
-    "why": "'it', 'the surface', 'what's underneath', 'the same thing'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX stickingPoints[0]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "Two internal processors can go too long without sharing",
-    "proposed": "Two internal processors can go too long without sharing how they feel",
-    "why": "sharing what"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX patterns[2]",
-    "where": "Couple type page, a pattern line",
-    "current": "The emotional texture of hard moments can sometimes get skipped in the move toward resolution.",
-    "proposed": "How a hard moment feels to each of you can get skipped in the rush to resolve it.",
-    "why": "'emotional texture' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX tips[0].title",
-    "where": "Couple type page, tip heading",
-    "current": "Check if it's resolved or just closed",
-    "proposed": "Check if an argument is resolved or just closed",
-    "why": "core: 'it' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Fast repair is a real strength. The risk is ending a conversation or apologizing before things are fully settled.",
-    "proposed": "Fast repair is a real strength. The risk is ending a conversation or apologizing before the issue is fully settled.",
-    "why": "'things' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX tips[1].title",
-    "where": "Couple type page, tip heading",
-    "current": "Ask what's going on underneath the plan",
-    "proposed": "Ask about the feelings underneath the plan",
-    "why": "'what's going on' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "{U} and {P} are both comfortable with the practical mode. Add a deliberate question to get at the emotional weight underneath the practical action. This changes the quality of the conclusion.",
-    "proposed": "{U} and {P} are both comfortable talking about what to do. When you make a plan together, add one question about how each of you feels about the plan. That question changes the quality of the decision you reach.",
-    "why": "'practical mode', 'practical action', 'This' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX tips[1].phraseTry",
-    "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
-    "current": "How does this actually feel for you, beyond what it means?",
-    "proposed": "How does this actually feel for you, beyond what we need to do about it?",
-    "why": "'beyond what it means': 'it' unclear"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX tips[2].title",
-    "where": "Couple type page, tip heading",
-    "current": "Give the slower moments their time",
-    "proposed": "Slow down your repair",
-    "why": "'the slower moments' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XX tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back.",
-    "proposed": "Now and then, after an argument, slow the repair down enough to make sure you've actually heard each other. Those extra few minutes are what stop the same argument from coming back.",
-    "why": "no when; 'the same conversation'; hedge 'tends to'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY tagline",
-    "where": "Couple type page, under the type name",
-    "current": "Both need space first. Both carry it visibly when withdrawn.",
-    "proposed": "Both of you need space first. Both of you show your feelings openly while you take that space.",
-    "why": "core: 'carry it visibly', 'it' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "When things get hard, {U} and {P} both pull back before coming forward. Neither of you is avoiding, you're both protecting the quality of the eventual conversation. When you do come back together, you both bring the full emotional weight of what you've been carrying.",
-    "proposed": "When things get hard, {U} and {P} both withdraw before coming forward. Neither of you is avoiding the issue. You are both protecting the quality of the conversation you have later. When you do come back together, you both bring the full weight of what you felt while apart.",
-    "why": "'avoiding' what; 'eventual conversation'; 'what you've been carrying'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "Two people who both need space can wait for the other to come back first for a very long time. That waiting can start to feel like abandonment even when it's just process. Build an agreed-upon signal, even something small, that means 'I'm ready when you are' without requiring a full conversation to get there.",
-    "proposed": "Two people who both need space can wait for the other to come back first for a very long time. That waiting can start to feel like abandonment even when each of you is only taking time to think. Build an agreed-upon signal, even something small, that means 'I'm ready when you are' without requiring a full conversation to get there.",
-    "why": "'it's just process' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY stickingPoints[1]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "Open-ended space is more fragile than a set limit",
-    "proposed": "Space with no end time is more fragile than space with a set end time",
-    "why": "'open-ended space', 'set limit' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY stickingPoints[2]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "Things that need addressing can be delayed a long time",
-    "proposed": "Issues that need addressing can be delayed a long time",
-    "why": "'Things' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step.",
-    "proposed": "After a hard moment, both {U} and {P} tend to wait for the other to reach out. Whoever reaches out first usually gets a warmer reception than they expect. Be the one who reaches out.",
-    "why": "wait for what; 'the return'; 'Take the step' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY tips[1].title",
-    "where": "Couple type page, tip heading",
-    "current": "Bound the space with a time",
-    "proposed": "Give your space an end time",
-    "why": "'Bound the space' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.",
-    "proposed": "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop worrying and wait for you to come back.",
-    "why": "'trust the process' vague. Same string in YZ"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YY tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "{U} and {P} don't need a full conversation to signal that you're okay again. A small gesture, a cup of tea, a hand on the shoulder, does most of the work.",
-    "proposed": "{U} and {P} don't need a full conversation to signal that you're okay again. A small gesture, like a cup of tea or a hand on the shoulder, can say you're okay.",
-    "why": "'does most of the work' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES ZZ tagline",
-    "where": "Couple type page, under the type name",
-    "current": "Both withdraw. Both hold it close. A lot lives under the surface.",
-    "proposed": "Both withdraw. Both keep feelings private. Much of what you feel goes unsaid.",
-    "why": "core: 'hold it close'; 'under the surface' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES ZZ description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, calm, and emotionally deep, but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows.",
-    "proposed": "{U} and {P} both withdraw when things get hard and both keep feelings private. The relationship tends to be stable, calm, and emotionally deep, but that depth rarely gets said out loud. There is often more going on beneath the calm than either of you shows.",
-    "why": "'go inward', 'hold their interior life', 'doesn't surface' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES ZZ nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "Important things can go unsaid for a very long time. The comfort with quiet can become avoidance without either person intending it. The relationship looks more okay from the outside than it sometimes is from the inside. Creating a deliberate structure for openness is worth more here than in most pairings.",
-    "proposed": "Important things can go unsaid for a very long time. Your comfort with quiet can become avoidance without either of you intending it. The relationship looks more okay from the outside than it sometimes is from the inside. A set time each week to say how you each feel is worth more for you two than for most couples.",
-    "why": "'deliberate structure for openness' vague action"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES ZZ strengths[2]",
-    "where": "Couple type page, a strengths tile (one line on its own)",
-    "current": "Feelings can be heavy even if they are not spoken",
-    "proposed": "Your feelings run deep even when you don't say them",
-    "why": "'Feelings can be heavy' unclear as a strength; whose"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES ZZ tips[0].title",
-    "where": "Couple type page, tip heading",
-    "current": "Build in the opening, don't wait for it to happen",
-    "proposed": "Schedule a time to talk, don't wait for one",
-    "why": "'the opening' and 'it' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES ZZ tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "A weekly check-in, even 15 minutes, creates a structure for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.",
-    "proposed": "A weekly check-in, even 15 minutes, gives you a set time to raise what you would each otherwise keep to yourselves. Schedule the conversation neither of you would start on your own.",
-    "why": "'the things', 'the opening' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES ZZ tips[1].title",
-    "where": "Couple type page, tip heading",
-    "current": "Share the rougher draft",
-    "proposed": "Share a feeling before you have it figured out",
-    "why": "'rougher draft' of what"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES ZZ tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed.",
-    "proposed": "Both {U} and {P} wait until a thought or feeling is fully formed before sharing it. Practice sharing thoughts and feelings while they are still half-formed.",
-    "why": "core: 'something', 'sharing it half-formed'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX tagline",
-    "where": "Couple type page, under the type name",
-    "current": "Different approaches to resolution, both heading in the same direction.",
-    "proposed": "You both engage to resolve conflict. You differ on how openly you share feelings.",
-    "why": "positions abstract; actually differ on Open/Guarded"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
-    "proposed": "{U} and {P} both engage to resolve conflict when things get hard, so you're pulling in the same direction. Where you differ is open versus guarded: one of you shares feelings as they come, and one keeps them private longer. You want the same outcome. You take different paths to it.",
-    "why": "'how the internal experience travels', 'holds it closer' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "The expressive partner can feel like the guarded partner isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different.",
-    "proposed": "The expressive partner can feel like the guarded partner isn't sharing what they actually feel. The guarded partner can feel like too much is said out loud before they have thought it through. Neither is wrong. You simply share at different levels of openness.",
-    "why": "'before it's ready', 'shared space', 'registers' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX strengths[1]",
-    "where": "Couple type page, a strengths tile (one line on its own)",
-    "current": "You are complementary processors, thoughtful and eager",
-    "proposed": "One of you thinks first and one of you shares first, and the two balance each other",
-    "why": "'complementary processors' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX stickingPoints[2]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "Processing can feel like withholding to one of you",
-    "proposed": "{GRD}'s private processing can feel like withholding to {EXP}",
-    "why": "'to one of you': which one. Use the name, not {GRD_pos}, which renders a bare 'his'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX patterns[1]",
-    "where": "Couple type page, a pattern line",
-    "current": "{EXP} tends to process out loud. {GRD} needs to think it through first, then bring it. Same conversation, different way in.",
-    "proposed": "{EXP} tends to process out loud. {GRD} needs to think a problem through first, then raise it. Same conversation, different way in.",
-    "why": "'think it through', 'bring it' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX patterns[2]",
-    "where": "Couple type page, a pattern line",
-    "current": "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
-    "proposed": "When you do talk a problem through, the talk tends to be useful. You don't fight about whether to talk, just when.",
-    "why": "'the conversation', 'somewhere useful', 'have it'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX tips[0].title",
-    "where": "Couple type page, tip heading",
-    "current": "Name which mode you're in",
-    "proposed": "Say whether you need to talk or think first",
-    "why": "'which mode' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early in the process.",
-    "proposed": "Say 'I need to process this out loud' or 'I need to think before I talk.' That one sentence tells the other person how to meet you. Say it at the start of a hard conversation.",
-    "why": "'Use it early in the process' vague when"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX tips[1].title",
-    "where": "Couple type page, tip heading",
-    "current": "Guarded partner: share the half-formed version",
-    "proposed": "Guarded partner: share your feelings before they are fully formed",
-    "why": "'the half-formed version' of what. Keep 'Guarded partner:' (audienceOf reads it)"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.",
-    "proposed": "You don't have to wait until a feeling is fully formed before you share it. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.",
-    "why": "core: 'until it's fully formed'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WX tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.",
-    "proposed": "Pressing the guarded partner to share more than they are ready to share doesn't create connection, it creates pressure. Ask once how they feel, then wait. They will share in their own time.",
-    "why": "'more' of what; 'Ask once' what; 'The sharing'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY tagline",
-    "where": "Couple type page, under the type name",
-    "current": "You have different conflict clocks. One is ready before the other, recognizing that changes everything.",
-    "proposed": "You have different conflict clocks. One of you is ready to talk before the other. Recognizing that difference changes everything.",
-    "why": "'One', 'that' unnamed; comma splice"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "When things get hard, {U} moves toward resolution and {P} pulls back, or vice versa, depending on your individual types. The reaching can feel like pressure. The withdrawal can feel like abandonment. Neither is true, you're just wired differently for when the conversation becomes possible.",
-    "proposed": "When things get hard, {RCH} engages to resolve the issue and {WDR} withdraws first. Engaging can feel like pressure to {WDR}. Withdrawing can feel like abandonment to {RCH}. Neither reading is true. You are wired differently for when you are ready to talk.",
-    "why": "'or vice versa' when tokens can name them; 'The reaching', 'Neither'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct, it's naming it out loud before the hard moment arrives. A simple agreement, 'I need a few hours, let's talk at 9', short-circuits the loop that otherwise runs on its own.",
-    "proposed": "Engaging versus withdrawing is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct. It is telling each other, before a hard moment arrives, which one you do first. A simple agreement, 'I need a few hours, let's talk at 9', breaks the cycle of one of you pressing while the other retreats.",
-    "why": "'This', 'naming it', 'the loop' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY strengths[2]",
-    "where": "Couple type page, a strengths tile (one line on its own)",
-    "current": "Genuinely beneficial repair systems are attainable here",
-    "proposed": "You can build a way of repairing after conflict that works for you both",
-    "why": "'repair systems are attainable here' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY stickingPoints[2]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "Repair starts on the initiator's timeline",
-    "proposed": "Repair starts on {RCH}'s timeline",
-    "why": "'the initiator' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY tips[0].title",
-    "where": "Couple type page, tip heading",
-    "current": "Name the pattern before you're in it",
-    "proposed": "Talk about how you each handle conflict before a hard moment",
-    "why": "core: 'the pattern', 'in it'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.",
-    "proposed": "When you are calm, tell each other what you each need during an argument. That one conversation changes what the next argument looks like.",
-    "why": "'what you need' when; 'things' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY tips[1].title",
-    "where": "Couple type page, tip heading",
-    "current": "Make space bounded, not open-ended",
-    "proposed": "Give your space an end time",
-    "why": "'bounded, not open-ended' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "When {WDR} needs time, give a return. 'I need an hour' is different from silence. It lets {RCH} stop the worried waiting.",
-    "proposed": "When {WDR} needs time, {WDR} names a time to come back. 'I need an hour' is different from silence. A set time lets {RCH} stop the worried waiting.",
-    "why": "'give a return' vague; 'It' unclear"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WY tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "When {U} presses for resolution, that's care, not control. When {P} needs space, that's the process, not withdrawal. Say what you need in the moment, and be open to the fact that your needs are different.",
-    "proposed": "When {RCH} presses for resolution, that's care, not control. When {WDR} needs space, that's time to think, not avoidance. Say what you need in the moment, and accept that your needs are different.",
-    "why": "{U}/{P} is the reader, not the role: wrong person named for half of readers; 'the process'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ tagline",
-    "where": "Couple type page, under the type name",
-    "current": "One reaches. One holds. Understanding what you each need bridges the gap.",
-    "proposed": "One of you engages and shares openly. One of you withdraws and keeps feelings private. Understanding what you each need bridges the gap.",
-    "why": "'One reaches. One holds.' holds what"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously, different conflict timing and different expressiveness, which means there's more translation work here than in most pairings.",
-    "proposed": "{RCH} engages to resolve conflict and shares feelings openly. {WDR} withdraws and keeps feelings private. You differ on both axes, engage or withdraw and open or guarded, which means there's more translation work here than in most pairings.",
-    "why": "'things' twice; 'both axes' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness that isn't natural to {GRD}. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
-    "proposed": "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness that isn't natural to {GRD_obj}. Seeing your gap as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
-    "why": "'Naming this' unnamed; 'natural to {GRD}' repeats the name"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ patterns[0]",
-    "where": "Couple type page, a pattern line",
-    "current": "{U} and {P} sometimes find that you mean something the other doesn't quite receive. The signal and the interpretation don't always match.",
-    "proposed": "{U} and {P} sometimes find that you mean something the other doesn't quite receive. What one of you says and what the other hears don't always match.",
-    "why": "'The signal and the interpretation' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that dynamic directly.",
-    "proposed": "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Say both of these things to each other out loud.",
-    "why": "core: 'Name that dynamic directly'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ tips[0].phraseTry",
-    "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
-    "current": "There's more going on for me than I'm showing. I just need to get it in order before I share it.",
-    "proposed": "There's more going on for me than I'm showing. I just need to get my feelings in order before I share them.",
-    "why": "'get it in order', 'share it'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.",
-    "proposed": "Pressing the reserved partner to share more than they are ready to share doesn't create connection, it creates pressure. Ask once how they feel, then wait. They will share in their own time.",
-    "why": "'more' of what; 'Ask once' what; 'The sharing'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ tips[2].title",
-    "where": "Couple type page, tip heading",
-    "current": "Reserved partner: share the earlier draft",
-    "proposed": "Reserved partner: share a feeling before it is fully formed",
-    "why": "'the earlier draft' of what. Keep 'Reserved partner:'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES WZ tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear.",
-    "proposed": "You don't have to wait until a feeling is fully formed before you share it. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear.",
-    "why": "core: 'until it's fully formed'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY tagline",
-    "where": "Couple type page, under the type name",
-    "current": "Strong instincts on both sides, pointed differently. Moving forward together takes understanding and intention.",
-    "proposed": "You both have strong conflict instincts, pointed differently. One of you engages and one of you withdraws. Moving forward together takes understanding and intention.",
-    "why": "positions abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "{U} pushes toward resolution while processing internally; {P} needs space before the conversation is possible, and carries visible feeling in the meantime. They can read each other as simultaneously too much and not enough, the driving toward resolution can close off the space, and the visible feeling during withdrawal can look like something that needs fixing right now.",
-    "proposed": "{RCH} pushes toward resolution and keeps feelings private. {WDR} needs space before talking, and shows feelings openly in the meantime. You can each read the other as too much and not enough at once. {RCH}'s push toward resolution can cut short the space {WDR} needs. {WDR}'s visible feelings during that space can look like a problem to fix right now.",
-    "why": "{U}/{P} is the reader, not the role; 'They' and the run-on are vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "{RCH_pos} urgency toward resolution can feel like pressure to {WDR}, who isn't ready yet. {WDR_pos} emotional visibility during withdrawal can look like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong.",
-    "proposed": "{RCH}'s urgency toward resolution can feel like pressure to {WDR}, who isn't ready yet. {WDR}'s emotional visibility while taking space can look like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong.",
-    "why": "{RCH_pos}/{WDR_pos} open a sentence and render 'her urgency', 'his emotional visibility' with no antecedent"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY strengths[0]",
-    "where": "Couple type page, a strengths tile (one line on its own)",
-    "current": "Named and managed, your instincts produce repair that works",
-    "proposed": "When you name your different conflict instincts and plan for them, your repair works",
-    "why": "'Named and managed' what"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY strengths[2]",
-    "where": "Couple type page, a strengths tile (one line on its own)",
-    "current": "The dynamic is highly solvable once it is understood",
-    "proposed": "Your difference in conflict timing is highly solvable once you both understand it",
-    "why": "'The dynamic' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY stickingPoints[0]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "The conversation can start before {WDR} is ready",
-    "proposed": "A hard conversation can start before {WDR} is ready",
-    "why": "'The conversation' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY stickingPoints[1]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "{WDR_pos} visible emotion can look like something to fix",
-    "proposed": "{WDR}'s visible emotion can look like something to fix",
-    "why": "{WDR_pos} alone on a tile renders 'his visible emotion': no antecedent"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY stickingPoints[2]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "It can look like one of you cares more",
-    "proposed": "Your different timing can make it look like one of you cares more",
-    "why": "'It' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY tips[0].title",
-    "where": "Couple type page, tip heading",
-    "current": "{RCH}: resolution doesn't mean resolved",
-    "proposed": "{RCH}: moving fast doesn't resolve things faster",
-    "why": "'resolution doesn't mean resolved' unclear"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "{WDR} needs the space first, and then the conversation. Moving fast to 'let's talk' before {WDR} is ready doesn't get to resolution faster. It delays it.",
-    "proposed": "{WDR} needs space first, and then the conversation. Pushing to talk before {WDR} is ready doesn't reach a resolution faster. Pushing delays the resolution.",
-    "why": "core: 'It delays it'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "The uncertainty is harder for {RCH} than the wait. 'I need until tonight' lets {RCH} stop the worried waiting and trust the process.",
-    "proposed": "Not knowing when {WDR} will come back is harder for {RCH} than the wait itself. 'I need until tonight' lets {RCH} stop the worried waiting.",
-    "why": "'The uncertainty' of what; 'trust the process' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY tips[2].title",
-    "where": "Couple type page, tip heading",
-    "current": "Name the pattern out loud before you're in it",
-    "proposed": "Talk about how you each handle conflict before a hard moment",
-    "why": "core: 'the pattern', 'in it'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.",
-    "proposed": "When you are calm, tell each other what you each need during an argument. That one conversation changes what the next argument looks like.",
-    "why": "'what you need' when; 'things'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XY tips[2].phraseTry",
-    "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
-    "current": "When I go quiet, it's not over, it's processing. Give me space and I'll come back.",
-    "proposed": "When I go quiet, the conversation isn't over. I'm processing. Give me space and I'll come back.",
-    "why": "'it's not over, it's processing': two different 'it's'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XZ tagline",
-    "where": "Couple type page, under the type name",
-    "current": "Both of you think before you speak, the real work happens before the conversations begin.",
-    "proposed": "Both of you think before you speak. Most of your working through happens privately, before you talk.",
-    "why": "'the real work' unnamed; comma splice"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XZ description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "{U} and {P} both hold things privately and both process what's going on before it comes out, if it comes out at all. The dynamic is low-temperature and rarely explosive. The practical machinery of the relationship runs smoothly. The emotional layer tends to stay quiet.",
-    "proposed": "{U} and {P} both keep feelings private and both think them through before saying anything, if you say anything at all. The dynamic is low-temperature and rarely explosive. The practical side of the relationship runs smoothly. Your feelings tend to stay unspoken.",
-    "why": "'things', 'what's going on', 'it comes out' unnamed; 'emotional layer' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XZ nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "Neither partner is offering a lot of emotional visibility to the other. The relationship can run on logic, shared purpose, and good-enough communication while the emotional texture goes largely unaddressed. That gap tends to show up during life transitions, when something that's been running quietly needs to be named.",
-    "proposed": "Neither partner is offering a lot of emotional visibility to the other. The relationship can run on logic, shared purpose, and good-enough communication while your feelings go largely unaddressed. That gap tends to show up during life transitions, when feelings that have stayed quiet need to be said out loud.",
-    "why": "'emotional texture', 'something that's been running quietly' vague"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XZ tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the structure that neither of you will naturally generate on your own.",
-    "proposed": "{U} and {P} are both capable of going long stretches without saying how you feel. A short weekly talk about how you each feel gives you a time that neither of you would set up on your own.",
-    "why": "'what's going on inside' vague; 'check-in' undefined"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XZ tips[2].title",
-    "where": "Couple type page, tip heading",
-    "current": "The quiet isn't a problem, until it is",
-    "proposed": "Quiet between you is fine, until it hides an avoided conversation",
-    "why": "'The quiet', 'until it is' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES XZ tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Calm is a wonderful quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.",
-    "proposed": "Calm is a wonderful quality. The work is making sure the ease isn't covering for avoided conversations. Every so often, ask each other whether the calm is genuine or whether something is going unsaid.",
-    "why": "'Check in on' vague action"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ tagline",
-    "where": "Couple type page, under the type name",
-    "current": "You both need space when things get hard. The difference is how much it shows, and that gap is worth understanding.",
-    "proposed": "You both need space when things get hard. You differ on open or guarded: one of you shows feelings and one of you keeps them private. That difference is worth understanding.",
-    "why": "core, same as Ellie's example: 'how much it shows'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ description",
-    "where": "Couple type page, the paragraph describing the dynamic",
-    "current": "When things get hard, {U} and {P} both pull back. {EXP} carries the emotional weight visibly while withdrawn. {GRD} holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
-    "proposed": "When things get hard, {U} and {P} both withdraw. {EXP} shows feelings openly while taking space. {GRD} keeps feelings private. Coming back together is slow for both of you. Hard moments can sit for a long time before either of you raises them.",
-    "why": "'The return' unnamed; 'carries the emotional weight visibly' abstract"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ nuance",
-    "where": "Couple type page (website), the nuance paragraph",
-    "current": "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces, because neither of you naturally initiates the opening. Agree on who brings it back, and when. A named pattern gives you both the full space, without indefinite silence.",
-    "proposed": "Real depth runs in this pairing, often more than either partner shows. The risk is that your feelings never get said, because neither of you naturally starts the conversation. Agree on who restarts the conversation after a hard moment, and when. An agreed plan gives you both the full space, without silence that has no end.",
-    "why": "core: 'Agree on who brings it back'; 'the opening', 'A named pattern'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ stickingPoints[1]",
-    "where": "Couple type page, a sticking points tile (one line on its own)",
-    "current": "{EXP_pos} visible emotion is hard to read during withdrawal",
-    "proposed": "{EXP}'s visible emotion is hard to read while you each take space",
-    "why": "{EXP_pos} alone on a tile renders 'her visible emotion': no antecedent"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ tips[0].title",
-    "where": "Couple type page, tip heading",
-    "current": "Agree on who brings it back",
-    "proposed": "Agree on who restarts the conversation",
-    "why": "core: 'brings it back'"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ tips[0].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "Neither of you moves to reopen things quickly, so the silence can stretch. Decide the pattern in advance. Whoever tends to settle first signals when they are ready, and the other gets the full space until then.",
-    "proposed": "Neither of you moves quickly to reopen a hard conversation, so the silence can stretch. Decide in advance who reaches out first. Whoever tends to settle first signals when they are ready, and the other gets the full space until then.",
-    "why": "'things', 'the pattern' unnamed"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ tips[1].title",
-    "where": "Couple type page, tip heading",
-    "current": "Bound the space with a time",
-    "proposed": "Give your space an end time",
-    "why": "'Bound the space' abstract. Same string in YY"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ tips[1].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.",
-    "proposed": "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop worrying and wait for you to come back.",
-    "why": "'trust the process' vague. Same string in YY"
-  },
-  {
-    "file": "api/_couple-types.js",
-    "key": "COUPLE_TYPES YZ tips[2].body",
-    "where": "Couple type page, tip body under its heading",
-    "current": "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own.",
-    "proposed": "{U} and {P} need a set time for feelings to get said. A weekly check-in, even 10 minutes, gives you a time to talk that neither of you would create on your own.",
-    "why": "'deliberate structure for things to surface', 'the opening' vague"
-  },
-  {
-    "file": "api/_lib/what-comes-next.js",
-    "key": "whatComesNext exp fallback item body",
-    "where": "What Comes Next > Discussions to have, when the couple matched on every Expectations area",
-    "current": "You matched across every area. Revisit this when something changes.",
-    "proposed": "You matched across every area of Expectations. Revisit your expectations when something in your life changes.",
-    "why": "'this', 'every area', 'something' unnamed"
-  },
-  {
-    "file": "api/_lib/what-comes-next.js",
-    "key": "whatComesNext exp category item body (template literal, plural branch shown)",
-    "where": "What Comes Next > Discussions to have, under \"<Category> discussions\"",
-    "current": "${topics.length} ${topics.length === 1 ? 'thing' : 'things'} here you each pictured differently.",
-    "proposed": "${topics.length} ${topics.length === 1 ? 'topic' : 'topics'} in this area that you each pictured differently.",
-    "why": "'things here' vague. Template literal source, not a plain string"
-  },
-  {
-    "file": "api/_lib/what-comes-next.js",
-    "key": "whatComesNext conflict fallback item title",
-    "where": "What Comes Next > Things to consider, when no conflict pattern needs attention",
-    "current": "Reread your patterns before the next hard conversation",
-    "proposed": "Reread your conflict patterns before your next hard conversation",
-    "why": "'your patterns' of what, on a page mixing five exercises"
-  },
-  {
-    "file": "api/_lib/next-action.js",
-    "key": "nextActions profile card body",
-    "where": "Home screen card \"Finish setting up your profile\"",
-    "current": "We need info to properly set up your exercises",
-    "proposed": "We need your profile details to set up your exercises",
-    "why": "'info' vague. Note: `missing` (profileMissing) is computed above and never used; the card could name it"
-  },
-  {
-    "file": "api/_lib/next-action.js",
-    "key": "nextActions use-resource started body",
-    "where": "Home screen card \"Complete your budget\" / \"Complete your checklist\"",
-    "current": "This exercise is in progress and status has been saved",
-    "proposed": "Your progress in this tool is saved",
-    "why": "'This exercise' on a card for a tool, not an exercise; 'status' vague"
-  },
-  {
-    "file": "api/_lib/next-action.js",
-    "key": "nextActions new-post body",
-    "where": "Home screen card \"New publication to explore\"",
-    "current": "View this and others in your Learn tab",
-    "proposed": "Read the new article and other In Practice articles in your Learn tab",
-    "why": "'this and others' unnamed"
-  },
-  {
-    "file": "api/_lib/next-action.js",
-    "key": "nextActions revisit body (top-gap branch, template literal)",
-    "where": "Home screen card \"Revisit <dimension>\"",
-    "current": "Your widest difference. Worth rereading together.",
-    "proposed": "This dimension is where you differ most. Reread its results together.",
-    "why": "fragment with no subject: difference in what"
-  },
-  {
-    "file": "api/_lib/next-action.js",
-    "key": "IDLE_PROMPTS[0].body",
-    "where": "Home screen idle card \"Send a note to your partner\"",
-    "current": "Mark a line in your results and share it with them.",
-    "proposed": "Mark a line in your results and share it with your partner.",
-    "why": "'them' unnamed in the body"
-  },
-  {
-    "file": "api/_lib/next-action.js",
-    "key": "IDLE_PROMPTS[2].body",
-    "where": "Home screen idle card \"Pick one conversation to have this week\"",
-    "current": "Every section ends with something to try.",
-    "proposed": "Every results section ends with an action to try.",
-    "why": "'section' of what; 'something' vague"
-  },
-  {
-    "file": "api/_lib/next-action.js",
-    "key": "IDLE_PROMPTS[3].body",
-    "where": "Home screen idle card \"Read something from In Practice\"",
-    "current": "Short pieces on the things that impact relationships.",
-    "proposed": "Short articles on what shapes a relationship.",
-    "why": "'the things' vague"
-  },
-  {
-    "file": "api/_lib/waiting-copy.js",
-    "key": "WAITING.LOCKED_BY_YOU (also NOT_FILLED_IN)",
-    "where": "A locked results section you have not finished; also any page that fills in as you finish",
-    "current": "Finish your exercises to open this.",
-    "proposed": "Finish your exercises to open this section.",
-    "why": "'this' unnamed. File header says these are Ellie's verbatim"
-  },
-  {
-    "file": "api/_lib/journal-copy.js",
-    "key": "JOURNAL_COPY.noMatch",
-    "where": "Journal search, when nothing matches",
-    "current": "Nothing here matches that.",
-    "proposed": "No entries match your search.",
-    "why": "'here', 'that' unnamed"
-  },
-  {
-    "file": "api/_lib/journal-copy.js",
-    "key": "JOURNAL_COPY.empty",
-    "where": "Journal, before the first entry",
-    "current": "Nothing here yet. The first entry is usually the hardest one.",
-    "proposed": "No entries yet. The first entry is usually the hardest one.",
-    "why": "'Nothing here' vague"
-  },
-  {
-    "file": "api/_lib/journal-copy.js",
-    "key": "JOURNAL_COPY.saveTitle",
-    "where": "Insight of the day, the save-to-journal sheet title",
-    "current": "Keep this in your journal",
-    "proposed": "Keep this insight in your journal",
-    "why": "'this' unnamed"
-  },
-  {
-    "file": "api/_lib/journal-copy.js",
-    "key": "JOURNAL_COPY.saveFailed",
-    "where": "Insight of the day save sheet, on failure",
-    "current": "That did not save. Try again in a moment.",
-    "proposed": "Your journal entry did not save. Try again in a moment.",
-    "why": "'That' unnamed"
-  },
-  {
-    "file": "api/_lib/exercise-intro.js",
-    "key": "exerciseIntro intimacy body[1]",
-    "where": "Physical Intimacy exercise cover, second paragraph",
-    "current": "This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.",
-    "proposed": "This exercise is an expectations tool, not therapy. If any of these questions raises a heavier issue, that issue is worth talking through with someone qualified.",
-    "why": "'This', 'anything here', 'something heavier', 'that'"
-  }
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "{U} and {P} both move toward resolution and process outward. High warmth and emotional availability in both directions. Neither partner has to coax the other into the conversation or wait for the signal that it's okay to share what's going on.",
+  "proposed": "{U} and {P} both move toward resolving conflict and both share feelings openly, which means there is a lot of warmth and emotional availability in both directions. Neither of you has to coax the other into a hard conversation or wait for a signal that it's okay to share how you feel.",
+  "why": "'the conversation', 'what's going on' unnamed; poles abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "The risk here is feedback loops rather than disconnection. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're both escalating things right now', is usually enough to break the loop.",
+  "proposed": "The risk for you two is not distance, but strong feelings feeding off each other. When you both feel something strongly, the intensity can build rather than settle. If one of you says out loud, 'I think we're both escalating things right now', that is usually enough to help you both calm down.",
+  "why": "'naming that', 'the loop' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW strengths[2]",
+  "where": "Couple type page, a strengths tile (one line on its own)",
+  "current": "Hard conversations aren't avoided as often",
+  "proposed": "You tend to avoid hard conversations less than most couples",
+  "why": "'as often' as what: comparison unstated"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW patterns[2]",
+  "where": "Couple type page, a pattern line",
+  "current": "Arguments between you are probably not subtle. The work is making sure what comes out is accurate, not just loud.",
+  "proposed": "Arguments between you are usually not subtle. Try to make sure that what you each say in an argument is accurate, not just loud.",
+  "why": "'what comes out' unnamed; hedge 'probably'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "When both of you are feeling something strongly, the loop can escalate. One person naming it can break the cycle before it needs to get bigger.",
+  "proposed": "When you both feel something strongly, each of your reactions can raise the other's, and an argument can escalate quickly. If one of you says 'we're both escalating' out loud, that can calm the argument down before it gets bigger.",
+  "why": "core target: 'the loop', 'naming it', 'before it needs to get bigger'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space.",
+  "proposed": "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Try to hold a feeling to yourself for a few minutes before you share that feeling with your partner.",
+  "why": "'something', 'it', 'the shared space' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW tips[1].phraseTry",
+  "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
+  "current": "I need a minute with this before I put it out there. Give me twenty minutes.",
+  "proposed": "I need some time with this feeling before I talk about it. Give me twenty minutes.",
+  "why": "'put it out there' vague; 'a minute' then 'twenty minutes'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW tips[2].title",
+  "where": "Couple type page, tip heading",
+  "current": "The visibility is a gift",
+  "proposed": "Seeing each other's feelings is a gift",
+  "why": "'the visibility' of what"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it is what makes real closeness possible.",
+  "proposed": "Most couples have to guess at how each other feels. {U} and {P} don't have to. Try to appreciate being able to see each other's feelings, even when that feels uncomfortable, because that openness is what makes real closeness possible.",
+  "why": "'that', 'it's', 'it' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WW tips[2].phraseTry",
+  "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
+  "current": "I know this is a lot right now, but I'm glad we can actually see each other in it.",
+  "proposed": "I know this conversation is a lot right now, but I'm glad we can see how each other feels.",
+  "why": "'see each other in it': 'it' unclear"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX tagline",
+  "where": "Couple type page, under the type name",
+  "current": "Resolution is the shared instinct. Privacy is the shared method of processing.",
+  "proposed": "You both engage to resolve conflict, and you both tend to keep feelings private while you work through them.",
+  "why": "positions abstract; name Engage and Guarded"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made and disagreements get worked through. The practical machinery of the relationship runs efficiently, and quietly.",
+  "proposed": "{U} and {P} both move toward resolving conflict, and both work through feelings privately before sharing them. Decisions get made and disagreements get worked through, which means the practical side of your relationship tends to run efficiently and quietly.",
+  "why": "'the feeling', 'before it comes out' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "Efficient repair can mean ending the conversation before it is actually settled. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly.",
+  "proposed": "Moving quickly to repair can mean ending an argument before the issue is actually settled. When you both move fast toward resolution, you can fix the visible problem without addressing the feelings underneath it, which means the same argument tends to come back because the real conversation happened too quickly.",
+  "why": "'it', 'the surface', 'what's underneath', 'the same thing'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX stickingPoints[0]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "Two internal processors can go too long without sharing",
+  "proposed": "Two internal processors can go too long without sharing how they feel",
+  "why": "sharing what"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX patterns[2]",
+  "where": "Couple type page, a pattern line",
+  "current": "The emotional texture of hard moments can sometimes get skipped in the move toward resolution.",
+  "proposed": "How a hard moment feels to each of you can get skipped in the rush to resolve the problem.",
+  "why": "'emotional texture' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX tips[0].title",
+  "where": "Couple type page, tip heading",
+  "current": "Check if it's resolved or just closed",
+  "proposed": "Check if an argument is resolved or just closed",
+  "why": "core: 'it' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Fast repair is a real strength. The risk is ending a conversation or apologizing before things are fully settled.",
+  "proposed": "Repairing quickly is a real strength, but there is a risk of ending a conversation or apologizing before the issue is fully settled.",
+  "why": "'things' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX tips[1].title",
+  "where": "Couple type page, tip heading",
+  "current": "Ask what's going on underneath the plan",
+  "proposed": "Ask about the feelings underneath the plan",
+  "why": "'what's going on' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "{U} and {P} are both comfortable with the practical mode. Add a deliberate question to get at the emotional weight underneath the practical action. This changes the quality of the conclusion.",
+  "proposed": "{U} and {P} are both comfortable talking about what to do. When you make a plan together, try to also ask how each of you feels about the plan. Talking about feelings as well as logistics can lead to a better decision for you both.",
+  "why": "'practical mode', 'practical action', 'This' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX tips[1].phraseTry",
+  "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
+  "current": "How does this actually feel for you, beyond what it means?",
+  "proposed": "How does this actually feel for you, beyond what we need to do about it?",
+  "why": "'beyond what it means': 'it' unclear"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX tips[2].title",
+  "where": "Couple type page, tip heading",
+  "current": "Give the slower moments their time",
+  "proposed": "Slow down your repair sometimes",
+  "why": "'the slower moments' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XX tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back.",
+  "proposed": "Occasionally, after an argument, try to slow the repair down enough to make sure you've actually heard each other. Those extra few minutes can stop the same argument from coming back.",
+  "why": "no when; 'the same conversation'; hedge 'tends to'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY tagline",
+  "where": "Couple type page, under the type name",
+  "current": "Both need space first. Both carry it visibly when withdrawn.",
+  "proposed": "You both need space first, and you both show your feelings openly while you take that space.",
+  "why": "core: 'carry it visibly', 'it' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "When things get hard, {U} and {P} both pull back before coming forward. Neither of you is avoiding, you're both protecting the quality of the eventual conversation. When you do come back together, you both bring the full emotional weight of what you've been carrying.",
+  "proposed": "When things get hard, {U} and {P} both withdraw before coming forward. Neither of you is avoiding the issue, but you are both taking time so the conversation you have later goes well. When you do come back together, you both bring the full weight of what you felt while you were apart.",
+  "why": "'avoiding' what; 'eventual conversation'; 'what you've been carrying'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "Two people who both need space can wait for the other to come back first for a very long time. That waiting can start to feel like abandonment even when it's just process. Build an agreed-upon signal, even something small, that means 'I'm ready when you are' without requiring a full conversation to get there.",
+  "proposed": "Two people who both need space can each wait a very long time for the other to come back first. That waiting can start to feel like abandonment, even when each of you is only taking time to think. Try to agree on a signal, even something small, that means 'I'm ready when you are' without needing a full conversation to get there.",
+  "why": "'it's just process' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY stickingPoints[1]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "Open-ended space is more fragile than a set limit",
+  "proposed": "Taking space with no set end time can be harder than taking space with one",
+  "why": "'open-ended space', 'set limit' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY stickingPoints[2]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "Things that need addressing can be delayed a long time",
+  "proposed": "Issues that need addressing can be put off for a long time",
+  "why": "'Things' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step.",
+  "proposed": "After a hard moment, both {U} and {P} tend to wait for the other to reach out. Whoever reaches out first usually gets a warmer reception than they expect, so try to be the one who reaches out.",
+  "why": "wait for what; 'the return'; 'Take the step' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY tips[1].title",
+  "where": "Couple type page, tip heading",
+  "current": "Bound the space with a time",
+  "proposed": "Give your space an end time",
+  "why": "'Bound the space' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.",
+  "proposed": "'I need some time' is not as useful as 'I need until tonight.' Giving a specific time to come back lets your partner stop worrying while they wait for you.",
+  "why": "'trust the process' vague. Same string in YZ"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YY tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "{U} and {P} don't need a full conversation to signal that you're okay again. A small gesture, a cup of tea, a hand on the shoulder, does most of the work.",
+  "proposed": "{U} and {P} don't need a full conversation to show each other that you're okay again. A small gesture, like a cup of tea or a hand on the shoulder, can say that for you.",
+  "why": "'does most of the work' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES ZZ tagline",
+  "where": "Couple type page, under the type name",
+  "current": "Both withdraw. Both hold it close. A lot lives under the surface.",
+  "proposed": "You both withdraw and keep feelings private, so much of what you feel can go unsaid.",
+  "why": "core: 'hold it close'; 'under the surface' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES ZZ description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, calm, and emotionally deep, but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows.",
+  "proposed": "{U} and {P} both withdraw when things get hard and both keep feelings private. Your relationship tends to be stable, calm, and emotionally deep, but that depth is rarely said out loud, which means there is often more going on beneath the calm than either of you shows.",
+  "why": "'go inward', 'hold their interior life', 'doesn't surface' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES ZZ nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "Important things can go unsaid for a very long time. The comfort with quiet can become avoidance without either person intending it. The relationship looks more okay from the outside than it sometimes is from the inside. Creating a deliberate structure for openness is worth more here than in most pairings.",
+  "proposed": "Important things can go unsaid for a very long time. Your comfort with quiet can turn into avoidance without either of you intending it, which means the relationship can look more okay from the outside than it sometimes feels from the inside. Setting a time each week to share how you each feel matters more for you two than for most couples.",
+  "why": "'deliberate structure for openness' vague action"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES ZZ strengths[2]",
+  "where": "Couple type page, a strengths tile (one line on its own)",
+  "current": "Feelings can be heavy even if they are not spoken",
+  "proposed": "Your feelings run deep, even when you don't say them out loud",
+  "why": "'Feelings can be heavy' unclear as a strength; whose"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES ZZ tips[0].title",
+  "where": "Couple type page, tip heading",
+  "current": "Build in the opening, don't wait for it to happen",
+  "proposed": "Schedule a time to talk instead of waiting for one",
+  "why": "'the opening' and 'it' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES ZZ tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "A weekly check-in, even 15 minutes, creates a structure for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.",
+  "proposed": "A weekly check-in, even for 15 minutes, gives you a set time to share what you would otherwise each keep to yourselves. Try to schedule the conversation that neither of you would start on your own.",
+  "why": "'the things', 'the opening' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES ZZ tips[1].title",
+  "where": "Couple type page, tip heading",
+  "current": "Share the rougher draft",
+  "proposed": "Share feelings before they are fully figured out",
+  "why": "'rougher draft' of what"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES ZZ tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed.",
+  "proposed": "Both {U} and {P} tend to wait until a thought or feeling is fully formed before sharing. Try to practice sharing thoughts and feelings while they are still half-formed, even if that feels uncomfortable.",
+  "why": "core: 'something', 'sharing it half-formed'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX tagline",
+  "where": "Couple type page, under the type name",
+  "current": "Different approaches to resolution, both heading in the same direction.",
+  "proposed": "You both engage to resolve conflict, but you differ on how openly you share feelings.",
+  "why": "positions abstract; actually differ on Open/Guarded"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different.",
+  "proposed": "{U} and {P} both engage to resolve conflict when things get hard, so you're pulling in the same direction. Where you differ is how openly you share: {EXP} shares feelings as they come, and {GRD} keeps them private for longer. You want the same outcome, but you take different paths to get there.",
+  "why": "'how the internal experience travels', 'holds it closer' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "The expressive partner can feel like the guarded partner isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different.",
+  "proposed": "{EXP} can feel like {GRD} is holding back {GRD_pos} real feelings. {GRD} can feel like too much is said out loud before there has been time to think it through. Neither of you is wrong. You simply share at different levels of openness.",
+  "why": "'before it's ready', 'shared space', 'registers' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX strengths[1]",
+  "where": "Couple type page, a strengths tile (one line on its own)",
+  "current": "You are complementary processors, thoughtful and eager",
+  "proposed": "{GRD} tends to think first and {EXP} tends to share first, which helps you balance each other",
+  "why": "'complementary processors' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX stickingPoints[2]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "Processing can feel like withholding to one of you",
+  "proposed": "{GRD}'s private processing can feel like withholding to {EXP}",
+  "why": "'to one of you': which one. Use the name, not {GRD_pos}, which renders a bare 'his'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX patterns[1]",
+  "where": "Couple type page, a pattern line",
+  "current": "{EXP} tends to process out loud. {GRD} needs to think it through first, then bring it. Same conversation, different way in.",
+  "proposed": "{EXP} tends to process out loud, while {GRD} needs to think a problem through before raising it. You are having the same conversation, just coming into it in different ways.",
+  "why": "'think it through', 'bring it' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX patterns[2]",
+  "where": "Couple type page, a pattern line",
+  "current": "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when.",
+  "proposed": "When you do talk a problem through, the conversation tends to be useful. You usually aren't fighting about whether to talk, just when.",
+  "why": "'the conversation', 'somewhere useful', 'have it'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX tips[0].title",
+  "where": "Couple type page, tip heading",
+  "current": "Name which mode you're in",
+  "proposed": "Say whether you need to talk or think first",
+  "why": "'which mode' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early in the process.",
+  "proposed": "At the start of a hard conversation, try to say 'I need to process this out loud' or 'I need to think before I talk.' That one sentence tells your partner how to meet you.",
+  "why": "'Use it early in the process' vague when"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX tips[1].title",
+  "where": "Couple type page, tip heading",
+  "current": "Guarded partner: share the half-formed version",
+  "proposed": "Guarded partner: share feelings before they are fully formed",
+  "why": "'the half-formed version' of what. Keep 'Guarded partner:' (audienceOf reads it)"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear.",
+  "proposed": "You don't have to wait until a feeling is fully formed before you share it. Saying 'I'm still figuring out how I feel about this' is a form of sharing, and that is usually exactly what {EXP} needs to hear.",
+  "why": "core: 'until it's fully formed'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WX tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.",
+  "proposed": "Pressing {GRD} to share before {GRD} is ready doesn't create connection, but it does create pressure. Try to ask once how {GRD} is feeling, and then give {GRD_obj} time to share.",
+  "why": "'more' of what; 'Ask once' what; 'The sharing'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY tagline",
+  "where": "Couple type page, under the type name",
+  "current": "You have different conflict clocks. One is ready before the other, recognizing that changes everything.",
+  "proposed": "You have different conflict clocks, and one of you is ready to talk before the other. Recognizing that difference changes everything.",
+  "why": "'One', 'that' unnamed; comma splice"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "When things get hard, {U} moves toward resolution and {P} pulls back, or vice versa, depending on your individual types. The reaching can feel like pressure. The withdrawal can feel like abandonment. Neither is true, you're just wired differently for when the conversation becomes possible.",
+  "proposed": "When things get hard, {RCH} tends to engage to resolve the issue, while {WDR} needs to withdraw first. Engaging can feel like pressure to {WDR}, and withdrawing can feel like abandonment to {RCH}. Neither reading is true. You are simply wired differently for when you are ready to talk.",
+  "why": "'or vice versa' when tokens can name them; 'The reaching', 'Neither'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct, it's naming it out loud before the hard moment arrives. A simple agreement, 'I need a few hours, let's talk at 9', short-circuits the loop that otherwise runs on its own.",
+  "proposed": "Engaging versus withdrawing is one of the most common and most solvable friction points in relationships. The answer isn't changing your instinct, but telling each other which one you tend to do before a hard moment arrives. A simple agreement, like 'I need a few hours, let's talk at 9', can break the cycle of one of you pressing while the other pulls away.",
+  "why": "'This', 'naming it', 'the loop' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY strengths[2]",
+  "where": "Couple type page, a strengths tile (one line on its own)",
+  "current": "Genuinely beneficial repair systems are attainable here",
+  "proposed": "You can build a way of repairing after conflict that works for you both",
+  "why": "'repair systems are attainable here' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY stickingPoints[2]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "Repair starts on the initiator's timeline",
+  "proposed": "Repair tends to start on {RCH}'s timeline",
+  "why": "'the initiator' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY tips[0].title",
+  "where": "Couple type page, tip heading",
+  "current": "Name the pattern before you're in it",
+  "proposed": "Talk about how you each handle conflict before a hard moment",
+  "why": "core: 'the pattern', 'in it'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.",
+  "proposed": "When you are both calm, try to tell each other what you each need during an argument. That one conversation can change how the next argument goes.",
+  "why": "'what you need' when; 'things' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY tips[1].title",
+  "where": "Couple type page, tip heading",
+  "current": "Make space bounded, not open-ended",
+  "proposed": "Give your space an end time",
+  "why": "'bounded, not open-ended' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "When {WDR} needs time, give a return. 'I need an hour' is different from silence. It lets {RCH} stop the worried waiting.",
+  "proposed": "When {WDR} needs time, {WDR} should try to name a time to come back. 'I need an hour' is different from silence, because a set time lets {RCH} stop worrying while waiting.",
+  "why": "'give a return' vague; 'It' unclear"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WY tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "When {U} presses for resolution, that's care, not control. When {P} needs space, that's the process, not withdrawal. Say what you need in the moment, and be open to the fact that your needs are different.",
+  "proposed": "When {RCH} presses for resolution, that comes from care, not control. When {WDR} needs space, that is time to think, not avoidance. Try to say what you need in the moment, and accept that your needs are different.",
+  "why": "{U}/{P} is the reader, not the role: wrong person named for half of readers; 'the process'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ tagline",
+  "where": "Couple type page, under the type name",
+  "current": "One reaches. One holds. Understanding what you each need bridges the gap.",
+  "proposed": "One of you engages and shares openly, and one of you withdraws and keeps feelings private. Understanding what you each need helps bridge that gap.",
+  "why": "'One reaches. One holds.' holds what"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously, different conflict timing and different expressiveness, which means there's more translation work here than in most pairings.",
+  "proposed": "{RCH} engages to resolve conflict and shares feelings openly, while {WDR} withdraws and keeps feelings private. You differ both in conflict timing and in how openly you share, which means you have more translating to do for each other than most couples.",
+  "why": "'things' twice; 'both axes' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness that isn't natural to {GRD}. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do.",
+  "proposed": "{RCH} often doesn't know what {GRD} is feeling until long after the fact, which can feel like withholding. {GRD} often feels pressure to be emotionally open in a way that doesn't come naturally to {GRD_obj}. The most useful thing {U} and {P} can do is see this gap as a difference, not a deficiency.",
+  "why": "'Naming this' unnamed; 'natural to {GRD}' repeats the name"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ patterns[0]",
+  "where": "Couple type page, a pattern line",
+  "current": "{U} and {P} sometimes find that you mean something the other doesn't quite receive. The signal and the interpretation don't always match.",
+  "proposed": "{U} and {P} sometimes find that what one of you means is not quite what the other hears.",
+  "why": "'The signal and the interpretation' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that dynamic directly.",
+  "proposed": "{GRD}'s inner life is not less rich because {GRD_pos} feelings aren't expressed as often. {RCH}'s sharing isn't less valuable because sharing comes more easily. Try to say both of these things to each other out loud.",
+  "why": "core: 'Name that dynamic directly'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ tips[0].phraseTry",
+  "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
+  "current": "There's more going on for me than I'm showing. I just need to get it in order before I share it.",
+  "proposed": "There's more going on for me than I'm showing. I just need to sort out my feelings before I share them.",
+  "why": "'get it in order', 'share it'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time.",
+  "proposed": "Pressing {GRD} to share before {GRD} is ready doesn't create connection, but it does create pressure. Try to ask once how {GRD} is feeling, and then give {GRD_obj} time to share.",
+  "why": "'more' of what; 'Ask once' what; 'The sharing'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ tips[2].title",
+  "where": "Couple type page, tip heading",
+  "current": "Reserved partner: share the earlier draft",
+  "proposed": "Reserved partner: share feelings before they are fully formed",
+  "why": "'the earlier draft' of what. Keep 'Reserved partner:'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES WZ tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear.",
+  "proposed": "You don't have to wait until a feeling is fully formed before you share it. Even saying 'I'm still figuring out how I feel about this' is a form of sharing, and that is usually exactly what {RCH} needs to hear.",
+  "why": "core: 'until it's fully formed'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY tagline",
+  "where": "Couple type page, under the type name",
+  "current": "Strong instincts on both sides, pointed differently. Moving forward together takes understanding and intention.",
+  "proposed": "You both have strong conflict instincts, but one of you engages and one of you withdraws. Moving forward together takes understanding and intention.",
+  "why": "positions abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "{U} pushes toward resolution while processing internally; {P} needs space before the conversation is possible, and carries visible feeling in the meantime. They can read each other as simultaneously too much and not enough, the driving toward resolution can close off the space, and the visible feeling during withdrawal can look like something that needs fixing right now.",
+  "proposed": "{RCH} pushes toward resolution and keeps feelings private, while {WDR} needs space before talking and shows feelings openly in the meantime. This means you can each read the other as too much and not enough at once. {RCH}'s push toward resolution can cut short the space {WDR} needs, and {WDR}'s visible feelings during that space can look like a problem {RCH} needs to fix right now.",
+  "why": "{U}/{P} is the reader, not the role; 'They' and the run-on are vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "{RCH_pos} urgency toward resolution can feel like pressure to {WDR}, who isn't ready yet. {WDR_pos} emotional visibility during withdrawal can look like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong.",
+  "proposed": "{RCH}'s urgency to resolve conflict can feel like pressure to {WDR}, who isn't ready yet. {WDR}'s visible emotion while taking space can look like an invitation to engage, when {WDR} is actually signaling a need to wait. Both readings are understandable, but both are wrong.",
+  "why": "{RCH_pos}/{WDR_pos} open a sentence and render 'her urgency', 'his emotional visibility' with no antecedent"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY strengths[0]",
+  "where": "Couple type page, a strengths tile (one line on its own)",
+  "current": "Named and managed, your instincts produce repair that works",
+  "proposed": "When you name your different conflict instincts and plan for them, your repairs tend to work",
+  "why": "'Named and managed' what"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY strengths[2]",
+  "where": "Couple type page, a strengths tile (one line on its own)",
+  "current": "The dynamic is highly solvable once it is understood",
+  "proposed": "Your difference in conflict timing is very solvable once you both understand it",
+  "why": "'The dynamic' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY stickingPoints[0]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "The conversation can start before {WDR} is ready",
+  "proposed": "A hard conversation can start before {WDR} is ready",
+  "why": "'The conversation' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY stickingPoints[1]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "{WDR_pos} visible emotion can look like something to fix",
+  "proposed": "{WDR}'s visible emotion can look like something {RCH} needs to fix",
+  "why": "{WDR_pos} alone on a tile renders 'his visible emotion': no antecedent"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY stickingPoints[2]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "It can look like one of you cares more",
+  "proposed": "Your different timing can make it look like one of you cares more",
+  "why": "'It' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY tips[0].title",
+  "where": "Couple type page, tip heading",
+  "current": "{RCH}: resolution doesn't mean resolved",
+  "proposed": "{RCH}: pushing to talk doesn't resolve conflict faster",
+  "why": "'resolution doesn't mean resolved' unclear"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "{WDR} needs the space first, and then the conversation. Moving fast to 'let's talk' before {WDR} is ready doesn't get to resolution faster. It delays it.",
+  "proposed": "{WDR} needs space first, and then the conversation. Pushing to talk before {WDR} is ready usually slows down a resolution rather than speeding up the process.",
+  "why": "core: 'It delays it'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "The uncertainty is harder for {RCH} than the wait. 'I need until tonight' lets {RCH} stop the worried waiting and trust the process.",
+  "proposed": "Not knowing when {WDR} will come back is harder for {RCH} than the wait itself. Saying 'I need until tonight' lets {RCH} stop worrying while waiting.",
+  "why": "'The uncertainty' of what; 'trust the process' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY tips[2].title",
+  "where": "Couple type page, tip heading",
+  "current": "Name the pattern out loud before you're in it",
+  "proposed": "Talk about how you each handle conflict before a hard moment",
+  "why": "core: 'the pattern', 'in it'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like.",
+  "proposed": "When you are both calm, try to tell each other what you each need during an argument. That one conversation can change how the next argument goes.",
+  "why": "'what you need' when; 'things'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XY tips[2].phraseTry",
+  "where": "Couple type page under the tip, and alone as a row in What Comes Next > Phrases to try",
+  "current": "When I go quiet, it's not over, it's processing. Give me space and I'll come back.",
+  "proposed": "When I go quiet, the conversation isn't over. I'm just processing. Give me space and I'll come back.",
+  "why": "'it's not over, it's processing': two different 'it's'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XZ tagline",
+  "where": "Couple type page, under the type name",
+  "current": "Both of you think before you speak, the real work happens before the conversations begin.",
+  "proposed": "You both think before you speak, so you tend to sort through your feelings privately before you talk.",
+  "why": "'the real work' unnamed; comma splice"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XZ description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "{U} and {P} both hold things privately and both process what's going on before it comes out, if it comes out at all. The dynamic is low-temperature and rarely explosive. The practical machinery of the relationship runs smoothly. The emotional layer tends to stay quiet.",
+  "proposed": "{U} and {P} both keep feelings private and both think them through before saying anything, if you say anything at all. Your dynamic is calm and rarely explosive, and the practical side of your relationship runs smoothly, but your feelings tend to stay unspoken.",
+  "why": "'things', 'what's going on', 'it comes out' unnamed; 'emotional layer' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XZ nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "Neither partner is offering a lot of emotional visibility to the other. The relationship can run on logic, shared purpose, and good-enough communication while the emotional texture goes largely unaddressed. That gap tends to show up during life transitions, when something that's been running quietly needs to be named.",
+  "proposed": "Neither of you shows the other much of what you feel. Your relationship can run on logic, shared purpose, and good-enough communication while your feelings go largely unaddressed. This gap tends to show up during life transitions, when feelings that have stayed quiet need to be said out loud.",
+  "why": "'emotional texture', 'something that's been running quietly' vague"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XZ tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the structure that neither of you will naturally generate on your own.",
+  "proposed": "{U} and {P} can both go long stretches without saying how you feel. Try to set aside a short weekly conversation about how you each feel, because neither of you is likely to start one on your own.",
+  "why": "'what's going on inside' vague; 'check-in' undefined"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XZ tips[2].title",
+  "where": "Couple type page, tip heading",
+  "current": "The quiet isn't a problem, until it is",
+  "proposed": "A calm relationship is a good thing, as long as nothing is going unsaid",
+  "why": "'The quiet', 'until it is' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES XZ tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Calm is a wonderful quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.",
+  "proposed": "Calm is a wonderful quality, but it is worth making sure the calm isn't covering for avoided conversations. Every so often, try to ask each other whether the calm is genuine or whether something is going unsaid.",
+  "why": "'Check in on' vague action"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ tagline",
+  "where": "Couple type page, under the type name",
+  "current": "You both need space when things get hard. The difference is how much it shows, and that gap is worth understanding.",
+  "proposed": "You both need space when things get hard, but one of you shows feelings openly and one of you keeps them private. That difference is worth understanding.",
+  "why": "core, same as Ellie's example: 'how much it shows'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ description",
+  "where": "Couple type page, the paragraph describing the dynamic",
+  "current": "When things get hard, {U} and {P} both pull back. {EXP} carries the emotional weight visibly while withdrawn. {GRD} holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them.",
+  "proposed": "When things get hard, {U} and {P} both withdraw. {EXP} shows feelings openly while taking space, and {GRD} keeps feelings private. Coming back together tends to be slow for both of you, which means hard moments can sit for a long time before either of you raises them.",
+  "why": "'The return' unnamed; 'carries the emotional weight visibly' abstract"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ nuance",
+  "where": "Couple type page (website), the nuance paragraph",
+  "current": "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces, because neither of you naturally initiates the opening. Agree on who brings it back, and when. A named pattern gives you both the full space, without indefinite silence.",
+  "proposed": "There is real depth in your relationship, often more than either of you shows. The risk is that your feelings never get said, because neither of you naturally starts the conversation. Try to agree on who restarts the conversation after a hard moment, and when, so you each get the space you need without a silence that has no end.",
+  "why": "core: 'Agree on who brings it back'; 'the opening', 'A named pattern'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ stickingPoints[1]",
+  "where": "Couple type page, a sticking points tile (one line on its own)",
+  "current": "{EXP_pos} visible emotion is hard to read during withdrawal",
+  "proposed": "{EXP}'s visible emotion can be hard to read while you each take space",
+  "why": "{EXP_pos} alone on a tile renders 'her visible emotion': no antecedent"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ tips[0].title",
+  "where": "Couple type page, tip heading",
+  "current": "Agree on who brings it back",
+  "proposed": "Agree on who restarts the conversation",
+  "why": "core: 'brings it back'"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ tips[0].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "Neither of you moves to reopen things quickly, so the silence can stretch. Decide the pattern in advance. Whoever tends to settle first signals when they are ready, and the other gets the full space until then.",
+  "proposed": "Neither of you tends to reopen a hard conversation quickly, so the silence can stretch. Try to decide in advance who reaches out first. Whoever tends to settle first should signal when they are ready, and the other gets the full space until then.",
+  "why": "'things', 'the pattern' unnamed"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ tips[1].title",
+  "where": "Couple type page, tip heading",
+  "current": "Bound the space with a time",
+  "proposed": "Give your space an end time",
+  "why": "'Bound the space' abstract. Same string in YY"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ tips[1].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process.",
+  "proposed": "'I need some time' is not as useful as 'I need until tonight.' Giving a specific time to come back lets your partner stop worrying while they wait for you.",
+  "why": "'trust the process' vague. Same string in YY"
+ },
+ {
+  "file": "api/_couple-types.js",
+  "key": "COUPLE_TYPES YZ tips[2].body",
+  "where": "Couple type page, tip body under its heading",
+  "current": "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own.",
+  "proposed": "{U} and {P} need a set time to share feelings. A weekly check-in, even for 10 minutes, gives you a time to talk that neither of you would usually create on your own.",
+  "why": "'deliberate structure for things to surface', 'the opening' vague"
+ },
+ {
+  "file": "api/_lib/what-comes-next.js",
+  "key": "whatComesNext exp fallback item body",
+  "where": "What Comes Next > Discussions to have, when the couple matched on every Expectations area",
+  "current": "You matched across every area. Revisit this when something changes.",
+  "proposed": "You matched across every area of Expectations, which means you are on the same page. Try to revisit your expectations together when something in your life changes.",
+  "why": "'this', 'every area', 'something' unnamed"
+ },
+ {
+  "file": "api/_lib/what-comes-next.js",
+  "key": "whatComesNext exp category item body (template literal, plural branch shown)",
+  "where": "What Comes Next > Discussions to have, under \"<Category> discussions\"",
+  "current": "${topics.length} ${topics.length === 1 ? 'thing' : 'things'} here you each pictured differently.",
+  "proposed": "${topics.length} ${topics.length === 1 ? 'topic' : 'topics'} in this area that you each pictured differently.",
+  "why": "'things here' vague. Template literal source, not a plain string"
+ },
+ {
+  "file": "api/_lib/what-comes-next.js",
+  "key": "whatComesNext conflict fallback item title",
+  "where": "What Comes Next > Things to consider, when no conflict pattern needs attention",
+  "current": "Reread your patterns before the next hard conversation",
+  "proposed": "Reread your conflict patterns before your next hard conversation",
+  "why": "'your patterns' of what, on a page mixing five exercises"
+ },
+ {
+  "file": "api/_lib/next-action.js",
+  "key": "nextActions profile card body",
+  "where": "Home screen card \"Finish setting up your profile\"",
+  "current": "We need info to properly set up your exercises",
+  "proposed": "We need your profile details to set up your exercises",
+  "why": "'info' vague. Note: `missing` (profileMissing) is computed above and never used; the card could name it"
+ },
+ {
+  "file": "api/_lib/next-action.js",
+  "key": "nextActions use-resource started body",
+  "where": "Home screen card \"Complete your budget\" / \"Complete your checklist\"",
+  "current": "This exercise is in progress and status has been saved",
+  "proposed": "Your progress in this tool has been saved",
+  "why": "'This exercise' on a card for a tool, not an exercise; 'status' vague"
+ },
+ {
+  "file": "api/_lib/next-action.js",
+  "key": "nextActions new-post body",
+  "where": "Home screen card \"New publication to explore\"",
+  "current": "View this and others in your Learn tab",
+  "proposed": "Read the new article and other In Practice articles in your Learn tab",
+  "why": "'this and others' unnamed"
+ },
+ {
+  "file": "api/_lib/next-action.js",
+  "key": "nextActions revisit body (top-gap branch, template literal)",
+  "where": "Home screen card \"Revisit <dimension>\"",
+  "current": "Your widest difference. Worth rereading together.",
+  "proposed": "You differ most on this dimension. Try to reread its results together.",
+  "why": "fragment with no subject: difference in what"
+ },
+ {
+  "file": "api/_lib/next-action.js",
+  "key": "IDLE_PROMPTS[0].body",
+  "where": "Home screen idle card \"Send a note to your partner\"",
+  "current": "Mark a line in your results and share it with them.",
+  "proposed": "Mark a line in your results and share that line with your partner.",
+  "why": "'them' unnamed in the body"
+ },
+ {
+  "file": "api/_lib/next-action.js",
+  "key": "IDLE_PROMPTS[2].body",
+  "where": "Home screen idle card \"Pick one conversation to have this week\"",
+  "current": "Every section ends with something to try.",
+  "proposed": "Every results section ends with an action to try.",
+  "why": "'section' of what; 'something' vague"
+ },
+ {
+  "file": "api/_lib/next-action.js",
+  "key": "IDLE_PROMPTS[3].body",
+  "where": "Home screen idle card \"Read something from In Practice\"",
+  "current": "Short pieces on the things that impact relationships.",
+  "proposed": "Short articles on what shapes a relationship.",
+  "why": "'the things' vague"
+ },
+ {
+  "file": "api/_lib/waiting-copy.js",
+  "key": "WAITING.LOCKED_BY_YOU (also NOT_FILLED_IN)",
+  "where": "A locked results section you have not finished; also any page that fills in as you finish",
+  "current": "Finish your exercises to open this.",
+  "proposed": "Finish your exercises to open this section.",
+  "why": "'this' unnamed. File header says these are Ellie's verbatim"
+ },
+ {
+  "file": "api/_lib/journal-copy.js",
+  "key": "JOURNAL_COPY.noMatch",
+  "where": "Journal search, when nothing matches",
+  "current": "Nothing here matches that.",
+  "proposed": "No journal entries match your search.",
+  "why": "'here', 'that' unnamed"
+ },
+ {
+  "file": "api/_lib/journal-copy.js",
+  "key": "JOURNAL_COPY.empty",
+  "where": "Journal, before the first entry",
+  "current": "Nothing here yet. The first entry is usually the hardest one.",
+  "proposed": "No journal entries yet. The first entry is usually the hardest one to write.",
+  "why": "'Nothing here' vague"
+ },
+ {
+  "file": "api/_lib/journal-copy.js",
+  "key": "JOURNAL_COPY.saveTitle",
+  "where": "Insight of the day, the save-to-journal sheet title",
+  "current": "Keep this in your journal",
+  "proposed": "Keep this insight in your journal",
+  "why": "'this' unnamed"
+ },
+ {
+  "file": "api/_lib/journal-copy.js",
+  "key": "JOURNAL_COPY.saveFailed",
+  "where": "Insight of the day save sheet, on failure",
+  "current": "That did not save. Try again in a moment.",
+  "proposed": "Your journal entry did not save. Try again in a moment.",
+  "why": "'That' unnamed"
+ },
+ {
+  "file": "api/_lib/exercise-intro.js",
+  "key": "exerciseIntro intimacy body[1]",
+  "where": "Physical Intimacy exercise cover, second paragraph",
+  "current": "This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.",
+  "proposed": "This exercise is a tool for talking about expectations, not therapy. If any of these questions brings up a heavier issue, it is worth talking that issue through with someone qualified.",
+  "why": "'This', 'anything here', 'something heavier', 'that'"
+ }
 ]
