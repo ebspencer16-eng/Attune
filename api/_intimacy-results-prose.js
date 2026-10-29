@@ -10,7 +10,7 @@
 //   discuss  — "what this means" when there's a moderate gap
 //   different— "what this means" when answers diverge
 //   unspoken — "what this means" when both chose "prefer not to say"
-//   prompt   — a question one partner can read aloud to the other ("Talk about it:")
+//   prompt   — a question one partner can read aloud to the other ("Ask each other:")
 //   oneSkipped — { lead, question } shown when ONE partner skipped the whole
 //                dimension (the other answered). {SKIPPER} = the partner who
 //                skipped. For these couples the separate prompt tile is hidden.
@@ -22,11 +22,11 @@
  * The label above a dimension's prompt.
  *
  * Typed inline in src/App.jsx, three times, and nowhere the app could read it.
- * So the website wrapped each prompt in a tile headed "Talk about it" and the
+ * So the website wrapped each prompt in a tile headed "Ask each other" and the
  * app printed the same sentence as a bare heading with nothing naming it: the
  * reader was given a question with no indication it was a question to ask.
  */
-export const TALK_ABOUT_IT = 'Talk about it';
+export const TALK_ABOUT_IT = 'Ask each other';
 
 /**
  * The line under the two names on Physical Intimacy at a glance.
@@ -44,7 +44,7 @@ export const TALK_ABOUT_IT = 'Talk about it';
  * is not empty. It was typed inside src/App.jsx, so the app had no way to
  * explain it and simply showed the list.
  */
-export const INTIMACY_ALL_ALIGNED = 'You line up across the board. These are still worth saying out loud.';
+export const INTIMACY_ALL_ALIGNED = 'You line up on all six aspects. The conversations below are still worth having out loud.';
 
 export const INTIMACY_LEAD = {
   married: 'Based on how things are now.',
@@ -54,28 +54,28 @@ export const INTIMACY_LEAD = {
 export const INTIMACY_RESULTS_PROSE = {
   frequency: {
     intro: "How often each of you wants physical intimacy.",
-    aligned: "You want intimacy about as often as each other. That is one less thing to negotiate. Keep saying it out loud anyway. Frequency that goes unspoken tends to drift.",
-    discuss: "Your ideal frequencies sit a little apart. This is the most common gap there is. What matters is naming it early, before it turns into a tally.",
+    aligned: "You want intimacy about as often as each other, so frequency is one less thing to negotiate. Try to keep telling each other how often you want intimacy anyway, because frequency that goes unspoken tends to drift.",
+    discuss: "When it comes to wanting intimacy more often or less often, you have slightly different needs. This is the most common difference couples have. Try to tell each other early how often you each want intimacy, before it turns into keeping score.",
     different: "You want intimacy at different rates. Neither rate is the correct one. The point is not to land on a number. It is to understand what intimacy gives each of you.",
-    unspoken: "Neither of you put a number to this. That is fine. Frequency is the easiest of these to talk about, because it is concrete.",
+    unspoken: "Neither of you put a number to how often you want intimacy, and that is fine. Frequency is the easiest of the six aspects to talk about, because it is concrete.",
     oneSkipped: { lead: "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.", question: "How often feels right to each of us, and what do we want to do on the nights we want different things?" },
     prompt: "How often feels right to you, and what do you want us to do on the nights we want different things?",
   },
   initiating: {
     intro: "Who reaches for who, and how that sits with each of you.",
     aligned: "You agree on how initiating works between you. That agreement does quiet, steady good. Mismatched initiating is one of the things that wears couples down without either of them noticing.",
-    discuss: "Your expectations about initiating sit a little apart. Usually one person assumes a balance the other does not. Name it before it becomes a pattern.",
-    different: "You see initiating differently. If you both expect to be pursued, or you both expect to lead, that shows up fast. Talk about who reaches, and what a no feels like to give and to get.",
-    unspoken: "Neither of you said who initiates. The person who reaches and the person who waits often carry very different feelings about the same moment. Worth getting to when you can.",
+    discuss: "When it comes to leading or being pursued, you have slightly different views. One of you may assume a balance your partner does not. Try to tell each other who you expect to initiate, before the mismatch becomes a pattern.",
+    different: "You see initiating differently. If you both expect to be pursued, or you both expect to lead, the mismatch can show up quickly. Try to talk about who reaches for whom, and how it feels to give and to get a no.",
+    unspoken: "Neither of you said who initiates. The person who reaches and the person who waits can have very different feelings about the same moment. Try to talk about who initiates when you can.",
     oneSkipped: { lead: "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.", question: "How does it feel to be the one who reaches, and what should a no sound like so it does not feel like rejection?" },
     prompt: "How does it feel when you are the one to reach for me, and what do you want a no to sound like so it does not feel like rejection?",
   },
   comfort: {
     intro: "How safe and at ease each of you feels being physically close.",
-    aligned: "You are at a similar place with feeling safe, and you ask for similar things to get there. That shared baseline holds everything else up. Keep checking in. Comfort moves with stress and time.",
-    discuss: "Your comfort levels sit a little apart. One of you may need more to feel safe than the other expects. That is not a problem to fix. It is information to use.",
+    aligned: "You are at a similar place with regards to feeling safe, and you ask for similar things to get there. That shared starting point supports everything else. Try to keep asking each other what helps you feel safe, because comfort can change with stress and time.",
+    discuss: "When it comes to needing time or feeling at ease quickly, you have slightly different comfort levels. One of you may need more to feel safe than your partner expects. That difference is not a problem to fix, but something useful to know about each other.",
     different: "You get comfortable at different speeds. One of you settles fast. The other needs time or the right conditions. Both reach the same closeness. Talk about what each of you needs to get there.",
-    unspoken: "Neither of you spoke to this. It is the most personal of the six. When you are ready, start with what helps each of you feel safe, not what does not.",
+    unspoken: "Neither of you answered the questions about comfort and safety. Comfort is the most personal of the six aspects. When you are ready, try to start with what helps each of you feel safe, rather than what does not.",
     oneSkipped: { lead: "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.", question: "What helps each of us feel safe enough to be open, and what makes us pull back?" },
     prompt: "What helps you feel safe enough to be open with me, and what makes you pull back?",
   },

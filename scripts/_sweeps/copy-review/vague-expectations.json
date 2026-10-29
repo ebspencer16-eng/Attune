@@ -1,786 +1,786 @@
 [
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.WW",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Name who's doing what explicitly, because your ability to talk about feelings doesn't automatically extend to who's vacuuming.",
-    "proposed": "Try to say out loud who does which chore. Being able to talk about feelings doesn't automatically mean you agree on who's vacuuming.",
-    "why": "'who's doing what' names no task"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.XX",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "The risk is that one person quietly takes on more without raising it. Agree on who handles what, and build a regular check-in so that quiet resentment doesn't build under the efficiency.",
-    "proposed": "One of you may quietly take on more of the chores without saying so. Agree on who handles which chores, and set a regular time to review that split so that resentment doesn't build.",
-    "why": "'more', 'it', 'what' unnamed; 'the efficiency' refers to cut type description"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.YY",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Domestic friction can land harder than expected when neither of you wants to seem petty for raising it. Name the logistics early. It's not unromantic to decide who buys groceries.",
-    "proposed": "Friction over chores can feel bigger than expected when neither of you wants to seem petty by raising it. Try to decide early who handles which chores. It is not unromantic to decide who buys groceries.",
-    "why": "'raising it', 'name the logistics' vague"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.ZZ",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Schedule a review of who's carrying what every few months. Domestic load is exactly the kind of thing that drifts without conversation.",
-    "proposed": "Every few months, try to set a time to review which chores each of you is carrying. The split of housework tends to drift when you don't talk about it.",
-    "why": "'who's carrying what' names nothing"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.WX",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Make sure household logistics get talked about at a set time rather than only when someone reaches a tipping point.",
-    "proposed": "Try to talk about who handles which chores at a set time, rather than only when one of you reaches a tipping point.",
-    "why": "'household logistics' abstract"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.WY",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Household friction rarely feels urgent enough to raise, until it is. Set a regular rhythm for reviewing who's doing what, so it doesn't only get named when someone is already frustrated.",
-    "proposed": "Friction over chores rarely feels urgent enough to raise, until it is. Try to set a regular time to review who does which chores, so an uneven split doesn't only come up when one of you is already frustrated.",
-    "why": "'who's doing what', 'it doesn't only get named'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.WZ",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Domestic imbalances tend to accumulate silently in couples like yours. Build a habit of naming household roles explicitly rather than letting them form by default.",
-    "proposed": "An uneven split of chores can build up without either of you saying anything. Try to make a habit of saying out loud who does which chores, rather than letting the split form by default.",
-    "why": "'couples like yours' points at a description that was cut"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.XY",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Household logistics decisions can stall if one person isn't ready and the other is impatient. Pick a weekly moment, 15 minutes, to review and decide together.",
-    "proposed": "Decisions about chores can stall if one of you isn't ready and the other is impatient. Try to pick 15 minutes each week to review who does which chores and decide together.",
-    "why": "'review and decide' what"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.XZ",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Domestic resentment is particularly likely to stay quiet in a pairing like yours, until it isn't. Make a habit of naming the load each person is carrying, before something breaks.",
-    "proposed": "When you both keep things to yourselves, resentment about chores can stay quiet until it boils over. Try to make a habit of saying out loud which chores each of you is carrying.",
-    "why": "'a pairing like yours', 'the load', 'something breaks'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.household.YZ",
-    "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
-    "current": "Household imbalances are easy to defer. Make a habit of reviewing roles at a set time so the conversation doesn't require someone to work up to it.",
-    "proposed": "An uneven split of chores is easy to leave unmentioned. Try to review who does which chores at a set time, so neither of you has to work up to raising it.",
-    "why": "'imbalances easy to defer', 'roles', 'work up to it'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.XX",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Financial decisions are one area where that efficiency can skip important alignment. Slow down enough to make sure both of you actually agree, not just that both of you accept.",
-    "proposed": "Deciding quickly can skip real agreement when it comes to money. Before you settle a financial decision, try to slow down and make sure you both agree with it, rather than one of you simply accepting it.",
-    "why": "'that efficiency' refers to cut type description"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.YY",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Know that it's okay for this to be uncomfortable. The discomfort doesn't mean you're financially incompatible.",
-    "proposed": "It is completely fine for talking about money to feel uncomfortable. That discomfort doesn't mean you're financially incompatible.",
-    "why": "'this' unnamed"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.ZZ",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Financial misalignments in a pairing like yours can go unnamed for a long time. Set a quarterly money conversation, not to review budgets, but to check: are we still aligned on what money is for?",
-    "proposed": "Differences about money can go unspoken for a long time when you both keep things to yourselves. Try to set a money conversation once a quarter. This is not to review budgets, but to ask each other: are we still aligned on what money is for?",
-    "why": "'a pairing like yours'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.WX",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Financial decisions benefit from the person who needs more time actually getting it, rather than quietly conceding. Make sure financial conversations include a built-in pause for reflection before deciding.",
-    "proposed": "Financial decisions go better when whichever of you needs more time to think actually gets that time, rather than quietly giving in. Try to build a pause into money conversations so you each have time to think before you decide.",
-    "why": "'the person', 'getting it'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.WY",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Financial conversations should happen when both of you are actually ready, not when one person pushes and the other complies. Pick a time for it when neither of you is stressed.",
-    "proposed": "Money conversations should happen when you are both ready, rather than when one of you pushes and the other goes along with it. Try to pick a time when neither of you is stressed.",
-    "why": "'a time for it'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.WZ",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Financial alignment is hard if one person is doing all the raising. Build an expectation that both people bring concerns.",
-    "proposed": "Agreeing about money is hard if one of you raises every money concern. Try to make it expected that each of you brings up your own money concerns.",
-    "why": "'doing all the raising' of what"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.XY",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Financial decisions made under time pressure rarely hold. Make sure the person who needs space gets it, even if it delays the decision.",
-    "proposed": "Financial decisions made under time pressure rarely hold. It is fine for a decision to wait, so make sure whichever of you needs time to think gets that time.",
-    "why": "'the person', 'gets it'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.XZ",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Financial transparency requires deliberate effort in a pairing like yours, since neither of you naturally pushes the other to open up. Schedule it.",
-    "proposed": "When you are both guarded, being open about money takes deliberate effort, since neither of you naturally pushes the other to open up. Try to schedule a regular time to talk through your finances together.",
-    "why": "'Schedule it'; 'a pairing like yours'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.financial.YZ",
-    "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
-    "current": "Money conversations can easily get deferred indefinitely. Set a regular, calm moment for financial check-ins, not after a tension-filled moment, but on a neutral calendar day.",
-    "proposed": "Money conversations can easily get put off indefinitely. Try to set a regular, calm time to talk about money, on an ordinary day rather than right after a tense moment.",
-    "why": "'financial check-ins' vague"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.career.YY",
-    "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
-    "current": "Career sacrifice is one of the harder things to name when you don't want to seem demanding. Know that naming it is an act of care, not selfishness, the person carrying more deserves to have it acknowledged.",
-    "proposed": "Career sacrifice can be hard to say out loud when you don't want to seem demanding. Telling your partner what you have given up is an act of care, not selfishness. Whichever of you is giving up more deserves to have that sacrifice acknowledged.",
-    "why": "'naming it', 'carrying more', 'have it'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.career.ZZ",
-    "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
-    "current": "Career imbalances in couples like yours can go entirely unspoken until they've built significant resentment. Check in explicitly about whose career is getting prioritized, and whether that feels fair to both.",
-    "proposed": "An imbalance between your careers can go unspoken until it has built real resentment. Try to ask each other directly whose career is getting priority right now, and whether that feels fair to both of you.",
-    "why": "'couples like yours'; 'check in'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.career.WX",
-    "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
-    "current": "Career decisions with long-term implications need both of you fully present. Don't let the faster processor set the pace before the other has had time to think.",
-    "proposed": "Career decisions with long-term consequences need both of you fully present. Try not to let whichever of you decides faster set the pace before your partner has had time to think.",
-    "why": "'the faster processor' is jargon"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.career.WZ",
-    "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
-    "current": "Career concerns are exactly the kind of thing the quieter partner may be carrying without raising. Build an expectation that career check-ins happen on both sides.",
-    "proposed": "The more private one of you may be carrying career concerns without raising them. Try to make it expected that you each ask the other about career concerns.",
-    "why": "'quieter partner', 'may', 'check-ins on both sides'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.career.XY",
-    "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
-    "current": "Career decisions are rarely truly urgent, give the person who processes slower the time they need. A decision made under pressure tends to not hold.",
-    "proposed": "Career decisions are rarely truly urgent, so it is fine to give whichever of you takes longer to think the time they need. A decision made under pressure tends not to hold.",
-    "why": "'the person who processes slower'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.career.XZ",
-    "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
-    "current": "Career conversations require deliberate effort in a pairing like yours because neither of you will naturally push the topic. Build in a regular 'where are we on career stuff?', once a quarter is enough.",
-    "proposed": "When you are both guarded, career conversations take deliberate effort, because neither of you will naturally bring up careers. Try to ask each other once a quarter: where are we each with our careers?",
-    "why": "'career stuff'; 'a pairing like yours'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.WW",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "The risk is that naming it starts to feel like scorekeeping. Frame it as awareness, not accounting.",
-    "proposed": "Pointing out the emotional labor each of you does can start to feel like scorekeeping. Try to point it out so you stay aware of each other, rather than to keep score.",
-    "why": "'it' has no referent at all"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.XX",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "Emotional labor in a pairing like yours can go entirely unremarked, since neither of you naturally points to it. Name it. The person carrying more needs it acknowledged.",
-    "proposed": "When you are both guarded, emotional labor can go unnoticed, since neither of you naturally points to it. Try to say out loud what emotional labor each of you is doing. Whichever of you carries more needs that work acknowledged.",
-    "why": "'Name it', 'needs it acknowledged'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.YY",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "The invisible labor in your relationship is probably significant on both sides. The work is both carrying the emotional load and making sure the other person sees it too.",
-    "proposed": "You each carry emotional labor that can be hard for your partner to see. Try to keep carrying your share, and to make sure your partner sees what you carry.",
-    "why": "hedge 'probably'; 'the work', 'sees it'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.ZZ",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "Emotional labor is probably distributed in your relationship in ways that neither of you has fully mapped. It can accumulate invisibly. Make a habit of asking: 'what are you managing right now that I might not know about?'",
-    "proposed": "Neither of you may have fully mapped how the emotional labor in your relationship is split, so that labor can build up without either of you seeing it. Try to make a habit of asking: 'what are you managing right now that I may not know about?'",
-    "why": "hedge 'probably'; 'It can accumulate'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.WX",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "Emotional labor that goes unspoken is still labor. The quieter partner may be carrying more than they say. Build a norm where both of you name what you're managing.",
-    "proposed": "Emotional labor that goes unspoken is still labor. The more guarded one of you may be carrying more than they say. Try to make it normal for each of you to say what you're keeping track of for the two of you.",
-    "why": "'quieter partner', 'may', 'name what you're managing'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.WY",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "Emotional labor conversations can feel premature for one partner and overdue for the other. Pick a neutral time, not when one person is already drained, to check in about what each of you is carrying.",
-    "proposed": "Conversations about emotional labor can feel too early for one of you and overdue for the other. Try to pick a neutral time, not when one of you is already drained, to ask each other what you are each carrying.",
-    "why": "'check in about what'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.WZ",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "Emotional labor is exactly the kind of thing that the more private partner absorbs silently. Build an expectation that both people name what they're tracking and carrying.",
-    "proposed": "The more private one of you tends to take on emotional labor silently. Try to make it expected that you each say out loud what you're keeping track of and carrying for the two of you.",
-    "why": "'the more private partner', 'name what'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.XY",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "Emotional labor conversations can feel charged. Don't rush the one who needs space, the conversation is more useful when both of you are actually present.",
-    "proposed": "Conversations about emotional labor can feel charged. Try not to rush whichever of you needs time to think, because the conversation is more useful when you are both fully present.",
-    "why": "'the one who needs space'; comma splice"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.XZ",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "Emotional labor is particularly invisible in pairings like yours. It's being done, often a lot of it, by one or both of you, without being named. Make it a practice to name it, even briefly.",
-    "proposed": "When you are both guarded, emotional labor is especially hard to see. One or both of you is usually doing a lot of it without saying so. Try to make a habit of saying out loud the emotional labor you are doing, even briefly.",
-    "why": "'name it'; 'pairings like yours'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.emotional.YZ",
-    "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
-    "current": "Emotional labor conversations can be repeatedly deferred in a pairing like yours. Set a recurring, calm check-in, not a big conversation, just a brief: 'what are you carrying right now?'",
-    "proposed": "Conversations about emotional labor can be put off again and again. Try to set a recurring, calm moment to ask each other one short question: 'what are you carrying right now?'",
-    "why": "'a pairing like yours'; 'check-in'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.life.XX",
-    "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
-    "current": "You may each have more formed views on life and values questions than the other knows about. Make space to share your position and the reasoning underneath it. It changes the conversation.",
-    "proposed": "Each of you may hold more settled views on life and values than your partner knows about. Try to tell each other where you stand and why. Hearing the reasoning behind each other's views can change the conversation.",
-    "why": "'may'; 'make space'; 'It changes'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.life.YY",
-    "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
-    "current": "Life and values disagreements can carry real weight. Know that diverging on some of these questions is normal, and not a sign you're wrong for each other. What matters is how you hold the difference.",
-    "proposed": "Disagreements about life and values can carry real weight. It is normal to differ on some of these questions, and it is not a sign you're wrong for each other. What matters is how you handle the places where you differ.",
-    "why": "'these questions'; 'hold the difference'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.life.ZZ",
-    "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
-    "current": "Big-picture questions about life and values can stay entirely internalized in a pairing like yours. Make a deliberate practice of sharing your current thinking on these topics, not to resolve them, but to stay current with each other.",
-    "proposed": "Big questions about life and values can stay entirely in your own heads. Try to make a habit of telling each other your current thinking on life and values, not to settle anything, but to stay up to date with each other.",
-    "why": "'a pairing like yours'; 'these topics'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.life.WX",
-    "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
-    "current": "Life and values conversations benefit from both people having time to think before sharing. Don't let the faster processor carry more of the conversation than the other person is ready for.",
-    "proposed": "Life and values conversations go better when you both have time to think before sharing. Try not to let whichever of you responds faster carry more of the conversation than your partner is ready for.",
-    "why": "'the faster processor'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.life.WY",
-    "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
-    "current": "Life questions, children, location, faith, shouldn't be decided when one person isn't fully ready to engage. Wait for both.",
-    "proposed": "Life questions like children, location and faith shouldn't be decided when one of you isn't fully ready. It is completely fine to wait until you are both ready to decide.",
-    "why": "'Wait for both' vague"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.life.XY",
-    "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
-    "current": "For life questions with real implications, the person who processes more slowly needs time, even if it delays the decision. A premature decision on big things tends to create pressure later.",
-    "proposed": "For big life questions, whichever of you takes longer to think needs that time, even if it delays the decision. A rushed decision on a big question tends to create pressure later.",
-    "why": "'the person who processes', 'big things'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.life.XZ",
-    "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
-    "current": "Life and values alignment can be assumed rather than actively explored in pairings like yours. Don't let the stability of your relationship mean you stop checking in on where each of you is with the big questions.",
-    "proposed": "When you are both guarded, it is easy to assume you agree on life and values rather than actually talking about them. Even when your relationship feels steady, try to keep asking where each of you stands on the big questions.",
-    "why": "'pairings like yours'; 'the big questions'"
-  },
-  {
-    "file": "api/_lib/expectation-starters.js",
-    "key": "EXP_CAT_STARTERS.life.YZ",
-    "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
-    "current": "Life and values conversations can be deferred indefinitely when both of you are comfortable waiting. Set a specific, recurring time to revisit where you each are, not when something forces the conversation.",
-    "proposed": "Life and values conversations can be put off indefinitely when you are both comfortable waiting. Try to set a recurring time to revisit where you each stand, rather than waiting for something to force the conversation.",
-    "why": "'where you each are'; 'something'"
-  },
-  {
-    "file": "api/_lib/category-intros.js",
-    "key": "CATEGORY_INTRO.career",
-    "where": "Career category page tip tile (when couple type unknown)",
-    "current": "How you think about work, ambition, and sacrifice for each other's careers will evolve. These conversations lay groundwork before the hard moments arrive.",
-    "proposed": "How you think about work, ambition, and sacrifice for each other's careers will change over time. Talking about your careers now prepares you for the harder career decisions ahead.",
-    "why": "'These conversations', 'the hard moments'"
-  },
-  {
-    "file": "api/_lib/category-intros.js",
-    "key": "CATEGORY_INTRO.emotional",
-    "where": "Emotional labor category page tip tile (when couple type unknown)",
-    "current": "The invisible work of a relationship, tracking, anticipating, initiating, is the category most couples never name. Naming it changes how it lands.",
-    "proposed": "The invisible work of a relationship, like tracking, anticipating and initiating, is the work most couples never talk about. Saying out loud who does that work can change how it is received.",
-    "why": "'Naming it changes how it lands'"
-  },
-  {
-    "file": "api/_lib/expectations.js",
-    "key": "childhoodWord: v === 'a' fallback",
-    "where": "Expectations rows, 'Experienced' column, when the person named no first adult",
-    "current": "One of them",
-    "proposed": "One adult",
-    "why": "'them' unnamed"
-  },
-  {
-    "file": "api/_lib/expectations.js",
-    "key": "childhoodWord: v === 'b' fallback",
-    "where": "Expectations rows, 'Experienced' column, when the person named no second adult",
-    "current": "The other",
-    "proposed": "The other adult",
-    "why": "'other' what"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "TALK_ABOUT_IT",
-    "where": "Label above every Physical Intimacy prompt, both surfaces",
-    "current": "Talk about it",
-    "proposed": "Ask each other",
-    "why": "core 'it'; heading above a question"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_ALL_ALIGNED",
-    "where": "Under 'Conversations worth having' when every dimension is aligned",
-    "current": "You line up across the board. These are still worth saying out loud.",
-    "proposed": "You line up on all six aspects. The conversations below are still worth having out loud.",
-    "why": "'These' unnamed"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.frequency.aligned",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "You want intimacy about as often as each other. That is one less thing to negotiate. Keep saying it out loud anyway. Frequency that goes unspoken tends to drift.",
-    "proposed": "You want intimacy about as often as each other, so frequency is one less thing to negotiate. Try to keep telling each other how often you want intimacy anyway, because frequency that goes unspoken tends to drift.",
-    "why": "'saying it'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.frequency.discuss",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Your ideal frequencies sit a little apart. This is the most common gap there is. What matters is naming it early, before it turns into a tally.",
-    "proposed": "When it comes to wanting intimacy more often or less often, you are a little apart. This is the most common difference couples have. Try to tell each other early how often you each want intimacy, before it turns into keeping score.",
-    "why": "'sit a little apart'; 'naming it'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.frequency.unspoken",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Neither of you put a number to this. That is fine. Frequency is the easiest of these to talk about, because it is concrete.",
-    "proposed": "Neither of you put a number to how often you want intimacy, and that is fine. Frequency is the easiest of the six aspects to talk about, because it is concrete.",
-    "why": "'this', 'these'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.initiating.discuss",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Your expectations about initiating sit a little apart. Usually one person assumes a balance the other does not. Name it before it becomes a pattern.",
-    "proposed": "When it comes to leading or being pursued, you are a little apart. Usually one of you assumes a balance your partner does not. Try to tell each other who you expect to initiate, before the mismatch becomes a pattern.",
-    "why": "'sit a little apart'; 'Name it'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.initiating.different",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "You see initiating differently. If you both expect to be pursued, or you both expect to lead, that shows up fast. Talk about who reaches, and what a no feels like to give and to get.",
-    "proposed": "You see initiating differently. If you both expect to be pursued, or you both expect to lead, the mismatch can show up quickly. Try to talk about who reaches for whom, and how it feels to give and to get a no.",
-    "why": "'that shows up'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.initiating.unspoken",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Neither of you said who initiates. The person who reaches and the person who waits often carry very different feelings about the same moment. Worth getting to when you can.",
-    "proposed": "Neither of you said who initiates. The person who reaches and the person who waits can have very different feelings about the same moment. Try to talk about who initiates when you can.",
-    "why": "'Worth getting to' fragment, no action"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.comfort.aligned",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "You are at a similar place with feeling safe, and you ask for similar things to get there. That shared baseline holds everything else up. Keep checking in. Comfort moves with stress and time.",
-    "proposed": "You are at a similar place with feeling safe, and you ask for similar things to get there. That shared starting point supports everything else. Try to keep asking each other what helps you feel safe, because comfort can change with stress and time.",
-    "why": "'Keep checking in'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.comfort.discuss",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Your comfort levels sit a little apart. One of you may need more to feel safe than the other expects. That is not a problem to fix. It is information to use.",
-    "proposed": "When it comes to needing time or feeling at ease quickly, you are a little apart. One of you may need more to feel safe than your partner expects. That difference is not a problem to fix, but something useful to know about each other.",
-    "why": "'sit a little apart'; 'may'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.comfort.unspoken",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Neither of you spoke to this. It is the most personal of the six. When you are ready, start with what helps each of you feel safe, not what does not.",
-    "proposed": "Neither of you answered the questions about comfort and safety. Comfort is the most personal of the six aspects. When you are ready, try to start with what helps each of you feel safe, rather than what does not.",
-    "why": "'this', 'It'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.communication.discuss",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Your styles sit a little apart. One of you wants to talk it through. The other would rather not pick it apart. Both work. The gap only hurts if it stays unnamed.",
-    "proposed": "When it comes to talking intimacy through or showing what you want, you are a little apart. One of you wants to talk it through, and the other would rather not analyze it. Both work. The difference only hurts when neither of you mentions it.",
-    "why": "'styles sit a little apart'; 'talk it through'; 'the gap'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.communication.different",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "You talk about intimacy in different ways. If one of you needs to say it and the other needs to not, you can miss each other completely. Agree on how you will signal what you want when words are hard.",
-    "proposed": "You talk about intimacy in different ways. If one of you needs to say what you want out loud and the other would rather not, you can miss each other completely. Try to agree on how you will signal what you want when words are hard.",
-    "why": "'say it'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.communication.unspoken",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Neither of you answered here. That is its own quiet answer. Start small: agree on how you will tell each other when something is or is not working.",
-    "proposed": "Neither of you answered the questions about talking about intimacy, and that can say something too. Try to start small by agreeing on how you will tell each other when something is or is not working.",
-    "why": "'here'; 'something'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.adventure.discuss",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Your appetites for novelty sit a little apart. One of you leans toward trying things. The other leans toward what already works. Easy to handle once it is named. Easy to misread as rejection when it is not.",
-    "proposed": "When it comes to the familiar or something new, you are a little apart. One of you leans toward trying new things, and the other leans toward what already works. That difference is easy to handle once you say it out loud, but it can be misread as rejection.",
-    "why": "'sit a little apart'; 'it is named' fragments"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.adventure.different",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "You want very different amounts of novelty. The adventurous one can read caution as disinterest. The one who likes the familiar can read appetite as pressure. Both readings are usually wrong. Talk about the why under it.",
-    "proposed": "You want very different amounts of novelty. The more adventurous one of you can read caution as disinterest, and the one who likes the familiar can read interest as pressure. Both readings are usually wrong. Try to talk about why each of you wants what you want.",
-    "why": "'the why under it'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.adventure.unspoken",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Neither of you spoke to this. It is lighter than it looks. Most of it is about how much each of you wants to be asked.",
-    "proposed": "Neither of you answered the questions about trying new things. This topic is usually lighter than it looks, and mostly comes down to how much each of you wants to be asked first.",
-    "why": "'this', 'It', 'Most of it'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.meaning.discuss",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "What intimacy is for sits a little apart between you. One of you leans toward closeness. The other toward play or release. Neither is the right reason. Knowing the difference keeps you from misreading each other.",
-    "proposed": "When it comes to closeness or play and release, you are a little apart on what intimacy is for. One of you leans toward closeness, and the other leans toward play or release. Neither is the right reason. Knowing the difference can keep you from misreading each other.",
-    "why": "'sits a little apart'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.meaning.different",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Intimacy means different things to each of you. This is the gap that drives the most quiet friction. You can be close and still feel like you missed each other. Naming it changes how those moments land.",
-    "proposed": "Intimacy means different things to each of you. This difference tends to cause the most quiet friction, because you can be close and still feel like you missed each other. Telling each other what intimacy is for can change how those moments feel.",
-    "why": "'Naming it'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.meaning.unspoken",
-    "where": "Physical Intimacy dimension page, 'what this means' body",
-    "current": "Neither of you named what intimacy is for you. It is the deepest of the six, and often the most clarifying. The answer is rarely what either partner assumes.",
-    "proposed": "Neither of you said what intimacy is for you. That question is the deepest of the six, and often the most clarifying, because the answer is rarely what either of you assumes.",
-    "why": "'It is the deepest'"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.frequency.oneSkipped.lead",
-    "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
-    "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
-    "proposed": "{SKIPPER} chose to skip the questions about how often you want intimacy. Here is a question you can ask each other when the time feels right.",
-    "why": "'this one', 'come at it'; same string in all six, replace by key"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.initiating.oneSkipped.lead",
-    "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
-    "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
-    "proposed": "{SKIPPER} chose to skip the questions about who initiates. Here is a question you can ask each other when the time feels right.",
-    "why": "'this one', 'come at it'; same string in all six, replace by key"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.comfort.oneSkipped.lead",
-    "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
-    "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
-    "proposed": "{SKIPPER} chose to skip the questions about comfort and safety. Here is a question you can ask each other when the time feels right.",
-    "why": "'this one', 'come at it'; same string in all six, replace by key"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.communication.oneSkipped.lead",
-    "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
-    "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
-    "proposed": "{SKIPPER} chose to skip the questions about talking about intimacy. Here is a question you can ask each other when the time feels right.",
-    "why": "'this one', 'come at it'; same string in all six, replace by key"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.adventure.oneSkipped.lead",
-    "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
-    "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
-    "proposed": "{SKIPPER} chose to skip the questions about trying new things. Here is a question you can ask each other when the time feels right.",
-    "why": "'this one', 'come at it'; same string in all six, replace by key"
-  },
-  {
-    "file": "api/_intimacy-results-prose.js",
-    "key": "INTIMACY_RESULTS_PROSE.meaning.oneSkipped.lead",
-    "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
-    "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
-    "proposed": "{SKIPPER} chose to skip the questions about what intimacy is for. Here is a question you can ask each other when the time feels right.",
-    "why": "'this one', 'come at it'; same string in all six, replace by key"
-  },
-  {
-    "file": "api/_lib/intimacy-framing.js",
-    "key": "FRAMING.note",
-    "where": "Physical Intimacy exercise, framing question note",
-    "current": "This sets the framing for both of you. Whoever starts first decides it for the couple.",
-    "proposed": "Your answer decides which questions both of you are asked. Whoever starts first decides the questions for the couple.",
-    "why": "'This', 'the framing', 'it'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.criticism.0",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "You do not express criticism. Worth naming to {partner} as something you already do well.",
-    "proposed": "You do not express criticism. Try to tell {partner} that this is something you already do well.",
-    "why": "'Worth naming' what, fragment"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.criticism.1",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Rare, and you notice it. Keep naming the specific behavior instead of the trait: \"when plans change last minute\" instead of \"you are careless.\"",
-    "proposed": "Criticism is rare for you, and you notice it when it happens. Try to keep naming the specific behavior rather than the trait: \"when plans change last minute\" instead of \"you are careless.\"",
-    "why": "'Rare' has no subject"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.criticism.2",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Criticism appears enough to matter. The swap is small: describe the thing that happened, not the kind of person they are. One sentence is usually the difference.",
-    "proposed": "Criticism shows up enough to matter. The change is small: describe what {partner} did, rather than the kind of person {partner} is. One sentence can usually make the difference.",
-    "why": "'the thing', 'they'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.criticism.3",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "This one is worth real attention. Before raising something, try writing the specific behavior down first. Character language tends to arrive when the actual complaint has not been named yet.",
-    "proposed": "Criticism is worth real attention. Before raising a complaint, try writing the specific behavior down first. Criticism of character tends to come up when the actual complaint has not been said yet.",
-    "why": "'This one', 'something'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.contempt.0",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "You do not show contempt. This is the pattern that matters most, so this is genuinely worth knowing.",
-    "proposed": "You do not show contempt. Contempt is the pattern that matters most, so this is good to know.",
-    "why": "'this' twice"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.contempt.1",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Rare. Sarcasm under pressure is common, and a quick check-in (\"was that sharper than I meant?\") keeps it from settling in.",
-    "proposed": "Contempt is rare for you. Sarcasm under pressure is common, and a quick check-in (\"was that sharper than I meant?\") can keep sarcasm from settling in.",
-    "why": "'Rare' no subject; 'it'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.contempt.2",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Worth taking seriously, more than the others at the same rate. Contempt tends to grow quietly. Naming it out loud to {partner} once, outside an argument, does more than trying to catch it mid-conflict.",
-    "proposed": "Contempt is worth taking seriously, more than the other three patterns at the same rate, because it tends to grow quietly. Telling {partner} once, outside an argument, that you have noticed contempt in how you speak does more than trying to catch it mid-conflict.",
-    "why": "no subject; 'the others'; 'Naming it'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.contempt.3",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "This is the one to work on first. Not because you are doing something unforgivable, but because it is the pattern that does the most damage over time and the one that responds best to being named.",
-    "proposed": "Contempt is the pattern to work on first. This is not because you are doing something unforgivable, but because contempt does the most damage over time and responds best to being named out loud.",
-    "why": "'This is the one'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.defensiveness.1",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Rare. You are already handling this well. Keep noticing what lets you stay open.",
-    "proposed": "Defensiveness is rare for you, so you already take complaints well. Try to keep noticing what helps you stay open when {partner} raises a concern.",
-    "why": "'Rare', 'this'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.defensiveness.2",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Defensiveness appears occasionally. Before responding, try reflecting back what you heard first. Even one sentence changes the pace, and it costs nothing to be wrong about it.",
-    "proposed": "Defensiveness shows up occasionally. Before responding to a complaint, try reflecting back what you heard first. Even one sentence changes the pace of the conversation, and it is completely fine if your reflection is not quite right.",
-    "why": "'wrong about it'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.defensiveness.3",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Worth attention. Defensiveness usually means the complaint landed as an attack. Saying \"give me a second, I want to hear that properly\" buys the pause where the reflex would have gone.",
-    "proposed": "Defensiveness is worth attention. It usually means a complaint felt like an attack. Saying \"give me a second, I want to hear that properly\" gives you a pause before you react.",
-    "why": "'Worth attention' no subject"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.stonewalling.1",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Rare. When you feel the pull to check out, naming it (\"I need five minutes\") keeps it from feeling like an exit.",
-    "proposed": "Shutting down is rare for you. When you feel the urge to check out, try saying so (\"I need five minutes\"), so the pause does not feel like you are leaving the conversation.",
-    "why": "'naming it', 'keeps it'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_COPY.stonewalling.3",
-    "where": "Conflict Patterns, horseman tile note at this frequency (private)",
-    "current": "Worth attention, and usually a sign of being overwhelmed rather than uninterested. Agreeing a pause signal with {partner} in advance means shutting down does not have to be the only exit.",
-    "proposed": "Stonewalling is worth attention, and it is usually a sign of feeling overwhelmed rather than uninterested. Try to agree on a pause signal with {partner} in advance, so shutting down is not the only way out of a hard conversation.",
-    "why": "no subject"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_ACTIONS.contempt.title",
-    "where": "Conflict action plan item title (private)",
-    "current": "Acknowledge it once, outside an argument",
-    "proposed": "Acknowledge your contempt once, outside an argument",
-    "why": "core 'it'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_ACTIONS.contempt.body",
-    "where": "Conflict action plan item body (private)",
-    "current": "Pay attention to micro-aggressions and tell {partner} you noticed it, but not mid-conflict and not as an apology. Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first.",
-    "proposed": "Pay attention to your own micro-aggressions, like sarcasm or eye-rolling, and tell {partner} that you noticed them. Try to do this outside of a conflict, and not as an apology. Contempt grows quietly, but loses most of its power when the person showing it names it out loud, and almost none when the other person points it out first.",
-    "why": "'noticed it' (micro-aggressions plural, unspecified)"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_ACTIONS.defensiveness.body",
-    "where": "Conflict action plan item body (private)",
-    "current": "When {partner} raises something, say what you heard before you say anything else. You are not agreeing, only confirming that you are listening. This changes the pace of the discussion and can correct misunderstandings.",
-    "proposed": "When {partner} raises a concern, try to say what you heard before you say anything else. You are not agreeing, only confirming that you are listening. Reflecting back changes the pace of the discussion and can clear up misunderstandings.",
-    "why": "'something', 'This'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_NOTES.contempt.body",
-    "where": "Conflict 'One thing to keep in mind' note at Rarely",
-    "current": "Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first.",
-    "proposed": "Contempt grows quietly, but loses most of its power when the person showing it names it out loud, and almost none when the other person points it out first.",
-    "why": "'the person doing it'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "PATTERN_NOTES.stonewalling.body",
-    "where": "Conflict 'One thing to keep in mind' note at Rarely",
-    "current": "When your partner is engaging, stonewalling from you can communicate unwillingness to repair.",
-    "proposed": "When your partner is trying to talk a problem through, stonewalling from you can come across as not wanting to repair.",
-    "why": "'engaging' in what"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "NO_ACTION_NEEDED.title",
-    "where": "Conflict at a glance, action plan when nothing is flagged",
-    "current": "Nothing here needs work",
-    "proposed": "None of your patterns need work",
-    "why": "'here'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "NO_ACTION_NEEDED.body",
-    "where": "Conflict at a glance, action plan when nothing is flagged",
-    "current": "None of the four patterns come up often for you. That is worth saying out loud to {partner}, because it is the kind of thing couples rarely tell each other.",
-    "proposed": "None of the four patterns come up often for you. Try to tell {partner}, because couples rarely share good news like this with each other.",
-    "why": "'That', 'it is the kind of thing'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "CONFLICT_RESULTS_COPY.allClear",
-    "where": "Conflict patterns page, all-clear line",
-    "current": "None of the four patterns come up often for you. That is worth knowing, and worth saying to {partner}.",
-    "proposed": "None of the four patterns come up often for you, which is good to know. Try to tell {partner} that.",
-    "why": "'That' unnamed"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "OPENING_CHIPS.c1.B",
-    "where": "Conflict snapshot chip, row 'When you notice something frustrating'",
-    "current": "Takes time before bringing it up",
-    "proposed": "Takes time before raising a frustration",
-    "why": "'it'"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "OPENING_CHIPS.c_topic.B",
-    "where": "Conflict snapshot chip, row 'When the scope of the argument changes'",
-    "current": "Notices the older pattern",
-    "proposed": "Connects the argument to past ones",
-    "why": "'the older pattern' unnamed"
-  },
-  {
-    "file": "api/_conflict-results-prose.js",
-    "key": "RESET_FORMS['Writing it down']",
-    "where": "Conflict 'To help reset mid-conflict' answer",
-    "current": "Writes it down",
-    "proposed": "Writes down what they feel",
-    "why": "'it' unnamed"
-  }
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.WW",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Name who's doing what explicitly, because your ability to talk about feelings doesn't automatically extend to who's vacuuming.",
+  "proposed": "Try to say out loud who does which chore. Being able to talk about feelings doesn't automatically mean you agree on who's vacuuming.",
+  "why": "'who's doing what' names no task"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.XX",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "The risk is that one person quietly takes on more without raising it. Agree on who handles what, and build a regular check-in so that quiet resentment doesn't build under the efficiency.",
+  "proposed": "One of you may quietly take on more of the chores without saying so. Agree on who handles which chores, and set a regular time to review that split so that resentment doesn't build.",
+  "why": "'more', 'it', 'what' unnamed; 'the efficiency' refers to cut type description"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.YY",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Domestic friction can land harder than expected when neither of you wants to seem petty for raising it. Name the logistics early. It's not unromantic to decide who buys groceries.",
+  "proposed": "Friction over chores can feel bigger than expected when neither of you wants to seem petty by raising it. Try to decide early who handles which chores. It is not unromantic to decide who buys groceries.",
+  "why": "'raising it', 'name the logistics' vague"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.ZZ",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Schedule a review of who's carrying what every few months. Domestic load is exactly the kind of thing that drifts without conversation.",
+  "proposed": "Every few months, try to set a time to review which chores each of you is carrying. The split of housework tends to drift when you don't talk about it.",
+  "why": "'who's carrying what' names nothing"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.WX",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Make sure household logistics get talked about at a set time rather than only when someone reaches a tipping point.",
+  "proposed": "Try to talk about who handles which chores at a set time, rather than only when one of you reaches a tipping point.",
+  "why": "'household logistics' abstract"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.WY",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Household friction rarely feels urgent enough to raise, until it is. Set a regular rhythm for reviewing who's doing what, so it doesn't only get named when someone is already frustrated.",
+  "proposed": "Friction over chores rarely feels urgent enough to raise, until it is. Try to set a regular time to review who does which chores, so an uneven split doesn't only come up when one of you is already frustrated.",
+  "why": "'who's doing what', 'it doesn't only get named'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.WZ",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Domestic imbalances tend to accumulate silently in couples like yours. Build a habit of naming household roles explicitly rather than letting them form by default.",
+  "proposed": "An uneven split of chores can build up without either of you saying anything. Try to make a habit of saying out loud who does which chores, rather than letting the split form by default.",
+  "why": "'couples like yours' points at a description that was cut"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.XY",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Household logistics decisions can stall if one person isn't ready and the other is impatient. Pick a weekly moment, 15 minutes, to review and decide together.",
+  "proposed": "Decisions about chores can stall if one of you isn't ready and the other is impatient. Try to pick 15 minutes each week to review who does which chores and decide together.",
+  "why": "'review and decide' what"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.XZ",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Domestic resentment is particularly likely to stay quiet in a pairing like yours, until it isn't. Make a habit of naming the load each person is carrying, before something breaks.",
+  "proposed": "When you both keep things to yourselves, resentment about chores can stay quiet until it boils over. Try to make a habit of saying out loud which chores each of you is carrying.",
+  "why": "'a pairing like yours', 'the load', 'something breaks'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.household.YZ",
+  "where": "Expectations household category page, 'A tip for {you} and {partner}' tile",
+  "current": "Household imbalances are easy to defer. Make a habit of reviewing roles at a set time so the conversation doesn't require someone to work up to it.",
+  "proposed": "An uneven split of chores is easy to leave unmentioned. Try to review who does which chores at a set time, so neither of you has to work up to raising it.",
+  "why": "'imbalances easy to defer', 'roles', 'work up to it'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.XX",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Financial decisions are one area where that efficiency can skip important alignment. Slow down enough to make sure both of you actually agree, not just that both of you accept.",
+  "proposed": "Deciding quickly can skip real agreement when it comes to money. Before you settle a financial decision, try to slow down and make sure you both agree with it, rather than one of you simply accepting it.",
+  "why": "'that efficiency' refers to cut type description"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.YY",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Know that it's okay for this to be uncomfortable. The discomfort doesn't mean you're financially incompatible.",
+  "proposed": "It is completely fine for talking about money to feel uncomfortable. That discomfort doesn't mean you're financially incompatible.",
+  "why": "'this' unnamed"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.ZZ",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Financial misalignments in a pairing like yours can go unnamed for a long time. Set a quarterly money conversation, not to review budgets, but to check: are we still aligned on what money is for?",
+  "proposed": "Differences about money can go unspoken for a long time when you both keep things to yourselves. Try to set a money conversation once a quarter. This is not to review budgets, but to ask each other: are we still aligned on what money is for?",
+  "why": "'a pairing like yours'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.WX",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Financial decisions benefit from the person who needs more time actually getting it, rather than quietly conceding. Make sure financial conversations include a built-in pause for reflection before deciding.",
+  "proposed": "Financial decisions go better when whichever of you needs more time to think actually gets that time, rather than quietly giving in. Try to build a pause into money conversations so you each have time to think before you decide.",
+  "why": "'the person', 'getting it'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.WY",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Financial conversations should happen when both of you are actually ready, not when one person pushes and the other complies. Pick a time for it when neither of you is stressed.",
+  "proposed": "Money conversations should happen when you are both ready, rather than when one of you pushes and the other goes along with it. Try to pick a time when neither of you is stressed.",
+  "why": "'a time for it'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.WZ",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Financial alignment is hard if one person is doing all the raising. Build an expectation that both people bring concerns.",
+  "proposed": "Agreeing about money is hard if one of you raises every money concern. Try to make it expected that each of you brings up your own money concerns.",
+  "why": "'doing all the raising' of what"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.XY",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Financial decisions made under time pressure rarely hold. Make sure the person who needs space gets it, even if it delays the decision.",
+  "proposed": "Financial decisions made under time pressure rarely hold. It is fine for a decision to wait, so make sure whichever of you needs time to think gets that time.",
+  "why": "'the person', 'gets it'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.XZ",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Financial transparency requires deliberate effort in a pairing like yours, since neither of you naturally pushes the other to open up. Schedule it.",
+  "proposed": "When you are both guarded, being open about money takes deliberate effort, since neither of you naturally pushes the other to open up. Try to schedule a regular time to talk through your finances together.",
+  "why": "'Schedule it'; 'a pairing like yours'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.financial.YZ",
+  "where": "Expectations financial category page, 'A tip for {you} and {partner}' tile",
+  "current": "Money conversations can easily get deferred indefinitely. Set a regular, calm moment for financial check-ins, not after a tension-filled moment, but on a neutral calendar day.",
+  "proposed": "Money conversations can easily get put off indefinitely. Try to set a regular, calm time to talk about money, on an ordinary day rather than right after a tense moment.",
+  "why": "'financial check-ins' vague"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.career.YY",
+  "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
+  "current": "Career sacrifice is one of the harder things to name when you don't want to seem demanding. Know that naming it is an act of care, not selfishness, the person carrying more deserves to have it acknowledged.",
+  "proposed": "Career sacrifice can be hard to say out loud when you don't want to seem demanding. Telling your partner what you have given up is an act of care, not selfishness. Whichever of you is giving up more deserves to have that sacrifice acknowledged.",
+  "why": "'naming it', 'carrying more', 'have it'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.career.ZZ",
+  "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
+  "current": "Career imbalances in couples like yours can go entirely unspoken until they've built significant resentment. Check in explicitly about whose career is getting prioritized, and whether that feels fair to both.",
+  "proposed": "An imbalance between your careers can go unspoken until it has built real resentment. Try to ask each other directly whose career is getting priority right now, and whether that feels fair to both of you.",
+  "why": "'couples like yours'; 'check in'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.career.WX",
+  "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
+  "current": "Career decisions with long-term implications need both of you fully present. Don't let the faster processor set the pace before the other has had time to think.",
+  "proposed": "Career decisions with long-term consequences need both of you fully present. Try not to let whichever of you decides faster set the pace before your partner has had time to think.",
+  "why": "'the faster processor' is jargon"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.career.WZ",
+  "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
+  "current": "Career concerns are exactly the kind of thing the quieter partner may be carrying without raising. Build an expectation that career check-ins happen on both sides.",
+  "proposed": "The more private one of you may be carrying career concerns without raising them. Try to make it expected that you each ask the other about career concerns.",
+  "why": "'quieter partner', 'may', 'check-ins on both sides'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.career.XY",
+  "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
+  "current": "Career decisions are rarely truly urgent, give the person who processes slower the time they need. A decision made under pressure tends to not hold.",
+  "proposed": "Career decisions are rarely truly urgent, so it is fine to give whichever of you takes longer to think the time they need. A decision made under pressure tends not to hold.",
+  "why": "'the person who processes slower'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.career.XZ",
+  "where": "Expectations career category page, 'A tip for {you} and {partner}' tile",
+  "current": "Career conversations require deliberate effort in a pairing like yours because neither of you will naturally push the topic. Build in a regular 'where are we on career stuff?', once a quarter is enough.",
+  "proposed": "When you are both guarded, career conversations take deliberate effort, because neither of you will naturally bring up careers. Try to ask each other once a quarter: where are we each with our careers?",
+  "why": "'career stuff'; 'a pairing like yours'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.WW",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "The risk is that naming it starts to feel like scorekeeping. Frame it as awareness, not accounting.",
+  "proposed": "Pointing out the emotional labor each of you does can start to feel like scorekeeping. Try to point it out so you stay aware of each other, rather than to keep score.",
+  "why": "'it' has no referent at all"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.XX",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "Emotional labor in a pairing like yours can go entirely unremarked, since neither of you naturally points to it. Name it. The person carrying more needs it acknowledged.",
+  "proposed": "When you are both guarded, emotional labor can go unnoticed, since neither of you naturally points to it. Try to say out loud what emotional labor each of you is doing. Whichever of you carries more needs that work acknowledged.",
+  "why": "'Name it', 'needs it acknowledged'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.YY",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "The invisible labor in your relationship is probably significant on both sides. The work is both carrying the emotional load and making sure the other person sees it too.",
+  "proposed": "You each carry emotional labor that can be hard for your partner to see. Try to keep carrying your share, and to make sure your partner sees what you carry.",
+  "why": "hedge 'probably'; 'the work', 'sees it'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.ZZ",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "Emotional labor is probably distributed in your relationship in ways that neither of you has fully mapped. It can accumulate invisibly. Make a habit of asking: 'what are you managing right now that I might not know about?'",
+  "proposed": "Neither of you may have fully mapped how the emotional labor in your relationship is split, so that labor can build up without either of you seeing it. Try to make a habit of asking: 'what are you managing right now that I may not know about?'",
+  "why": "hedge 'probably'; 'It can accumulate'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.WX",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "Emotional labor that goes unspoken is still labor. The quieter partner may be carrying more than they say. Build a norm where both of you name what you're managing.",
+  "proposed": "Emotional labor that goes unspoken is still labor. The more guarded one of you may be carrying more than they say. Try to make it normal for each of you to say what you're keeping track of for the two of you.",
+  "why": "'quieter partner', 'may', 'name what you're managing'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.WY",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "Emotional labor conversations can feel premature for one partner and overdue for the other. Pick a neutral time, not when one person is already drained, to check in about what each of you is carrying.",
+  "proposed": "Conversations about emotional labor can feel too early for one of you and overdue for the other. Try to pick a neutral time, not when one of you is already drained, to ask each other what you are each carrying.",
+  "why": "'check in about what'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.WZ",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "Emotional labor is exactly the kind of thing that the more private partner absorbs silently. Build an expectation that both people name what they're tracking and carrying.",
+  "proposed": "The more private one of you tends to take on emotional labor silently. Try to make it expected that you each say out loud what you're keeping track of and carrying for the two of you.",
+  "why": "'the more private partner', 'name what'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.XY",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "Emotional labor conversations can feel charged. Don't rush the one who needs space, the conversation is more useful when both of you are actually present.",
+  "proposed": "Conversations about emotional labor can feel charged. Try not to rush whichever of you needs time to think, because the conversation is more useful when you are both fully present.",
+  "why": "'the one who needs space'; comma splice"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.XZ",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "Emotional labor is particularly invisible in pairings like yours. It's being done, often a lot of it, by one or both of you, without being named. Make it a practice to name it, even briefly.",
+  "proposed": "When you are both guarded, emotional labor is especially hard to see. One or both of you is usually doing a lot of it without saying so. Try to make a habit of saying out loud the emotional labor you are doing, even briefly.",
+  "why": "'name it'; 'pairings like yours'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.emotional.YZ",
+  "where": "Expectations emotional category page, 'A tip for {you} and {partner}' tile",
+  "current": "Emotional labor conversations can be repeatedly deferred in a pairing like yours. Set a recurring, calm check-in, not a big conversation, just a brief: 'what are you carrying right now?'",
+  "proposed": "Conversations about emotional labor can be put off again and again. Try to set a recurring, calm moment to ask each other one short question: 'what are you carrying right now?'",
+  "why": "'a pairing like yours'; 'check-in'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.life.XX",
+  "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
+  "current": "You may each have more formed views on life and values questions than the other knows about. Make space to share your position and the reasoning underneath it. It changes the conversation.",
+  "proposed": "Each of you may hold more settled views on life and values than your partner knows about. Try to tell each other where you stand and why. Hearing the reasoning behind each other's views can change the conversation.",
+  "why": "'may'; 'make space'; 'It changes'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.life.YY",
+  "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
+  "current": "Life and values disagreements can carry real weight. Know that diverging on some of these questions is normal, and not a sign you're wrong for each other. What matters is how you hold the difference.",
+  "proposed": "Disagreements about life and values can carry real weight. It is normal to differ on some of these questions, and it is not a sign you're wrong for each other. What matters is how you handle the places where you differ.",
+  "why": "'these questions'; 'hold the difference'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.life.ZZ",
+  "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
+  "current": "Big-picture questions about life and values can stay entirely internalized in a pairing like yours. Make a deliberate practice of sharing your current thinking on these topics, not to resolve them, but to stay current with each other.",
+  "proposed": "Big questions about life and values can stay entirely in your own heads. Try to make a habit of telling each other your current thinking on life and values, not to settle anything, but to stay up to date with each other.",
+  "why": "'a pairing like yours'; 'these topics'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.life.WX",
+  "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
+  "current": "Life and values conversations benefit from both people having time to think before sharing. Don't let the faster processor carry more of the conversation than the other person is ready for.",
+  "proposed": "Life and values conversations go better when you both have time to think before sharing. Try not to let whichever of you responds faster carry more of the conversation than your partner is ready for.",
+  "why": "'the faster processor'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.life.WY",
+  "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
+  "current": "Life questions, children, location, faith, shouldn't be decided when one person isn't fully ready to engage. Wait for both.",
+  "proposed": "Life questions like children, location and faith shouldn't be decided when one of you isn't fully ready. It is completely fine to wait until you are both ready to decide.",
+  "why": "'Wait for both' vague"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.life.XY",
+  "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
+  "current": "For life questions with real implications, the person who processes more slowly needs time, even if it delays the decision. A premature decision on big things tends to create pressure later.",
+  "proposed": "For big life questions, whichever of you takes longer to think needs that time, even if it delays the decision. A rushed decision on a big question tends to create pressure later.",
+  "why": "'the person who processes', 'big things'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.life.XZ",
+  "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
+  "current": "Life and values alignment can be assumed rather than actively explored in pairings like yours. Don't let the stability of your relationship mean you stop checking in on where each of you is with the big questions.",
+  "proposed": "When you are both guarded, it is easy to assume you agree on life and values rather than actually talking about them. Even when your relationship feels steady, try to keep asking where each of you stands on the big questions.",
+  "why": "'pairings like yours'; 'the big questions'"
+ },
+ {
+  "file": "api/_lib/expectation-starters.js",
+  "key": "EXP_CAT_STARTERS.life.YZ",
+  "where": "Expectations life category page, 'A tip for {you} and {partner}' tile",
+  "current": "Life and values conversations can be deferred indefinitely when both of you are comfortable waiting. Set a specific, recurring time to revisit where you each are, not when something forces the conversation.",
+  "proposed": "Life and values conversations can be put off indefinitely when you are both comfortable waiting. Try to set a recurring time to revisit where you each stand, rather than waiting for something to force the conversation.",
+  "why": "'where you each are'; 'something'"
+ },
+ {
+  "file": "api/_lib/category-intros.js",
+  "key": "CATEGORY_INTRO.career",
+  "where": "Career category page tip tile (when couple type unknown)",
+  "current": "How you think about work, ambition, and sacrifice for each other's careers will evolve. These conversations lay groundwork before the hard moments arrive.",
+  "proposed": "How you think about work, ambition, and sacrifice for each other's careers will change over time. Talking about your careers now prepares you for the harder career decisions ahead.",
+  "why": "'These conversations', 'the hard moments'"
+ },
+ {
+  "file": "api/_lib/category-intros.js",
+  "key": "CATEGORY_INTRO.emotional",
+  "where": "Emotional labor category page tip tile (when couple type unknown)",
+  "current": "The invisible work of a relationship, tracking, anticipating, initiating, is the category most couples never name. Naming it changes how it lands.",
+  "proposed": "The invisible work of a relationship, like tracking, anticipating and initiating, is the work most couples never talk about. Saying out loud who does that work can change how it is received.",
+  "why": "'Naming it changes how it lands'"
+ },
+ {
+  "file": "api/_lib/expectations.js",
+  "key": "childhoodWord: v === 'a' fallback",
+  "where": "Expectations rows, 'Experienced' column, when the person named no first adult",
+  "current": "One of them",
+  "proposed": "One adult",
+  "why": "'them' unnamed"
+ },
+ {
+  "file": "api/_lib/expectations.js",
+  "key": "childhoodWord: v === 'b' fallback",
+  "where": "Expectations rows, 'Experienced' column, when the person named no second adult",
+  "current": "The other",
+  "proposed": "The other adult",
+  "why": "'other' what"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "TALK_ABOUT_IT",
+  "where": "Label above every Physical Intimacy prompt, both surfaces",
+  "current": "Talk about it",
+  "proposed": "Ask each other",
+  "why": "core 'it'; heading above a question"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_ALL_ALIGNED",
+  "where": "Under 'Conversations worth having' when every dimension is aligned",
+  "current": "You line up across the board. These are still worth saying out loud.",
+  "proposed": "You line up on all six aspects. The conversations below are still worth having out loud.",
+  "why": "'These' unnamed"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.frequency.aligned",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "You want intimacy about as often as each other. That is one less thing to negotiate. Keep saying it out loud anyway. Frequency that goes unspoken tends to drift.",
+  "proposed": "You want intimacy about as often as each other, so frequency is one less thing to negotiate. Try to keep telling each other how often you want intimacy anyway, because frequency that goes unspoken tends to drift.",
+  "why": "'saying it'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.frequency.discuss",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Your ideal frequencies sit a little apart. This is the most common gap there is. What matters is naming it early, before it turns into a tally.",
+  "proposed": "When it comes to wanting intimacy more often or less often, you are a little apart. This is the most common difference couples have. Try to tell each other early how often you each want intimacy, before it turns into keeping score.",
+  "why": "'sit a little apart'; 'naming it'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.frequency.unspoken",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Neither of you put a number to this. That is fine. Frequency is the easiest of these to talk about, because it is concrete.",
+  "proposed": "Neither of you put a number to how often you want intimacy, and that is fine. Frequency is the easiest of the six aspects to talk about, because it is concrete.",
+  "why": "'this', 'these'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.initiating.discuss",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Your expectations about initiating sit a little apart. Usually one person assumes a balance the other does not. Name it before it becomes a pattern.",
+  "proposed": "When it comes to leading or being pursued, you are a little apart. Usually one of you assumes a balance your partner does not. Try to tell each other who you expect to initiate, before the mismatch becomes a pattern.",
+  "why": "'sit a little apart'; 'Name it'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.initiating.different",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "You see initiating differently. If you both expect to be pursued, or you both expect to lead, that shows up fast. Talk about who reaches, and what a no feels like to give and to get.",
+  "proposed": "You see initiating differently. If you both expect to be pursued, or you both expect to lead, the mismatch can show up quickly. Try to talk about who reaches for whom, and how it feels to give and to get a no.",
+  "why": "'that shows up'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.initiating.unspoken",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Neither of you said who initiates. The person who reaches and the person who waits often carry very different feelings about the same moment. Worth getting to when you can.",
+  "proposed": "Neither of you said who initiates. The person who reaches and the person who waits can have very different feelings about the same moment. Try to talk about who initiates when you can.",
+  "why": "'Worth getting to' fragment, no action"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.comfort.aligned",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "You are at a similar place with feeling safe, and you ask for similar things to get there. That shared baseline holds everything else up. Keep checking in. Comfort moves with stress and time.",
+  "proposed": "You are at a similar place with feeling safe, and you ask for similar things to get there. That shared starting point supports everything else. Try to keep asking each other what helps you feel safe, because comfort can change with stress and time.",
+  "why": "'Keep checking in'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.comfort.discuss",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Your comfort levels sit a little apart. One of you may need more to feel safe than the other expects. That is not a problem to fix. It is information to use.",
+  "proposed": "When it comes to needing time or feeling at ease quickly, you are a little apart. One of you may need more to feel safe than your partner expects. That difference is not a problem to fix, but something useful to know about each other.",
+  "why": "'sit a little apart'; 'may'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.comfort.unspoken",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Neither of you spoke to this. It is the most personal of the six. When you are ready, start with what helps each of you feel safe, not what does not.",
+  "proposed": "Neither of you answered the questions about comfort and safety. Comfort is the most personal of the six aspects. When you are ready, try to start with what helps each of you feel safe, rather than what does not.",
+  "why": "'this', 'It'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.communication.discuss",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Your styles sit a little apart. One of you wants to talk it through. The other would rather not pick it apart. Both work. The gap only hurts if it stays unnamed.",
+  "proposed": "When it comes to talking intimacy through or showing what you want, you have slightly different views. One of you wants to talk it through, and the other would rather not analyze it. Both work. The difference only hurts when neither of you mentions it.",
+  "why": "'styles sit a little apart'; 'talk it through'; 'the gap'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.communication.different",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "You talk about intimacy in different ways. If one of you needs to say it and the other needs to not, you can miss each other completely. Agree on how you will signal what you want when words are hard.",
+  "proposed": "You talk about intimacy in different ways. If one of you needs to say what you want out loud and the other would rather not, you can miss each other completely. Try to agree on how you will signal what you want when words are hard.",
+  "why": "'say it'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.communication.unspoken",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Neither of you answered here. That is its own quiet answer. Start small: agree on how you will tell each other when something is or is not working.",
+  "proposed": "Neither of you answered the questions about talking about intimacy, and that can say something too. Try to start small by agreeing on how you will tell each other when something is or is not working.",
+  "why": "'here'; 'something'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.adventure.discuss",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Your appetites for novelty sit a little apart. One of you leans toward trying things. The other leans toward what already works. Easy to handle once it is named. Easy to misread as rejection when it is not.",
+  "proposed": "When it comes to the familiar or something new, you have slightly different views. One of you leans toward trying new things, and the other leans toward what already works. That difference is easy to handle once you say it out loud, but it can be misread as rejection.",
+  "why": "'sit a little apart'; 'it is named' fragments"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.adventure.different",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "You want very different amounts of novelty. The adventurous one can read caution as disinterest. The one who likes the familiar can read appetite as pressure. Both readings are usually wrong. Talk about the why under it.",
+  "proposed": "You want very different amounts of novelty. The more adventurous one of you can read caution as disinterest, and the one who likes the familiar can read interest as pressure. Both readings may be wrong. Try to talk about why each of you wants what you want.",
+  "why": "'the why under it'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.adventure.unspoken",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Neither of you spoke to this. It is lighter than it looks. Most of it is about how much each of you wants to be asked.",
+  "proposed": "Neither of you answered the questions about trying new things. This topic may be lighter than it looks, and mostly comes down to how much each of you wants to be asked first.",
+  "why": "'this', 'It', 'Most of it'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.meaning.discuss",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "What intimacy is for sits a little apart between you. One of you leans toward closeness. The other toward play or release. Neither is the right reason. Knowing the difference keeps you from misreading each other.",
+  "proposed": "When it comes to closeness or play and release, you have slightly different views on what intimacy is for. One of you leans toward closeness, and the other leans toward play or release. Neither is the right reason. Knowing the difference can keep you from misreading each other.",
+  "why": "'sits a little apart'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.meaning.different",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Intimacy means different things to each of you. This is the gap that drives the most quiet friction. You can be close and still feel like you missed each other. Naming it changes how those moments land.",
+  "proposed": "Intimacy means different things to each of you. This difference tends to cause the most quiet friction, because you can be close and still feel like you missed each other. Telling each other what intimacy is for can change how those moments feel.",
+  "why": "'Naming it'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.meaning.unspoken",
+  "where": "Physical Intimacy dimension page, 'what this means' body",
+  "current": "Neither of you named what intimacy is for you. It is the deepest of the six, and often the most clarifying. The answer is rarely what either partner assumes.",
+  "proposed": "Neither of you said what intimacy is for you. That question is the deepest of the six, and often the most clarifying, because the answer may not be what either of you assumes.",
+  "why": "'It is the deepest'"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.frequency.oneSkipped.lead",
+  "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
+  "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
+  "proposed": "{SKIPPER} chose to skip the questions about how often you want intimacy. Here is a question you can ask each other when the time feels right.",
+  "why": "'this one', 'come at it'; same string in all six, replace by key"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.initiating.oneSkipped.lead",
+  "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
+  "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
+  "proposed": "{SKIPPER} chose to skip the questions about who initiates. Here is a question you can ask each other when the time feels right.",
+  "why": "'this one', 'come at it'; same string in all six, replace by key"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.comfort.oneSkipped.lead",
+  "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
+  "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
+  "proposed": "{SKIPPER} chose to skip the questions about comfort and safety. Here is a question you can ask each other when the time feels right.",
+  "why": "'this one', 'come at it'; same string in all six, replace by key"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.communication.oneSkipped.lead",
+  "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
+  "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
+  "proposed": "{SKIPPER} chose to skip the questions about talking about intimacy. Here is a question you can ask each other when the time feels right.",
+  "why": "'this one', 'come at it'; same string in all six, replace by key"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.adventure.oneSkipped.lead",
+  "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
+  "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
+  "proposed": "{SKIPPER} chose to skip the questions about trying new things. Here is a question you can ask each other when the time feels right.",
+  "why": "'this one', 'come at it'; same string in all six, replace by key"
+ },
+ {
+  "file": "api/_intimacy-results-prose.js",
+  "key": "INTIMACY_RESULTS_PROSE.meaning.oneSkipped.lead",
+  "where": "Physical Intimacy dimension page when one partner skipped the whole dimension",
+  "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right.",
+  "proposed": "{SKIPPER} chose to skip the questions about what intimacy is for. Here is a question you can ask each other when the time feels right.",
+  "why": "'this one', 'come at it'; same string in all six, replace by key"
+ },
+ {
+  "file": "api/_lib/intimacy-framing.js",
+  "key": "FRAMING.note",
+  "where": "Physical Intimacy exercise, framing question note",
+  "current": "This sets the framing for both of you. Whoever starts first decides it for the couple.",
+  "proposed": "Your answer decides which questions both of you are asked. Whoever starts first decides the questions for the couple.",
+  "why": "'This', 'the framing', 'it'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.criticism.0",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "You do not express criticism. Worth naming to {partner} as something you already do well.",
+  "proposed": "You do not express criticism. Try to tell {partner} that this is something you already do well.",
+  "why": "'Worth naming' what, fragment"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.criticism.1",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Rare, and you notice it. Keep naming the specific behavior instead of the trait: \"when plans change last minute\" instead of \"you are careless.\"",
+  "proposed": "Criticism is rare for you, and you notice it when it happens. Try to keep naming the specific behavior rather than the trait: \"when plans change last minute\" instead of \"you are careless.\"",
+  "why": "'Rare' has no subject"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.criticism.2",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Criticism appears enough to matter. The swap is small: describe the thing that happened, not the kind of person they are. One sentence is usually the difference.",
+  "proposed": "Criticism shows up enough to matter. The change is small: describe what {partner} did, rather than the kind of person {partner} is. One sentence can usually make the difference.",
+  "why": "'the thing', 'they'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.criticism.3",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "This one is worth real attention. Before raising something, try writing the specific behavior down first. Character language tends to arrive when the actual complaint has not been named yet.",
+  "proposed": "Criticism is worth real attention. Before raising a complaint, try writing the specific behavior down first. Criticism of character tends to come up when the actual complaint has not been said yet.",
+  "why": "'This one', 'something'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.contempt.0",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "You do not show contempt. This is the pattern that matters most, so this is genuinely worth knowing.",
+  "proposed": "You do not show contempt. Contempt is the pattern that matters most, so this is good to know.",
+  "why": "'this' twice"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.contempt.1",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Rare. Sarcasm under pressure is common, and a quick check-in (\"was that sharper than I meant?\") keeps it from settling in.",
+  "proposed": "Contempt is rare for you. Sarcasm under pressure is common, and a quick check-in (\"was that sharper than I meant?\") can keep sarcasm from settling in.",
+  "why": "'Rare' no subject; 'it'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.contempt.2",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Worth taking seriously, more than the others at the same rate. Contempt tends to grow quietly. Naming it out loud to {partner} once, outside an argument, does more than trying to catch it mid-conflict.",
+  "proposed": "Contempt is worth taking seriously, more than the other three patterns at the same rate, because it tends to grow quietly. Telling {partner} once, outside an argument, that you have noticed contempt in how you speak does more than trying to catch it mid-conflict.",
+  "why": "no subject; 'the others'; 'Naming it'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.contempt.3",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "This is the one to work on first. Not because you are doing something unforgivable, but because it is the pattern that does the most damage over time and the one that responds best to being named.",
+  "proposed": "Contempt is the pattern to work on first. This is not because you are doing something unforgivable, but because contempt does the most damage over time and responds best to being named out loud.",
+  "why": "'This is the one'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.defensiveness.1",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Rare. You are already handling this well. Keep noticing what lets you stay open.",
+  "proposed": "Defensiveness is rare for you, so you already take complaints well. Try to keep noticing what helps you stay open when {partner} raises a concern.",
+  "why": "'Rare', 'this'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.defensiveness.2",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Defensiveness appears occasionally. Before responding, try reflecting back what you heard first. Even one sentence changes the pace, and it costs nothing to be wrong about it.",
+  "proposed": "Defensiveness shows up occasionally. Before responding to a complaint, try reflecting back what you heard first. Even one sentence changes the pace of the conversation, and it is completely fine if your reflection is not quite right.",
+  "why": "'wrong about it'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.defensiveness.3",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Worth attention. Defensiveness usually means the complaint landed as an attack. Saying \"give me a second, I want to hear that properly\" buys the pause where the reflex would have gone.",
+  "proposed": "Defensiveness is worth attention. It may mean a complaint felt like an attack. Saying \"give me a second, I want to hear that properly\" gives you a pause before you react.",
+  "why": "'Worth attention' no subject"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.stonewalling.1",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Rare. When you feel the pull to check out, naming it (\"I need five minutes\") keeps it from feeling like an exit.",
+  "proposed": "Shutting down is rare for you. When you feel the urge to check out, try saying so (\"I need five minutes\"), so the pause does not feel like you are leaving the conversation.",
+  "why": "'naming it', 'keeps it'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_COPY.stonewalling.3",
+  "where": "Conflict Patterns, horseman tile note at this frequency (private)",
+  "current": "Worth attention, and usually a sign of being overwhelmed rather than uninterested. Agreeing a pause signal with {partner} in advance means shutting down does not have to be the only exit.",
+  "proposed": "Stonewalling is worth attention, and it may be a sign of feeling overwhelmed rather than uninterested. Try to agree on a pause signal with {partner} in advance, so shutting down is not the only way out of a hard conversation.",
+  "why": "no subject"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_ACTIONS.contempt.title",
+  "where": "Conflict action plan item title (private)",
+  "current": "Acknowledge it once, outside an argument",
+  "proposed": "Acknowledge your contempt once, outside an argument",
+  "why": "core 'it'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_ACTIONS.contempt.body",
+  "where": "Conflict action plan item body (private)",
+  "current": "Pay attention to micro-aggressions and tell {partner} you noticed it, but not mid-conflict and not as an apology. Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first.",
+  "proposed": "Pay attention to your own micro-aggressions, like sarcasm or eye-rolling, and tell {partner} that you noticed them. Try to do this outside of a conflict, and not as an apology. Contempt grows quietly, but loses most of its power when the person showing it names it out loud, and almost none when the other person points it out first.",
+  "why": "'noticed it' (micro-aggressions plural, unspecified)"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_ACTIONS.defensiveness.body",
+  "where": "Conflict action plan item body (private)",
+  "current": "When {partner} raises something, say what you heard before you say anything else. You are not agreeing, only confirming that you are listening. This changes the pace of the discussion and can correct misunderstandings.",
+  "proposed": "When {partner} raises a concern, try to say what you heard before you say anything else. You are not agreeing, only confirming that you are listening. Reflecting back changes the pace of the discussion and can clear up misunderstandings.",
+  "why": "'something', 'This'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_NOTES.contempt.body",
+  "where": "Conflict 'One thing to keep in mind' note at Rarely",
+  "current": "Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first.",
+  "proposed": "Contempt grows quietly, but loses most of its power when the person showing it names it out loud, and almost none when the other person points it out first.",
+  "why": "'the person doing it'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "PATTERN_NOTES.stonewalling.body",
+  "where": "Conflict 'One thing to keep in mind' note at Rarely",
+  "current": "When your partner is engaging, stonewalling from you can communicate unwillingness to repair.",
+  "proposed": "When your partner is trying to talk a problem through, stonewalling from you can come across as not wanting to repair.",
+  "why": "'engaging' in what"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "NO_ACTION_NEEDED.title",
+  "where": "Conflict at a glance, action plan when nothing is flagged",
+  "current": "Nothing here needs work",
+  "proposed": "None of your patterns need work",
+  "why": "'here'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "NO_ACTION_NEEDED.body",
+  "where": "Conflict at a glance, action plan when nothing is flagged",
+  "current": "None of the four patterns come up often for you. That is worth saying out loud to {partner}, because it is the kind of thing couples rarely tell each other.",
+  "proposed": "None of the four patterns come up often for you. Try to tell {partner}, because couples rarely share good news like this with each other.",
+  "why": "'That', 'it is the kind of thing'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "CONFLICT_RESULTS_COPY.allClear",
+  "where": "Conflict patterns page, all-clear line",
+  "current": "None of the four patterns come up often for you. That is worth knowing, and worth saying to {partner}.",
+  "proposed": "None of the four patterns come up often for you, which is good to know. Try to tell {partner} that.",
+  "why": "'That' unnamed"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "OPENING_CHIPS.c1.B",
+  "where": "Conflict snapshot chip, row 'When you notice something frustrating'",
+  "current": "Takes time before bringing it up",
+  "proposed": "Takes time before raising a frustration",
+  "why": "'it'"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "OPENING_CHIPS.c_topic.B",
+  "where": "Conflict snapshot chip, row 'When the scope of the argument changes'",
+  "current": "Notices the older pattern",
+  "proposed": "Connects the argument to past ones",
+  "why": "'the older pattern' unnamed"
+ },
+ {
+  "file": "api/_conflict-results-prose.js",
+  "key": "RESET_FORMS['Writing it down']",
+  "where": "Conflict 'To help reset mid-conflict' answer",
+  "current": "Writes it down",
+  "proposed": "Writes down what they feel",
+  "why": "'it' unnamed"
+ }
 ]

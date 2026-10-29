@@ -355,7 +355,7 @@ export function SaveToJournal({ quote, onClose }: { quote: string; onClose: (sav
             }}
           />
           {failed ? (
-            <Text style={{ ...Type.small, color: c.accent }}>{SAVE_FAILED}</Text>
+            <Text style={{ ...Type.small, color: c.accent }}>{JOURNAL_SAVE_FAILED}</Text>
           ) : null}
           <Pressable
             accessibilityRole="button"
@@ -899,14 +899,17 @@ const RAIL_INSET = 120;
  */
 const PLACEHOLDER = 'Write about today';
 const SEARCH = 'Search your entries';
-const NO_MATCH = 'Nothing here matches that.';
-const EMPTY = 'Nothing here yet. The first entry is usually the hardest one.';
+const NO_MATCH = 'No journal entries match your search.';
+const EMPTY = 'No journal entries yet. The first entry is usually the hardest one to write.';
 const FAILED = 'Your journal could not be loaded. Pull down to try again.';
 /**
  * The four strings on the save sheet. Placeholders in Ellie's house style,
  * named here so they are findable, and listed in TASKS.md as part of C4.
  */
-const SAVE_TITLE = 'Keep this in your journal';
+const SAVE_TITLE = 'Keep this insight in your journal';
+/* The journal's own failure line (A187). Every other save in the app says
+   SAVE_FAILED; this one names what did not save, in Ellie's words. */
+const JOURNAL_SAVE_FAILED = 'Your insight did not save to your journal. Try again in a moment.';
 const SAVE_PLACEHOLDER = 'Add commentary';
 const SAVE_ACTION = 'Save';
 

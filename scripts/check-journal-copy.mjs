@@ -100,7 +100,7 @@ const SAVE_PAIRS = {
  * home: check-app-copy-mirrors reported two of the three the moment it was
  * added to JOURNAL_COPY. One constant now, in attune-app/src/constants.
  */
-const SAVE_FAILED_PAIR = { saveFailed: 'SAVE_FAILED' };
+const SAVE_FAILED_PAIR = { saveFailed: 'JOURNAL_SAVE_FAILED' };
 
 const fails = [];
 const app = readFileSync(APP, 'utf8');
@@ -153,9 +153,9 @@ const journalApp = app;
 
 for (const [map, pairs, label, src, where] of [
   [JOURNAL_COPY, SAVE_PAIRS, 'JOURNAL_COPY', journalApp, 'attune-app/src/components/journal.tsx'],
-  [JOURNAL_COPY, SAVE_FAILED_PAIR, 'JOURNAL_COPY',
-    readFileSync(`${ROOT}attune-app/src/constants/save-copy.ts`, 'utf8'),
-    'attune-app/src/constants/save-copy.ts'],
+  /* The journal's own failure line since A187, when Ellie gave it words of its
+     own; SAVE_FAILED stays the generic line every other save uses. */
+  [JOURNAL_COPY, SAVE_FAILED_PAIR, 'JOURNAL_COPY', journalApp, 'attune-app/src/components/journal.tsx'],
   [NOTES_COPY, NOTES_PAIRS, 'NOTES_COPY', notesApp, 'attune-app/src/app/notes.tsx'],
   [NOTES_COPY, WORD_PAIRS, 'NOTES_COPY',
     readFileSync(`${ROOT}attune-app/src/components/word-entry.tsx`, 'utf8'),

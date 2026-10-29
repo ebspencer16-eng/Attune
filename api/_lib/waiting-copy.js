@@ -32,7 +32,7 @@ export const WAITING = {
   BEFORE_PURCHASE: 'Create your account to get started. Results unlock when both of you complete exercises.',
   DASHBOARD: 'Results unlock once both of you complete your exercises.',
   EXERCISE_FOOTER: 'Your answers are saved, results will open once you both complete all exercises.',
-  LOCKED_BY_YOU: 'Finish your exercises to open this.',
+  LOCKED_BY_YOU: 'Finish your exercises to open these results.',
   LOCKED_BY_THEM: 'This section will unlock once your partner completes their exercises.',
 };
 

@@ -95,8 +95,8 @@ export function childhoodWord(value, adults) {
   const v = String(value ?? '').trim();
   if (!v) return null;
   const who = adults || {};
-  if (v === 'a') return who.a || 'One of them';
-  if (v === 'b') return who.b || 'The other';
+  if (v === 'a') return who.a || 'One adult';
+  if (v === 'b') return who.b || 'The other adult';
   if (v === 'both') return 'Both';
   if (v === 'na') return null;
   /* The one-adult path answers whether it happened at all. */

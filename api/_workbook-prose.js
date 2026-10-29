@@ -34,39 +34,39 @@
 export const DIM_CONTENT = {
   "energy": {
     "measures": "How each of you recovers, socially, emotionally, physically. Inward: solitude recharges. Outward: connection recharges. This shapes your weekend default, how you decompress, and what a good evening looks like.",
-    "closeText": "{U} and {P} recover in similar ways. This quietly removes friction, you're rarely on opposite ends after a hard week.",
-    "gapText": "One of you recharges through solitude; the other through connection. After a long week, you're in very different places. Without understanding, the inward partner's need for quiet can read as withdrawal, and the outward partner's reach for people can feel exhausting.",
+    "closeText": "{U} and {P} recover in similar ways, which removes a lot of friction. After a hard week, you rarely find one of you wanting quiet while the other wants company.",
+    "gapText": "One of you recharges through solitude; the other through connection. After a long week, you're in very different places. Without understanding how each of you recharges, the inward partner's need for quiet can read as withdrawal, and the outward partner's reach for people can feel exhausting.",
     "prompts": [
       "After a big social event, what does each of you need in the next 24 hours?",
       "When does one of you feel most energized, and when does the other feel most depleted?",
       "Is your current daily rhythm giving each person the kind of recovery they need?",
       "Is there anything either of you has been asking of the other that runs against their recharge style?"
     ],
-    "thisWeek": "Pick one upcoming situation likely to produce different energy states, a party, a family visit, a busy week. Before it happens, name what you'll each need afterward. Then check in."
+    "thisWeek": "Pick one upcoming situation likely to produce different energy states, a party, a family visit, a busy week. Before it happens, tell each other what you will each need afterward, whether that is time alone or time with people. Afterward, ask each other whether you got what you needed."
   },
   "expression": {
     "measures": "How freely each of you shares what's going on internally, not the content of feelings, but how naturally they surface. Expressive partners wear their emotional state; guarded partners process privately and share selectively.",
-    "closeText": "{U} and {P} are operating in the same register. Neither tends to feel overwhelmed by too much sharing or starved by too little.",
+    "closeText": "{U} and {P} tend to share feelings in similar ways, whether you both share them as they come or both hold them until you have sorted through them. Neither tends to feel overwhelmed by too much sharing or starved by too little.",
     "gapText": "One of you shares as feelings arise; the other waits until they've processed. The expressive partner may experience the guarded one's silence as emotional unavailability. The guarded partner may experience the expressive one's openness as pressure.",
     "prompts": [
       "When something bothers you, at what point do you typically share it, immediately, after processing, or only when asked?",
-      "When one of you is struggling, does the other know? Or is it usually carried privately?",
+      "When one of you is struggling, does the other know? Or does the struggle usually stay private?",
       "Is there a version of your emotional experience you share, and a version you hold back?",
       "What would feel different if either of you shared more, or less?"
     ],
-    "thisWeek": "Each of you shares one thing you'd normally hold back or let pass, not something big, just something that's been sitting there. Notice what happens."
+    "thisWeek": "Each of you shares one feeling you would normally hold back or let pass. The feeling does not need to be big, just something that has been on your mind. Notice how your partner responds."
   },
   "reassurance": {
-    "measures": "How each of you stays sure of where you stand. Voiced: hearing it said keeps you close. Assumed: security is the baseline and does not need confirming. This shapes what a long quiet stretch means to each of you.",
+    "measures": "How each of you stays sure of where you stand. Voiced: hearing reassurance said out loud helps you feel close. Assumed: security is the baseline and does not need confirming. This shapes what a long quiet stretch means to each of you.",
     "closeText": "{U} and {P} need reassurance in similar amounts. Neither of you is left waiting for a signal the other never thought to send.",
-    "gapText": "One of you needs where you stand said out loud. The other treats it as settled and does not think to say it. The voiced partner can read the quiet as distance. The assumed partner can read the asking as doubt. Neither reading is accurate, and both feel true in the moment.",
+    "gapText": "One of you needs where you stand said out loud. The other treats the relationship as settled and does not think to say so. The voiced partner can read the quiet as distance. The assumed partner can read the asking as doubt. Neither reading is accurate, and both feel true in the moment.",
     "prompts": [
       "When was the last time either of you wanted to hear you were okay and did not say so?",
       "What does a long quiet stretch mean to each of you?",
       "Which words land as reassurance, and which ones feel automatic?",
-      "If each of you set the number, how often would it get said?"
+      "If each of you set the number, how often would you reassure each other out loud?"
     ],
-    "thisWeek": "Once this week, say where you stand out loud without being asked for it. One sentence. Notice how it lands."
+    "thisWeek": "Once this week, try to tell your partner where you stand, out loud and without being asked. One sentence is enough. Notice how it makes your partner feel."
   },
   "needs": {
     "measures": "How directly each partner communicates needs, whether they ask outright or signal indirectly. Direct communicators state needs explicitly. Indirect communicators hint, hope to be noticed, or pull back.",
@@ -75,7 +75,7 @@ export const DIM_CONTENT = {
     "prompts": [
       "Think of the last time you needed something and didn't get it. Did you ask directly, or did you signal?",
       "Is there something you've needed for a while that you haven't said clearly? What's the barrier?",
-      "Do you each know what the other needs right now? Has it been said, or are you guessing?",
+      "Do you each know what the other needs right now? Has that need been said out loud, or are you guessing?",
       "What would make it easier for each of you to ask more directly?"
     ],
     "thisWeek": "Each of you names one thing you need from the other this week, specifically, without softening. \"I need you to ___.\" Notice what it feels like to ask that clearly."
@@ -83,18 +83,18 @@ export const DIM_CONTENT = {
   "bids": {
     "measures": "How reliably each partner notices and responds to small, everyday bids for connection, a comment, a gesture, a look. These micro-moments are the primary currency of sustained intimacy.",
     "closeText": "{U} and {P} both notice and respond naturally to each other's small bids. This is one of the strongest predictors of relationship satisfaction over time.",
-    "gapText": "One partner tends to miss bids, absorbed in tasks, not naturally tracking the relational current. The other tracks them instinctively. Repeated missed bids can feel like dismissal even when none is intended.",
+    "gapText": "One partner tends to miss bids, absorbed in tasks, not naturally noticing the small ways their partner reaches out. The other tracks them instinctively. Repeated missed bids can feel like dismissal even when none is intended.",
     "prompts": [
       "Can you think of a recent moment when one of you reached for connection and the other wasn't available?",
       "Are there ways either of you reaches for the other that get regularly missed, not out of rejection, but out of being absorbed?",
       "What's the smallest thing each of you does that signals you want the other's attention?",
-      "What would it look like to be slightly more tuned in, without it feeling performative?"
+      "What would it look like to notice each other's small bids a bit more, in a way that still feels natural?"
     ],
     "thisWeek": "Once a day this week, when one of you makes a small bid, says something minor, reaches out physically, checks in, the other stops what they're doing and acknowledges it specifically."
   },
   "conflict": {
     "measures": "How each partner responds when something feels wrong, whether the instinct is to engage immediately or need space first. This is about timing, not care.",
-    "closeText": "{U} and {P} move toward resolution with similar timing. This symmetry removes the most common friction point in conflict, the pursuer-withdrawer dynamic.",
+    "closeText": "{U} and {P} move toward resolution with similar timing. Handling conflict in similar ways removes the most common friction point, where one of you pushes to talk while the other pulls back.",
     "gapText": "One of you needs to address things immediately; the other needs space first. If feelings are not voiced, the person who needs resolution reads the other's silence as avoidance. The person who needs space reads the other's urgency as pressure.",
     "prompts": [
       "When something is bothering you, what does your ideal next few hours look like?",
@@ -102,10 +102,10 @@ export const DIM_CONTENT = {
       "Is there a version of \"I need space\" that lands differently than open-ended silence?",
       "What agreement would make the next hard moment go better than the last?"
     ],
-    "thisWeek": "When things are calm, not during conflict, tell each other: \"When I'm upset, what I need first is ___.\" Write it down. Refer to it next time."
+    "thisWeek": "When things are calm, not during conflict, tell each other: \"When I'm upset, what I need first is ___.\" Write both answers down, and read them again the next time you disagree."
   },
   "repair": {
-    "measures": "What each partner needs to feel genuinely repaired after conflict. One end needs explicit verbal acknowledgment. The other can move forward once the warmth is back, without needing the formal exchange.",
+    "measures": "What each partner needs to feel genuinely repaired after conflict. Some people need to hear out loud that things are okay again. Others can move forward once the warmth is back, without needing that conversation.",
     "closeText": "{U} and {P} both know what \"okay again\" feels like and reach it in similar ways. This shortens the distance between conflict and repair.",
     "gapText": "One of you considers things resolved when warmth returns. The other isn't repaired until there's been an explicit conversation. The informal partner often considers things over before the formal partner is ready.",
     "prompts": [
@@ -117,9 +117,9 @@ export const DIM_CONTENT = {
     "thisWeek": "After the next friction moment, however small, check in explicitly: \"Are we actually okay, or are we both just ready to be done?\" Name the difference out loud."
   },
   "listening": {
-    "measures": "How each of you shows you are listening. Reflective: you go quiet and stay with it. Responsive: you engage, ask, reflect back. Both are attention. They just look nothing alike from the outside.",
+    "measures": "How each of you shows you are listening. Reflective: you go quiet and stay with what you heard. Responsive: you engage, ask, reflect back. Both are attention. They just look nothing alike from the outside.",
     "closeText": "{U} and {P} listen in similar ways. This works until one of you needs the other kind of listening, quiet attention or questions and a response. It is completely fine to ask your partner which kind of listening they want when they begin a discussion.",
-    "gapText": "One of you listens by going quiet. The other listens by engaging and drawing it out. The quiet can read as absence. The questions can read as pressure. Neither is what is happening.",
+    "gapText": "One of you listens by going quiet. The other listens by engaging and asking questions. The quiet can feel like absence, and the questions can feel like pressure, but both are ways of paying attention.",
     "prompts": [
       "When you bring something to each other, do you want to be heard, or do you want a response?",
       "Has either of you ever read the other's quiet as not caring, or the other's questions as pushing?",
@@ -130,7 +130,7 @@ export const DIM_CONTENT = {
   },
   "love": {
     "measures": "How each partner most naturally gives and receives affection. Specifically: does verbal expression land most deeply, or does love register more through presence, action, and shared experience?",
-    "closeText": "{U} and {P} express and receive love through compatible channels. When care is expressed in a language the other naturally receives, the signal lands without translation.",
+    "closeText": "{U} and {P} tend to give and receive love in similar ways, whether through words or through actions. When care is expressed in a language the other naturally receives, the signal lands without translation.",
     "gapText": "One of you feels most loved through verbal affirmation; the other through presence, touch, or shared activity. Both may be genuinely expressing love, but in a language the other doesn't fully receive.",
     "prompts": [
       "When did each of you last feel genuinely loved by the other? What was happening?",
@@ -138,11 +138,11 @@ export const DIM_CONTENT = {
       "Is there something you'd like more of that you haven't said clearly?",
       "Do you each know specifically how to make the other feel appreciated?"
     ],
-    "thisWeek": "Each of you asks the other: \"What's one thing I do that makes you feel really loved that I might not realize has that effect?\" Then do more of it."
+    "thisWeek": "Each of you asks the other: \"What's one thing I do that makes you feel really loved that I might not realize has that effect?\" Then try to do more of what your partner names."
   },
   "feedback": {
     "measures": "How comfortably each partner gives and receives direct, honest feedback. Guarded partners tend toward defensiveness. Open partners can engage with critical input without feeling attacked.",
-    "closeText": "{U} and {P} are in a similar place on feedback. This creates a low-friction environment for honest conversations, things that need to be said, get said.",
+    "closeText": "{U} and {P} are similarly comfortable giving and receiving feedback. This creates a low-friction environment for honest conversations, things that need to be said, get said.",
     "gapText": "One of you avoids direct feedback; the other can engage with it. The open partner may feel like things go unsaid for too long. The guarded partner may feel like honest observations come as attacks, even when not intended that way.",
     "prompts": [
       "Is there something either of you does regularly that bothers the other that hasn't been said clearly? What's the barrier?",
@@ -150,7 +150,7 @@ export const DIM_CONTENT = {
       "Can each of you tell the other when something isn't working without it becoming a bigger thing than it needs to be?",
       "What would make honest feedback easier in both directions?"
     ],
-    "thisWeek": "Identify one small thing that bothered you recently that you let go without saying anything. Bring it up briefly, specifically: \"Hey, this thing last week, can I mention it?\" Notice what happens."
+    "thisWeek": "Identify one small thing that bothered you recently that you let go without saying anything. Bring it up briefly, specifically: \"Hey, something from last week has been on my mind. Can I mention it?\" Notice what happens."
   }
 };
 
@@ -158,7 +158,7 @@ export const DIM_CONTENT = {
 export const MOMENTS_W = {
   "hard_workday": {
     "moment": "{U} gets home from a hard day and starts going through things the moment they walk in: the project, the people, the frustration.",
-    "happening": "{U} processes by talking. They're not asking {P} to fix it; they're making sense of the day by hearing themselves say it. Once it's said, most of it's out of their system and they can move on.",
+    "happening": "{U} processes by talking. They're not asking {P} to fix it; they're making sense of the day by hearing themselves say it. Once they have talked through the day, most of the stress is out of their system and they can move on.",
     "not": "Don't problem-solve, don't try to redirect, don't go quiet halfway through.",
     "works": "Listen actively. Reflect back what you heard. Match their energy and ask one or two follow-up questions. The relief comes from being heard, not from being fixed.",
     "phrase": "Tell me more, what was the worst part?"
@@ -172,14 +172,14 @@ export const MOMENTS_W = {
   },
   "during_conflict": {
     "moment": "Tension is rising. {U} is leaning in, wanting to address it now, surface the feelings, talk it through.",
-    "happening": "{U} processes conflict outward. Holding it in feels worse than the conflict itself. They want to engage so the thing can move, not so it can escalate.",
+    "happening": "{U} processes conflict outward. Holding it in feels worse than the conflict itself. They want to engage so the disagreement can move forward, not so it can escalate.",
     "not": "Don't go silent or ask to 'talk later' without a specific time. Open-ended pauses register as withdrawal, not space.",
     "works": "Stay engaged. If you genuinely need a beat, name it with a return time: 'I need 30 minutes, then let's pick this up.' Then come back on time.",
     "phrase": "I want to work this out with you. Give me 20 minutes to think, then I'm in."
   },
   "after_conflict": {
     "moment": "The hard part of the conversation is over. The room has cooled, but {U} is still circling, checking in, looking for closure.",
-    "happening": "For {U}, repair isn't done until it's named. They need to hear that you're okay, that the two of you are okay. Warmth alone reads as 'maybe but not sure.'",
+    "happening": "For {U}, repair isn't finished until someone says out loud that things are okay. They need to hear that you're okay, that the two of you are okay. Warmth alone reads as 'maybe but not sure.'",
     "not": "Don't assume warmth equals resolved. Don't skip the verbal close.",
     "works": "Say it out loud, even if it feels obvious. A short, clear sentence ('we're good') does more than another hour of warmth.",
     "phrase": "We're good. I love you. We worked it out."
@@ -193,7 +193,7 @@ export const MOMENTS_W = {
   },
   "external_stress": {
     "moment": "{U} is dealing with something hard: a work crisis, a family thing, a deadline. They're reaching toward you for support.",
-    "happening": "Under pressure, {U} reaches outward. They're not asking you to fix it; they're asking you to be present in it. Solitude is what makes the stress worse, not better.",
+    "happening": "Under pressure, {U} reaches outward. They're not asking you to fix the problem; they're asking you to stay close while they deal with it. Solitude is what makes the stress worse, not better.",
     "not": "Don't disappear into your own work. Don't assume they'd rather be left alone.",
     "works": "Be visibly available. Take one logistical thing off their plate without being asked, and tell them you did. Sit with them in the evening even if neither of you talks.",
     "phrase": "I've got dinner tonight. You don't have to think about it."
@@ -224,8 +224,8 @@ export const MOMENTS_X = {
     "phrase": "Walk me through how you're seeing it. Then I'll tell you how it lands for me."
   },
   "after_conflict": {
-    "moment": "The conversation has ended. The logic is sorted out. {U} is moving forward like the thing is closed.",
-    "happening": "For {U}, repair happens when the problem is solved. Once the working-through is done, they experience the thing as resolved. The verbal close-out feels redundant to them.",
+    "moment": "The conversation has ended. The logic is sorted out. {U} is moving forward as if the disagreement is settled.",
+    "happening": "For {U}, repair happens when the problem is solved. Once the problem has been worked through, they feel the disagreement is resolved. The verbal close-out feels redundant to them.",
     "not": "Don't assume their moving on means they don't care. Don't withhold warmth waiting for a verbal close that they don't realize you need.",
     "works": "Ask for the verbal close explicitly. They'll give it readily; they just don't realize it's missing. After that, trust that they mean it when they say it's done.",
     "phrase": "Are we good? I just want to hear you say it."
@@ -241,7 +241,7 @@ export const MOMENTS_X = {
     "moment": "{U} is dealing with something hard. They're working it internally, not bringing it into the room, not asking for help.",
     "happening": "Under stress, {U} goes inward. They're not refusing support; they're running the analysis. Once they have a plan, they'll surface what's relevant. Until then, talking about it can feel like adding load, not lifting it.",
     "not": "Don't push them to talk through it. Don't take the silence as exclusion or as a sign you're not trusted.",
-    "works": "Take logistical things off their plate without asking. Be visibly available without requiring engagement. Tell them after the fact that you did the thing.",
+    "works": "Take logistical things off their plate without asking. Be visibly available without requiring engagement. Afterward, let them know what you took off their plate.",
     "phrase": "I picked up groceries, one less thing. Take the night."
   }
 };
@@ -271,7 +271,7 @@ export const MOMENTS_Y = {
   },
   "after_conflict": {
     "moment": "The hard part is over. {U} has gone quiet, but the residue is still on their face.",
-    "happening": "For {U}, repair has to reach the feeling, not just the topic. Until the emotional charge has eased, they don't experience the thing as resolved, even if the issue itself is sorted.",
+    "happening": "For {U}, repair has to reach the feeling, not just the topic. Until the emotional charge has eased, they don't feel the conflict is resolved, even if the practical issue is sorted.",
     "not": "Don't move on too fast. Don't assume topic-resolution equals emotional-resolution.",
     "works": "Give the feeling a name and a moment. 'That was hard for both of us' acknowledges it without re-litigating. Soft physical contact often does more than another conversation.",
     "phrase": "That was hard. I love you. Come here."
@@ -286,7 +286,7 @@ export const MOMENTS_Y = {
   "external_stress": {
     "moment": "{U} is dealing with something hard from outside the relationship. They're carrying it in their face but not bringing it into words.",
     "happening": "Under pressure, {U} goes inward emotionally. The feelings are loud internally; the expression is half-volume. They want presence and steady ground, not problem-solving.",
-    "not": "Don't try to fix the outside thing. Don't take the heaviness personally.",
+    "not": "Don't try to fix the outside problem. Don't take the heaviness personally.",
     "works": "Be the steady ground. Make the meals, run the warm bath, hold the routine. Touch their shoulder when you walk past. Less talk, more presence.",
     "phrase": "I've got the basics tonight. You don't have to carry anything else."
   }
@@ -297,7 +297,7 @@ export const MOMENTS_Z = {
   "hard_workday": {
     "moment": "{U} gets home from a hard day, follows their normal routine, and reveals nothing.",
     "happening": "{U} contains hard days. The processing happens privately and at its own pace. Performing a debrief would actually make the day worse, not better. Steady routine is how they reset.",
-    "not": "Don't ask probing questions hoping to crack it open. Don't take the steadiness as a sign nothing's wrong.",
+    "not": "Don't ask probing questions hoping to get them to open up about their day. Don't take the steadiness as a sign nothing's wrong.",
     "works": "Hold the regular rhythm. Make eye contact when they pass through the room. Trust that they'll surface what they want surfaced, on their schedule.",
     "phrase": "Glad you're home. Dinner's at seven."
   },
@@ -311,7 +311,7 @@ export const MOMENTS_Z = {
   "during_conflict": {
     "moment": "Tension is rising. {U} has gone level: voice steady, language careful, conflict approached like a problem to manage.",
     "happening": "{U} stays composed in conflict by design. The composure is the strategy: emotional flooding makes things worse, so they keep their own temperature down. Inside the calm, real feelings are still moving; they're just not on the surface.",
-    "not": "Don't read the calm as not caring. Don't push for emotional volume to prove the thing matters.",
+    "not": "Don't read the calm as not caring. Don't push for strong emotion as proof that the issue matters to them.",
     "works": "Match the temperature. Stay specific. Resolve the concrete piece in front of you; the feelings can come later, in private. Trust that 'fine' said calmly is sometimes the most honest version they have.",
     "phrase": "Let's solve this piece. We can talk about the rest tonight."
   },
@@ -333,7 +333,7 @@ export const MOMENTS_Z = {
     "moment": "{U} is dealing with something hard outside the relationship. They've absorbed it and kept going. The shape of the day looks normal.",
     "happening": "Under pressure, {U} goes self-contained. Asking for help feels like adding cost, not relieving load. They'd rather hold it themselves and protect you from carrying it too.",
     "not": "Don't pry for the details. Don't make them perform reassurance that they're 'fine.'",
-    "works": "Reduce ambient load without making it a transaction. Handle one normal thing without comment. Be physically present without requiring conversation. They feel supported when the friction quietly drops.",
+    "works": "Reduce ambient load without making it a transaction. Quietly handle one everyday chore without mentioning it. Be physically present without requiring conversation. They feel supported when the friction quietly drops.",
     "phrase": "I've got tonight. You don't have to do anything."
   }
 };
@@ -381,22 +381,22 @@ export const MOMENTS_SHARED_W = {
     "phrase": "I need 30 minutes. I'm not done, but I want to say this better."
   },
   "after_conflict": {
-    "moment": "The hard part is over. You've both said what needed saying. The room is quieter, but the thing isn't quite closed yet.",
-    "happening": "Both of you need verbal repair to feel done. A nod or a hug isn't enough. For Ws, the closure happens when one of you names it out loud.",
-    "not": "Assuming the other is done because you're done. Or circling back into it because the relief hasn't landed yet.",
-    "works": "One of you names the close. A short clear sentence. Not a recap, just a flag that you're both okay. The other confirms back.",
+    "moment": "The hard part is over. You've both said what needed saying. The room is quieter, but the disagreement doesn't feel fully closed yet.",
+    "happening": "Both of you need verbal repair to feel done. A nod or a hug isn't enough. For Ws, closure comes when one of you says out loud that you're okay.",
+    "not": "Assuming the other is done because you're done. Or going back into the argument because the relief hasn't settled in yet.",
+    "works": "One of you says out loud, in one short, clear sentence, that you're both okay. The sentence does not need to recap anything. Your partner then confirms they feel the same.",
     "phrase": "We're good. I love you. We worked it out."
   },
   "wanting_closeness": {
     "moment": "One of you is reaching. Sitting closer, asking what the other is up to, finding excuses to be in the same room.",
     "happening": "Bids for closeness in a W-W pair often look like conversation starters. Casual questions, light topics, low-stakes ramble. The actual ask is presence, not the topic.",
-    "not": "Half-meeting it. Answering the question while keeping your eyes on your screen. Two Ws can both be reaching at the same time and both miss the bid.",
+    "not": "Only half meeting the bid, like answering a question while keeping your eyes on your screen. Two Ws can both be reaching at the same time and both miss the bid.",
     "works": "Stop what you're doing for thirty seconds. Make eye contact. Match the energy briefly. The bid landing matters more than how long it lasts.",
     "phrase": "Hey. What's going on with you right now?"
   },
   "external_stress": {
     "moment": "One of you is dealing with something hard. Work, family, a deadline. They're reaching toward the relationship, not retreating from it.",
-    "happening": "Under pressure, Ws reach outward. Not to be fixed. To be present in. The risk in a W-W pair is that when you're both stressed at the same time, both of you are reaching, and neither of you is anchored.",
+    "happening": "Under pressure, Ws reach outward, not to have the problem fixed but to have someone present with them. The risk in a W-W pair is that when you're both stressed at the same time, both of you are reaching, and neither of you is anchored.",
     "not": "Trading stress stories. Both venting at the same time, neither actually landing. You leave the conversation more wound up than you started.",
     "works": "When you're both in it, one takes the anchoring role for an hour. Listen to the other's stress fully, hold it, then switch. Sequential, not parallel.",
     "phrase": "Yours first tonight. I want to hear it before I bring mine in."
@@ -416,35 +416,35 @@ export const MOMENTS_SHARED_X = {
     "moment": "One of you is carrying something. The routine is normal. Dinner happens. Nothing looks wrong, and something is.",
     "happening": "An X under strain gets busier and more available, not quieter. Two Xs can both be managing something privately while being perfectly pleasant to each other, for weeks.",
     "not": "Reading the normal behaviour as proof that nothing is wrong. For an X it is not evidence either way.",
-    "works": "Ask about the thing rather than the mood. 'How is the thing with your sister' gets an answer. 'Are you okay' gets a yes.",
+    "works": "Ask about the specific situation rather than their mood. 'How is the thing with your sister' gets an answer. 'Are you okay' gets a yes.",
     "phrase": "I'm not asking how you are. I'm asking what's on your mind."
   },
   "during_conflict": {
     "moment": "You are both in it, and you are both being reasonable. The voices stay level. The point keeps not landing.",
     "happening": "Xs engage with a disagreement and keep the feeling out of it. Two of you can argue the facts for an hour without either of you saying what actually hurt, which is why it does not resolve.",
-    "not": "Winning the logic. You can both be right about the facts and neither of you has said the true thing yet.",
-    "works": "One of you names the feeling first, out loud, without justifying it. It will feel disproportionate to say. It is the part the other one cannot guess.",
+    "not": "Winning the logic. You can both be right about the facts and neither of you has said what actually hurt yet.",
+    "works": "One of you shares what you are feeling first, out loud, without justifying the feeling. Saying it may feel out of proportion, but the feeling is the part your partner cannot guess.",
     "phrase": "Before we go further: this one landed harder than it should have, and I want to say why."
   },
   "after_conflict": {
-    "moment": "It is finished. You are both being kind. Neither of you has mentioned it since.",
+    "moment": "The argument is over and you are both being kind, but neither of you has brought the argument up since.",
     "happening": "Xs repair through behaviour. Coffee gets made, the plan gets kept, the tone is warm. Two Xs can both feel repaired without either of you knowing the other does.",
-    "not": "Assuming the warmth means it is closed for both of you. It might be closed for one.",
-    "works": "Say the sentence anyway, even though it feels redundant. Behaviour is how you repair; words are how you check.",
+    "not": "Assuming the warmth means the argument is settled for both of you. It may only be settled for one of you.",
+    "works": "Say out loud that you're okay anyway, even if it feels unnecessary. Behaviour is how you repair; words are how you check.",
     "phrase": "Are we actually done with that, or just being nice about it?"
   },
   "wanting_closeness": {
     "moment": "One of you keeps ending up in the same room. Sitting nearby. Suggesting something to do together.",
     "happening": "An X asks for closeness by doing rather than saying. Two Xs get a lot of shared activity and not much stated wanting, and either of you can end up unsure whether you were chosen or just nearby.",
-    "not": "Adding another activity. More proximity does not answer the question that is actually being asked.",
-    "works": "Name the wanting once, plainly. It is the thing neither of you does by default, and it is the only thing that answers it.",
+    "not": "Adding another activity. More time side by side does not tell your partner that they were chosen.",
+    "works": "Say plainly, once, that you want to be with them. Neither of you tends to do this by default, and hearing it is what lets your partner know they were chosen.",
     "phrase": "I don't want to do anything. I just want to be with you."
   },
   "external_stress": {
     "moment": "Something outside the relationship is pressing on one of you. A deadline, a diagnosis, a family thing. Life at home carries on looking ordinary.",
     "happening": "Under pressure an X takes on more, tightens up and stays present. Two Xs both do it, so the household runs beautifully and nobody has said they are struggling.",
     "not": "Matching their competence with your own. Two people coping well is two people alone.",
-    "works": "Drop one thing deliberately and say you are dropping it. It gives the other person permission they will not ask for.",
+    "works": "Drop one thing deliberately and say you are dropping it. Saying so gives your partner permission to admit they are struggling too, which they are unlikely to ask for.",
     "phrase": "I'm not doing dinner tonight. I'm at capacity, and I wanted you to know rather than guess."
   }
 };
@@ -461,8 +461,8 @@ export const MOMENTS_SHARED_Y = {
   "quiet_worry": {
     "moment": "One of you is somewhere else. Present in the room, not in the conversation. It has been a few days.",
     "happening": "A Y goes inward first and says it fully later. Two Ys can both be inward at once, and the silence stops registering as unusual because it is what the house normally sounds like.",
-    "not": "Waiting for it to surface on its own. In a Y-Y pair the normal amount of quiet hides a lot.",
-    "works": "Ask once, directly, and then leave it with them. A Y will not answer on demand and will almost always come back to it.",
+    "not": "Waiting for whatever is wrong to come up on its own. In a Y-Y pair the normal amount of quiet hides a lot.",
+    "works": "Ask once, directly, what is on their mind, and then give them time. A Y will not answer on demand, but will almost always come back to the question when they are ready.",
     "phrase": "Something's been sitting with you. I'm not asking now. I'm telling you I noticed."
   },
   "during_conflict": {
@@ -473,10 +473,10 @@ export const MOMENTS_SHARED_Y = {
     "phrase": "I'm stopping, not leaving. Give me an hour and I'll come find you."
   },
   "after_conflict": {
-    "moment": "The heat is gone. You have both been quiet for a while. It is not clear to either of you whether it is over.",
-    "happening": "A Y needs the space first and the conversation second. Two Ys get the space right and skip the conversation, so the thing looks resolved and is only paused.",
+    "moment": "The heat is gone. You have both been quiet for a while. Neither of you is sure whether the argument is over.",
+    "happening": "A Y needs the space first and the conversation second. Two Ys get the space right and skip the conversation, so the argument looks resolved when it has only been paused.",
     "not": "Letting the calm stand in for the repair. Quiet is where a Y recovers, not where a Y closes things.",
-    "works": "Come back to it once, briefly, when you are both level. It does not need to be long. It needs to happen.",
+    "works": "Come back to the argument once, briefly, when you are both calm. The conversation does not need to be long, but it does need to happen.",
     "phrase": "I'm past it now. Can we say the last bit out loud so it's actually finished?"
   },
   "wanting_closeness": {
@@ -500,7 +500,7 @@ export const MOMENTS_SHARED_Z = {
   "hard_workday": {
     "moment": "Both of you are home, both of you had a day, and the evening passes without either of you saying anything about it.",
     "happening": "Zs take space and keep the inside in. Two of you means a calm house and very little information. It works for years, and then something has been unsaid long enough that neither of you knows how to start.",
-    "not": "Taking the peace as proof that you are fine. It is proof that you are both doing what you do.",
+    "not": "Taking the peace as proof that you are fine. The peace may only mean you are both keeping things to yourselves.",
     "works": "Build a small habit that does not depend on either of you initiating. Same time, same question, short answer allowed. A structure carries what neither of you will start.",
     "phrase": "One thing from today. You first."
   },
@@ -508,34 +508,34 @@ export const MOMENTS_SHARED_Z = {
     "moment": "Something is wrong with one of you. There is no visible sign of it. There rarely is.",
     "happening": "A Z absorbs and keeps going. With two Zs, nothing about the surface changes when something is badly wrong, so the other person has no signal to read even if they are looking.",
     "not": "Waiting for a sign. In a Z-Z pair the sign does not come, and its absence means nothing.",
-    "works": "Ask on a schedule rather than on instinct. It feels mechanical and it is the only reliable way in, because neither of you volunteers and neither of you shows it.",
+    "works": "Try to ask how your partner is doing at a set time, rather than waiting until you sense something. Asking at a set time can feel mechanical, but it is the only reliable way in, because neither of you volunteers and neither of you shows it.",
     "phrase": "Checking in because it's Sunday, not because I think something's wrong. Anything I should know about?"
   },
   "during_conflict": {
     "moment": "It sharpened, and then it stopped. Nobody left the room. Nobody said anything either.",
     "happening": "Zs disengage to protect the relationship, not to punish. Two Zs shut it down almost instantly, which means the disagreement never actually happens and never actually ends.",
-    "not": "Calling it resolved because it stopped. It did not resolve. It went underground, and it will come back attached to something small.",
-    "works": "Put it in writing if saying it is too much. Zs will often write what they will not speak, and written is a great deal better than nothing.",
+    "not": "Calling the disagreement resolved because the arguing stopped. The disagreement did not resolve. It went underground, and it will come back attached to something small.",
+    "works": "If speaking feels like too much, put what you want to say in writing. Zs will often write what they will not speak, and written is a great deal better than nothing.",
     "phrase": "I can't do this out loud right now. I'm going to write it down and give it to you tonight."
   },
   "after_conflict": {
-    "moment": "A day has passed. Things are normal again. Neither of you has mentioned it.",
+    "moment": "A day has passed since the argument. Things are back to normal, and neither of you has brought the argument up.",
     "happening": "Zs repair by letting time do it. Two Zs get very good at moving on and never confirming, so the same argument can recur for years without either of you knowing it was never closed.",
-    "not": "Letting normal stand in for repaired. For two Zs it always will, and it is what accumulates.",
-    "works": "One sentence, once, even days later. It does not have to reopen anything. It has to acknowledge that something happened.",
+    "not": "Letting a return to normal stand in for repair. For two Zs, normal will always feel like enough, and that is how unrepaired arguments build up over time.",
+    "works": "Try to say one sentence about the argument, once, even days later. The sentence does not need to reopen anything, just acknowledge that the argument happened.",
     "phrase": "About Tuesday. I'm not bringing it back. I just didn't want it to go unsaid."
   },
   "wanting_closeness": {
     "moment": "One of you wants to be close and has not said so. The evening looks exactly like every other evening.",
     "happening": "A Z asks for closeness in very small ways, or not at all. When both of you are Zs, the signals are small enough on both sides that they can pass each other completely.",
     "not": "Expecting to be read. Neither of you is going to catch a signal that quiet, and neither of you is failing when you miss it.",
-    "works": "Make it explicit and make it easy to say yes to. A Z will accept an invitation far more readily than they will issue one.",
+    "works": "Ask for closeness out loud, and make the invitation easy to say yes to. A Z will accept an invitation far more readily than they will issue one.",
     "phrase": "Come sit with me for ten minutes."
   },
   "external_stress": {
     "moment": "Something hard is happening to one of you. The routine holds. Everything gets done.",
     "happening": "Under pressure a Z contracts and carries on. Two Zs under pressure produce a household that looks completely fine and two people managing alone, in the same rooms, at the same time.",
-    "not": "Admiring the competence. Both of you are good at this, and being good at it is what keeps it invisible.",
+    "not": "Admiring how well you both cope. You are both good at handling stress alone, and that is what keeps the struggle invisible to each other.",
     "works": "Say the fact without the feeling, which is a Z's easiest route in. 'This is happening' asks for nothing and tells the other person everything they need.",
     "phrase": "Something's going on. I don't want to talk about it yet. I wanted you to know it's there."
   }

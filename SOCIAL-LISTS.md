@@ -18,20 +18,20 @@ whether their results are ready, and what they have bought and not used.
 
 | # | Priority | Heading | Description | Button |
 |---|---|---|---|---|
-| 1 | undefined | Complete your budget | This exercise is in progress and status has been saved | undefined |
+| 1 | undefined | Complete your budget | Your progress has been saved, so you can pick up where you left off. | undefined |
 | 2 | undefined | Complete your checklist | Merge your lives seamlessly with a practical checklist | undefined |
 | 3 | undefined | Complete your exercises | Your results unlock once you and James complete your exercises | undefined |
 | 4 | undefined | Continue Communication | You've completed 12/30 questions | undefined |
 | 5 | undefined | Explore build-a-budget | Build your budget with a customizable tool | undefined |
 | 6 | undefined | Finish setting up your profile | We need your profile details to set up your exercises | undefined |
 | 7 | undefined | Look back at your tags | What you marked is a record of what mattered to you. | undefined |
-| 8 | undefined | New publication to explore | View this and others in your Learn tab | undefined |
-| 9 | undefined | Pick one conversation to have this week | Every section ends with something to try. | undefined |
-| 10 | undefined | Read something from In Practice | Short pieces on the things that impact relationships. | undefined |
+| 8 | undefined | New publication to explore | Read the new article and the rest of In Practice in your Learn tab. | undefined |
+| 9 | undefined | Pick one conversation to have this week | Every results section ends with an idea to try together. | undefined |
+| 10 | undefined | Read something from In Practice | Short articles on what affects relationships. | undefined |
 | 11 | undefined | Reread what you each wrote | Written answers are worth revisiting and discussing. | undefined |
-| 12 | undefined | Revisit Conflict Style | Your widest difference. Worth rereading together. | undefined |
+| 12 | undefined | Revisit Conflict Style | You differ most on this dimension. Try to reread these results together. | undefined |
 | 13 | undefined | Revisit Money and what it is for | You flagged this and have not come back to it. | undefined |
-| 14 | undefined | Send a note to your partner | Mark a line in your results and share it with them. | undefined |
+| 14 | undefined | Send a note to your partner | Mark a line in your results and share that line with your partner. | undefined |
 | 15 | undefined | Send James a reminder | Results unlock once James finishes her final exercise | undefined |
 | 16 | undefined | Tell us about your experience | Take a minute to share feedback to help us shape Attune | undefined |
 | 17 | undefined | Waiting on James | You sent a reminder recently | undefined |

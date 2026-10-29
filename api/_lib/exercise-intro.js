@@ -112,7 +112,7 @@ export function exerciseIntro(key, { partner = 'your partner' } = {}) {
           'Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. These private questions help you identify areas to discuss with each other.',
           // Ellie, asked whether this should go with the copy it used to sit
           // under: "Keep it as a separate paragraph below mine."
-          'This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.',
+          'This exercise is a tool for talking about expectations. It is not therapy. If any of these questions brings up a heavier issue, it is worth talking through with someone qualified.',
         ],
         note: null,
         cta: 'Start',

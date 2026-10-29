@@ -416,7 +416,7 @@ export function nextActions(state = {}) {
         // other one is per tool, and anything she has not written keeps the
         // general sentence rather than something invented for it.
         body: r.started
-          ? 'This exercise is in progress and status has been saved'
+          ? 'Your progress has been saved, so you can pick up where you left off.'
           : (RESOURCE_BLURB[key] || 'You have purchased exercises that you have not completed'),
         deepLink: `/?view=${link}` });
       break;
@@ -427,7 +427,7 @@ export function nextActions(state = {}) {
   if (ip.latestId && ago(ip.latestPublishedAt) < 30 && ago(ip.lastReadAt) > ago(ip.latestPublishedAt)) {
     add({ id: 'new-post', kind: 'new_post', priority: 5,
       title: 'New publication to explore',
-      body: 'View this and others in your Learn tab',
+      body: 'Read the new article and the rest of In Practice in your Learn tab.',
       deepLink: `/?view=practice&post=${ip.latestId}` });
   }
 
@@ -439,7 +439,7 @@ export function nextActions(state = {}) {
         title: `Revisit ${anchor}`,
         body: state.unresolvedConversationTitle
           ? 'You flagged this and have not come back to it.'
-          : `Your widest difference. Worth rereading together.`,
+          : `You differ most on this dimension. Try to reread these results together.`,
         deepLink: '/?view=results' });
     }
   }
@@ -584,7 +584,7 @@ const ANYTIME = [
 const IDLE_PROMPTS = [
   {
     title: 'Send a note to your partner',
-    body: 'Mark a line in your results and share it with them.',
+    body: 'Mark a line in your results and share that line with your partner.',
     deepLink: '/?view=results',
   },
   {
@@ -594,12 +594,12 @@ const IDLE_PROMPTS = [
   },
   {
     title: 'Pick one conversation to have this week',
-    body: 'Every section ends with something to try.',
+    body: 'Every results section ends with an idea to try together.',
     deepLink: '/?view=results',
   },
   {
     title: 'Read something from In Practice',
-    body: 'Short pieces on the things that impact relationships.',
+    body: 'Short articles on what affects relationships.',
     deepLink: '/practice',
   },
   {

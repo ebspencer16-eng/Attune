@@ -47,9 +47,9 @@ export const JOURNAL_COPY = {
   /** The search field over past entries. */
   search: 'Search your entries',
   /** Nothing matched what was typed into the search. */
-  noMatch: 'Nothing here matches that.',
+  noMatch: 'No journal entries match your search.',
   /** No entries at all, yet. */
-  empty: 'Nothing here yet. The first entry is usually the hardest one.',
+  empty: 'No journal entries yet. The first entry is usually the hardest one to write.',
 
   /**
    * ── KEEPING AN INSIGHT ────────────────────────────────────────────────
@@ -63,10 +63,10 @@ export const JOURNAL_COPY = {
    * button - I want the functionality to save it to a journal entry just like
    * the app can." The moment there are two surfaces the words need one home.
    */
-  saveTitle: 'Keep this in your journal',
+  saveTitle: 'Keep this insight in your journal',
   savePlaceholder: 'Add commentary',
   saveAction: 'Save',
-  saveFailed: 'That did not save. Try again in a moment.',
+  saveFailed: 'Your insight did not save to your journal. Try again in a moment.',
 };
 
 /**
