@@ -94,20 +94,20 @@ export const NEAR_AXIS_PROSE = {
     },
     stickingPointsNearEngage: {
       1: {
-        one: `Neither of you starts the harder conversation by default. One of you sits closer to the middle and may reach first on some things. That person opening the door is the pattern-breaker, make the reach a habit not an exception.`,
-        both: `Neither of you starts the harder conversation by default, but both of you sit closer to neutral and may reach first on some things. Either of you opening the door breaks the pattern, so make the reach a habit not an exception.`,
+        one: `Neither of you prefers to start the harder conversations, but one of you might tend to bring things up first more often. When this happens, it helps you both stop waiting, so try to make that a habit rather than an exception.`,
+        both: `Neither of you prefers to start the harder conversations, but when it comes to engaging or withdrawing, you both are relatively neutral, so either of you may bring things up first. When one of you does, it helps you both stop waiting, so try to make that a habit rather than an exception.`,
       },
     },
     patternsNearOpen: {
       2: {
-        one: `The relationship looks stable, and mostly is. One of you reveals a little more of what's underneath, which is your early-warning system when things build up.`,
-        both: `The relationship looks stable, and mostly is. Both of you reveal a little more of what's underneath, which is your early-warning system when things build up.`,
+        one: `Your relationship looks stable, and it mostly is. One of you shows a little more of how they feel, which can be an early sign when something is building up.`,
+        both: `Your relationship looks stable, and it mostly is. You both show a little more of how you feel than very private people would, which can be an early sign when something is building up.`,
       },
     },
     stickingPointsNearOpen: {
       0: {
-        one: `Important things can go unsaid for a long time. One of you shows more than a fully guarded partner, so there are more openings than there could be. Take them when they appear.`,
-        both: `Important things can go unsaid for a long time, but both of you show more than fully guarded partners, so there are more openings than the type implies. Take them when they appear.`,
+        one: `Important feelings can go unsaid for a long time. When one of you shows a feeling, try to ask about it.`,
+        both: `Important feelings can go unsaid for a long time, but you both show more of how you feel than very private partners would, so you have more chances to talk than your type suggests. When one of you shows a feeling, try to ask about it.`,
       },
     },
   },
@@ -115,17 +115,17 @@ export const NEAR_AXIS_PROSE = {
     patternsNearOpen: {
       1: {
         one: `{EXP} leans toward processing out loud. {GRD} sometimes wants a beat to think before discussing feelings. You two both want a productive conversation, what you're experiencing is just a difference in timing.`,
-        both: `Though you both sit close to neutral, {EXP} leans slightly expressive and {GRD} tends to take a minute to process. You two both want a productive conversation, what you're experiencing is just a small difference in timing.`,
+        both: `When it comes to being open or guarded, you both are relatively neutral, but {EXP} leans slightly toward sharing and {GRD} tends to take a minute to process. You both want a productive conversation, what you might be noticing is just a small difference in timing.`,
       },
     },
     stickingPointsNearOpen: {
       0: {
-        one: `{EXP} tends to start the deeper conversations, but one of you sits closer to the middle than the label suggests, so the map placement should read less like fixed roles and more like who happens to speak first.`,
+        one: `{EXP} might tend to start the deeper conversations, but these roles are less fixed than your map suggests. It is more about who happens to speak first, and the other person supporting them when they do.`,
         both: `{EXP} tends to start the deeper conversations, but {GRD} shares more than a truly guarded partner would, so who speaks first may change depending on the situation.`,
       },
       1: {
-        one: `One of you sits close to the middle on how much you show. On an easy day, that person shares freely. Under stress, they can pull inward, which may feel sudden to the other.`,
-        both: `You both sit close to the middle on how much you show. On an easy day you both may share freely, but under stress, either of you can pull inward, which may feel sudden to the other.`,
+        one: `On an easy day, you might both share freely, but under stress, you may pull inward, which can feel sudden to your partner.`,
+        both: `When it comes to being open or guarded, you both are relatively neutral. On an easy day you both tend to share freely, but under stress, either of you can pull inward, which can feel sudden to your partner.`,
       },
     },
     patternsNearEngage: {
@@ -138,42 +138,42 @@ export const NEAR_AXIS_PROSE = {
   WY: {
     patternsNearEngage: {
       0: {
-        one: `When something is off, you're often not in the same place at once. {RCH} is ready sooner, {WDR} needs a moment. One of you sits close to the axis here, so the gap is smaller than the map labels suggest and may flip depending on the situation.`,
-        both: `When something is off, you're often not in the same place at once. {RCH} is ready sooner, {WDR} needs a moment. You both sit close to the axis here, so the gap is smaller than the map labels suggest and often flips depending on the situation.`,
+        one: `When something is wrong, you are often not ready to talk at the same time. {RCH} is ready sooner, and {WDR} needs a moment. However, this difference is smaller for your relationship and can change depending on the situation.`,
+        both: `When something is wrong, you are often not ready to talk at the same time. {RCH} is ready sooner, and {WDR} needs a moment. When it comes to engaging or withdrawing, you both are relatively neutral, so the difference is smaller than your map suggests and often changes depending on the situation.`,
       },
     },
     stickingPointsNearEngage: {
       1: {
-        one: `The pursue-and-retreat loop is real, but muted here. Because one of you flexes toward neutral, the loop is easy to interrupt and rarely runs far. Name it early and it will often dissolve.`,
-        both: `The pursue-and-retreat loop is real, but muted here because you both flex toward neutral. This means the loop is easy to interrupt and rarely runs far, name it early and it will often dissolve.`,
+        one: `One of you can push to talk while the other pulls back, but that pattern is mild for you. If you notice it starting, try to say so early, and it will usually help you create a safe place to talk.`,
+        both: `One of you can push to talk while the other pulls back, but that pattern is mild for you. If you notice it starting, try to say so early, and it will usually help you to communicate calmly.`,
       },
       2: {
-        one: `Repair tends to start on one person's timeline. Since the two of you are closer to neutral in this regard, whoever is ready can start the conversation, and it will not usually be the same person every time.`,
-        both: `Repair tends to start on one person's timeline. Since you're both close to neutral here, whoever is ready can start, and it won't usually be the same person every time.`,
+        one: `Repair after a disagreement tends to start when one person is ready. Whichever of you is ready can start the conversation, but that usually will not be the same person every time.`,
+        both: `Repair after a disagreement tends to start when one person is ready. Whoever is ready can start the conversation, and that will usually not be the same person every time.`,
       },
     },
     patternsNearOpen: {
       1: {
-        one: `What reads as pulling away is usually needing space, not distance. One of you shows a little less while processing, so say the reassuring part out loud rather than trusting it to land on its own.`,
-        both: `What reads as pulling away is usually needing space, not distance. You both show a little less while processing, so say the reassuring part out loud rather than trusting it to land on its own.`,
+        one: `What looks like pulling away is usually a need for space, not distance. One of you shows a little less of how they feel while processing, so try to say out loud that you need space, rather than trusting your partner to understand the silence.`,
+        both: `What looks like pulling away is usually a need for space, not distance. Try to say out loud that you need space, rather than trusting your partner to understand the silence.`,
       },
     },
   },
   WZ: {
     patternsNearOpen: {
       0: {
-        one: `You sometimes mean one thing and the other receives something different, though one of you is more communicative than a fully guarded partner, so the signal usually gets through with a little checking.`,
-        both: `You sometimes mean one thing and the other receives something different. You both sit closer to neutral than the labels suggest, so the signal usually gets through with a little checking.`,
+        one: `Sometimes one of you means one thing and your partner hears something different. The way to combat this is by asking your partner what they heard.`,
+        both: `Sometimes one of you means one thing and your partner hears something different. When it comes to being open or guarded, you both are more neutral than your labels suggest, so asking your partner what they heard will usually help.`,
       },
     },
     stickingPointsNearOpen: {
       0: {
-        one: `{EXP} tends to start the emotional depth. But because one of you sits close to neutral this can shift with the situation.`,
-        both: `{EXP} tends to start the emotional depth, but you both sit close to neutral here, so this role is not fixed and will often shift based on the situation.`,
+        one: `{EXP} might tend to start the deeper emotional conversations, but this is flexible and who starts may change in your relationship depending on the situation.`,
+        both: `{EXP} might tend to start the deeper emotional conversations, but this is flexible and who starts may change in your relationship depending on the situation.`,
       },
       1: {
-        one: `One of you sits closer to neutral on how much you show. On steady days that person meets the other partway. Under strain they can withdraw, and that is where a rift can become noticeable.`,
-        both: `You both sit close to neutral with regard to how much you show. On steady days you meet in the middle, but under strain, either of you can withdraw, and that is where a rift can become noticeable.`,
+        one: `On steady days, you meet each other partway. Under stress, one of you may withdraw, and that is when distance between you can become noticeable.`,
+        both: `When it comes to being open or guarded, you both are relatively neutral. On steady days you meet in the middle, but under stress, either of you can withdraw, and that is when distance between you can become noticeable.`,
       },
     },
     patternsNearEngage: {
@@ -186,64 +186,64 @@ export const NEAR_AXIS_PROSE = {
   XY: {
     patternsNearEngage: {
       0: {
-        one: `When something is hard, you're often not in the same place at once. {RCH} is ready, {WDR} needs room. One of you sits near neutral, so the timing gap is relatively narrow and shifts by topic.`,
-        both: `When something is hard, you're often not in the same place at once. {RCH} is ready, {WDR} needs room. You both sit near neutral, so the timing gap is narrow and roles shift based on the topic.`,
+        one: `When something is hard, you may not be ready to talk at the same time. {RCH} might be ready, while {WDR} needs room. However, this difference in timing is fairly small and can change by topic.`,
+        both: `When something is hard, you may not be ready to talk at the same time. {RCH} is ready, and {WDR} needs room. When it comes to engaging or withdrawing, you both are relatively neutral, so the difference in timing is small and who needs what can change by topic.`,
       },
     },
     stickingPointsNearEngage: {
       0: {
-        one: `{RCH_pos} move toward resolution can close off the space {WDR} needs. Because one of you flexes toward neutral, that crowding is more mild here. A short agreement on when to talk usually settles it.`,
-        both: `{RCH_pos} move toward resolution can crowd the space {WDR} needs. Because you both flex toward neutral, that crowding is mild here. A short agreement on when to talk usually settles it.`,
+        one: `{RCH_pos} push to resolve a disagreement can take away the space {WDR} sometimes needs. A quick agreement on when to talk usually helps.`,
+        both: `{RCH_pos} push to resolve a disagreement can take away the space {WDR} needs. When it comes to engaging or withdrawing, you both are relatively neutral, so that pressure is mild for you. A short agreement on when to talk usually helps.`,
       },
     },
     stickingPointsNearOpen: {
       1: {
-        one: `{WDR_pos} visible emotion during withdrawal can read to {RCH} as something to fix now. One of you sits closer to the middle on showing, so signals can be easier to read than you may expect. Ask what things mean instead of assuming.`,
-        both: `{WDR_pos} visible emotion during withdrawal can read to {RCH} as something to fix now. You both sit closer to the middle on showing, so signals are easier to read than the pairing suggests. Ask what things mean instead of assuming.`,
+        one: `{WDR_pos} visible emotion while processing can feel to {RCH} like something to fix right away. Feelings can be easier to read than you expect. Nonetheless, try to ask each other what a reaction means, rather than assuming.`,
+        both: `{WDR_pos} visible emotion while taking space can feel to {RCH} like something to fix right away. When it comes to being open or guarded, you both are relatively neutral, so your feelings are easier to read than your pairing suggests. Try to ask what a reaction means, rather than assuming.`,
       },
     },
   },
   XZ: {
     patternsNearEngage: {
       1: {
-        one: `{RCH} carries a low push toward resolving, and {WDR} usually needs more time. One of you sits near neutral, so that gap is not always noticeable and depends on the issue.`,
-        both: `{RCH} carries a low push toward resolving, and {WDR} usually needs more time. You both sit near neutral, so that gap is often not noticeable and depends on the issue.`,
+        one: `{RCH} has a mild pull toward resolving things, and {WDR} sometimes needs more time. For your relationship, that difference is not always noticeable and depends on the issue.`,
+        both: `{RCH} has a mild pull toward resolving things, and {WDR} sometimes needs more time. When it comes to engaging or withdrawing, you both are relatively neutral, so that difference is often not noticeable and depends on the issue.`,
       },
     },
     stickingPointsNearEngage: {
       1: {
-        one: `When something is wrong, neither of you reaches first by default. Because one of you leans toward reaching, problems can sit for less time when that person leads, make that the norm.`,
-        both: `When something is wrong, neither of you reaches first by default. Because you both lean toward reaching, problems don't always sit for long. Though it can be uncomfortable, make reaching the norm.`,
+        one: `When something is wrong, neither of you usually brings it up first. One of you leans a little toward talking things through, so problems sit for less time when that person speaks up. Try to make that the norm.`,
+        both: `When something is wrong, neither of you usually brings it up first. You both lean a little toward talking things through, so problems do not always sit for long. Even if it feels uncomfortable, try to make bringing things up the norm.`,
       },
     },
     stickingPointsNearOpen: {
       0: {
-        one: `Neither of you offers much emotional visibility, so it can look more okay outside than in. One of you shows more than a fully guarded partner, which is your opening and shouldn't be taken for granted.`,
-        both: `Neither of you offers much emotional visibility, so it can look more okay outside than in. Both of you show more than fully guarded partners, which is your opening and shouldn't be taken for granted.`,
+        one: `Neither of you shows much of how you feel, so things can look more okay from the outside than they really are. One of you shows a little more than a very private partner would. Try to treat what that person shows as a chance to talk, because those chances are easy to take for granted.`,
+        both: `Neither of you shows much of how you feel, so things can look more okay from the outside than they really are. You both show a little more than very private partners would. Try to treat what you each show as a chance to talk, because those chances are easy to take for granted.`,
       },
       2: {
-        one: `Two private processors can coexist without reaching emotional depth together. One of you leans toward showing a little more, so let that person set a slightly more open baseline and try to maintain it together.`,
-        both: `Two private processors can coexist without reaching emotional depth together. Both of you lean toward showing a little more, so set a slightly more open baseline and maintain it together.`,
+        one: `Two people who process feelings privately can get along well without ever sharing deeply. One of you leans toward sharing a little more, so let that person set the pace for sharing a bit more than feels natural, and try to keep that pace together.`,
+        both: `Two people who process feelings privately can get along well without ever sharing deeply. You both lean toward sharing a little more, so try to agree to share a bit more than feels natural, and keep doing so together.`,
       },
     },
   },
   YZ: {
     patternsNearEngage: {
       1: {
-        one: `The coming-back-together step can drag because neither of you rushes it. One of you sits closer to neutral and is sometimes ready first. Let that person start conversations without it becoming their job.`,
-        both: `The coming-back-together step can drag because neither of you rushes it. Both of you sit closer to neutral which means either may be ready first. Whoever is ready can start, it won't always be the same person.`,
+        one: `Coming back together after a disagreement can take a while, because neither of you rushes it. One of you is sometimes ready to talk first. It is fine to let that person start the conversation, as long as it does not become their job every time.`,
+        both: `Coming back together after a disagreement can take a while, because neither of you rushes it. When it comes to engaging or withdrawing, you both are relatively neutral, so either of you may be ready to talk first. Whoever is ready can start the conversation, and that will not always be the same person.`,
       },
     },
     stickingPointsNearEngage: {
       0: {
-        one: `You can both wait a long time for the other to return. Since one of you flexes toward reaching, the wait can sometimes be shorter. Name the feeling rather than reading it as abandonment.`,
-        both: `You can both wait a long time for the other to return. Since you both flex toward reaching, the wait is usually shorter than it feels. Name the feeling rather than reading it as abandonment.`,
+        one: `You can both wait a long time for your partner to come back to the conversation. One of you leans a little toward talking things through, so the wait can sometimes be shorter. Try to say how the waiting feels, rather than reading it as abandonment.`,
+        both: `You can both wait a long time for your partner to come back to the conversation. You both lean a little toward talking things through, so the wait is usually shorter than it feels. Try to say how the waiting feels, rather than reading it as abandonment.`,
       },
     },
     stickingPointsNearOpen: {
       1: {
-        one: `{EXP_pos} visible emotion during withdrawal can be hard for {GRD} to interpret. One of you sits closer to neutral on showing, so emotions can be more visible than the pairing suggests. A quick "this isn't a call to fix it" clears up intentions.`,
-        both: `Visible emotion during withdrawal can be confusing to interpret. You both sit close to neutral, which means emotions are sometimes visible and may be hard for either of you to place. A quick "this isn't a call to fix it" clears up intentions.`,
+        one: `{EXP_pos} visible emotion while taking space can be hard for {GRD} to understand. When it comes to being open or guarded, one of you is relatively neutral, so feelings can be easier to see than your pairing suggests. A quick "I don't need you to fix this" helps make your intentions clear.`,
+        both: `When one of you shows emotion while taking space, it can be confusing for your partner. When it comes to being open or guarded, you both are relatively neutral, so feelings are sometimes visible but can be hard for either of you to understand. A quick "I don't need you to fix this" helps make your intentions clear.`,
       },
     },
   },

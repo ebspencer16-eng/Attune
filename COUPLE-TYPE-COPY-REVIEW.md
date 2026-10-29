@@ -10,7 +10,7 @@ types. A couple only ever sees their own six, and you only ever see your own,
 which is why it reads as four or six rather than sixty.
 
 This is what ships. You rewrote all 60 of them on 17 October and they went
-into the module the same day, word for word: **51 characters each, where the
+into the module the same day, word for word: **53 characters each, where the
 paragraphs they replaced averaged 128**.
 
 Two of your lines I left exactly as you wrote them and asked about in TASKS.md
@@ -29,7 +29,7 @@ of them to a name before anyone reads them.
 |--|--|--|
 | WW | 1 | Emotional availability is a strong suit for you two |
 | WW | 2 | You are both readable and willing to be read |
-| WW | 3 | Hard conversations aren't avoided as often |
+| WW | 3 | You tend to avoid hard conversations less than most couples |
 | XX | 1 | As a unit, you are efficient decision makers |
 | XX | 2 | Arguments tend to be structured and reasonable |
 | XX | 3 | You often understand where the other is coming from |
@@ -38,9 +38,9 @@ of them to a name before anyone reads them.
 | YY | 3 | Neither of you takes the other's need for space personally |
 | ZZ | 1 | When either of you shares something, it is respected |
 | ZZ | 2 | You both respect each other's interior life |
-| ZZ | 3 | Feelings can be heavy even if they are not spoken |
+| ZZ | 3 | Your feelings can be heavy, even when you don't say them out loud |
 | WX | 1 | You both strive for resolution |
-| WX | 2 | You are complementary processors, thoughtful and eager |
+| WX | 2 | {GRD} tends to think first and {EXP} tends to share first, which helps you balance each other |
 | WX | 3 | Your relationship has warmth and steadiness |
 | WY | 1 | Friction can be easily removed for this pairing |
 | WY | 2 | You have complementary instincts, attentive and stabilizing |
@@ -65,18 +65,18 @@ of them to a name before anyone reads them.
 | WW | 1 | Two strong feelings can amplify each other |
 | WW | 2 | Hard moments land at full force for you two |
 | WW | 3 | Not every feeling has to be said straight away |
-| XX | 1 | Two internal processors can go too long without sharing |
+| XX | 1 | Two internal processors can go too long without sharing how they feel |
 | XX | 2 | Quick repair is not always complete repair |
 | XX | 3 | Though you are great at logistics, emotional depth can be lost |
 | YY | 1 | Waiting for the other to reengage can feel like abandonment |
-| YY | 2 | Open-ended space is more fragile than a set limit |
-| YY | 3 | Things that need addressing can be delayed a long time |
+| YY | 2 | Taking space with no set end time can be harder than taking space with one |
+| YY | 3 | Issues that need addressing can be put off for a long time |
 | ZZ | 1 | Comfort with silence can become avoidance |
 | ZZ | 2 | Neither of you likes to start hard conversations |
 | ZZ | 3 | The relationship can appear more stable than it actually is |
 | WX | 1 | {EXP} can feel like the one always doing the emotional work |
 | WX | 2 | {GRD} can feel pressure to match an expressiveness that is not natural |
-| WX | 3 | Processing can feel like withholding to one of you |
+| WX | 3 | {GRD}'s private processing can feel like withholding to {EXP} |
 | WY | 1 | Urgency reads as pressure, distance reads as avoidance |
 | WY | 2 | When one presses and the other retreats, things can escalate |
 | WY | 3 | Repair starts on the initiator's timeline |
