@@ -755,6 +755,21 @@ not finish without is refused (503, `ok: false`); every client here already
 draws a refusal as "could not check". check-unread-is-not-no holds the ones
 without a gate of their own.
 
+**A "sent" stamp written after sending is a message sent on every run.** The
+check-in email, the survey nudge and the push log each recorded the send
+after making it, unchecked, and the record is the only thing stopping the
+next run. Claim first (a conditional PATCH `field=is.null` with
+`return=representation`, one row back means it is yours), send only on a
+claim, give the claim back if the send fails. A failure then costs one missed
+message, never a repeated one. check-send-claimed-first holds the emails;
+check-push-reach holds the log.
+
+**A stub that cannot be constructed fails a gate for the wrong reason.**
+`new Response('', { status: 204 })` throws, because a 204 may not carry a body
+and the empty string is one. A plant against check-send-claimed-first "failed"
+by crashing the harness, which proves nothing. Use `null` for a bodiless
+status, and read the failure message before counting a plant as caught.
+
 **The database answers a thousand rows, whatever you ask for.** Supabase cuts
 every request to its max rows, and `.limit(100000)` is cut to it without an
 error or a header saying so. Every admin read but Engagement's took one

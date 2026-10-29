@@ -144,6 +144,18 @@ export default async function handler(req) {
   }
 
   const mark = (id, field) => fetch(`${url}/rest/v1/profiles?id=eq.${id}`, { method: 'PATCH', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ [field]: now.toISOString() }) });
+  /* Claimed before sending, only where still empty, and given back if the
+     email fails: the stamp is what stops the next run nudging again, so a
+     stamp written after sending, unchecked, meant the same nudge every run
+     while the person was in the window. Same rule as cron-checkin; both are
+     held by check-send-claimed-first (A170). */
+  const claim = async (id, field) => {
+    const r = await fetch(`${url}/rest/v1/profiles?id=eq.${id}&${field}=is.null`, { method: 'PATCH', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify({ [field]: now.toISOString() }) }).catch(() => null);
+    if (!r || !r.ok) return false;
+    const rows = await r.json().catch(() => null);
+    return Array.isArray(rows) && rows.length === 1;
+  };
+  const release = (id, field) => fetch(`${url}/rest/v1/profiles?id=eq.${id}`, { method: 'PATCH', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ [field]: null }) }).catch(() => {});
   const sendEmail = (to, subject, html) => fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html }) }).then(r => r.ok);
   const isBeta = (u) => u.email && betaEmails.has(String(u.email).toLowerCase());
 
@@ -181,8 +193,9 @@ export default async function handler(req) {
       if (!u.email) continue;
       if (submitted.has(u.id) || isBeta(u)) { skipped++; await mark(u.id, field); continue; }
       const mail = build(EMAIL_CONTEXT(u));
-      const ok = await sendEmail(u.email, mail.subject, mail.html);
-      if (ok) { await mark(u.id, field); sent++; } else failed++;
+      if (!(await claim(u.id, field))) continue;
+      const ok = await sendEmail(u.email, mail.subject, mail.html).catch(() => false);
+      if (ok) sent++; else { await release(u.id, field); failed++; }
     }
     return { eligible: users.length, sent, skipped, failed };
   }

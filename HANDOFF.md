@@ -4685,3 +4685,13 @@ the app shows the follow-up).
 - check-app-cover-fits now says "the Expo server stopped answering" rather than
   "the cover never drew" when the server is gone. Seen in a smoke run in swap;
   the check passed 30 of 30 on its own straight after.
+
+### Round three (A170g, A170h)
+- cron-checkin and cron-survey-nudge claim `*_sent_at` (conditional PATCH,
+  return=representation) before sending and release it if Resend refuses;
+  push.js claims a push_sends row (ok: true) before Expo and marks it false on
+  refusal; logSend is gone. check-send-claimed-first (new) and
+  check-push-reach 1b hold them. check-nudge-fails-closed's PATCH stub now
+  answers rows, as PostgREST does with return=representation.
+- admin-engagement: every `all()` path names `order=`; check-row-cap fails a
+  restAll or all() path without one.

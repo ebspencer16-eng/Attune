@@ -24,7 +24,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A170 | **Sweeps, your ask while you were away. Two rounds done and live: A170a to A170f in section 3.** Say "keep going" and I'll run another round; nothing waits on you. |
+| A170 | **Sweeps, your ask: "keep going". Three rounds done: A170a to A170h in section 3.** Say "keep going" for another round; nothing waits on you. |
 
 ## 3. For you to review
 
@@ -33,6 +33,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A170g | **Three scheduled messages could repeat themselves.** The six-month and one-year check-in emails, the two survey nudges, and phone notifications each record "sent" so the next run leaves that person alone. All three recorded it after sending, without checking the record saved. If it didn't save, the same message went out again on every run. Now the record is made first and the message only goes if it saved. A failed send clears the record so it's retried. If something still goes wrong, a person misses one message rather than getting it twice. |
+| A170h | **Engagement figures could count a row twice and miss another.** That page reads big tables a thousand rows at a time without saying what order to read them in, so the database could hand back an overlapping set, most likely on page views, which are written while they're read. Every paged read now names its order, and the check requires it. |
 | A170a | **Saving an edit to a live In Practice article could unpublish it.** Saving reads the stored post first, to keep its publish date. If that read failed, the save treated the article as new: it wrote no publish date, which takes it off the site and the app, and gave every paragraph a new id, which detaches readers' notes on it. Proven by running it, not just by reading the code. A failed read now changes nothing and tells you to save again. |
 | A170b | **A failed read was shown as a statement about a person in eight places.** Each turned "we could not find out" into something untrue: your partner has done nothing (home), your partner's account is gone (results), your partner has not finished (Conflict Patterns), you never opted out of research (privacy choices), your partner shares no notes (Notes), you have answered nothing (survey, and exercises in the app). Each now says it could not check. Two of them also wrote over real data: the survey's next save replaced every answer someone had given, and the Shared Budget and Starting Out checklist could put an older copy over the couple's current one. |
 | A170c | **Two things would have stopped working as you grow, without any error.** The admin's Feedback page looked up every survey respondent in one request, and the request has a length limit, so past a few hundred it would fail. The journal-streak and new-article phone notifications did the same with everyone who has notifications on, so past a couple of hundred both would have stopped for everybody. Both now go 100 at a time, and the notification job reads past the 1,000-row limit. |

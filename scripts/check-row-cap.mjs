@@ -176,6 +176,17 @@ for (const f of files) {
   for (const m of code.matchAll(/restAll\([^,]+,[^,]+,\s*['"`]([a-z_]+)\?([^'"`]*)/g)) {
     if (GROWS.includes(m[1])) { reads += 1; paged += 1; }
   }
+  /* A paged read with no order can hand one row to two pages and skip
+     another. Every restAll path, and every path through admin-engagement's
+     `all`, which is restAll, names one (A170). */
+  /* Two arguments before the path, both spellings. The first version skipped
+     one for `all(` and so never reached a path: the plant walked through. */
+  for (const m of code.matchAll(/(?:\brestAll|\ball)\([^,()]+,[^,()]+,\s*[`'"]([a-z_]+)\?([^`'"]*)[`'"]/g)) {
+    if (!/(^|&)order=/.test(m[2])) {
+      const line = code.slice(0, m.index).split('\n').length;
+      fails.push(`${f}:${line} pages ${m[1]} with no order=. Without one, a row can land on two pages and another on none.`);
+    }
+  }
 }
 if (reads < 15) fails.push(`only ${reads} reads of growing tables found in the admin and the scheduled jobs. The scanner has lost them.`);
 

@@ -96,16 +96,36 @@ export default async function handler(req) {
       return false;
     }
 
-    // ── Helper: mark sent ─────────────────────────────────────────────────────
-    async function markSent(userId, field) {
+    // ── Helper: claim the send, and give it back ──────────────────────────────
+    /* The stamp used to be written after the email, unchecked. A stamp that
+       failed left the person due, so the same check-in went out on every run
+       while they were inside the window. Now the stamp is the claim: written
+       first, only where it is still empty (which also stops two overlapping
+       runs both sending), and the email goes only if it landed. A failed email
+       gives the claim back so the next run tries again; if THAT fails, this
+       person misses one email rather than getting several (A170). */
+    async function claimSend(userId, field) {
+      const r = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&${field}=is.null`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=representation',
+        },
+        body: JSON.stringify({ [field]: now.toISOString() }),
+      }).catch(() => null);
+      if (!r || !r.ok) return false;
+      const rows = await r.json().catch(() => null);
+      return Array.isArray(rows) && rows.length === 1;
+    }
+    async function releaseSend(userId, field) {
       await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
         method: 'PATCH',
         headers: {
           'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}`,
           'Content-Type': 'application/json', 'Prefer': 'return=minimal',
         },
-        body: JSON.stringify({ [field]: now.toISOString() }),
-      });
+        body: JSON.stringify({ [field]: null }),
+      }).catch(() => {});
     }
 
     // ── Helper: send via Resend ───────────────────────────────────────────────
@@ -125,8 +145,10 @@ export default async function handler(req) {
       if (!user.email) continue;
       const hasRefl = hasReflectionAccess(user);
       const mail = CHECKIN_EMAILS.cron_checkin_6mo(EMAIL_CONTEXT(user, hasRefl));
-      const ok = await sendEmail(user.email, mail.subject, mail.html);
-      if (ok) { await markSent(user.id, 'checkin_sent_at'); sent6mo++; sentSoFar.sent6mo = sent6mo; }
+      if (!(await claimSend(user.id, 'checkin_sent_at'))) continue;
+      const ok = await sendEmail(user.email, mail.subject, mail.html).catch(() => false);
+      if (!ok) await releaseSend(user.id, 'checkin_sent_at');
+      if (ok) { sent6mo++; sentSoFar.sent6mo = sent6mo; }
       else { console.error('[cron-checkin] 6mo email failed:', redactEmail(user.email)); failed++; sentSoFar.failed = failed; }
     }
 
@@ -137,8 +159,10 @@ export default async function handler(req) {
       if (!user.email) continue;
       const hasRefl = hasReflectionAccess(user);
       const mail = CHECKIN_EMAILS.cron_checkin_12mo(EMAIL_CONTEXT(user, hasRefl));
-      const ok = await sendEmail(user.email, mail.subject, mail.html);
-      if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; sentSoFar.sent1yr = sent1yr; }
+      if (!(await claimSend(user.id, 'checkin_1yr_sent_at'))) continue;
+      const ok = await sendEmail(user.email, mail.subject, mail.html).catch(() => false);
+      if (!ok) await releaseSend(user.id, 'checkin_1yr_sent_at');
+      if (ok) { sent1yr++; sentSoFar.sent1yr = sent1yr; }
       else { console.error('[cron-checkin] 1yr email failed:', redactEmail(user.email)); failed++; sentSoFar.failed = failed; }
     }
 

@@ -105,6 +105,53 @@ if (pushable.length < 3) {
   }
 }
 
+// ── 1b. A send the log cannot record is not made ───────────────────────────
+/* The log is the cooldown. It was written after delivery with its failure
+   dropped, so a broken log write meant the same push on every run (A170).
+   Three cases: the log refuses, so Expo is never called; Expo refuses, so
+   the claimed row is marked failed; Expo delivers, so nothing is unmarked. */
+{
+  const run = async ({ logStatus, expoStatus }) => {
+    let expoCalls = 0;
+    const patches = [];
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = async (url, opts = {}) => {
+      const u = String(url);
+      const method = opts.method || 'GET';
+      if (/exp\.host/.test(u)) {
+        expoCalls += 1;
+        return new Response(JSON.stringify({ data: [{ status: 'ok' }] }), { status: expoStatus });
+      }
+      if (/\/rest\/v1\/profiles/.test(u)) return new Response(JSON.stringify([{ push_opt_in: true }]), { status: 200 });
+      if (/\/rest\/v1\/push_tokens/.test(u)) return new Response(JSON.stringify([{ token: 'ExponentPushToken[aaa]', platform: 'ios' }]), { status: 200 });
+      if (/\/rest\/v1\/push_sends/.test(u) && method === 'POST') {
+        return logStatus < 300 ? new Response(JSON.stringify([{ id: 41 }]), { status: logStatus }) : new Response('{}', { status: logStatus });
+      }
+      if (/\/rest\/v1\/push_sends/.test(u) && method === 'PATCH') { patches.push(u + ' ' + opts.body); return new Response(null, { status: 204 }); }
+      if (/\/rest\/v1\/push_sends/.test(u)) return new Response('[]', { status: 200 });
+      return new Response('[]', { status: 200 });
+    };
+    const alert = notificationFor('partner_finished', { partnerName: 'Sam' });
+    const res = await sendPush('person-1', alert).catch((e) => ({ sent: false, reason: String(e?.message) }));
+    globalThis.fetch = realFetch;
+    return { expoCalls, patches, res };
+  };
+  const noLog = await run({ logStatus: 503, expoStatus: 200 });
+  if (noLog.expoCalls > 0) {
+    problems.push('a push went to Expo when its log row could not be written. The log is the cooldown,'
+      + ' so the next run sends it again, and the one after.');
+  }
+  const refused = await run({ logStatus: 201, expoStatus: 500 });
+  if (!refused.patches.some((p) => /id=eq\.41/.test(p) && /"ok":false/.test(p))) {
+    problems.push('Expo refused a push and its claimed log row was not marked failed, so a push nobody'
+      + ' received counts against the cooldown and the cap.');
+  }
+  const delivered = await run({ logStatus: 201, expoStatus: 200 });
+  if (!delivered.res.sent || delivered.patches.length) {
+    problems.push(`a delivered push came back sent=${delivered.res.sent} with ${delivered.patches.length} change(s) to its log row.`);
+  }
+}
+
 // ── 2. The rate limits, at their edges ────────────────────────────────────
 {
   const event = notificationFor('partner_finished', { partnerName: 'Sam' });

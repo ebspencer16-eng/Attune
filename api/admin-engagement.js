@@ -512,24 +512,27 @@ export default async function handler(req) {
       'children', 'signup_source', 'pkg',
     ];
     const EVENT_COLS = 'kind,key,ms,owner_id,created_at';
+    /* Every paged read names an order. Without one Postgres may hand the same
+       row to two pages and skip another, and page_events is written to while
+       it is read, which is when that happens (A170). check-row-cap holds it. */
     const results = await Promise.all([
-      fetchProfiles((path) => all(url, key, path), `profiles?select=${columns.join(',')}`),
-      all(url, key, 'notes?select=id,owner_id,anchor_type,anchor_key,visibility,kind,created_at'),
-      all(url, key, 'tags?select=id,owner_id,name,standard_key'),
-      all(url, key, 'note_tags?select=note_id,tag_id'),
-      all(url, key, 'post_reads?select=post_id,owner_id,read_at'),
-      all(url, key, 'posts?select=id,title'),
+      fetchProfiles((path) => all(url, key, path), `profiles?select=${columns.join(',')}&order=id`),
+      all(url, key, 'notes?select=id,owner_id,anchor_type,anchor_key,visibility,kind,created_at&order=id'),
+      all(url, key, 'tags?select=id,owner_id,name,standard_key&order=id'),
+      all(url, key, 'note_tags?select=note_id,tag_id&order=note_id,tag_id'),
+      all(url, key, 'post_reads?select=post_id,owner_id,read_at&order=owner_id,post_id'),
+      all(url, key, 'posts?select=id,title&order=id'),
       // With the surface first. Migration 061 adds that column, and asking for
       // a column that does not exist fails the whole select, so the fallback
       // below asks again without it rather than reporting an empty table.
-      all(url, key, `page_events?select=${EVENT_COLS},surface`),
+      all(url, key, `page_events?select=${EVENT_COLS},surface&order=id`),
     ]);
 
     let [profilesR, notesR, tagsR, noteTagsR, readsR, postsR, eventsR] = results;
     let surfaceKnown = true;
     if (eventsR.error) {
       surfaceKnown = false;
-      eventsR = await all(url, key, `page_events?select=${EVENT_COLS}`);
+      eventsR = await all(url, key, `page_events?select=${EVENT_COLS}&order=id`);
     }
 
     // A query that failed is not a measure that is empty, and the page says

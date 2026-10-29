@@ -71,8 +71,11 @@ async function run(reject) {
     if (u.includes('beta_codes')) return reject === 'beta' ? bad() : j([]);
     if (u.includes('/orders')) return j([]);
     if (u.includes('/profiles')) {
-      /* The PATCH that marks someone nudged. Only the select returns rows. */
-      if ((init.method || 'GET').toUpperCase() !== 'GET') return j({});
+      /* The PATCH that marks someone nudged. With return=representation the
+         database answers the rows it changed, which is how the cron knows its
+         claim landed (A170); `{}` here was a claim about the server it does
+         not make. */
+      if ((init.method || 'GET').toUpperCase() !== 'GET') return j([PROFILE]);
       return j([PROFILE]);
     }
     return j([]);

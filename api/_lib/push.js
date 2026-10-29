@@ -79,14 +79,45 @@ export async function pushHistoryFor(profileId) {
   };
 }
 
-/** Write down that it went, or that Expo refused it. */
-async function logSend(profileId, kind, ok, detail) {
+/**
+ * ── CLAIM THE SEND BEFORE MAKING IT ──────────────────────────────────────
+ * The log is the cooldown's and the cap's only source, and it was written
+ * AFTER Expo had delivered, with a catch that dropped any failure. So a log
+ * write that failed was a push the cooldown never saw, and the next run sent
+ * it again, and the one after, for as long as the write kept failing: the one
+ * fault in this feature that turns into spam. Found in the A170 sweep.
+ *
+ * Now a row is written first, counted as sent, and nothing goes to Expo
+ * unless that write landed. A send that then fails is marked failed. If the
+ * marking fails too, the row still counts as sent, which costs one push that
+ * should have been allowed, never one that should not.
+ *
+ * Returns the row id, `true` for a row written without one coming back, or
+ * null when nothing was written and nothing may be sent.
+ */
+async function claimSend(profileId, kind) {
   const { url, key } = env();
-  if (!url || !key) return;
-  await fetch(`${url}/rest/v1/push_sends`, {
-    method: 'POST',
+  if (!url || !key) return null;
+  try {
+    const r = await fetch(`${url}/rest/v1/push_sends`, {
+      method: 'POST',
+      headers: { ...svc(key), 'Content-Type': 'application/json', Prefer: 'return=representation' },
+      body: JSON.stringify({ profile_id: profileId, kind, ok: true, detail: null }),
+    });
+    if (!r.ok) return null;
+    const rows = await r.json().catch(() => null);
+    return (Array.isArray(rows) && rows[0]?.id) || true;
+  } catch { return null; }
+}
+
+/** A claimed send that did not reach anybody: kept, marked failed. */
+async function settleFailed(claim, detail) {
+  const { url, key } = env();
+  if (!url || !key || claim === true || claim == null) return;
+  await fetch(`${url}/rest/v1/push_sends?id=eq.${encodeURIComponent(claim)}`, {
+    method: 'PATCH',
     headers: { ...svc(key), 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-    body: JSON.stringify({ profile_id: profileId, kind, ok, detail: detail ? String(detail).slice(0, 300) : null }),
+    body: JSON.stringify({ ok: false, detail: detail ? String(detail).slice(0, 300) : null }),
   }).catch(() => {});
 }
 
@@ -136,6 +167,9 @@ export async function sendPush(profileId, alert) {
   }));
   if (!messages.length) return { sent: false, reason: 'no_devices' };
 
+  const claim = await claimSend(profileId, alert.kind);
+  if (claim == null) return { sent: false, reason: 'could_not_log' };
+
   const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
   const accessToken = process.env.EXPO_ACCESS_TOKEN;
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
@@ -148,11 +182,11 @@ export async function sendPush(profileId, alert) {
     });
     body = await res.json().catch(() => null);
     if (!res.ok) {
-      await logSend(profileId, alert.kind, false, `expo ${res.status}`);
+      await settleFailed(claim, `expo ${res.status}`);
       return { sent: false, reason: 'expo_refused' };
     }
   } catch (e) {
-    await logSend(profileId, alert.kind, false, e?.message);
+    await settleFailed(claim, e?.message);
     return { sent: false, reason: 'expo_unreachable' };
   }
 
@@ -166,6 +200,6 @@ export async function sendPush(profileId, alert) {
     if (t?.details?.error === 'DeviceNotRegistered') await forgetToken(messages[i].to);
   }
   const ok = delivered > 0;
-  await logSend(profileId, alert.kind, ok, ok ? null : (tickets[0]?.message || 'no device accepted it'));
+  if (!ok) await settleFailed(claim, tickets[0]?.message || 'no device accepted it');
   return { sent: ok, reason: ok ? 'ok' : 'all_devices_refused' };
 }
