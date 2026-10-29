@@ -1,0 +1,3266 @@
+{
+ "v-comms-0": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both want where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that it becomes common and stops carrying weight. Name the specific thing, not the category."
+ },
+ "v-comms-1": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both take security as a given, so it rarely gets said. That is a settled place to be. The issue is that silence carries no information, so a hard stretch looks exactly like an easy one. Say it out loud after the next rough week."
+ },
+ "v-comms-2": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You recharge in similar ways. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it."
+ },
+ "v-comms-3": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both process emotion inwardly. That gives feelings room to settle before they're spoken. It also means nothing forces the deeper thing to the surface, so neither of you pushes the other toward the part that's harder to say. Ask for it sometimes, even when neither of you offers first."
+ },
+ "v-comms-4": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both tend to hint. That keeps things gentle, but when neither of you says it straight, the ask gets missed by both of you. Say the direct version sometimes anyway."
+ },
+ "v-comms-5": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both reserved with the small reaches for connection. Neither of you makes a show of them, which keeps things low-key. It also means they can pass unnoticed. Name one out loud now and then. The reach only lands when the other person knows it happened."
+ },
+ "v-comms-6": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both catch the small reaches for connection. Keep catching them out loud. The acknowledgment is what makes a bid land, not just the noticing."
+ },
+ "v-comms-7": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it."
+ },
+ "v-comms-8": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You handle conflict in similar ways. If you both engage, it can escalate fast. If you both step back, things go unsaid. Watch for whichever one is yours."
+ },
+ "v-comms-9": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both repair deliberately, with a real reset. That makes repairs count. It can also leave small ruptures waiting for a big enough moment. Let some be smaller and sooner."
+ },
+ "v-comms-10": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both repair casually, without much ceremony. Because it comes so naturally, it's easy to skip naming that a repair even happened. Say it landed."
+ },
+ "v-comms-11": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default."
+ },
+ "v-comms-12": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You handle feedback in similar ways. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early."
+ },
+ "v-comms-13": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both need where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that it turns into a routine and stops carrying weight. Make it specific this week: name the thing, not the category."
+ },
+ "v-comms-14": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} needs it said plainly; ${hiName} leans the same way. Close match, so neither of you is left waiting. The one gap: when life gets busy, the saying is the first thing to drop. Put it somewhere it survives a hard week."
+ },
+ "v-comms-15": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} needs where they stand said out loud; ${hiName} is steady either way. That steadiness can read as not needing to say it. It costs ${hiName} very little to say it anyway, and it lands."
+ },
+ "v-comms-16": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} needs it voiced; ${hiName} treats it as settled and does not think to say it. The quiet is not withholding, and the asking is not doubt. The shift: ${hiName} says it once this week unprompted, before ${loName} has to ask."
+ },
+ "v-comms-17": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} needs where they stand said out loud. ${hiName} takes it as given and rarely says it. This is the gap where a long quiet stretch means two completely different things. Agree on a small, regular way it gets said. It matters more to one of you than the other, and that is fine."
+ },
+ "v-comms-18": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both like hearing it, without needing much. Comfortable match. Watch for it thinning out over time, since neither of you will chase it. Say it when you notice it, not only when it is asked for."
+ },
+ "v-comms-19": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} likes it said; ${hiName} is comfortable either way. No real strain here. ${hiName} can be the one who says it first, since it costs them less."
+ },
+ "v-comms-20": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} likes hearing it; ${hiName} assumes it and moves on. The shift: ${hiName} answers the unasked question sometimes, rather than waiting for a prompt."
+ },
+ "v-comms-21": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} wants it said now and then; ${hiName} treats it as long since settled. ${hiName} may not hear the ask, because it arrives quietly. ${loName} can ask outright, and ${hiName} can take the ask at face value."
+ },
+ "v-comms-22": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "Neither of you needs it said, and neither of you goes looking for it. That is a low-maintenance place to be. The gap shows up after a rough patch, when neither of you names that you are okay. Say it once out loud after the next hard week."
+ },
+ "v-comms-23": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is steady either way; ${hiName} takes it as given. Nothing is straining. The one thing worth doing is saying it during a good stretch, so it is available during a bad one."
+ },
+ "v-comms-24": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} does not need much; ${hiName} needs none at all. You will rarely talk about where you stand. That works until something is actually off and there is no signal either way. Build one small check-in you both do on purpose."
+ },
+ "v-comms-25": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both take it as settled and rarely say it. Secure and uncomplicated. The risk is that silence carries no information, so a hard stretch looks exactly like an easy one. Name it out loud once a month, even when nothing prompts it."
+ },
+ "v-comms-26": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} assumes it; ${hiName} assumes it more. Neither of you will bring it up. That is fine while things are steady. Pick one moment, an anniversary or the start of a month, and say it then."
+ },
+ "v-comms-27": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both treat security as a given and neither of you asks for confirmation. Genuinely settled. The only thing to watch: after something hard, neither of you will be the one to say you are okay. Decide now who says it first next time."
+ },
+ "v-comms-28": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both recharge in solitude. The risk is that neither of you flags when you're depleted. You just go quiet. Try naming it before you disappear: \"I need a low-key evening.\" It prevents the silence from reading as something else."
+ },
+ "v-comms-29": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} recharges alone; ${hiName} leans the same way, slightly more flexible. Close match, but don't let the ease of being separate quietly turn into less connection than you want. One shared ritual, dinner, a walk, holds the thread."
+ },
+ "v-comms-30": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} restores alone; ${hiName} leans toward people and togetherness. The shift: when ${loName} needs to withdraw, name it as a recharge request rather than going quiet. ${hiName} is less likely to misread it when it's said out loud."
+ },
+ "v-comms-31": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both lean toward quiet restoration. Good match. You're unlikely to drain each other. The one gap: neither of you may push for togetherness when it's actually needed. Sometimes one person has to reach, even when it doesn't come naturally."
+ },
+ "v-comms-32": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} leans toward recharging alone; ${hiName} leans toward connection. One shift: when you've both had a long day, name your mode before defaulting to it. \"I need an hour to decompress\" lands very differently than silently withdrawing."
+ },
+ "v-comms-33": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} tends toward quiet; ${hiName} genuinely energizes from togetherness. The shift: ${hiName} shouldn't read ${loName}'s quiet time as withdrawal, and ${loName} should flag when they're recharged and ready to reconnect. Both need to become signals."
+ },
+ "v-comms-34": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both genuinely flexible about how you restore. That's adaptive, but it can mean connection gets left to chance. When stress hits, each of you may default to a mode the other doesn't know about. Check in when things are hard."
+ },
+ "v-comms-35": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${hiName} leans more toward needing togetherness than ${loName} does. ${hiName} can name when they want company rather than hoping ${loName} picks it up. ${loName} tends to assume everyone's preferences match their own."
+ },
+ "v-comms-36": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is neutral; ${hiName} genuinely energizes from people and connection. ${hiName}'s need is a real preference worth designing around. Build in deliberate closeness even when ${loName} would otherwise be fine either way."
+ },
+ "v-comms-37": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "Both of you lean toward connection, ${hiName} more strongly. When one of you is genuinely depleted and doesn't have energy for togetherness, build in an easy way to signal it: \"I'm low tonight but I'm not going anywhere.\""
+ },
+ "v-comms-38": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both restore through people and being together. Strong match in daily energy needs. The risk: when you're both depleted at the same time, neither of you may feel like being \"on\" for the other. Name it when it happens rather than both performing okay-ness."
+ },
+ "v-comms-39": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both process internally before sharing. That prevents blurting, but it also means important things can stay unspoken for a long time. The shift: if something's been sitting with you for more than 48 hours, name it. Even \"I've been sitting with something\" opens the door."
+ },
+ "v-comms-40": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is strongly internal; ${hiName} leans similar. Neither of you is rushing to the surface. Watch for the slow drift where things stay unsaid because neither pushed. A regular check-in, \"anything on your mind this week?\", creates the opening."
+ },
+ "v-comms-41": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} processes privately; ${hiName} is flexible. The shift for ${loName}: trust that sharing before you're fully sorted won't make you look uncertain. It gives ${hiName} a chance to feel included in what's actually going on."
+ },
+ "v-comms-42": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${hiName} leans more toward sharing than ${loName}. ${hiName} may feel like they're doing most of the initiating when it comes to talking things through. ${loName} can start sometimes, even when nothing is wrong."
+ },
+ "v-comms-43": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is neutral; ${hiName} genuinely processes out loud and needs to share. Give ${hiName} explicit room to think aloud without ${loName} treating every word as a conclusion. Processing isn't the same as deciding."
+ },
+ "v-comms-44": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} asks directly; ${hiName} tends to signal rather than state. A real difference. The shift: ${loName} can ask \"what do you need right now?\" when something seems off. It gives ${hiName} an opening without them having to initiate the ask."
+ },
+ "v-comms-45": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} states needs directly; ${hiName} signals indirectly. The gap creates the \"you should just know\" dynamic on one side and \"just tell me what you want\" frustration on the other. ${loName} can model the direct ask gently, \"I'd love X, what about you?\", to show it's safe."
+ },
+ "v-comms-46": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} leans direct; ${hiName} tends to hint. A moderate difference. When ${loName} doesn't catch ${hiName}'s signal, ${hiName} can try: \"I was hoping you'd offer to\u2026\", it names the expectation without accusation."
+ },
+ "v-comms-47": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both somewhere in the middle, not always direct, not always signaling. Watch for: needs slipping through because neither of you pushed to name them. A weekly \"what do you need from me this week?\" keeps it simple."
+ },
+ "v-comms-48": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${hiName} tends a bit more indirect than ${loName}. ${loName} can reflect back what they observe, \"it sounds like you might need X\", rather than waiting. It gives ${hiName} a bridge between signaling and asking."
+ },
+ "v-comms-49": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is neutral; ${hiName} is quite indirect in how they ask. ${hiName} doesn't have to change their style completely, but practicing one direct ask per week, on something small, makes the indirect signals land better when they matter."
+ },
+ "v-comms-50": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both tend toward indirect communication around needs. That works when you're well-attuned, but it also means things can go unmet because neither named them. The shift: once a week, name one thing you actually need from each other. Directly."
+ },
+ "v-comms-51": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both tend to signal needs rather than state them. The relationship carries real goodwill. You're both trying not to burden each other. The cost is that needs can quietly go unmet. Build a weekly \"what do you need?\" into your rhythm. It removes the weight from the ask."
+ },
+ "v-comms-52": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is very reserved; ${hiName} is a bit more present. Close match, but the bid volume between you is probably low. Worth deliberately creating more moments, share more small things, even when they feel insignificant."
+ },
+ "v-comms-53": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is reserved; ${hiName} is in the middle. ${hiName} can start noticing and naming when ${loName} makes a small bid, \"you seemed like you wanted to say something earlier\", making it easier for ${loName} to reach again."
+ },
+ "v-comms-54": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} tends quieter; ${hiName} is more attuned to small moments. ${loName} can become more aware of what ${hiName} does to reach for connection, and make a deliberate effort to turn toward it, even when it's a small thing."
+ },
+ "v-comms-55": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} leans reserved; ${hiName} is highly responsive. ${hiName} may feel like they're always the one reaching. The shift: ${loName} can pick one type of bid and practice it consistently, asking about ${hiName}'s day, noticing something they did. It doesn't have to be grand."
+ },
+ "v-comms-56": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both somewhere in the middle. Workable, but \"somewhere in the middle\" can mean neither reaches reliably. Build in deliberate connection moments rather than leaving it to feel."
+ },
+ "v-comms-57": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is neutral; ${hiName} is very attuned and responsive. ${hiName} genuinely values these small moments, and ${loName} can create more of them even when they'd otherwise not think about it. It doesn\u2019t take much but it matters a lot."
+ },
+ "v-comms-58": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both responsive to each other. That builds a warm, attentive dynamic. Watch for: when one of you is distracted or checked out, the other can feel it acutely. Agree to name it: \"I feel like I haven't had your attention today.\""
+ },
+ "v-comms-59": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both highly attuned and responsive. The relationship probably feels warm and connected. Watch for: because both of you reach for connection readily, check in about whether the volume feels right. Too many bids can occasionally feel like pressure rather than warmth."
+ },
+ "v-comms-60": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} moves toward resolution quickly; ${hiName} is flexible. ${hiName} can signal when they're ready. It helps ${loName} not feel like they're carrying the weight of bringing things up."
+ },
+ "v-comms-61": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} addresses things quickly; ${hiName} tends to need more time. This can cause tension. Agree in advance that when ${hiName} asks for time, ${loName} can ask for a return window: \"when should we come back to this?\", turns space into a plan."
+ },
+ "v-comms-62": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} wants to resolve things quickly; ${hiName} needs significant space first. One of the most common conflict mismatches. Name the pattern in a calm moment. Agree: ${hiName} commits to a specific return time, and ${loName} trusts that as a promise, not avoidance."
+ },
+ "v-comms-63": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} leans toward quicker resolution; ${hiName} is flexible. ${hiName} can signal readiness. It helps ${loName} not always be the one initiating."
+ },
+ "v-comms-64": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is neutral; ${hiName} strongly needs space before engaging. The shift: ${hiName} can share why time matters, often it's about saying things more accurately, not avoiding the conversation. That reframe helps ${loName} understand the delay isn't rejection."
+ },
+ "v-comms-65": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both tend toward more formal, deliberate repair. The aftermath can feel long. The shift: agree on a small signal that says \"I'm not fully okay yet, but we're okay\", separate from full resolution. It prevents the silence from reading as something worse."
+ },
+ "v-comms-66": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} takes significantly longer to recover; ${hiName} moves on quickly, a noteworthy gap. Agree: ${hiName} moving on first doesn't mean it's resolved. ${loName} can name a window, \"I'll be ready to put this behind me by tomorrow morning\", gives both something to work with."
+ },
+ "v-comms-67": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} tends slower; ${hiName} tends to recover more quickly. Moderate difference. Try a check-in 24 hours after conflict, \"are we good?\", It asks little but can reveal a lot."
+ },
+ "v-comms-68": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both somewhere in the middle. Watch for: neither of you having a strong pull to check in, which can leave repair feeling incomplete. A \"are we actually good?\" the day after a hard moment helps."
+ },
+ "v-comms-69": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is flexible; ${hiName} moves on very quickly. ${hiName}'s quick return to normal doesn't always mean ${loName} is there yet. Check in, don't assume."
+ },
+ "v-comms-70": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both listen by going quiet and staying with it. Neither of you rushes to respond. That makes you calm to talk to. The risk: silence can read as absence. A small signal, a nod, a short \"I'm with you,\" tells the other you're still there."
+ },
+ "v-comms-71": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} listens quietly and stays with it; ${hiName} leans the same way, a little more active. Close match. Just check that neither of you reads the other's quiet as checking out. A word now and then confirms you're tracking."
+ },
+ "v-comms-72": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} listens by sitting with it; ${hiName} shifts between quiet and active. The shift: ${hiName} can name when they're just receiving versus ready to engage, so ${loName} isn't guessing which one is happening."
+ },
+ "v-comms-73": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} listens in silence and stays there; ${hiName} listens by engaging and drawing it out. A wide gap, and an easy one to misread. ${hiName}'s questions aren't interruption. ${loName}'s quiet isn't disinterest. Name what each of you is doing so neither has to assume."
+ },
+ "v-comms-74": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both adjust how you listen depending on the day. That's adaptive. Watch for: in a hard moment, you each default to a mode the other didn't expect. When it matters, say what you need, presence or engagement."
+ },
+ "v-comms-75": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is flexible; ${hiName} listens by engaging, reflecting, asking. ${hiName}'s questions are how they connect, not a demand for more than you have. ${loName} can meet it with a short answer rather than retreating into quiet."
+ },
+ "v-comms-76": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both listen by engaging, asking, reflecting back. Conversations move. Watch for: two people responding at once crowds out the actual listening. Let one person finish and sit with it before the other steps in."
+ },
+ "v-comms-77": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} feels love through words; ${hiName} is flexible. The shift: ${hiName} can default slightly more toward verbal expression when uncertain. It's low-cost and high-return for a words-oriented partner."
+ },
+ "v-comms-78": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both genuinely receptive to both words and acts. Flexible. Watch for: when neither of you has a strong pull, love expression can get inconsistent. Build in deliberate moments rather than leaving it to spontaneity."
+ },
+ "v-comms-79": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is neutral; ${hiName} feels love primarily through acts and presence. For ${hiName}, showing up and doing things is the language of care. ${loName} can practice acts of service, planning something, making something easier, even when verbal expression would feel more natural."
+ },
+ "v-comms-80": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You both lean toward acts and presence as expressions of care. A close match. Neither of you may say what you feel in words very often, which means the verbal thread can fade. Naming what you appreciate explicitly, occasionally, holds the relationship in the light."
+ },
+ "v-comms-81": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "Both of you lean toward acts, ${hiName} more strongly. Good match. When both of you are very busy and the acts start slipping, neither may say anything, and the connection can fade quietly. Name when you notice it dropping."
+ },
+ "v-comms-82": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} leans guarded; ${hiName} is very comfortable with direct feedback, a noteworthy gap. ${hiName} needs to slow down delivery. One thing, specific, followed by silence. Not a list, not a conversation. ${loName} needs time to sit with it."
+ },
+ "v-comms-83": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You're both in the middle. Watch for: feedback needing to happen but neither person reaching for it. A norm: one thing each month that each person wants to mention, raised gently. Small volume, regular cadence."
+ },
+ "v-comms-84": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "${loName} is neutral; ${hiName} is very open to feedback. ${loName} can communicate what format works best, \"I'd rather you bring it up in the moment\" or the opposite. Giving ${hiName} the protocol makes it easier."
+ },
+ "v-comms-85": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "{LO} refuels alone, {HI} refuels around people. Neither of you can read the other's tank from the outside. This week, say it out loud before you hit empty, not after. One sentence: 'I need an hour on my own' or 'I need to be around people tonight.'"
+ },
+ "v-comms-86": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "Close the gap between feeling it and saying it"
+ },
+ "v-comms-87": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "{HI} names it in the moment. {LO} works it out inside first and brings it later. The quiet is not withholding and the speed is not pressure. This week, {LO} shares one thing while it is still half-formed, and {HI} waits a beat before filling the silence."
+ },
+ "v-comms-88": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "{LO} needs it said. {HI} treats it as settled. That difference decides what a long quiet stretch means to each of you. Once this week, say it plainly and unprompted. One sentence. Notice how it lands."
+ },
+ "v-comms-89": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "Give it in their currency, not yours"
+ },
+ "v-comms-90": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "{LO} feels it in words, {HI} feels it in what gets done. You are both showing up, in the language that reads as love to you. This week, each of you does one thing in the other's currency instead of your own."
+ },
+ "v-comms-91": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "{LO} listens by reflecting it back. {HI} listens by helping fix it. Both are attention. Neither is what the other wants in the moment. This week, whoever is bringing something says first: 'I want you to just hear this' or 'I want help solving this.'"
+ },
+ "v-comms-92": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "{LO} wants it resolved now. {HI} needs space before they can think. Without a plan, the pressing reads as attack and the space reads as abandonment. Agree this week on the words for a pause and the time it ends. The person who calls it is the person who restarts it."
+ },
+ "v-comms-93": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "{LO} needs it said out loud to feel finished. {HI} repairs through warmth and moving on. One of you can be done while the other is still waiting. This week, name what closure takes for each of you, and say it before the next disagreement, not during."
+ },
+ "v-comms-94": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "{LO} holds feedback until it matters enough. {HI} says it as it comes. Held-back feedback arrives heavier than it needed to be. This week, when something lands a little off, name it the same day, in one sentence, not to fight but to say it."
+ },
+ "v-comms-95": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You process on similar rhythms, so neither of you is left guessing. That holds while life is steady. Say the quiet stuff out loud once this week anyway, so the habit is there when it is not."
+ },
+ "v-comms-96": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "Pressure-test it while things are calm"
+ },
+ "v-comms-97": {
+  "files": [
+   "api/_content/v1.js"
+  ],
+  "current": "You handle hard moments in similar ways, so they rarely escalate. The time to agree on what happens in a genuinely bad week is a good one. Talk it through before you need it."
+ },
+ "v-comms-98": {
+  "files": [
+   "api/_lib/comms-plan.js"
+  ],
+  "current": "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens."
+ },
+ "v-comms-99": {
+  "files": [
+   "api/_lib/comms-plan.js"
+  ],
+  "current": "Most couples only talk about their relationship when something feels off. ${youName} and ${themName} have something worth naming explicitly: real alignment. Talking about what you're doing well, alongside what feels hard, reinforces it."
+ },
+ "v-comms-100": {
+  "files": [
+   "api/_lib/comms-plan.js"
+  ],
+  "current": "Keep checking in"
+ },
+ "v-comms-101": {
+  "files": [
+   "api/_lib/comms-plan.js"
+  ],
+  "current": "Even with slightly different scores, you and ${themName} navigate ${label} in compatible ways."
+ },
+ "v-comms-102": {
+  "files": [
+   "api/_lib/comm-domains.js"
+  ],
+  "current": "All couples navigate conflict. What sets healthy relationships apart is the ability to communicate effectively in difficult situations."
+ },
+ "v-comms-103": {
+  "files": [
+   "api/_lib/comm-domains.js"
+  ],
+  "current": "The mechanics of your relationship. Understanding your unique dynamic helps you communicate in a way that will be interpreted clearly."
+ },
+ "v-comms-104": {
+  "files": [
+   "api/_lib/comm-domains.js"
+  ],
+  "current": "How you handle feelings before sharing thoughts aloud. Understand each other's approaches to establish supportive communication methods."
+ },
+ "v-comms-105": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Arguments between you can run hot, but one of you does not always engage on the spot. It's not a retreat, use the pause as an opportunity to stabilize."
+ },
+ "v-comms-106": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Both of you bring real emotional energy, though one of you runs a touch cooler. That small difference can keep a heated moment from intensifying."
+ },
+ "v-comms-107": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Both of you bring real emotional energy, and neither of you sits at full intensity, so a heated moment has less to feed on."
+ },
+ "v-comms-108": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "High expressiveness can amplify when you both light up at once, but one of you sits closer to the middle here which can help tensions stay in check. Under stress, emotions can flare and that amplification returns."
+ },
+ "v-comms-109": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "High expressiveness can amplify when you both light up at once. You both sit closer to neutral here, so that amplification is less of a default. Under stress, emotions can still flare and amplification returns."
+ },
+ "v-comms-110": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The feelings behind hard moments can get skipped on the way to a fix, though one of you flags it more than a fully guarded partner would. That flag creates a good opportunity for you both to take a pause."
+ },
+ "v-comms-111": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The feelings behind hard moments can get skipped on the way to a fix. Both of you flag it more than fully guarded partners would, use those flags to take a pause."
+ },
+ "v-comms-112": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Two internal processors can go a long time without surfacing what's going on. One of you sits closer to the middle and will often be ready to talk sooner. Use that opening instead of waiting to both be ready."
+ },
+ "v-comms-113": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Two internal processors can go a long time without surfacing what's going on. You both sit closer to the middle, so you're often ready to talk sooner than two fully guarded partners. Use the opening instead of waiting to both be ready."
+ },
+ "v-comms-114": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The coming-back-together step can drag because neither of you rushes it. One of you sits closer to the middle and is sometimes ready to talk sooner. Let that person open the door without it becoming their job every time."
+ },
+ "v-comms-115": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The coming-back-together step can drag because neither of you rushes it. Both of you sit closer to the middle and are sometimes ready sooner than two full withdrawers. Whoever surfaces first can open the door, and it won't always be the same person."
+ },
+ "v-comms-116": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Two withdrawers can go long stretches without addressing things. One of you also holds a bit more back, so unsaid feelings build quietly. Standing check-ins can be a helpful solution to discuss what you are each feeling."
+ },
+ "v-comms-117": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Two withdrawers can go long stretches without addressing things. Both of you hold a bit more back than fully open partners, so unsaid feelings build quietly. Standing check-ins help you name what you are each feeling."
+ },
+ "v-comms-118": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Neither of you starts the harder conversation by default. One of you sits closer to the middle and may reach first on some things. That person opening the door is the pattern-breaker, make the reach a habit not an exception."
+ },
+ "v-comms-119": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Neither of you starts the harder conversation by default, but both of you sit closer to neutral and may reach first on some things. Either of you opening the door breaks the pattern, so make the reach a habit not an exception."
+ },
+ "v-comms-120": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The relationship looks stable, and mostly is. One of you reveals a little more of what's underneath, which is your early-warning system when things build up."
+ },
+ "v-comms-121": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The relationship looks stable, and mostly is. Both of you reveal a little more of what's underneath, which is your early-warning system when things build up."
+ },
+ "v-comms-122": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Important things can go unsaid for a long time. One of you shows more than a fully guarded partner, so there are more openings than there could be. Take them when they appear."
+ },
+ "v-comms-123": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Important things can go unsaid for a long time, but both of you show more than fully guarded partners, so there are more openings than the type implies. Take them when they appear."
+ },
+ "v-comms-124": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Though you both sit close to neutral, {EXP} leans slightly expressive and {GRD} tends to take a minute to process. You two both want a productive conversation, what you're experiencing is just a small difference in timing."
+ },
+ "v-comms-125": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{EXP} tends to start the deeper conversations, but one of you sits closer to the middle than the label suggests, so the map placement should read less like fixed roles and more like who happens to speak first."
+ },
+ "v-comms-126": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "One of you sits close to the middle on how much you show. On an easy day, that person shares freely. Under stress, they can pull inward, which may feel sudden to the other."
+ },
+ "v-comms-127": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "You both sit close to the middle on how much you show. On an easy day you both may share freely, but under stress, either of you can pull inward, which may feel sudden to the other."
+ },
+ "v-comms-128": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "When something is off, you're often not in the same place at once. {RCH} is ready sooner, {WDR} needs a moment. One of you sits close to the axis here, so the gap is smaller than the map labels suggest and may flip depending on the situation."
+ },
+ "v-comms-129": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "When something is off, you're often not in the same place at once. {RCH} is ready sooner, {WDR} needs a moment. You both sit close to the axis here, so the gap is smaller than the map labels suggest and often flips depending on the situation."
+ },
+ "v-comms-130": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The pursue-and-retreat loop is real, but muted here. Because one of you flexes toward neutral, the loop is easy to interrupt and rarely runs far. Name it early and it will often dissolve."
+ },
+ "v-comms-131": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The pursue-and-retreat loop is real, but muted here because you both flex toward neutral. This means the loop is easy to interrupt and rarely runs far, name it early and it will often dissolve."
+ },
+ "v-comms-132": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Repair tends to start on one person's timeline. Since the two of you are closer to neutral in this regard, whoever is ready can start the conversation, and it will not usually be the same person every time."
+ },
+ "v-comms-133": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Repair tends to start on one person's timeline. Since you're both close to neutral here, whoever is ready can start, and it won't usually be the same person every time."
+ },
+ "v-comms-134": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "What reads as pulling away is usually needing space, not distance. One of you shows a little less while processing, so say the reassuring part out loud rather than trusting it to land on its own."
+ },
+ "v-comms-135": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "What reads as pulling away is usually needing space, not distance. You both show a little less while processing, so say the reassuring part out loud rather than trusting it to land on its own."
+ },
+ "v-comms-136": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "You sometimes mean one thing and the other receives something different, though one of you is more communicative than a fully guarded partner, so the signal usually gets through with a little checking."
+ },
+ "v-comms-137": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "You sometimes mean one thing and the other receives something different. You both sit closer to neutral than the labels suggest, so the signal usually gets through with a little checking."
+ },
+ "v-comms-138": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{EXP} tends to start the emotional depth. But because one of you sits close to neutral this can shift with the situation."
+ },
+ "v-comms-139": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{EXP} tends to start the emotional depth, but you both sit close to neutral here, so this role is not fixed and will often shift based on the situation."
+ },
+ "v-comms-140": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "One of you sits closer to neutral on how much you show. On steady days that person meets the other partway. Under strain they can withdraw, and that is where a rift can become noticeable."
+ },
+ "v-comms-141": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "You both sit close to neutral with regard to how much you show. On steady days you meet in the middle, but under strain, either of you can withdraw, and that is where a rift can become noticeable."
+ },
+ "v-comms-142": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "When something is hard, you're often not in the same place at once. {RCH} is ready, {WDR} needs room. One of you sits near neutral, so the timing gap is relatively narrow and shifts by topic."
+ },
+ "v-comms-143": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "When something is hard, you're often not in the same place at once. {RCH} is ready, {WDR} needs room. You both sit near neutral, so the timing gap is narrow and roles shift based on the topic."
+ },
+ "v-comms-144": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{RCH_pos} move toward resolution can close off the space {WDR} needs. Because one of you flexes toward neutral, that crowding is more mild here. A short agreement on when to talk usually settles it."
+ },
+ "v-comms-145": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{RCH_pos} move toward resolution can crowd the space {WDR} needs. Because you both flex toward neutral, that crowding is mild here. A short agreement on when to talk usually settles it."
+ },
+ "v-comms-146": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{WDR_pos} visible emotion during withdrawal can read to {RCH} as something to fix now. One of you sits closer to the middle on showing, so signals can be easier to read than you may expect. Ask what things mean instead of assuming."
+ },
+ "v-comms-147": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{WDR_pos} visible emotion during withdrawal can read to {RCH} as something to fix now. You both sit closer to the middle on showing, so signals are easier to read than the pairing suggests. Ask what things mean instead of assuming."
+ },
+ "v-comms-148": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{RCH} carries a low push toward resolving, and {WDR} usually needs more time. One of you sits near neutral, so that gap is not always noticeable and depends on the issue."
+ },
+ "v-comms-149": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{RCH} carries a low push toward resolving, and {WDR} usually needs more time. You both sit near neutral, so that gap is often not noticeable and depends on the issue."
+ },
+ "v-comms-150": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "When something is wrong, neither of you reaches first by default. Because one of you leans toward reaching, problems can sit for less time when that person leads, make that the norm."
+ },
+ "v-comms-151": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "When something is wrong, neither of you reaches first by default. Because you both lean toward reaching, problems don't always sit for long. Though it can be uncomfortable, make reaching the norm."
+ },
+ "v-comms-152": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Neither of you offers much emotional visibility, so it can look more okay outside than in. One of you shows more than a fully guarded partner, which is your opening and shouldn't be taken for granted."
+ },
+ "v-comms-153": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Neither of you offers much emotional visibility, so it can look more okay outside than in. Both of you show more than fully guarded partners, which is your opening and shouldn't be taken for granted."
+ },
+ "v-comms-154": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Two private processors can coexist without reaching emotional depth together. One of you leans toward showing a little more, so let that person set a slightly more open baseline and try to maintain it together."
+ },
+ "v-comms-155": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Two private processors can coexist without reaching emotional depth together. Both of you lean toward showing a little more, so set a slightly more open baseline and maintain it together."
+ },
+ "v-comms-156": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The coming-back-together step can drag because neither of you rushes it. One of you sits closer to neutral and is sometimes ready first. Let that person start conversations without it becoming their job."
+ },
+ "v-comms-157": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "The coming-back-together step can drag because neither of you rushes it. Both of you sit closer to neutral which means either may be ready first. Whoever is ready can start, it won't always be the same person."
+ },
+ "v-comms-158": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "You can both wait a long time for the other to return. Since one of you flexes toward reaching, the wait can sometimes be shorter. Name the feeling rather than reading it as abandonment."
+ },
+ "v-comms-159": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "You can both wait a long time for the other to return. Since you both flex toward reaching, the wait is usually shorter than it feels. Name the feeling rather than reading it as abandonment."
+ },
+ "v-comms-160": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "{EXP_pos} visible emotion during withdrawal can be hard for {GRD} to interpret. One of you sits closer to neutral on showing, so emotions can be more visible than the pairing suggests. A quick \"this isn't a call to fix it\" clears up intentions."
+ },
+ "v-comms-161": {
+  "files": [
+   "api/_lib/near-axis.js"
+  ],
+  "current": "Visible emotion during withdrawal can be confusing to interpret. You both sit close to neutral, which means emotions are sometimes visible and may be hard for either of you to place. A quick \"this isn't a call to fix it\" clears up intentions."
+ },
+ "v-coupletype-0": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} both move toward resolution and process outward. High warmth and emotional availability in both directions. Neither partner has to coax the other into the conversation or wait for the signal that it's okay to share what's going on."
+ },
+ "v-coupletype-1": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The risk here is feedback loops rather than disconnection. When both of you are feeling something strongly, the intensity can amplify rather than settle. One of you naming that, 'I think we're both escalating things right now', is usually enough to break the loop."
+ },
+ "v-coupletype-2": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Hard conversations aren't avoided as often"
+ },
+ "v-coupletype-3": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Arguments between you are probably not subtle. The work is making sure what comes out is accurate, not just loud."
+ },
+ "v-coupletype-4": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When both of you are feeling something strongly, the loop can escalate. One person naming it can break the cycle before it needs to get bigger."
+ },
+ "v-coupletype-5": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space."
+ },
+ "v-coupletype-6": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "I need a minute with this before I put it out there. Give me twenty minutes."
+ },
+ "v-coupletype-7": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The visibility is a gift"
+ },
+ "v-coupletype-8": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it is what makes real closeness possible."
+ },
+ "v-coupletype-9": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "I know this is a lot right now, but I'm glad we can actually see each other in it."
+ },
+ "v-coupletype-10": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Resolution is the shared instinct. Privacy is the shared method of processing."
+ },
+ "v-coupletype-11": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made and disagreements get worked through. The practical machinery of the relationship runs efficiently, and quietly."
+ },
+ "v-coupletype-12": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Efficient repair can mean ending the conversation before it is actually settled. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly."
+ },
+ "v-coupletype-13": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Two internal processors can go too long without sharing"
+ },
+ "v-coupletype-14": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The emotional texture of hard moments can sometimes get skipped in the move toward resolution."
+ },
+ "v-coupletype-15": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Check if it's resolved or just closed"
+ },
+ "v-coupletype-16": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Fast repair is a real strength. The risk is ending a conversation or apologizing before things are fully settled."
+ },
+ "v-coupletype-17": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Ask what's going on underneath the plan"
+ },
+ "v-coupletype-18": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} are both comfortable with the practical mode. Add a deliberate question to get at the emotional weight underneath the practical action. This changes the quality of the conclusion."
+ },
+ "v-coupletype-19": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "How does this actually feel for you, beyond what it means?"
+ },
+ "v-coupletype-20": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Give the slower moments their time"
+ },
+ "v-coupletype-21": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back."
+ },
+ "v-coupletype-22": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Both need space first. Both carry it visibly when withdrawn."
+ },
+ "v-coupletype-23": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When things get hard, {U} and {P} both pull back before coming forward. Neither of you is avoiding, you're both protecting the quality of the eventual conversation. When you do come back together, you both bring the full emotional weight of what you've been carrying."
+ },
+ "v-coupletype-24": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Two people who both need space can wait for the other to come back first for a very long time. That waiting can start to feel like abandonment even when it's just process. Build an agreed-upon signal, even something small, that means 'I'm ready when you are' without requiring a full conversation to get there."
+ },
+ "v-coupletype-25": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Open-ended space is more fragile than a set limit"
+ },
+ "v-coupletype-26": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Things that need addressing can be delayed a long time"
+ },
+ "v-coupletype-27": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Both {U} and {P} tend to wait. The good news is that whoever initiates the return usually gets a warmer reception than they expect. Take the step."
+ },
+ "v-coupletype-28": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Bound the space with a time"
+ },
+ "v-coupletype-29": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "'I need some time' is not as useful as 'I need until tonight.' A specific return time lets the other person stop the worried waiting and trust the process."
+ },
+ "v-coupletype-30": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} don't need a full conversation to signal that you're okay again. A small gesture, a cup of tea, a hand on the shoulder, does most of the work."
+ },
+ "v-coupletype-31": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Both withdraw. Both hold it close. A lot lives under the surface."
+ },
+ "v-coupletype-32": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, calm, and emotionally deep, but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows."
+ },
+ "v-coupletype-33": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Important things can go unsaid for a very long time. The comfort with quiet can become avoidance without either person intending it. The relationship looks more okay from the outside than it sometimes is from the inside. Creating a deliberate structure for openness is worth more here than in most pairings."
+ },
+ "v-coupletype-34": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Feelings can be heavy even if they are not spoken"
+ },
+ "v-coupletype-35": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Build in the opening, don't wait for it to happen"
+ },
+ "v-coupletype-36": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "A weekly check-in, even 15 minutes, creates a structure for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make."
+ },
+ "v-coupletype-37": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Share the rougher draft"
+ },
+ "v-coupletype-38": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Both {U} and {P} wait until something is fully formed before sharing it. Practice sharing it half-formed."
+ },
+ "v-coupletype-39": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Different approaches to resolution, both heading in the same direction."
+ },
+ "v-coupletype-40": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} both move toward resolution when things get hard, you're pulling in the same direction. Where you differ is in how the internal experience travels: one processes outward, and one holds it closer. The destination is the same. The path there looks different."
+ },
+ "v-coupletype-41": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The expressive partner can feel like the guarded partner isn't sharing what's actually going on. The guarded partner can feel like too much is being put into the shared space before it's ready. Neither is wrong. The registers are just different."
+ },
+ "v-coupletype-42": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "You are complementary processors, thoughtful and eager"
+ },
+ "v-coupletype-43": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Processing can feel like withholding to one of you"
+ },
+ "v-coupletype-44": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{EXP} tends to process out loud. {GRD} needs to think it through first, then bring it. Same conversation, different way in."
+ },
+ "v-coupletype-45": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When the conversation does happen, it tends to go somewhere useful. You're not fighting about whether to have it, just when."
+ },
+ "v-coupletype-46": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Name which mode you're in"
+ },
+ "v-coupletype-47": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "'I need to process this out loud' vs. 'I need to think before I talk.' That one sentence tells the other person how to meet you. Use it early in the process."
+ },
+ "v-coupletype-48": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Guarded partner: share the half-formed version"
+ },
+ "v-coupletype-49": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "You don't have to wait until it's fully formed. 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the expressive partner needs to hear."
+ },
+ "v-coupletype-50": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Pressing for more than the guarded partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time."
+ },
+ "v-coupletype-51": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "You have different conflict clocks. One is ready before the other, recognizing that changes everything."
+ },
+ "v-coupletype-52": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When things get hard, {U} moves toward resolution and {P} pulls back, or vice versa, depending on your individual types. The reaching can feel like pressure. The withdrawal can feel like abandonment. Neither is true, you're just wired differently for when the conversation becomes possible."
+ },
+ "v-coupletype-53": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct, it's naming it out loud before the hard moment arrives. A simple agreement, 'I need a few hours, let's talk at 9', short-circuits the loop that otherwise runs on its own."
+ },
+ "v-coupletype-54": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Genuinely beneficial repair systems are attainable here"
+ },
+ "v-coupletype-55": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Repair starts on the initiator's timeline"
+ },
+ "v-coupletype-56": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Name the pattern before you're in it"
+ },
+ "v-coupletype-57": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When things are calm, explain what you need when things are not calm. That one conversation changes what the next hard moment looks like."
+ },
+ "v-coupletype-58": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Make space bounded, not open-ended"
+ },
+ "v-coupletype-59": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When {WDR} needs time, give a return. 'I need an hour' is different from silence. It lets {RCH} stop the worried waiting."
+ },
+ "v-coupletype-60": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When {U} presses for resolution, that's care, not control. When {P} needs space, that's the process, not withdrawal. Say what you need in the moment, and be open to the fact that your needs are different."
+ },
+ "v-coupletype-61": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "One reaches. One holds. Understanding what you each need bridges the gap."
+ },
+ "v-coupletype-62": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "One of {U} and {P} reaches toward resolution and expresses things openly; the other pulls back and holds things privately. The gap exists on both axes simultaneously, different conflict timing and different expressiveness, which means there's more translation work here than in most pairings."
+ },
+ "v-coupletype-63": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The reaching partner often doesn't know what the reserved partner is feeling until long after the fact, which can feel like withholding. The reserved partner often feels pressure to perform an emotional openness that isn't natural to {GRD}. Naming this as a difference, not a deficiency, is the most useful thing {U} and {P} can do."
+ },
+ "v-coupletype-64": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} sometimes find that you mean something the other doesn't quite receive. The signal and the interpretation don't always match."
+ },
+ "v-coupletype-65": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The reserved partner's inner life is not less rich because it isn't expressed as often. The reaching partner's sharing isn't less valuable because it comes more easily. Name that dynamic directly."
+ },
+ "v-coupletype-66": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "There's more going on for me than I'm showing. I just need to get it in order before I share it."
+ },
+ "v-coupletype-67": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Pressing for more than the reserved partner is ready to give doesn't create connection, it creates pressure. Ask once, then wait. The sharing will come in its own time."
+ },
+ "v-coupletype-68": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Reserved partner: share the earlier draft"
+ },
+ "v-coupletype-69": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "You don't have to wait until it's fully formed. Even 'I'm still figuring out how I feel about this' is a form of sharing, and it's usually exactly what the reaching partner needs to hear."
+ },
+ "v-coupletype-70": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Strong instincts on both sides, pointed differently. Moving forward together takes understanding and intention."
+ },
+ "v-coupletype-71": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} pushes toward resolution while processing internally; {P} needs space before the conversation is possible, and carries visible feeling in the meantime. They can read each other as simultaneously too much and not enough, the driving toward resolution can close off the space, and the visible feeling during withdrawal can look like something that needs fixing right now."
+ },
+ "v-coupletype-72": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{RCH_pos} urgency toward resolution can feel like pressure to {WDR}, who isn't ready yet. {WDR_pos} emotional visibility during withdrawal can look like an invitation to engage, when it's actually a signal to wait. Both readings are understandable. Both are wrong."
+ },
+ "v-coupletype-73": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Named and managed, your instincts produce repair that works"
+ },
+ "v-coupletype-74": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The dynamic is highly solvable once it is understood"
+ },
+ "v-coupletype-75": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The conversation can start before {WDR} is ready"
+ },
+ "v-coupletype-76": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{WDR_pos} visible emotion can look like something to fix"
+ },
+ "v-coupletype-77": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "It can look like one of you cares more"
+ },
+ "v-coupletype-78": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{RCH}: resolution doesn't mean resolved"
+ },
+ "v-coupletype-79": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{WDR} needs the space first, and then the conversation. Moving fast to 'let's talk' before {WDR} is ready doesn't get to resolution faster. It delays it."
+ },
+ "v-coupletype-80": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The uncertainty is harder for {RCH} than the wait. 'I need until tonight' lets {RCH} stop the worried waiting and trust the process."
+ },
+ "v-coupletype-81": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Name the pattern out loud before you're in it"
+ },
+ "v-coupletype-83": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When I go quiet, it's not over, it's processing. Give me space and I'll come back."
+ },
+ "v-coupletype-84": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Both of you think before you speak, the real work happens before the conversations begin."
+ },
+ "v-coupletype-85": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} both hold things privately and both process what's going on before it comes out, if it comes out at all. The dynamic is low-temperature and rarely explosive. The practical machinery of the relationship runs smoothly. The emotional layer tends to stay quiet."
+ },
+ "v-coupletype-86": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Neither partner is offering a lot of emotional visibility to the other. The relationship can run on logic, shared purpose, and good-enough communication while the emotional texture goes largely unaddressed. That gap tends to show up during life transitions, when something that's been running quietly needs to be named."
+ },
+ "v-coupletype-87": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the structure that neither of you will naturally generate on your own."
+ },
+ "v-coupletype-88": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "The quiet isn't a problem, until it is"
+ },
+ "v-coupletype-89": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Calm is a wonderful quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken."
+ },
+ "v-coupletype-90": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "You both need space when things get hard. The difference is how much it shows, and that gap is worth understanding."
+ },
+ "v-coupletype-91": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "When things get hard, {U} and {P} both pull back. {EXP} carries the emotional weight visibly while withdrawn. {GRD} holds everything privately. The return is slow for both. Hard moments can sit for a long time before either of you surfaces them."
+ },
+ "v-coupletype-92": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Real depth runs in this pairing, often more than either partner shows. The risk is that the depth never surfaces, because neither of you naturally initiates the opening. Agree on who brings it back, and when. A named pattern gives you both the full space, without indefinite silence."
+ },
+ "v-coupletype-93": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{EXP_pos} visible emotion is hard to read during withdrawal"
+ },
+ "v-coupletype-94": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Agree on who brings it back"
+ },
+ "v-coupletype-95": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "Neither of you moves to reopen things quickly, so the silence can stretch. Decide the pattern in advance. Whoever tends to settle first signals when they are ready, and the other gets the full space until then."
+ },
+ "v-coupletype-98": {
+  "files": [
+   "api/_couple-types.js"
+  ],
+  "current": "{U} and {P} need a deliberate structure for things to surface. A weekly check-in, even 10 minutes, creates the opening that neither of you will naturally generate on your own."
+ },
+ "v-coupletype-99": {
+  "files": [
+   "api/_lib/what-comes-next.js"
+  ],
+  "current": "You matched across every area. Revisit this when something changes."
+ },
+ "v-coupletype-100": {
+  "files": [
+   "api/_lib/what-comes-next.js"
+  ],
+  "current": "${topics.length} ${topics.length === 1 ? 'thing' : 'things'} here you each pictured differently."
+ },
+ "v-coupletype-101": {
+  "files": [
+   "api/_lib/what-comes-next.js"
+  ],
+  "current": "Reread your patterns before the next hard conversation"
+ },
+ "v-coupletype-102": {
+  "files": [
+   "api/_lib/next-action.js"
+  ],
+  "current": "We need info to properly set up your exercises"
+ },
+ "v-coupletype-103": {
+  "files": [
+   "api/_lib/next-action.js"
+  ],
+  "current": "This exercise is in progress and status has been saved"
+ },
+ "v-coupletype-104": {
+  "files": [
+   "api/_lib/next-action.js"
+  ],
+  "current": "View this and others in your Learn tab"
+ },
+ "v-coupletype-105": {
+  "files": [
+   "api/_lib/next-action.js"
+  ],
+  "current": "Your widest difference. Worth rereading together."
+ },
+ "v-coupletype-106": {
+  "files": [
+   "api/_lib/next-action.js"
+  ],
+  "current": "Mark a line in your results and share it with them."
+ },
+ "v-coupletype-107": {
+  "files": [
+   "api/_lib/next-action.js"
+  ],
+  "current": "Every section ends with something to try."
+ },
+ "v-coupletype-108": {
+  "files": [
+   "api/_lib/next-action.js"
+  ],
+  "current": "Short pieces on the things that impact relationships."
+ },
+ "v-coupletype-109": {
+  "files": [
+   "api/_lib/waiting-copy.js",
+   "attune-app/src/constants/waiting.ts"
+  ],
+  "current": "Finish your exercises to open this."
+ },
+ "v-coupletype-110": {
+  "files": [
+   "api/_lib/journal-copy.js"
+  ],
+  "current": "Nothing here matches that."
+ },
+ "v-coupletype-111": {
+  "files": [
+   "api/_lib/journal-copy.js"
+  ],
+  "current": "Nothing here yet. The first entry is usually the hardest one."
+ },
+ "v-coupletype-112": {
+  "files": [
+   "api/_lib/journal-copy.js"
+  ],
+  "current": "Keep this in your journal"
+ },
+ "v-coupletype-113": {
+  "files": [
+   "api/_lib/journal-copy.js"
+  ],
+  "current": "That did not save. Try again in a moment."
+ },
+ "v-coupletype-114": {
+  "files": [
+   "api/_lib/exercise-intro.js"
+  ],
+  "current": "This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified."
+ },
+ "v-expectations-0": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Name who's doing what explicitly, because your ability to talk about feelings doesn't automatically extend to who's vacuuming."
+ },
+ "v-expectations-1": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "The risk is that one person quietly takes on more without raising it. Agree on who handles what, and build a regular check-in so that quiet resentment doesn't build under the efficiency."
+ },
+ "v-expectations-2": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Domestic friction can land harder than expected when neither of you wants to seem petty for raising it. Name the logistics early. It's not unromantic to decide who buys groceries."
+ },
+ "v-expectations-3": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Schedule a review of who's carrying what every few months. Domestic load is exactly the kind of thing that drifts without conversation."
+ },
+ "v-expectations-4": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Make sure household logistics get talked about at a set time rather than only when someone reaches a tipping point."
+ },
+ "v-expectations-5": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Household friction rarely feels urgent enough to raise, until it is. Set a regular rhythm for reviewing who's doing what, so it doesn't only get named when someone is already frustrated."
+ },
+ "v-expectations-6": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Domestic imbalances tend to accumulate silently in couples like yours. Build a habit of naming household roles explicitly rather than letting them form by default."
+ },
+ "v-expectations-7": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Household logistics decisions can stall if one person isn't ready and the other is impatient. Pick a weekly moment, 15 minutes, to review and decide together."
+ },
+ "v-expectations-8": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Domestic resentment is particularly likely to stay quiet in a pairing like yours, until it isn't. Make a habit of naming the load each person is carrying, before something breaks."
+ },
+ "v-expectations-9": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Household imbalances are easy to defer. Make a habit of reviewing roles at a set time so the conversation doesn't require someone to work up to it."
+ },
+ "v-expectations-10": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Financial decisions are one area where that efficiency can skip important alignment. Slow down enough to make sure both of you actually agree, not just that both of you accept."
+ },
+ "v-expectations-11": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Know that it's okay for this to be uncomfortable. The discomfort doesn't mean you're financially incompatible."
+ },
+ "v-expectations-12": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Financial misalignments in a pairing like yours can go unnamed for a long time. Set a quarterly money conversation, not to review budgets, but to check: are we still aligned on what money is for?"
+ },
+ "v-expectations-13": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Financial decisions benefit from the person who needs more time actually getting it, rather than quietly conceding. Make sure financial conversations include a built-in pause for reflection before deciding."
+ },
+ "v-expectations-14": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Financial conversations should happen when both of you are actually ready, not when one person pushes and the other complies. Pick a time for it when neither of you is stressed."
+ },
+ "v-expectations-15": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Financial alignment is hard if one person is doing all the raising. Build an expectation that both people bring concerns."
+ },
+ "v-expectations-16": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Financial decisions made under time pressure rarely hold. Make sure the person who needs space gets it, even if it delays the decision."
+ },
+ "v-expectations-17": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Financial transparency requires deliberate effort in a pairing like yours, since neither of you naturally pushes the other to open up. Schedule it."
+ },
+ "v-expectations-18": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Money conversations can easily get deferred indefinitely. Set a regular, calm moment for financial check-ins, not after a tension-filled moment, but on a neutral calendar day."
+ },
+ "v-expectations-19": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Career sacrifice is one of the harder things to name when you don't want to seem demanding. Know that naming it is an act of care, not selfishness, the person carrying more deserves to have it acknowledged."
+ },
+ "v-expectations-20": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Career imbalances in couples like yours can go entirely unspoken until they've built significant resentment. Check in explicitly about whose career is getting prioritized, and whether that feels fair to both."
+ },
+ "v-expectations-21": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Career decisions with long-term implications need both of you fully present. Don't let the faster processor set the pace before the other has had time to think."
+ },
+ "v-expectations-22": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Career concerns are exactly the kind of thing the quieter partner may be carrying without raising. Build an expectation that career check-ins happen on both sides."
+ },
+ "v-expectations-23": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Career decisions are rarely truly urgent, give the person who processes slower the time they need. A decision made under pressure tends to not hold."
+ },
+ "v-expectations-24": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Career conversations require deliberate effort in a pairing like yours because neither of you will naturally push the topic. Build in a regular 'where are we on career stuff?', once a quarter is enough."
+ },
+ "v-expectations-25": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "The risk is that naming it starts to feel like scorekeeping. Frame it as awareness, not accounting."
+ },
+ "v-expectations-26": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Emotional labor in a pairing like yours can go entirely unremarked, since neither of you naturally points to it. Name it. The person carrying more needs it acknowledged."
+ },
+ "v-expectations-27": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "The invisible labor in your relationship is probably significant on both sides. The work is both carrying the emotional load and making sure the other person sees it too."
+ },
+ "v-expectations-28": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Emotional labor is probably distributed in your relationship in ways that neither of you has fully mapped. It can accumulate invisibly. Make a habit of asking: 'what are you managing right now that I might not know about?'"
+ },
+ "v-expectations-29": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Emotional labor that goes unspoken is still labor. The quieter partner may be carrying more than they say. Build a norm where both of you name what you're managing."
+ },
+ "v-expectations-30": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Emotional labor conversations can feel premature for one partner and overdue for the other. Pick a neutral time, not when one person is already drained, to check in about what each of you is carrying."
+ },
+ "v-expectations-31": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Emotional labor is exactly the kind of thing that the more private partner absorbs silently. Build an expectation that both people name what they're tracking and carrying."
+ },
+ "v-expectations-32": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Emotional labor conversations can feel charged. Don't rush the one who needs space, the conversation is more useful when both of you are actually present."
+ },
+ "v-expectations-33": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Emotional labor is particularly invisible in pairings like yours. It's being done, often a lot of it, by one or both of you, without being named. Make it a practice to name it, even briefly."
+ },
+ "v-expectations-34": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Emotional labor conversations can be repeatedly deferred in a pairing like yours. Set a recurring, calm check-in, not a big conversation, just a brief: 'what are you carrying right now?'"
+ },
+ "v-expectations-35": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "You may each have more formed views on life and values questions than the other knows about. Make space to share your position and the reasoning underneath it. It changes the conversation."
+ },
+ "v-expectations-36": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Life and values disagreements can carry real weight. Know that diverging on some of these questions is normal, and not a sign you're wrong for each other. What matters is how you hold the difference."
+ },
+ "v-expectations-37": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Big-picture questions about life and values can stay entirely internalized in a pairing like yours. Make a deliberate practice of sharing your current thinking on these topics, not to resolve them, but to stay current with each other."
+ },
+ "v-expectations-38": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Life and values conversations benefit from both people having time to think before sharing. Don't let the faster processor carry more of the conversation than the other person is ready for."
+ },
+ "v-expectations-39": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Life questions, children, location, faith, shouldn't be decided when one person isn't fully ready to engage. Wait for both."
+ },
+ "v-expectations-40": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "For life questions with real implications, the person who processes more slowly needs time, even if it delays the decision. A premature decision on big things tends to create pressure later."
+ },
+ "v-expectations-41": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Life and values alignment can be assumed rather than actively explored in pairings like yours. Don't let the stability of your relationship mean you stop checking in on where each of you is with the big questions."
+ },
+ "v-expectations-42": {
+  "files": [
+   "api/_lib/expectation-starters.js"
+  ],
+  "current": "Life and values conversations can be deferred indefinitely when both of you are comfortable waiting. Set a specific, recurring time to revisit where you each are, not when something forces the conversation."
+ },
+ "v-expectations-43": {
+  "files": [
+   "api/_lib/category-intros.js"
+  ],
+  "current": "How you think about work, ambition, and sacrifice for each other's careers will evolve. These conversations lay groundwork before the hard moments arrive."
+ },
+ "v-expectations-44": {
+  "files": [
+   "api/_lib/category-intros.js"
+  ],
+  "current": "The invisible work of a relationship, tracking, anticipating, initiating, is the category most couples never name. Naming it changes how it lands."
+ },
+ "v-expectations-45": {
+  "files": [
+   "api/_lib/expectations.js"
+  ],
+  "current": "One of them"
+ },
+ "v-expectations-46": {
+  "files": [
+   "api/_lib/expectations.js"
+  ],
+  "current": "The other"
+ },
+ "v-expectations-47": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Talk about it"
+ },
+ "v-expectations-48": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "You line up across the board. These are still worth saying out loud."
+ },
+ "v-expectations-49": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "You want intimacy about as often as each other. That is one less thing to negotiate. Keep saying it out loud anyway. Frequency that goes unspoken tends to drift."
+ },
+ "v-expectations-50": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Your ideal frequencies sit a little apart. This is the most common gap there is. What matters is naming it early, before it turns into a tally."
+ },
+ "v-expectations-51": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Neither of you put a number to this. That is fine. Frequency is the easiest of these to talk about, because it is concrete."
+ },
+ "v-expectations-52": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Your expectations about initiating sit a little apart. Usually one person assumes a balance the other does not. Name it before it becomes a pattern."
+ },
+ "v-expectations-53": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "You see initiating differently. If you both expect to be pursued, or you both expect to lead, that shows up fast. Talk about who reaches, and what a no feels like to give and to get."
+ },
+ "v-expectations-54": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Neither of you said who initiates. The person who reaches and the person who waits often carry very different feelings about the same moment. Worth getting to when you can."
+ },
+ "v-expectations-55": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "You are at a similar place with feeling safe, and you ask for similar things to get there. That shared baseline holds everything else up. Keep checking in. Comfort moves with stress and time."
+ },
+ "v-expectations-56": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Your comfort levels sit a little apart. One of you may need more to feel safe than the other expects. That is not a problem to fix. It is information to use."
+ },
+ "v-expectations-57": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Neither of you spoke to this. It is the most personal of the six. When you are ready, start with what helps each of you feel safe, not what does not."
+ },
+ "v-expectations-58": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Your styles sit a little apart. One of you wants to talk it through. The other would rather not pick it apart. Both work. The gap only hurts if it stays unnamed."
+ },
+ "v-expectations-59": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "You talk about intimacy in different ways. If one of you needs to say it and the other needs to not, you can miss each other completely. Agree on how you will signal what you want when words are hard."
+ },
+ "v-expectations-60": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Neither of you answered here. That is its own quiet answer. Start small: agree on how you will tell each other when something is or is not working."
+ },
+ "v-expectations-61": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Your appetites for novelty sit a little apart. One of you leans toward trying things. The other leans toward what already works. Easy to handle once it is named. Easy to misread as rejection when it is not."
+ },
+ "v-expectations-62": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "You want very different amounts of novelty. The adventurous one can read caution as disinterest. The one who likes the familiar can read appetite as pressure. Both readings are usually wrong. Talk about the why under it."
+ },
+ "v-expectations-63": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Neither of you spoke to this. It is lighter than it looks. Most of it is about how much each of you wants to be asked."
+ },
+ "v-expectations-64": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "What intimacy is for sits a little apart between you. One of you leans toward closeness. The other toward play or release. Neither is the right reason. Knowing the difference keeps you from misreading each other."
+ },
+ "v-expectations-65": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Intimacy means different things to each of you. This is the gap that drives the most quiet friction. You can be close and still feel like you missed each other. Naming it changes how those moments land."
+ },
+ "v-expectations-66": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "Neither of you named what intimacy is for you. It is the deepest of the six, and often the most clarifying. The answer is rarely what either partner assumes."
+ },
+ "v-expectations-67": {
+  "files": [
+   "api/_intimacy-results-prose.js"
+  ],
+  "current": "{SKIPPER} chose to skip this one. Here is a way to come at it together when the time feels right."
+ },
+ "v-expectations-73": {
+  "files": [
+   "api/_lib/intimacy-framing.js"
+  ],
+  "current": "This sets the framing for both of you. Whoever starts first decides it for the couple."
+ },
+ "v-expectations-74": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "You do not express criticism. Worth naming to {partner} as something you already do well."
+ },
+ "v-expectations-75": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Rare, and you notice it. Keep naming the specific behavior instead of the trait: \"when plans change last minute\" instead of \"you are careless.\""
+ },
+ "v-expectations-76": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Criticism appears enough to matter. The swap is small: describe the thing that happened, not the kind of person they are. One sentence is usually the difference."
+ },
+ "v-expectations-77": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "This one is worth real attention. Before raising something, try writing the specific behavior down first. Character language tends to arrive when the actual complaint has not been named yet."
+ },
+ "v-expectations-78": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "You do not show contempt. This is the pattern that matters most, so this is genuinely worth knowing."
+ },
+ "v-expectations-79": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Rare. Sarcasm under pressure is common, and a quick check-in (\"was that sharper than I meant?\") keeps it from settling in."
+ },
+ "v-expectations-80": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Worth taking seriously, more than the others at the same rate. Contempt tends to grow quietly. Naming it out loud to {partner} once, outside an argument, does more than trying to catch it mid-conflict."
+ },
+ "v-expectations-81": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "This is the one to work on first. Not because you are doing something unforgivable, but because it is the pattern that does the most damage over time and the one that responds best to being named."
+ },
+ "v-expectations-82": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Rare. You are already handling this well. Keep noticing what lets you stay open."
+ },
+ "v-expectations-83": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Defensiveness appears occasionally. Before responding, try reflecting back what you heard first. Even one sentence changes the pace, and it costs nothing to be wrong about it."
+ },
+ "v-expectations-84": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Worth attention. Defensiveness usually means the complaint landed as an attack. Saying \"give me a second, I want to hear that properly\" buys the pause where the reflex would have gone."
+ },
+ "v-expectations-85": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Rare. When you feel the pull to check out, naming it (\"I need five minutes\") keeps it from feeling like an exit."
+ },
+ "v-expectations-86": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Worth attention, and usually a sign of being overwhelmed rather than uninterested. Agreeing a pause signal with {partner} in advance means shutting down does not have to be the only exit."
+ },
+ "v-expectations-87": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Acknowledge it once, outside an argument"
+ },
+ "v-expectations-88": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Pay attention to micro-aggressions and tell {partner} you noticed it, but not mid-conflict and not as an apology. Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first."
+ },
+ "v-expectations-89": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "When {partner} raises something, say what you heard before you say anything else. You are not agreeing, only confirming that you are listening. This changes the pace of the discussion and can correct misunderstandings."
+ },
+ "v-expectations-90": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first."
+ },
+ "v-expectations-91": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "When your partner is engaging, stonewalling from you can communicate unwillingness to repair."
+ },
+ "v-expectations-92": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Nothing here needs work"
+ },
+ "v-expectations-93": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "None of the four patterns come up often for you. That is worth saying out loud to {partner}, because it is the kind of thing couples rarely tell each other."
+ },
+ "v-expectations-94": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "None of the four patterns come up often for you. That is worth knowing, and worth saying to {partner}."
+ },
+ "v-expectations-95": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Takes time before bringing it up"
+ },
+ "v-expectations-96": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Notices the older pattern"
+ },
+ "v-expectations-97": {
+  "files": [
+   "api/_conflict-results-prose.js"
+  ],
+  "current": "Writes it down"
+ },
+ "v-reflection-workbook-0": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Ask each other: what would make this feel even better from where you're standing right now? Don't defend your own rating, get curious about theirs first."
+ },
+ "v-reflection-workbook-1": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Build on this\""
+ },
+ "v-reflection-workbook-2": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Name it together. When you both feel good about things but don't say it out loud, that warmth stays private. Saying \"I feel like things are really good between us right now\" creates a shared moment instead of parallel ones."
+ },
+ "v-reflection-workbook-3": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "This isn't a complaint about the relationship, it's a signal about what's been deprioritized."
+ },
+ "v-reflection-workbook-4": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Keep prioritizing it\""
+ },
+ "v-reflection-workbook-5": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Don't let busyness quietly crowd out the small pleasures. Whatever's been creating lightness lately, protect it."
+ },
+ "v-reflection-workbook-6": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Worth naming explicitly\""
+ },
+ "v-reflection-workbook-7": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "${lowPerson}: try naming one thing that's been sitting unspoken, not a criticism, just something you've been carrying. The other person likely doesn't know it's there."
+ },
+ "v-reflection-workbook-8": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "The things you're each most grateful for are the things most worth protecting. Whatever you're each doing that makes the other feel known, keep doing it deliberately. These are the first things to quietly erode when life gets full."
+ },
+ "v-reflection-workbook-9": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Keep doing it\","
+ },
+ "v-reflection-workbook-10": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "That is a description of being understood rather than simply appreciated, and it is worth knowing that it lands that way."
+ },
+ "v-reflection-workbook-11": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Whatever produces that feeling, it is probably something small and repeated rather than grand. Identify it and protect it, because these are the first things to erode when life gets full."
+ },
+ "v-reflection-workbook-12": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Say these out loud\""
+ },
+ "v-reflection-workbook-13": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Read each other's answer, then say why that one."
+ },
+ "v-reflection-workbook-14": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "It is also the first thing to slip when a season gets busy."
+ },
+ "v-reflection-workbook-15": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Work out what is actually producing this. It is almost never the big things. Name the small repeated one, and guard it when the calendar fills up."
+ },
+ "v-reflection-workbook-16": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Put both answers side by side and find the overlap. Most couples discover these are two routes to the same thing: more intentional time that actually feels like you. Pick one concrete version of each and try both this month."
+ },
+ "v-reflection-workbook-17": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Block an evening for this one specifically. Where these two pictures overlap is your shared plan. Where they differ is not a problem to solve tonight, it is the thing to keep talking about. Get concrete: numbers, places, timelines."
+ },
+ "v-reflection-workbook-18": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Make this mutual\""
+ },
+ "v-reflection-workbook-19": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Saying it out loud creates accountability and removes the guesswork."
+ },
+ "v-reflection-workbook-20": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Say it out loud\","
+ },
+ "v-reflection-workbook-21": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Make it direct\""
+ },
+ "v-reflection-workbook-22": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Say it to each other: \"${partnerName}, I most admire your ${admiredNounLower(mine.a8)} right now.\" It takes about eight seconds and lands better than you'd think."
+ },
+ "v-reflection-workbook-23": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Let's talk about that moment when things broke down under pressure. I want to understand what each of us needed then."
+ },
+ "v-reflection-workbook-24": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Both point at something not fully said or heard. Landing there independently, without coordinating, suggests it is a real pattern rather than a one-off."
+ },
+ "v-reflection-workbook-25": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Don't relitigate the specific situation, instead, talk about the pattern. \"When things get hard between us, what does each of us actually need in the first hour?\" Getting to that agreement before the next hard moment changes how it plays out."
+ },
+ "v-reflection-workbook-26": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "The fact that both of you can identify something shows self-awareness, which is the first requirement for handling it better next time."
+ },
+ "v-reflection-workbook-27": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Talk about it directly\""
+ },
+ "v-reflection-workbook-28": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Pick one of these to talk about. Not to assign blame, to understand what each person was feeling in that moment that the other person didn't know. \"When that happened, I was feeling X and I didn't say it because Y.\" That's the whole conversation."
+ },
+ "v-reflection-workbook-29": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Let's talk about the moment one of us had in mind. I want to hear what made it stick."
+ },
+ "v-reflection-workbook-30": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "${other}, ask ${who} to walk through it, not to defend anything, just to hear what it was like from the inside."
+ },
+ "v-reflection-workbook-31": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "When two people rank the same thing first without discussing it, that alignment is real, and it makes it much easier to act on."
+ },
+ "v-reflection-workbook-32": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "priority: \"Turn it into a plan\""
+ },
+ "v-reflection-workbook-33": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Neither is wrong, but without naming it, this difference quietly shapes decisions, energy allocation, and what each of you feels is being neglected."
+ },
+ "v-reflection-workbook-34": {
+  "files": [
+   "api/_lib/reflection-insights.js"
+  ],
+  "current": "Start with something small and specific."
+ },
+ "v-reflection-workbook-35": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "{U} and {P} recover in similar ways. This quietly removes friction, you're rarely on opposite ends after a hard week."
+ },
+ "v-reflection-workbook-36": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Without understanding, the inward partner's need for quiet"
+ },
+ "v-reflection-workbook-37": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Before it happens, name what you'll each need afterward. Then check in."
+ },
+ "v-reflection-workbook-38": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "{U} and {P} are operating in the same register."
+ },
+ "v-reflection-workbook-39": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Or is it usually carried privately?"
+ },
+ "v-reflection-workbook-40": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Each of you shares one thing you'd normally hold back or let pass, not something big, just something that's been sitting there. Notice what happens."
+ },
+ "v-reflection-workbook-41": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Voiced: hearing it said keeps you close."
+ },
+ "v-reflection-workbook-42": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "The other treats it as settled and does not think to say it."
+ },
+ "v-reflection-workbook-43": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "If each of you set the number, how often would it get said?"
+ },
+ "v-reflection-workbook-44": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Once this week, say where you stand out loud without being asked for it. One sentence. Notice how it lands."
+ },
+ "v-reflection-workbook-45": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Has it been said, or are you guessing?"
+ },
+ "v-reflection-workbook-46": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "not naturally tracking the relational current."
+ },
+ "v-reflection-workbook-47": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "What would it look like to be slightly more tuned in, without it feeling performative?"
+ },
+ "v-reflection-workbook-48": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "This symmetry removes the most common friction point in conflict, the pursuer-withdrawer dynamic."
+ },
+ "v-reflection-workbook-49": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Write it down. Refer to it next time."
+ },
+ "v-reflection-workbook-50": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "One end needs explicit verbal acknowledgment. The other can move forward once the warmth is back, without needing the formal exchange."
+ },
+ "v-reflection-workbook-51": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Reflective: you go quiet and stay with it."
+ },
+ "v-reflection-workbook-52": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "That works until one of you needs the other mode. Ask which one is wanted before you give it."
+ },
+ "v-reflection-workbook-53": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "The other listens by engaging and drawing it out. The quiet can read as absence. The questions can read as pressure. Neither is what is happening."
+ },
+ "v-reflection-workbook-54": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "{U} and {P} express and receive love through compatible channels."
+ },
+ "v-reflection-workbook-55": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Then do more of it."
+ },
+ "v-reflection-workbook-56": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "{U} and {P} are in a similar place on feedback."
+ },
+ "v-reflection-workbook-57": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "\\\"Hey, this thing last week, can I mention it?\\\""
+ },
+ "v-reflection-workbook-58": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Once it's said, most of it's out of their system and they can move on."
+ },
+ "v-reflection-workbook-59": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "They want to engage so the thing can move, not so it can escalate."
+ },
+ "v-reflection-workbook-60": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "For {U}, repair isn't done until it's named."
+ },
+ "v-reflection-workbook-61": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "They're not asking you to fix it; they're asking you to be present in it."
+ },
+ "v-reflection-workbook-62": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "{U} is moving forward like the thing is closed."
+ },
+ "v-reflection-workbook-63": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Once the working-through is done, they experience the thing as resolved."
+ },
+ "v-reflection-workbook-64": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Tell them after the fact that you did the thing."
+ },
+ "v-reflection-workbook-65": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "they don't experience the thing as resolved, even if the issue itself is sorted."
+ },
+ "v-reflection-workbook-66": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Don't try to fix the outside thing."
+ },
+ "v-reflection-workbook-67": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Don't ask probing questions hoping to crack it open."
+ },
+ "v-reflection-workbook-68": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Don't push for emotional volume to prove the thing matters."
+ },
+ "v-reflection-workbook-69": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Handle one normal thing without comment."
+ },
+ "v-reflection-workbook-70": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "The room is quieter, but the thing isn't quite closed yet."
+ },
+ "v-reflection-workbook-71": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "For Ws, the closure happens when one of you names it out loud."
+ },
+ "v-reflection-workbook-72": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Or circling back into it because the relief hasn't landed yet."
+ },
+ "v-reflection-workbook-73": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "One of you names the close. A short clear sentence. Not a recap, just a flag that you're both okay. The other confirms back."
+ },
+ "v-reflection-workbook-74": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Half-meeting it. Answering the question while keeping your eyes on your screen."
+ },
+ "v-reflection-workbook-75": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Under pressure, Ws reach outward. Not to be fixed. To be present in."
+ },
+ "v-reflection-workbook-76": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Ask about the thing rather than the mood."
+ },
+ "v-reflection-workbook-77": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "neither of you has said the true thing yet."
+ },
+ "v-reflection-workbook-78": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "One of you names the feeling first, out loud, without justifying it. It will feel disproportionate to say. It is the part the other one cannot guess."
+ },
+ "v-reflection-workbook-79": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "It is finished. You are both being kind. Neither of you has mentioned it since."
+ },
+ "v-reflection-workbook-80": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Assuming the warmth means it is closed for both of you. It might be closed for one."
+ },
+ "v-reflection-workbook-81": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Say the sentence anyway, even though it feels redundant."
+ },
+ "v-reflection-workbook-82": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "More proximity does not answer the question that is actually being asked."
+ },
+ "v-reflection-workbook-83": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Name the wanting once, plainly. It is the thing neither of you does by default, and it is the only thing that answers it."
+ },
+ "v-reflection-workbook-84": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "It gives the other person permission they will not ask for."
+ },
+ "v-reflection-workbook-85": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Waiting for it to surface on its own."
+ },
+ "v-reflection-workbook-86": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Ask once, directly, and then leave it with them. A Y will not answer on demand and will almost always come back to it."
+ },
+ "v-reflection-workbook-87": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "It is not clear to either of you whether it is over."
+ },
+ "v-reflection-workbook-88": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "so the thing looks resolved and is only paused."
+ },
+ "v-reflection-workbook-89": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Come back to it once, briefly, when you are both level. It does not need to be long. It needs to happen."
+ },
+ "v-reflection-workbook-90": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "It is proof that you are both doing what you do."
+ },
+ "v-reflection-workbook-91": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Ask on a schedule rather than on instinct. It feels mechanical and it is the only reliable way in"
+ },
+ "v-reflection-workbook-92": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Calling it resolved because it stopped. It did not resolve."
+ },
+ "v-reflection-workbook-93": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Put it in writing if saying it is too much."
+ },
+ "v-reflection-workbook-94": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "A day has passed. Things are normal again. Neither of you has mentioned it."
+ },
+ "v-reflection-workbook-95": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Letting normal stand in for repaired. For two Zs it always will, and it is what accumulates."
+ },
+ "v-reflection-workbook-96": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "One sentence, once, even days later. It does not have to reopen anything. It has to acknowledge that something happened."
+ },
+ "v-reflection-workbook-97": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Make it explicit and make it easy to say yes to."
+ },
+ "v-reflection-workbook-98": {
+  "files": [
+   "api/_workbook-prose.js"
+  ],
+  "current": "Admiring the competence. Both of you are good at this, and being good at it is what keeps it invisible."
+ },
+ "v-reflection-workbook-99": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Some of these gaps are probably running in the background, costing more than you realize."
+ },
+ "v-reflection-workbook-100": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "The mental load, the remembering, the repair, you both clock it."
+ },
+ "v-reflection-workbook-101": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Worth surfacing before it accumulates."
+ },
+ "v-reflection-workbook-102": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Some of it is quietly carried by one of you, often along the lines of whose family it is. Worth saying out loud."
+ },
+ "v-reflection-workbook-103": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You recharge in similar ways. You move together in this sense and the rhythm feels right to both of you without negotiation."
+ },
+ "v-reflection-workbook-104": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You wear emotion and process situations similarly. This often means that neither has to translate what the other feels."
+ },
+ "v-reflection-workbook-105": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You express emotion at slightly different levels."
+ },
+ "v-reflection-workbook-106": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You express at very different levels. One wears it; the other holds it. The balance is found once you learn each other\\'s signals."
+ },
+ "v-reflection-workbook-107": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "The other treats it as settled. Unnamed, the quiet reads as distance to one of you and as ordinary to the other."
+ },
+ "v-reflection-workbook-108": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Whether direct or indirect, you share a protocol, which keeps small things from accumulating. Consider checking in with your partner on if the current state is still serving you both."
+ },
+ "v-reflection-workbook-109": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Unspoken, this is the gap where needs go unmet."
+ },
+ "v-reflection-workbook-110": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Without an agreement, conflicts can compound."
+ },
+ "v-reflection-workbook-111": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "What works for one tends to work for the other. Less translation needed."
+ },
+ "v-reflection-workbook-112": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You give and receive feedback at similar comfort levels."
+ },
+ "v-reflection-workbook-113": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Useful conversations may need both of you to stretch."
+ },
+ "v-reflection-workbook-114": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You\\'ll feel it after social weekends. Both of you refill through connection, so you can miss when one of you is drained. After full days, check in before making more plans."
+ },
+ "v-reflection-workbook-115": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You\\'ll feel it after busy stretches when neither has named being tired. Both of you recover by doing, not talking, so exhaustion builds quietly. Name the feeling before it turns into irritability."
+ },
+ "v-reflection-workbook-116": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You\\'ll feel it after dinners, family visits, work events."
+ },
+ "v-reflection-workbook-117": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You\\'ll feel it when one of you is depleted and the other can\\'t tell. Neither broadcasts the drain. Consider naming the feeling: \\'I\\'m running low today.\\'"
+ },
+ "v-reflection-workbook-118": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You\\'ll feel it when one wants to debrief and the other is done talking."
+ },
+ "v-reflection-workbook-119": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You\\'ll feel it on the way home from anything social."
+ },
+ "v-reflection-workbook-120": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "You\\'ll feel it after social events."
+ },
+ "v-reflection-workbook-121": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Having different recovery timelines does not mean avoidance. Name what you both need."
+ },
+ "v-reflection-workbook-122": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Efficient, but it can tip into isolation."
+ },
+ "v-reflection-workbook-123": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "When one of you has been quieter than usual, name it out loud instead of waiting to see if it clears."
+ },
+ "v-reflection-workbook-124": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "[W partner name] can keep the instinct to name things"
+ },
+ "v-reflection-workbook-125": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "When [W partner name] feels a gap, name it:"
+ },
+ "v-reflection-workbook-126": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Both of you default to holding. Schedule a specific time,"
+ },
+ "v-reflection-workbook-127": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "If the quiet doesn\\'t break on its own after two days, check in. Consider scheduling a specific time to check in."
+ },
+ "v-reflection-workbook-128": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Both of you say where you stand readily, so it rarely goes unsaid. The risk is that it turns into a routine and stops carrying weight. Make it specific. Name the thing, not the category."
+ },
+ "v-reflection-workbook-129": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Neither of you says it much, and both of you assume it is understood. That holds until a hard stretch, when neither of you thinks to check. Say it plainly once a month anyway."
+ },
+ "v-reflection-workbook-130": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Whoever notices the gap says it first."
+ },
+ "v-reflection-workbook-131": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Both of you treat it as settled, and mostly it is. The gap shows up after a rough patch, when neither of you names that you are okay. Say it once out loud. Short is fine."
+ },
+ "v-reflection-workbook-132": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "[X partner name] treats it as given and does not think to say it. [X partner name] can offer it without being asked"
+ },
+ "v-reflection-workbook-133": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Both of you want it said."
+ },
+ "v-reflection-workbook-134": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "so [W partner name] can offer it first."
+ },
+ "v-reflection-workbook-135": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "[Z partner name] holds it as obvious and stays quiet. When [W partner name] asks, they are not doubting the relationship. When [Z partner name] does not say it, they are not withholding."
+ },
+ "v-reflection-workbook-136": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "[Y partner name] feels a long quiet and starts to wonder about it. [X partner name] does not register the gap at all. One unprompted sentence from [X partner name] closes it."
+ },
+ "v-reflection-workbook-137": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Neither of you asks for it and neither of you offers it. That is comfortable right up until something is actually off and there is no signal either way. Build one small check-in you both do on purpose."
+ },
+ "v-reflection-workbook-138": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Whoever notices the gap names it, even briefly."
+ },
+ "v-reflection-workbook-139": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "while [X partner name] often won\\'t return the question."
+ },
+ "v-reflection-workbook-140": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "When you notice, address it kindly."
+ },
+ "v-reflection-workbook-141": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "It will be helpful to understand each others\\' methods of communicating to ensure it still works."
+ },
+ "v-reflection-workbook-142": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Your bids tend to be gentle, a song they liked, a comment about the weekend. They can be easy to miss, but important to recognize and respond to in the appropriate manner."
+ },
+ "v-reflection-workbook-143": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "If one is missed, you may not either try again that day."
+ },
+ "v-reflection-workbook-144": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "[W partner name] can name the response they\\'d like."
+ },
+ "v-reflection-workbook-145": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Every so often, mark appreciation out loud to reinforce the pattern."
+ },
+ "v-reflection-workbook-146": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "except when \\'now\\' means neither of you is regulated. It may prove productive for you to each recognize your temperature:"
+ },
+ "v-reflection-workbook-147": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "which works fine until it doesn\\'t. It may be helpful to schedule a time to revisit."
+ },
+ "v-reflection-workbook-148": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Try naming it:"
+ },
+ "v-reflection-workbook-149": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Every few times, make it explicit."
+ },
+ "v-reflection-workbook-150": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Give it a full day"
+ },
+ "v-reflection-workbook-151": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "so [W partner name] knows it landed."
+ },
+ "v-reflection-workbook-152": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Say it out loud, even when you think it\\'s obvious."
+ },
+ "v-reflection-workbook-153": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Every so often, add the sentence out loud."
+ },
+ "v-reflection-workbook-154": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "[W partner name] needs to hear it, and [X partner name] needs to see it. Say it out loud and show up consistently."
+ },
+ "v-reflection-workbook-155": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "both of you may sometimes wonder if it\\'s still there. It is. Once in a while, mark it explicitly."
+ },
+ "v-reflection-workbook-156": {
+  "files": [
+   "api/_workbook-content.js"
+  ],
+  "current": "Both of you want to deliver it well, but may overwait."
+ },
+ "v-reflection-workbook-157": {
+  "files": [
+   "src/App.jsx"
+  ],
+  "current": "This shapes how you answer the next section, and helps us give you more personalized context in your results."
+ },
+ "v-reflection-workbook-158": {
+  "files": [
+   "attune-app/src/components/results.tsx",
+   "src/App.jsx"
+  ],
+  "current": "Nothing to work through. Keep staying current with each other."
+ },
+ "v-reflection-workbook-159": {
+  "files": [
+   "src/App.jsx"
+  ],
+  "current": "Explore your full results to learn what this looks like for the two of you."
+ },
+ "v-reflection-workbook-160": {
+  "files": [
+   "src/App.jsx"
+  ],
+  "current": "Explore what you each expect out of this part of your relationship."
+ },
+ "v-reflection-workbook-161": {
+  "files": [
+   "src/App.jsx"
+  ],
+  "current": "It lives with the rest of your results."
+ },
+ "v-reflection-workbook-162": {
+  "files": [
+   "attune-app/src/components/expectations.tsx"
+  ],
+  "current": "This shapes how you answer the next section, and helps us give you"
+ },
+ "v-reflection-workbook-164": {
+  "files": [
+   "attune-app/src/components/results.tsx"
+  ],
+  "current": "There is nothing here yet. These appear where you both wrote an answer to the same question."
+ },
+ "v-reflection-workbook-165": {
+  "files": [
+   "attune-app/src/components/conflict-results.tsx"
+  ],
+  "current": "has not finished this yet. Their side fills in when they do."
+ },
+ "v-reflection-workbook-167": {
+  "files": [
+   "attune-app/src/components/screen-states.tsx"
+  ],
+  "current": "You're offline. This will load as soon as you're back."
+ },
+ "v-reflection-workbook-168": {
+  "files": [
+   "attune-app/src/components/screen-states.tsx"
+  ],
+  "current": "Finish setting up on the website and this will fill in."
+ },
+ "v-reflection-workbook-169": {
+  "files": [
+   "attune-app/src/components/settings.tsx"
+  ],
+  "current": "You are offline. This needs a connection."
+ },
+ "v-reflection-workbook-170": {
+  "files": [
+   "attune-app/src/components/annotation-sheet.tsx"
+  ],
+  "current": "Tap the tags this belongs in."
+ },
+ "v-reflection-workbook-171": {
+  "files": [
+   "attune-app/src/app/notes.tsx"
+  ],
+  "current": "It moves to the bottom of your tag list. Typing the name again brings it back."
+ },
+ "v-reflection-workbook-172": {
+  "files": [
+   "attune-app/src/app/notes.tsx"
+  ],
+  "current": "This has been updated since you wrote this."
+ },
+ "v-reflection-workbook-173": {
+  "files": [
+   "attune-app/src/components/conflict-exercise.tsx",
+   "attune-app/src/components/exercise.tsx",
+   "attune-app/src/components/expectations.tsx",
+   "attune-app/src/components/intimacy-exercise.tsx",
+   "attune-app/src/components/reflection-exercise.tsx"
+  ],
+  "current": "That answer has not saved yet. It will try again on the next one."
+ },
+ "v-reflection-workbook-178": {
+  "files": [
+   "attune-app/src/components/checklist.tsx"
+  ],
+  "current": "That tick has not saved yet. It will try again on the next one."
+ },
+ "v-reflection-workbook-179": {
+  "files": [
+   "attune-app/src/components/budget.tsx"
+  ],
+  "current": "That has not saved yet. It will try again when you leave the next field."
+ },
+ "v-reflection-workbook-180": {
+  "files": [
+   "attune-app/src/components/conflict-exercise.tsx"
+  ],
+  "current": "Tap them in order, best first. Tap one again to take it back."
+ },
+ "v-reflection-workbook-181": {
+  "files": [
+   "attune-app/src/components/exercise-chrome.tsx"
+  ],
+  "current": "Tap them in order, most important first. Tap one again to take it back."
+ }
+}

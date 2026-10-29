@@ -1,4 +1,3 @@
-| A191 | **Yes, that works, and here is the delete you asked for: migration 100, below.** Run 100 first. It removes the account the app made for Mya: her login, her profile, and everything attached to them. Then she buys with her promo code and makes her account on the website, under either Gmail address. Then she signs in to the app with that same address and the same way she signed up (the email and password she just set, or Continue with Google under that address), and it opens. Order matters: if she signs in to the app with Google under the old address before buying, it makes a fresh empty account, which the app now turns away. Harmless, but it would show up on the no-purchase list. 100 deletes nothing if more than one account matches its description or if she has already bought something, and it tells you so. **Still yours whenever you like:** the words on the "No Attune package" screen are mine. |
 
 Everything you need is in this file. Commands are written to be copied whole,
 including the part that moves to the right folder, so you never have to know
@@ -10,10 +9,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A191 | **Mya's app account is under a different Gmail address from the one you gave me.** Your query shows it: she signed in with Google, made the account on 29 October, and nobody has joined on her invite code. An order under the address you gave me won't open that account. Two ways through. (1) Simplest: she buys with her promo code using the Gmail address on that row, then opens the app and taps "I just bought one". (2) If she wants the other address: she buys under it, then signs out in the app and signs back in with that address. Her first account stays behind, empty. She can delete it from Settings before signing out, or leave it. Either way the app lets her in once the order exists. **Still yours whenever you like:** the words on the "No Attune package" screen are mine. |
-| A187 | **Review the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** 543 sentences where "it", "this" or "that" points at nothing, or a position is described without naming its two ends, each with a proposed rewrite. Your example is there: "once a week, name one thing you actually need" (Communicating Needs). For each row, take the proposal, edit it in the box, or keep what is live. Your choices save as you go, and I apply them when you say you're done. Filter by area to work through it in sittings. Two things to look at first. Several couple type sentences describe the wrong person for about half of readers: they use the reader's name where they mean "the one who reaches first" (The translators description, The orbit's third tip), and two sticking points open with a bare "her"/"his". And some rows are copy no screen shows today (the reflection insights, Communication action items); they're marked "not shown" in the "where" line, so you can keep those as they are. |
+| A187 | **Going through the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** Your ask: "As I go through and click use this once I'm done with the edit, please remove that tile from my view and apply that change to the live site and app." Edit the box if you want to, then press Use this, or Keep current. The tile leaves your list, and about every 20 minutes while this session is open I put your decisions live on the site and in the app. They then show "· live" under All. Text you are partway through is kept as a draft until you press a button. One thing to know: a highlight someone made on a sentence you change loses its marker. The note itself stays in their Notes. Look first at the couple type sentences that name the wrong person (The translators description, The orbit's third tip). |
 | A190 | **Review the ten Behavior to try tiles, same page, Behavior to try tab.** One per couple type, in your shape: "Given your unique approaches, {name} can … and {name} can …". The names fill in from who is more open or guarded, or who reaches first. The four same-type couples (both Initiators, both Anchors, and so on) can't split into two jobs, because nothing says which person is which, so each of those is one behavior you both do. Once you approve them, I add the tile above Phrases to try and in What Comes Next under Things to consider. |
-| A192 | **Please run migration 099. Your check after 098 found one last open rule, on a table called partner_sync.** Its name says "service role only", but it lets anybody holding the site's public key read and change every row. No code here creates or reads that table: it was made by hand in the dashboard, so nothing breaks when the rule goes. 099 removes it, and skips quietly if the table isn't there. Steps below, then the same check as last time, which should now come back empty. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -24,131 +21,9 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### Two things to run, for A191 and A192
-
-**For A191. Paste this into Terminal.** It copies migration 100 and prints `copied`.
-
-```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/100_remove_app_account_made_without_purchase.sql | pbcopy && echo copied
-```
-
-**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned." If it says "Expected exactly one account", nothing was deleted: paste me the message.
-
-<!-- SQL 100_remove_app_account_made_without_purchase.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 100: remove the one account the app made without a purchase (A191).
---
--- Ellie: "Can we delete her account that she made on the app and shouldn't
--- have been able to?" Before the A191 fix, the app's Continue with Google
--- made an account for any address and let it set up a profile. The
--- accounts-with-no-purchase check found exactly one: made with Google on
--- 29 October, a profile, nobody joined on its invite code, nothing bought.
---
--- No address is written here: this file is in a public repository. The
--- account is found by that description instead, which is the same rule as
--- supabase/diagnostics/accounts-with-no-purchase.sql.
---
--- ── WHY IT REFUSES RATHER THAN GUESSES ──────────────────────────────────────
--- It deletes only if the description matches exactly one account. Zero means
--- she has since bought something under that address, or the account is
--- already gone, and either way it must be left alone. Two or more means
--- somebody else fits too, and deleting a person by accident is not something
--- a re-run undoes. Both stop with a message and change nothing.
---
--- ── WHAT GOES WITH IT ───────────────────────────────────────────────────────
--- Deleting the login removes the profile (profiles.id cascades from
--- auth.users), and the profile takes her notes, tags, folders, saved and read
--- articles, notifications and push tokens with it. Anonymous page visits and
--- any survey answer keep their row with the owner cleared, which is what
--- happens when anybody deletes their own account.
---
--- Safe to run twice: the second run finds nobody and stops.
--- ============================================================================
-
-do $$
-declare
-  target uuid;
-  n int;
-begin
-  select count(*), min(u.id::text)::uuid into n, target
-  from auth.users u
-  join public.profiles p on p.id = u.id
-  where coalesce(u.raw_app_meta_data->>'provider', 'email') = 'google'
-    and u.created_at::date = date '2026-10-29'
-    and p.partner_profile_id is null
-    and not coalesce(p.is_comp, false)
-    and not coalesce((p.entitlements->>'hasGrant')::boolean, false)
-    and not exists (
-      select 1 from public.orders o
-      where o.user_id = u.id or lower(o.buyer_email) = lower(u.email))
-    and not exists (
-      select 1 from public.profiles j
-      where j.invite_code = p.invite_code and j.id <> p.id);
-
-  if n <> 1 then
-    raise exception 'Expected exactly one account made in the app without a purchase on 29 October, found %. Nothing was deleted.', n;
-  end if;
-
-  delete from auth.users where id = target;
-  raise notice 'Removed one account made in the app without a purchase.';
-end
-$$;
-```
-<!-- /SQL -->
-
-**For A192. Paste this into Terminal.** It copies the open-rules check and prints `copied`.
-
-```bash
-cd /Users/Ellie/Projects/unison && cat supabase/diagnostics/open-policies.sql | pbcopy && echo copied
-```
-
-**Then paste that into the Supabase SQL Editor** and run it. It reads only. It should come back with no rows now. If it shows any, paste them to me.
-
-<!-- SQL open-policies.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- Which tables can anybody holding the public key read or write?
---
--- Run this in the Supabase SQL Editor. It reads only; it writes nothing.
---
--- A policy whose test is always true, for a role a browser can be, opens its
--- table to anybody: the public key is in every visitor's browser. The server
--- uses the service key, which bypasses these rules, so it needs none of them.
---
--- ── WHAT ITS ANSWER MEANS ─────────────────────────────────────────────────
---   no rows        nothing is open. This is the answer after migration 098.
---   a policy row   that table is open to that command. Paste it back.
---   a bucket row   that bucket's files download without a signed link.
---                  Paste it back; it is a switch in Storage, not a migration.
-
-select
-  'policy'                          as "kind",
-  tablename                         as "name",
-  policyname || ' lets ' || array_to_string(roles, ', ') || ' ' || cmd as "what is open"
-from pg_policies
-where schemaname = 'public'
-  and (coalesce(qual, '') = 'true' or coalesce(with_check, '') = 'true')
-  and roles && array['public', 'anon', 'authenticated']::name[]
-
-union all
-
--- A storage bucket marked public serves its files to anybody with the address,
--- signed or not. The workbooks bucket holds each couple's full results, and the
--- code only ever hands out signed links, which is only private if the bucket is.
-select
-  'bucket',
-  id,
-  'public: anybody with a file address can download it'
-from storage.buckets
-where public
-
-order by 1, 2;
-```
-<!-- /SQL -->
-
 ## 2. Open
 
-**Nothing open.** A192, A187, A190 and A191 are waiting on you in section 1; A188 and A189 are in section 3.
+**Nothing open.** A187 and A190 are waiting on you in section 1; A188 and A189 are in section 3.
 
 ## 3. For you to review
 
@@ -186,6 +61,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A191 | **The app no longer lets anyone in without a purchase (Google and Apple sign-in used to make a free account). Mya's stray app account removed by migration 100; she buys, then signs in with the same address.** |
+| A192 | **Migration 099 closed the last open database rule (partner_sync); the open-rules check now comes back empty.** |
 | A171 | **Migration 098 ran and closed the promo codes and the other open rules. Its check found one more, partner_sync, which is A192.** |
 | A170 | **Five sweep rounds, A170a to A170m: failed reads no longer shown as facts about people, sends claimed before sending, every big read paged, open database rules found (A171).** |
 | A170a | **Saving an edit to a live In Practice article could unpublish it when the read failed. Now refuses.** |

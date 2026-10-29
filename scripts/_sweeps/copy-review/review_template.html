@@ -72,7 +72,7 @@ textarea:focus-visible, button:focus-visible, select:focus-visible{outline:2px s
 <div class="wrap">
   <header style="display:flex;flex-direction:column;gap:10px">
     <h1>Attune Copy Review</h1>
-    <p class="lede">Two tables from the beta feedback. <strong>Behavior to try</strong> is the new couple type tile (A190), one per pairing. <strong>Vague language</strong> is every sentence I found where "it", "this" or "that" points at nothing, or a position is described without naming its two ends (A187). For each row, take the proposal, edit it, or keep what is live. Your choices save as you go, and nothing reaches the product until I apply them.</p>
+    <p class="lede">Two tables from the beta feedback. <strong>Behavior to try</strong> is the new couple type tile (A190), one per pairing. <strong>Vague language</strong> is every sentence I found where "it", "this" or "that" points at nothing, or a position is described without naming its two ends (A187). For each row, edit the box if you want to, then press Use this, or Keep current. The tile then leaves your list, and I put it live on the site and in the app within about half an hour. Edits you are partway through are kept as drafts until you press a button.</p>
     <div class="legend"><span><span class="tok">${you}</span> <span class="tok">{U}</span> the reader</span><span><span class="tok">${them}</span> <span class="tok">{P}</span> their partner</span><span><span class="tok">${loName}</span> <span class="tok">${hiName}</span> the partner lower or higher on that scale</span><span><span class="tok">{EXP}</span> <span class="tok">{GRD}</span> more open, more guarded</span><span><span class="tok">{RCH}</span> <span class="tok">{WDR}</span> reaches first, needs space first</span><span><span class="tok">_sub _obj _pos</span> their pronoun</span></div>
   </header>
 
@@ -95,7 +95,7 @@ textarea:focus-visible, button:focus-visible, select:focus-visible{outline:2px s
 
 <script>
 const DATA = /*__DATA__*/null;
-const state = { tab: 'b', filter: 'todo', area: '', decisions: {} };
+const state = { tab: 'b', filter: 'todo', area: '', decisions: {}, drafts: {}, applied: {} };
 let db = null;
 const $ = (id) => document.getElementById(id);
 
@@ -108,9 +108,17 @@ function rowsFor() {
   const list = state.tab === 'b' ? DATA.behaviors : DATA.vague;
   return list.filter((r) => (!state.area || r.area === state.area) && (state.filter === 'all' || !state.decisions[r.id]));
 }
-function choiceLabel(d) {
+function choiceLabel(d, id) {
   if (!d) return null;
-  return d.choice === 'current' ? 'Keeping current' : d.choice === 'edited' ? 'Your edit' : 'Using proposal';
+  const what = d.choice === 'current' ? 'Keeping current' : d.choice === 'edited' ? 'Your edit' : 'Using proposal';
+  return state.applied[id] && d.choice !== 'current' ? what + ' · live' : what;
+}
+let draftTimer = {};
+function saveDraft(id, text) {
+  state.drafts[id] = text;
+  if (!db) return;
+  clearTimeout(draftTimer[id]);
+  draftTimer[id] = setTimeout(() => { db.collection('drafts').doc(id).set({ text, at: Date.now() }).catch(() => {}); }, 600);
 }
 async function save(id, rec) {
   state.decisions[id] = rec;
@@ -129,10 +137,10 @@ function card(r) {
   const isB = state.tab === 'b';
   const title = isB ? (r.id.slice(2) + ' · ' + r.type) : r.where;
   const meta = isB ? r.split : (r.file + (r.key ? ' · ' + r.key : ''));
-  const text = d && d.text != null ? d.text : r.proposed;
+  const text = d && d.text != null ? d.text : (state.drafts[r.id] != null ? state.drafts[r.id] : r.proposed);
   el.innerHTML =
     '<div class="head"><div><div class="where">' + esc(title) + '</div><div class="meta">' + markTokens(meta) + '</div></div>'
-    + '<span class="pill ' + (d ? 'ok' : 'todo') + '">' + (d ? esc(choiceLabel(d)) : 'To review') + '</span></div>'
+    + '<span class="pill ' + (d ? 'ok' : 'todo') + '">' + (d ? esc(choiceLabel(d, r.id)) : 'To review') + '</span></div>'
     + '<div class="cols">'
     + (isB ? '<div><div class="lbl">Where it goes</div><div class="now" style="background:var(--tok)">On the couple type page, a shaded tile headed Behavior to try, above Phrases to try. The same tile in What Comes Next, under Things to consider.</div></div>'
            : '<div><div class="lbl">Live now</div><div class="now">' + markNow(r.current) + '</div></div>')
@@ -140,16 +148,16 @@ function card(r) {
     + '</div>'
     + (r.why ? '<div class="why">' + markTokens(r.why) + '</div>' : '')
     + '<div class="acts">'
-    + '<button type="button" class="primary" data-a="use">' + (isB ? 'Use this' : 'Use proposal') + '</button>'
+    + '<button type="button" class="primary" data-a="use">Use this</button>'
     + (isB ? '' : '<button type="button" data-a="keep">Keep current</button>')
     + (d ? '<button type="button" data-a="undo">Undo</button>' : '')
     + '</div>';
   const ta = el.querySelector('textarea');
   ta.value = text;
-  ta.addEventListener('change', () => {
-    if (ta.value.trim() === r.proposed.trim()) return;
-    save(r.id, { choice: 'edited', text: ta.value, at: Date.now() }).then(render);
-  });
+  /* Typing saves a draft and decides nothing: a tile leaves the list only
+     when a button is pressed. Ellie: "As I go through and click use this
+     once I'm done with the edit, please remove that tile from my view." */
+  ta.addEventListener('input', () => saveDraft(r.id, ta.value));
   el.querySelector('[data-a="use"]').onclick = () => {
     const edited = ta.value.trim() !== r.proposed.trim();
     save(r.id, { choice: edited ? 'edited' : 'proposed', text: ta.value, at: Date.now() }).then(render);
@@ -157,6 +165,7 @@ function card(r) {
   const keep = el.querySelector('[data-a="keep"]');
   if (keep) keep.onclick = () => save(r.id, { choice: 'current', text: r.current, at: Date.now() }).then(render);
   const undo = el.querySelector('[data-a="undo"]');
+  if (undo && state.applied[r.id]) undo.title = 'Already live. Undo here and tell Claude to put it back.';
   if (undo) undo.onclick = async () => {
     delete state.decisions[r.id];
     if (db) { try { await db.collection('decisions').doc(r.id).delete(); } catch (e) {} }
@@ -194,6 +203,17 @@ function render() {
   (async () => {
     try { db = window.claude ? await window.claude.use('db') : null; } catch (e) { db = null; }
     if (!db) { $('status').textContent = 'Read only: choices cannot be saved in this view. Open the page signed in to claude.ai.'; return; }
+    db.collection('drafts').onSnapshot((snap) => {
+      const next = {};
+      snap.docs.forEach((d) => { next[d.id] = d.data().text; });
+      state.drafts = next;
+    }, () => {});
+    db.collection('applied').onSnapshot((snap) => {
+      const next = {};
+      snap.docs.forEach((d) => { next[d.id] = true; });
+      state.applied = next;
+      if (!document.activeElement || document.activeElement.tagName !== 'TEXTAREA') render();
+    }, () => {});
     db.collection('decisions').onSnapshot((snap) => {
       const next = {};
       snap.docs.forEach((d) => { next[d.id] = d.data(); });
