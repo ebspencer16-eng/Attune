@@ -44,6 +44,7 @@ import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 import { shouldShow, SURVEY_COPY } from "../api/_lib/survey.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insights.js";
+import { SIDE_BY_SIDE_KEY, sideBySideKeyText } from "../api/_lib/side-by-side.js";
 /**
  * ── THE APP'S ARITHMETIC, NOT A SECOND COPY OF IT ─────────────────────────
  * Ellie: "Peek looks right but it's cutting off the insight of the day. We
@@ -3185,14 +3186,14 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
     <div>
       {/* Always shown: the cross-view dots carry no initial, so the legend is
           the only thing naming them. Colour follows the person the dot is
-          about, not who answered, so "how Preston views Ellie" is Ellie's
+          about, not who answered, so "what Preston thought Ellie would say" is Ellie's
           colour and sits next to Ellie's own dot. */}
       <div style={{ display: "flex", gap: "0.5rem 1.1rem", flexWrap: "wrap", marginBottom: "1.1rem" }}>
         {[
-          { size: 16, color: U, label: `${userName}'s responses`, initial: sameInit ? null : uInit },
-          { size: 16, color: Pc, label: `${partnerName}'s responses`, initial: sameInit ? null : pInit },
-          { size: 9, color: U, label: `How ${partnerName} views ${userName}` },
-          { size: 9, color: Pc, label: `How ${userName} views ${partnerName}` },
+          { size: 16, color: U, label: sideBySideKeyText(SIDE_BY_SIDE_KEY.yours, userName, partnerName), initial: sameInit ? null : uInit },
+          { size: 16, color: Pc, label: sideBySideKeyText(SIDE_BY_SIDE_KEY.theirs, userName, partnerName), initial: sameInit ? null : pInit },
+          { size: 9, color: U, label: sideBySideKeyText(SIDE_BY_SIDE_KEY.theirReadOfYou, userName, partnerName) },
+          { size: 9, color: Pc, label: sideBySideKeyText(SIDE_BY_SIDE_KEY.yourReadOfThem, userName, partnerName) },
         ].map((it, i) => (
           <span key={i} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>
             <span style={{ width: it.size, height: it.size, borderRadius: "50%", background: it.color, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>

@@ -1,0 +1,1298 @@
+[
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.reassurance.low",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Reassurance",
+  "current": "You both want where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that it becomes common and stops carrying weight. Name the specific thing, not the category.",
+  "proposed": "You both want where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that saying where you stand becomes routine and stops carrying weight. Name the specific thing you value in the other, not a general reassurance.",
+  "why": "'it' = saying where you stand; 'the specific thing' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.reassurance.high",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Reassurance",
+  "current": "You both take security as a given, so it rarely gets said. That is a settled place to be. The issue is that silence carries no information, so a hard stretch looks exactly like an easy one. Say it out loud after the next rough week.",
+  "proposed": "You both take security as a given, so you rarely say where you stand. That is a settled place to be. The issue is that silence carries no information, so a hard stretch looks exactly like an easy one. After the next rough week, tell each other out loud where you stand.",
+  "why": "'it' = where you stand"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.energy",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Energy & Recharge",
+  "current": "You recharge in similar ways. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it.",
+  "proposed": "You recharge in similar ways. That makes it easy to assume the other always wants what you want. Ask what the other wants before you plan the weekend around your own preference.",
+  "why": "'it' = your own preference"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.expression.low",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Emotional Expression",
+  "current": "You both process emotion inwardly. That gives feelings room to settle before they're spoken. It also means nothing forces the deeper thing to the surface, so neither of you pushes the other toward the part that's harder to say. Ask for it sometimes, even when neither of you offers first.",
+  "proposed": "You both process emotion inwardly. That gives feelings room to settle before they're spoken. It also means nothing pushes the harder feelings to the surface, so neither of you pushes the other toward the part that's harder to say. Ask the other about those harder feelings sometimes, even when neither of you offers first.",
+  "why": "'the deeper thing' and 'Ask for it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.needs.high",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Communicating Needs",
+  "current": "You both tend to hint. That keeps things gentle, but when neither of you says it straight, the ask gets missed by both of you. Say the direct version sometimes anyway.",
+  "proposed": "You both tend to hint. That keeps things gentle, but when neither of you says what you need plainly, the ask gets missed by both of you. Sometimes ask for what you need in plain words anyway.",
+  "why": "'says it straight' = what you need; 'the direct version' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.bids.low",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Bids for Connection",
+  "current": "You're both reserved with the small reaches for connection. Neither of you makes a show of them, which keeps things low-key. It also means they can pass unnoticed. Name one out loud now and then. The reach only lands when the other person knows it happened.",
+  "proposed": "You're both reserved with the small reaches for connection. Neither of you makes a show of them, which keeps things low-key. It also means those reaches can pass unnoticed. Now and then, say out loud that you noticed the other reach for you. A reach only lands when the person who made it knows it was noticed.",
+  "why": "'Name one' = a reach you noticed; 'it happened' unclear"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.bids.high",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Bids for Connection",
+  "current": "You both catch the small reaches for connection. Keep catching them out loud. The acknowledgment is what makes a bid land, not just the noticing.",
+  "proposed": "You both catch the small reaches for connection. When you notice one, say so out loud. The acknowledgment is what makes a bid land, not just the noticing.",
+  "why": "'catching them out loud' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.listening",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Listening",
+  "current": "You listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
+  "proposed": "You listen in similar ways. That works until one of you needs the other kind of listening: quiet attention, or questions and a response. Ask which kind is wanted before you give it.",
+  "why": "'the other mode' and 'which one' never named"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.conflict",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Conflict Style",
+  "current": "You handle conflict in similar ways. If you both engage, it can escalate fast. If you both step back, things go unsaid. Watch for whichever one is yours.",
+  "proposed": "You handle conflict in similar ways. If you both engage, it can escalate fast. If you both step back, things go unsaid. Notice which of the two you are: quick to engage, or quick to step back.",
+  "why": "'whichever one is yours' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.repair.low",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Repairing",
+  "current": "You both repair deliberately, with a real reset. That makes repairs count. It can also leave small ruptures waiting for a big enough moment. Let some be smaller and sooner.",
+  "proposed": "You both repair deliberately, with a real reset. That makes repairs count. It can also leave small ruptures waiting for a big enough moment. Let some repairs be smaller and sooner.",
+  "why": "'some' = repairs"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.repair.high",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Repairing",
+  "current": "You both repair casually, without much ceremony. Because it comes so naturally, it's easy to skip naming that a repair even happened. Say it landed.",
+  "proposed": "You both repair casually, without much ceremony. Because repair comes so naturally, it's easy to skip saying that a repair even happened. Tell each other when an apology or a reset landed.",
+  "why": "'it comes', 'Say it landed' = the repair"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.love",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Emotional Intimacy",
+  "current": "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
+  "proposed": "Love lands in similar ways for both of you. That's rare. Keep showing love in that shared way on purpose, not just by default.",
+  "why": "'giving it in that form' = love, your shared way"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "ALIGNED_ADVICE.feedback",
+  "where": "Communication overview action tile (domain led by an aligned dimension), Feedback",
+  "current": "You handle feedback in similar ways. When you're both open, keep it kind. When you're both guarded, small things pile up. Say the small thing early.",
+  "proposed": "You handle feedback in similar ways. When you're both open, keep feedback kind. When you're both guarded, small things pile up. Mention a small annoyance early, before it piles up.",
+  "why": "'keep it kind', 'the small thing' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['1_1']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 1 and 1 (1 = left pole, 5 = right pole)",
+  "current": "You both need where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that it turns into a routine and stops carrying weight. Make it specific this week: name the thing, not the category.",
+  "proposed": "You both need where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that saying where you stand turns into a routine and stops carrying weight. Make it specific this week: name the thing you value in the other, not a general reassurance.",
+  "why": "'it' = saying where you stand"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['1_2']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 1 and 2 (1 = left pole, 5 = right pole)",
+  "current": "${loName} needs it said plainly; ${hiName} leans the same way. Close match, so neither of you is left waiting. The one gap: when life gets busy, the saying is the first thing to drop. Put it somewhere it survives a hard week.",
+  "proposed": "${loName} needs where they stand said plainly; ${hiName} leans the same way. Close match, so neither of you is left waiting. The one gap: when life gets busy, saying where you stand is the first thing to drop. Tie that reassurance to a fixed moment in your week, so it survives a hard one.",
+  "why": "'it' and 'the saying' = where they stand"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['1_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 1 and 3 (1 = left pole, 5 = right pole)",
+  "current": "${loName} needs where they stand said out loud; ${hiName} is steady either way. That steadiness can read as not needing to say it. It costs ${hiName} very little to say it anyway, and it lands.",
+  "proposed": "${loName} needs where they stand said out loud; ${hiName} is steady either way. That steadiness can make saying it feel unnecessary to ${hiName}. Telling ${loName} where they stand costs ${hiName} very little, and ${loName} feels the difference.",
+  "why": "'say it anyway, and it lands' = telling them where they stand"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['1_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 1 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} needs it voiced; ${hiName} treats it as settled and does not think to say it. The quiet is not withholding, and the asking is not doubt. The shift: ${hiName} says it once this week unprompted, before ${loName} has to ask.",
+  "proposed": "${loName} needs where they stand said out loud; ${hiName} treats the relationship as settled and does not think to say so. The quiet is not withholding, and the asking is not doubt. The shift: once this week, ${hiName} tells ${loName} where they stand, unprompted, before ${loName} has to ask.",
+  "why": "'it voiced', 'treats it as settled', 'says it' never named"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['1_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 1 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} needs where they stand said out loud. ${hiName} takes it as given and rarely says it. This is the gap where a long quiet stretch means two completely different things. Agree on a small, regular way it gets said. It matters more to one of you than the other, and that is fine.",
+  "proposed": "${loName} needs where they stand said out loud. ${hiName} takes it as given and rarely says it. This is the gap where a long quiet stretch means two completely different things. Agree on a small, regular way to say where you stand. Hearing it matters more to one of you than the other, and that is fine.",
+  "why": "'a way it gets said' = where you stand"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['2_2']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 2 and 2 (1 = left pole, 5 = right pole)",
+  "current": "You both like hearing it, without needing much. Comfortable match. Watch for it thinning out over time, since neither of you will chase it. Say it when you notice it, not only when it is asked for.",
+  "proposed": "You both like hearing where you stand, without needing much. Comfortable match. Watch for those reassurances thinning out over time, since neither of you will chase them. Tell each other where you stand when the feeling comes up, not only when someone asks.",
+  "why": "'hearing it', 'Say it when you notice it' never named"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['2_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 2 and 3 (1 = left pole, 5 = right pole)",
+  "current": "${loName} likes it said; ${hiName} is comfortable either way. No real strain here. ${hiName} can be the one who says it first, since it costs them less.",
+  "proposed": "${loName} likes where they stand said out loud; ${hiName} is comfortable either way. No real strain here. ${hiName} can be the first to say where you stand, since saying so costs them less.",
+  "why": "'it said', 'says it first' = where they stand"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['2_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 2 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} likes hearing it; ${hiName} assumes it and moves on. The shift: ${hiName} answers the unasked question sometimes, rather than waiting for a prompt.",
+  "proposed": "${loName} likes hearing where they stand; ${hiName} assumes the relationship is secure and moves on. The shift: sometimes ${hiName} tells ${loName} where they stand before ${loName} asks.",
+  "why": "'hearing it', 'assumes it', 'the unasked question' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['2_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 2 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} wants it said now and then; ${hiName} treats it as long since settled. ${hiName} may not hear the ask, because it arrives quietly. ${loName} can ask outright, and ${hiName} can take the ask at face value.",
+  "proposed": "${loName} wants where they stand said now and then; ${hiName} treats that as long since settled. ${hiName} can miss ${loName}'s ask, because it arrives quietly. ${loName} can ask outright, and ${hiName} can take the ask at face value.",
+  "why": "'wants it said', 'treats it as' unnamed; 'may' hedge"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['3_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 3 and 3 (1 = left pole, 5 = right pole)",
+  "current": "Neither of you needs it said, and neither of you goes looking for it. That is a low-maintenance place to be. The gap shows up after a rough patch, when neither of you names that you are okay. Say it once out loud after the next hard week.",
+  "proposed": "Neither of you needs where you stand said out loud, and neither of you goes looking for reassurance. That is a low-maintenance place to be. The gap shows up after a rough patch, when neither of you names that you are okay. After the next hard week, say out loud, once, that you are okay.",
+  "why": "'needs it said', 'looking for it', 'Say it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['3_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 3 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is steady either way; ${hiName} takes it as given. Nothing is straining. The one thing worth doing is saying it during a good stretch, so it is available during a bad one.",
+  "proposed": "${loName} is steady either way; ${hiName} takes the relationship's security as given. Nothing is straining. The one thing worth doing is telling each other where you stand during a good stretch, so the words are there during a bad one.",
+  "why": "'takes it as given', 'saying it', 'it is available' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} does not need much; ${hiName} needs none at all. You will rarely talk about where you stand. That works until something is actually off and there is no signal either way. Build one small check-in you both do on purpose.",
+  "proposed": "${loName} does not need much reassurance; ${hiName} needs none at all. You will rarely talk about where you stand. That works until something is actually off and there is no signal either way. Pick one small, regular moment where you each say how things feel between you.",
+  "why": "'need much' of what; 'check-in' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['4_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 4 and 4 (1 = left pole, 5 = right pole)",
+  "current": "You both take it as settled and rarely say it. Secure and uncomplicated. The risk is that silence carries no information, so a hard stretch looks exactly like an easy one. Name it out loud once a month, even when nothing prompts it.",
+  "proposed": "You both take the relationship as secure and rarely say so. Secure and uncomplicated. The risk is that silence carries no information, so a hard stretch looks exactly like an easy one. Once a month, tell each other out loud where you stand, even when nothing prompts it.",
+  "why": "'take it as settled', 'Name it' = where you stand"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['4_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 4 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} assumes it; ${hiName} assumes it more. Neither of you will bring it up. That is fine while things are steady. Pick one moment, an anniversary or the start of a month, and say it then.",
+  "proposed": "${loName} assumes the relationship is secure; ${hiName} assumes so even more. Neither of you will raise where you stand. That is fine while things are steady. Pick one moment, an anniversary or the start of a month, and tell each other where you stand then.",
+  "why": "'assumes it', 'bring it up', 'say it then' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.reassurance['5_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Reassurance, scores bucket 5 and 5 (1 = left pole, 5 = right pole)",
+  "current": "You both treat security as a given and neither of you asks for confirmation. Genuinely settled. The only thing to watch: after something hard, neither of you will be the one to say you are okay. Decide now who says it first next time.",
+  "proposed": "You both treat security as a given and neither of you asks for confirmation. Genuinely settled. The only thing to watch: after something hard, neither of you will be the one to say you are okay. Decide now which of you says 'we're okay' first next time.",
+  "why": "'says it first' = that you are okay"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['1_1']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 1 and 1 (1 = left pole, 5 = right pole)",
+  "current": "You both recharge in solitude. The risk is that neither of you flags when you're depleted. You just go quiet. Try naming it before you disappear: \"I need a low-key evening.\" It prevents the silence from reading as something else.",
+  "proposed": "You both recharge in solitude. The risk is that neither of you flags when you're depleted. You just go quiet. Say that you're running low before you disappear: \"I need a low-key evening.\" Saying so keeps the silence from reading as a problem between you.",
+  "why": "'naming it' = being depleted; 'something else' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['1_2']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 1 and 2 (1 = left pole, 5 = right pole)",
+  "current": "${loName} recharges alone; ${hiName} leans the same way, slightly more flexible. Close match, but don't let the ease of being separate quietly turn into less connection than you want. One shared ritual, dinner, a walk, holds the thread.",
+  "proposed": "${loName} recharges alone; ${hiName} leans the same way, slightly more flexible. Close match, but don't let the ease of being separate quietly turn into less connection than you want. One shared ritual, like dinner or a walk, keeps you connected.",
+  "why": "'holds the thread' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['1_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 1 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} restores alone; ${hiName} leans toward people and togetherness. The shift: when ${loName} needs to withdraw, name it as a recharge request rather than going quiet. ${hiName} is less likely to misread it when it's said out loud.",
+  "proposed": "${loName} restores alone; ${hiName} leans toward people and togetherness. The shift: when ${loName} needs to withdraw, ${loName} says so as a recharge request, \"I need an hour on my own,\" rather than going quiet. ${hiName} is less likely to read time alone as distance when the need is said out loud.",
+  "why": "'name it', 'misread it' = the need to recharge"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['2_2']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 2 and 2 (1 = left pole, 5 = right pole)",
+  "current": "You both lean toward quiet restoration. Good match. You're unlikely to drain each other. The one gap: neither of you may push for togetherness when it's actually needed. Sometimes one person has to reach, even when it doesn't come naturally.",
+  "proposed": "You both lean toward quiet restoration. Good match. You're unlikely to drain each other. The one gap: neither of you may push for togetherness when it's actually needed. Sometimes one of you has to ask for time together, even when that doesn't come naturally.",
+  "why": "'has to reach' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['2_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 2 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} leans toward recharging alone; ${hiName} leans toward connection. One shift: when you've both had a long day, name your mode before defaulting to it. \"I need an hour to decompress\" lands very differently than silently withdrawing.",
+  "proposed": "${loName} leans toward recharging alone; ${hiName} leans toward connection. One shift: when you've both had a long day, say whether you need time alone or time together before acting on that need. \"I need an hour to decompress\" lands very differently than silently withdrawing.",
+  "why": "'name your mode' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['2_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 2 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} tends toward quiet; ${hiName} genuinely energizes from togetherness. The shift: ${hiName} shouldn't read ${loName}'s quiet time as withdrawal, and ${loName} should flag when they're recharged and ready to reconnect. Both need to become signals.",
+  "proposed": "${loName} tends toward quiet; ${hiName} genuinely energizes from togetherness. The shift: ${hiName} shouldn't read ${loName}'s quiet time as withdrawal, and ${loName} should flag when they're recharged and ready to reconnect. Both the quiet time and the return from it need to be said out loud.",
+  "why": "'Both need to become signals' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['3_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 3 and 3 (1 = left pole, 5 = right pole)",
+  "current": "You're both genuinely flexible about how you restore. That's adaptive, but it can mean connection gets left to chance. When stress hits, each of you may default to a mode the other doesn't know about. Check in when things are hard.",
+  "proposed": "You're both genuinely flexible about how you restore. That's adaptive, but it can mean connection gets left to chance. When stress hits, each of you can default to time alone or time together without the other knowing which. When things are hard, ask: \"Do you want company or space tonight?\"",
+  "why": "'a mode', 'Check in' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['3_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 3 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${hiName} leans more toward needing togetherness than ${loName} does. ${hiName} can name when they want company rather than hoping ${loName} picks it up. ${loName} tends to assume everyone's preferences match their own.",
+  "proposed": "${hiName} leans more toward needing togetherness than ${loName} does. ${hiName} can name when they want company rather than hoping ${loName} picks up on that need. ${loName} tends to assume everyone's preferences match their own.",
+  "why": "'picks it up' = the want for company"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is neutral; ${hiName} genuinely energizes from people and connection. ${hiName}'s need is a real preference worth designing around. Build in deliberate closeness even when ${loName} would otherwise be fine either way.",
+  "proposed": "When it comes to recharging alone or with people, ${loName} is relatively neutral; ${hiName} genuinely energizes from people and connection. ${hiName}'s need for time together is a real preference worth planning around. Plan regular time together even when ${loName} would otherwise be fine either way.",
+  "why": "'is neutral' on what; 'deliberate closeness' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['4_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 4 and 5 (1 = left pole, 5 = right pole)",
+  "current": "Both of you lean toward connection, ${hiName} more strongly. When one of you is genuinely depleted and doesn't have energy for togetherness, build in an easy way to signal it: \"I'm low tonight but I'm not going anywhere.\"",
+  "proposed": "Both of you lean toward connection, ${hiName} more strongly. When one of you is genuinely depleted and doesn't have energy for togetherness, agree on an easy way to say so: \"I'm low tonight but I'm not going anywhere.\"",
+  "why": "'signal it' = being depleted"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.energy['5_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Energy & Recharge, scores bucket 5 and 5 (1 = left pole, 5 = right pole)",
+  "current": "You both restore through people and being together. Strong match in daily energy needs. The risk: when you're both depleted at the same time, neither of you may feel like being \"on\" for the other. Name it when it happens rather than both performing okay-ness.",
+  "proposed": "You both restore through people and being together. Strong match in daily energy needs. The risk: when you're both depleted at the same time, neither of you may feel like being \"on\" for the other. When you're both running low, say so rather than both performing okay-ness.",
+  "why": "'Name it when it happens' = both being depleted"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.expression['1_1']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Expression, scores bucket 1 and 1 (1 = left pole, 5 = right pole)",
+  "current": "You both process internally before sharing. That prevents blurting, but it also means important things can stay unspoken for a long time. The shift: if something's been sitting with you for more than 48 hours, name it. Even \"I've been sitting with something\" opens the door.",
+  "proposed": "You both process internally before sharing. That prevents blurting, but it also means important things can stay unspoken for a long time. The shift: if a feeling or worry has been sitting with you for more than 48 hours, bring that feeling up. Even \"I've been sitting with something\" opens the door.",
+  "why": "'name it' = the thing sitting with you"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.expression['1_2']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Expression, scores bucket 1 and 2 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is strongly internal; ${hiName} leans similar. Neither of you is rushing to the surface. Watch for the slow drift where things stay unsaid because neither pushed. A regular check-in, \"anything on your mind this week?\", creates the opening.",
+  "proposed": "${loName} is strongly internal; ${hiName} leans similar. Neither of you rushes to say what you feel. Watch for the slow drift where feelings stay unsaid because neither of you asked. A regular check-in, \"anything on your mind this week?\", creates the opening.",
+  "why": "'rushing to the surface', 'things' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.expression['1_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Expression, scores bucket 1 and 3 (1 = left pole, 5 = right pole)",
+  "current": "${loName} processes privately; ${hiName} is flexible. The shift for ${loName}: trust that sharing before you're fully sorted won't make you look uncertain. It gives ${hiName} a chance to feel included in what's actually going on.",
+  "proposed": "${loName} processes privately; ${hiName} is flexible. The shift for ${loName}: trust that sharing before you're fully sorted won't make you look uncertain. Sharing early gives ${hiName} a chance to feel included in what's actually going on.",
+  "why": "'It' = sharing early"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.expression['3_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Expression, scores bucket 3 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${hiName} leans more toward sharing than ${loName}. ${hiName} may feel like they're doing most of the initiating when it comes to talking things through. ${loName} can start sometimes, even when nothing is wrong.",
+  "proposed": "${hiName} leans more toward sharing than ${loName}. ${hiName} may feel like they're doing most of the initiating when it comes to talking things through. ${loName} can start those conversations sometimes, even when nothing is wrong.",
+  "why": "'start' what"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.expression['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Expression, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is neutral; ${hiName} genuinely processes out loud and needs to share. Give ${hiName} explicit room to think aloud without ${loName} treating every word as a conclusion. Processing isn't the same as deciding.",
+  "proposed": "When it comes to keeping feelings in or sharing them, ${loName} is relatively neutral; ${hiName} genuinely processes out loud and needs to share. Give ${hiName} explicit room to think aloud without ${loName} treating every word as a conclusion. Processing isn't the same as deciding.",
+  "why": "'is neutral' on what"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.needs['1_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Communicating Needs, scores bucket 1 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} asks directly; ${hiName} tends to signal rather than state. A real difference. The shift: ${loName} can ask \"what do you need right now?\" when something seems off. It gives ${hiName} an opening without them having to initiate the ask.",
+  "proposed": "${loName} asks directly; ${hiName} tends to signal rather than state. A real difference. The shift: ${loName} can ask \"what do you need right now?\" when something seems off. That question gives ${hiName} an opening without them having to initiate the ask.",
+  "why": "'It' = the question"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.needs['1_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Communicating Needs, scores bucket 1 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} states needs directly; ${hiName} signals indirectly. The gap creates the \"you should just know\" dynamic on one side and \"just tell me what you want\" frustration on the other. ${loName} can model the direct ask gently, \"I'd love X, what about you?\", to show it's safe.",
+  "proposed": "${loName} states needs directly; ${hiName} signals indirectly. The gap creates the \"you should just know\" dynamic on one side and \"just tell me what you want\" frustration on the other. ${loName} can model the direct ask gently, \"I'd love X, what about you?\", to show that asking directly is safe.",
+  "why": "'it's safe' = asking directly"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.needs['2_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Communicating Needs, scores bucket 2 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} leans direct; ${hiName} tends to hint. A moderate difference. When ${loName} doesn't catch ${hiName}'s signal, ${hiName} can try: \"I was hoping you'd offer to…\", it names the expectation without accusation.",
+  "proposed": "${loName} leans direct; ${hiName} tends to hint. A moderate difference. When ${loName} doesn't catch ${hiName}'s signal, ${hiName} can try: \"I was hoping you'd offer to…\" That line names the expectation without accusation.",
+  "why": "'it names' = that line"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.needs['3_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Communicating Needs, scores bucket 3 and 3 (1 = left pole, 5 = right pole)",
+  "current": "You're both somewhere in the middle, not always direct, not always signaling. Watch for: needs slipping through because neither of you pushed to name them. A weekly \"what do you need from me this week?\" keeps it simple.",
+  "proposed": "When it comes to asking directly or hinting, you are both relatively neutral. Watch for: needs slipping through because neither of you pushed to name them. A weekly \"what do you need from me this week?\" keeps it simple.",
+  "why": "'somewhere in the middle' shape"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.needs['3_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Communicating Needs, scores bucket 3 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${hiName} tends a bit more indirect than ${loName}. ${loName} can reflect back what they observe, \"it sounds like you might need X\", rather than waiting. It gives ${hiName} a bridge between signaling and asking.",
+  "proposed": "${hiName} tends a bit more indirect than ${loName}. ${loName} can reflect back what they observe, \"it sounds like you might need X\", rather than waiting. That gives ${hiName} a bridge between signaling and asking.",
+  "why": "'It' = reflecting back"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.needs['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Communicating Needs, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is neutral; ${hiName} is quite indirect in how they ask. ${hiName} doesn't have to change their style completely, but practicing one direct ask per week, on something small, makes the indirect signals land better when they matter.",
+  "proposed": "When it comes to asking directly or hinting, ${loName} is relatively neutral; ${hiName} is quite indirect in how they ask. ${hiName} doesn't have to change their style completely, but practicing one direct ask per week, on something small, makes the indirect signals land better when they matter.",
+  "why": "'is neutral' on what"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.needs['4_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Communicating Needs, scores bucket 4 and 4 (1 = left pole, 5 = right pole)",
+  "current": "You both tend toward indirect communication around needs. That works when you're well-attuned, but it also means things can go unmet because neither named them. The shift: once a week, name one thing you actually need from each other. Directly.",
+  "proposed": "You both tend toward indirect communication around needs. That works when you're well-attuned, but it also means needs can go unmet because neither of you named them. The shift: once a week, name one thing you actually need from each other. Directly.",
+  "why": "'things' = needs"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.needs['5_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Communicating Needs, scores bucket 5 and 5 (1 = left pole, 5 = right pole)",
+  "current": "You both tend to signal needs rather than state them. The relationship carries real goodwill. You're both trying not to burden each other. The cost is that needs can quietly go unmet. Build a weekly \"what do you need?\" into your rhythm. It removes the weight from the ask.",
+  "proposed": "You both tend to signal needs rather than state them. The relationship carries real goodwill. You're both trying not to burden each other. The cost is that needs can quietly go unmet. Build a weekly \"what do you need?\" into your rhythm. A standing question takes the weight off asking.",
+  "why": "'It removes' = the weekly question"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.bids['1_2']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Bids for Connection, scores bucket 1 and 2 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is very reserved; ${hiName} is a bit more present. Close match, but the bid volume between you is probably low. Worth deliberately creating more moments, share more small things, even when they feel insignificant.",
+  "proposed": "${loName} is very reserved; ${hiName} is a bit more present. Close match, but the bid volume between you is probably low. Create more small moments of connection on purpose: share small things, even when they feel insignificant.",
+  "why": "'Worth deliberately creating more moments' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.bids['1_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Bids for Connection, scores bucket 1 and 3 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is reserved; ${hiName} is in the middle. ${hiName} can start noticing and naming when ${loName} makes a small bid, \"you seemed like you wanted to say something earlier\", making it easier for ${loName} to reach again.",
+  "proposed": "${loName} is reserved; ${hiName} sits between reserved and expressive. ${hiName} can start noticing and naming when ${loName} makes a small bid, \"you seemed like you wanted to say something earlier\", making it easier for ${loName} to reach again.",
+  "why": "'in the middle' shape"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.bids['2_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Bids for Connection, scores bucket 2 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} tends quieter; ${hiName} is more attuned to small moments. ${loName} can become more aware of what ${hiName} does to reach for connection, and make a deliberate effort to turn toward it, even when it's a small thing.",
+  "proposed": "${loName} tends quieter; ${hiName} is more attuned to small moments. ${loName} can become more aware of what ${hiName} does to reach for connection, and make a deliberate effort to turn toward those reaches, even small ones.",
+  "why": "'turn toward it', 'it's a small thing' = the reach"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.bids['2_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Bids for Connection, scores bucket 2 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} leans reserved; ${hiName} is highly responsive. ${hiName} may feel like they're always the one reaching. The shift: ${loName} can pick one type of bid and practice it consistently, asking about ${hiName}'s day, noticing something they did. It doesn't have to be grand.",
+  "proposed": "${loName} leans reserved; ${hiName} is highly responsive. ${hiName} may feel like they're always the one reaching. The shift: ${loName} can pick one type of bid and practice it consistently, asking about ${hiName}'s day, noticing something they did. The bid doesn't have to be grand.",
+  "why": "'It doesn't have to be grand' = the bid"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.bids['3_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Bids for Connection, scores bucket 3 and 3 (1 = left pole, 5 = right pole)",
+  "current": "You're both somewhere in the middle. Workable, but \"somewhere in the middle\" can mean neither reaches reliably. Build in deliberate connection moments rather than leaving it to feel.",
+  "proposed": "When it comes to reaching for each other quietly or openly, you are both relatively neutral. That works, but it can mean neither of you reaches for the other reliably. Plan small moments of connection on purpose rather than waiting until you feel like it.",
+  "why": "'somewhere in the middle' shape; 'leaving it to feel' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.bids['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Bids for Connection, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is neutral; ${hiName} is very attuned and responsive. ${hiName} genuinely values these small moments, and ${loName} can create more of them even when they'd otherwise not think about it. It doesn’t take much but it matters a lot.",
+  "proposed": "When it comes to reaching for connection, ${loName} is relatively neutral; ${hiName} is very attuned and responsive. ${hiName} genuinely values these small moments, and ${loName} can create more of them even when they'd otherwise not think about it. A small moment doesn't take much, but it matters a lot to ${hiName}.",
+  "why": "'is neutral' on what; 'It doesn't take much' = a small moment"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.bids['4_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Bids for Connection, scores bucket 4 and 4 (1 = left pole, 5 = right pole)",
+  "current": "You're both responsive to each other. That builds a warm, attentive dynamic. Watch for: when one of you is distracted or checked out, the other can feel it acutely. Agree to name it: \"I feel like I haven't had your attention today.\"",
+  "proposed": "You're both responsive to each other. That builds a warm, attentive dynamic. Watch for: when one of you is distracted or checked out, the other can feel it acutely. Agree to say so: \"I feel like I haven't had your attention today.\"",
+  "why": "'name it' = feeling the other is distracted"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.bids['5_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Bids for Connection, scores bucket 5 and 5 (1 = left pole, 5 = right pole)",
+  "current": "You're both highly attuned and responsive. The relationship probably feels warm and connected. Watch for: because both of you reach for connection readily, check in about whether the volume feels right. Too many bids can occasionally feel like pressure rather than warmth.",
+  "proposed": "You're both highly attuned and responsive. The relationship probably feels warm and connected. Watch for: because both of you reach for connection readily, ask each other whether the number of bids feels right. Too many bids can occasionally feel like pressure rather than warmth.",
+  "why": "'check in about whether the volume' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.conflict['1_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Conflict Style, scores bucket 1 and 3 (1 = left pole, 5 = right pole)",
+  "current": "${loName} moves toward resolution quickly; ${hiName} is flexible. ${hiName} can signal when they're ready. It helps ${loName} not feel like they're carrying the weight of bringing things up.",
+  "proposed": "${loName} moves toward resolution quickly; ${hiName} is flexible. ${hiName} can say when they're ready to talk. That helps ${loName} not feel like they're carrying the weight of bringing things up.",
+  "why": "'signal when they're ready' for what; 'It' = the signal"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.conflict['1_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Conflict Style, scores bucket 1 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} addresses things quickly; ${hiName} tends to need more time. This can cause tension. Agree in advance that when ${hiName} asks for time, ${loName} can ask for a return window: \"when should we come back to this?\", turns space into a plan.",
+  "proposed": "${loName} addresses things quickly; ${hiName} tends to need more time. That difference can cause tension. Agree in advance that when ${hiName} asks for time, ${loName} can ask for a return window: \"when should we come back to this?\", turns space into a plan.",
+  "why": "'This' = the timing difference"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.conflict['1_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Conflict Style, scores bucket 1 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} wants to resolve things quickly; ${hiName} needs significant space first. One of the most common conflict mismatches. Name the pattern in a calm moment. Agree: ${hiName} commits to a specific return time, and ${loName} trusts that as a promise, not avoidance.",
+  "proposed": "${loName} wants to resolve things quickly; ${hiName} needs significant space first. One of the most common conflict mismatches. In a calm moment, talk about how one of you pushes to resolve while the other needs space. Agree: ${hiName} commits to a specific return time, and ${loName} trusts that as a promise, not avoidance.",
+  "why": "'Name the pattern' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.conflict['2_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Conflict Style, scores bucket 2 and 3 (1 = left pole, 5 = right pole)",
+  "current": "${loName} leans toward quicker resolution; ${hiName} is flexible. ${hiName} can signal readiness. It helps ${loName} not always be the one initiating.",
+  "proposed": "${loName} leans toward quicker resolution; ${hiName} is flexible. ${hiName} can say when they're ready to talk. That way ${loName} is not always the one who starts.",
+  "why": "'signal readiness' for what; 'It helps' = the signal"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.conflict['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Conflict Style, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is neutral; ${hiName} strongly needs space before engaging. The shift: ${hiName} can share why time matters, often it's about saying things more accurately, not avoiding the conversation. That reframe helps ${loName} understand the delay isn't rejection.",
+  "proposed": "When it comes to engaging right away or stepping back, ${loName} is relatively neutral; ${hiName} strongly needs space before engaging. The shift: ${hiName} can share why time matters, often it's about saying things more accurately, not avoiding the conversation. That reframe helps ${loName} understand the delay isn't rejection.",
+  "why": "'is neutral' on what"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.repair['1_1']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Repairing, scores bucket 1 and 1 (1 = left pole, 5 = right pole)",
+  "current": "You both tend toward more formal, deliberate repair. The aftermath can feel long. The shift: agree on a small signal that says \"I'm not fully okay yet, but we're okay\", separate from full resolution. It prevents the silence from reading as something worse.",
+  "proposed": "You both tend toward more formal, deliberate repair. The aftermath can feel long. The shift: agree on a small signal that says \"I'm not fully okay yet, but we're okay\", separate from full resolution. That signal keeps the silence from reading as something worse.",
+  "why": "'It prevents' = the signal"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.repair['1_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Repairing, scores bucket 1 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} takes significantly longer to recover; ${hiName} moves on quickly, a noteworthy gap. Agree: ${hiName} moving on first doesn't mean it's resolved. ${loName} can name a window, \"I'll be ready to put this behind me by tomorrow morning\", gives both something to work with.",
+  "proposed": "${loName} takes significantly longer to recover; ${hiName} moves on quickly, a noteworthy gap. Agree: ${hiName} moving on first doesn't mean the disagreement is resolved. ${loName} can name a window, \"I'll be ready to put this behind me by tomorrow morning\", gives both something to work with.",
+  "why": "'it's resolved' = the disagreement"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.repair['2_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Repairing, scores bucket 2 and 4 (1 = left pole, 5 = right pole)",
+  "current": "${loName} tends slower; ${hiName} tends to recover more quickly. Moderate difference. Try a check-in 24 hours after conflict, \"are we good?\", It asks little but can reveal a lot.",
+  "proposed": "${loName} tends slower; ${hiName} tends to recover more quickly. Moderate difference. Try a check-in 24 hours after conflict, \"are we good?\" The question asks little but can reveal a lot.",
+  "why": "'It asks little' = the question"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.repair['3_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Repairing, scores bucket 3 and 3 (1 = left pole, 5 = right pole)",
+  "current": "You're both somewhere in the middle. Watch for: neither of you having a strong pull to check in, which can leave repair feeling incomplete. A \"are we actually good?\" the day after a hard moment helps.",
+  "proposed": "When it comes to repairing formally or informally, you are both relatively neutral. Watch for: neither of you having a strong pull to check in, which can leave repair feeling incomplete. A \"are we actually good?\" the day after a hard moment helps.",
+  "why": "'somewhere in the middle' shape"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.repair['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Repairing, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is flexible; ${hiName} moves on very quickly. ${hiName}'s quick return to normal doesn't always mean ${loName} is there yet. Check in, don't assume.",
+  "proposed": "${loName} is flexible; ${hiName} moves on very quickly. ${hiName}'s quick return to normal doesn't always mean ${loName} is there yet. Ask ${loName} whether they're okay; don't assume.",
+  "why": "'Check in' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.listening['1_1']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Listening, scores bucket 1 and 1 (1 = left pole, 5 = right pole)",
+  "current": "You both listen by going quiet and staying with it. Neither of you rushes to respond. That makes you calm to talk to. The risk: silence can read as absence. A small signal, a nod, a short \"I'm with you,\" tells the other you're still there.",
+  "proposed": "You both listen by going quiet and staying with what the other is saying. Neither of you rushes to respond. That makes you calm to talk to. The risk: silence can read as absence. A small signal, a nod, a short \"I'm with you,\" tells the other you're still there.",
+  "why": "'staying with it' = what the other says"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.listening['1_2']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Listening, scores bucket 1 and 2 (1 = left pole, 5 = right pole)",
+  "current": "${loName} listens quietly and stays with it; ${hiName} leans the same way, a little more active. Close match. Just check that neither of you reads the other's quiet as checking out. A word now and then confirms you're tracking.",
+  "proposed": "${loName} listens quietly and stays with what's being said; ${hiName} leans the same way, a little more active. Close match. Just check that neither of you reads the other's quiet as checking out. A word now and then confirms you're tracking.",
+  "why": "'stays with it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.listening['1_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Listening, scores bucket 1 and 3 (1 = left pole, 5 = right pole)",
+  "current": "${loName} listens by sitting with it; ${hiName} shifts between quiet and active. The shift: ${hiName} can name when they're just receiving versus ready to engage, so ${loName} isn't guessing which one is happening.",
+  "proposed": "${loName} listens by sitting with what they hear; ${hiName} shifts between quiet and active. The shift: ${hiName} can name when they're just receiving versus ready to engage, so ${loName} isn't guessing which one is happening.",
+  "why": "'sitting with it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.listening['1_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Listening, scores bucket 1 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} listens in silence and stays there; ${hiName} listens by engaging and drawing it out. A wide gap, and an easy one to misread. ${hiName}'s questions aren't interruption. ${loName}'s quiet isn't disinterest. Name what each of you is doing so neither has to assume.",
+  "proposed": "${loName} listens in silence and stays there; ${hiName} listens by engaging and drawing the other person out. A wide gap, and an easy one to misread. ${hiName}'s questions aren't interruption. ${loName}'s quiet isn't disinterest. Name what each of you is doing so neither has to assume.",
+  "why": "'drawing it out' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.listening['3_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Listening, scores bucket 3 and 3 (1 = left pole, 5 = right pole)",
+  "current": "You both adjust how you listen depending on the day. That's adaptive. Watch for: in a hard moment, you each default to a mode the other didn't expect. When it matters, say what you need, presence or engagement.",
+  "proposed": "You both adjust how you listen depending on the day. That's adaptive. Watch for: in a hard moment, each of you can default to quiet listening or to active questions, and the other won't expect which. When it matters, say what you need, presence or engagement.",
+  "why": "'a mode' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.listening['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Listening, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is flexible; ${hiName} listens by engaging, reflecting, asking. ${hiName}'s questions are how they connect, not a demand for more than you have. ${loName} can meet it with a short answer rather than retreating into quiet.",
+  "proposed": "${loName} is flexible; ${hiName} listens by engaging, reflecting, asking. ${hiName}'s questions are how they connect, not a demand for more than you have. ${loName} can meet those questions with a short answer rather than retreating into quiet.",
+  "why": "'meet it' = the questions"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.listening['4_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Listening, scores bucket 4 and 4 (1 = left pole, 5 = right pole)",
+  "current": "You both listen by engaging, asking, reflecting back. Conversations move. Watch for: two people responding at once crowds out the actual listening. Let one person finish and sit with it before the other steps in.",
+  "proposed": "You both listen by engaging, asking, reflecting back. Conversations move. Watch for: two people responding at once crowds out the actual listening. Let one person finish, and sit with what they said before the other steps in.",
+  "why": "'sit with it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.love['1_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Intimacy, scores bucket 1 and 3 (1 = left pole, 5 = right pole)",
+  "current": "${loName} feels love through words; ${hiName} is flexible. The shift: ${hiName} can default slightly more toward verbal expression when uncertain. It's low-cost and high-return for a words-oriented partner.",
+  "proposed": "${loName} feels love through words; ${hiName} is flexible. The shift: ${hiName} can default slightly more toward verbal expression when uncertain. Verbal expression is low-cost and high-return for a words-oriented partner.",
+  "why": "'It's low-cost' = verbal expression"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.love['3_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Intimacy, scores bucket 3 and 3 (1 = left pole, 5 = right pole)",
+  "current": "You're both genuinely receptive to both words and acts. Flexible. Watch for: when neither of you has a strong pull, love expression can get inconsistent. Build in deliberate moments rather than leaving it to spontaneity.",
+  "proposed": "You're both genuinely receptive to both words and acts. Flexible. Watch for: when neither of you has a strong pull, love expression can get inconsistent. Plan moments to show love on purpose rather than leaving them to spontaneity.",
+  "why": "'deliberate moments' of what; 'leaving it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.love['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Intimacy, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is neutral; ${hiName} feels love primarily through acts and presence. For ${hiName}, showing up and doing things is the language of care. ${loName} can practice acts of service, planning something, making something easier, even when verbal expression would feel more natural.",
+  "proposed": "When it comes to words or actions, ${loName} is relatively neutral; ${hiName} feels love primarily through acts and presence. For ${hiName}, showing up and doing things is the language of care. ${loName} can practice acts of service, planning something, making something easier, even when verbal expression would feel more natural.",
+  "why": "'is neutral' on what"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.love['4_4']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Intimacy, scores bucket 4 and 4 (1 = left pole, 5 = right pole)",
+  "current": "You both lean toward acts and presence as expressions of care. A close match. Neither of you may say what you feel in words very often, which means the verbal thread can fade. Naming what you appreciate explicitly, occasionally, holds the relationship in the light.",
+  "proposed": "You both lean toward acts and presence as expressions of care. A close match. Neither of you may say what you feel in words very often, which means the verbal thread can fade. Now and then, say out loud what you appreciate in each other, so words stay part of how you show love.",
+  "why": "'holds the relationship in the light' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.love['4_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Emotional Intimacy, scores bucket 4 and 5 (1 = left pole, 5 = right pole)",
+  "current": "Both of you lean toward acts, ${hiName} more strongly. Good match. When both of you are very busy and the acts start slipping, neither may say anything, and the connection can fade quietly. Name when you notice it dropping.",
+  "proposed": "Both of you lean toward acts, ${hiName} more strongly. Good match. When both of you are very busy and the acts start slipping, neither may say anything, and the connection can fade quietly. Say so when you notice the acts of care dropping off.",
+  "why": "'Name when you notice it dropping' = the acts of care"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.feedback['2_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Feedback, scores bucket 2 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} leans guarded; ${hiName} is very comfortable with direct feedback, a noteworthy gap. ${hiName} needs to slow down delivery. One thing, specific, followed by silence. Not a list, not a conversation. ${loName} needs time to sit with it.",
+  "proposed": "${loName} leans guarded; ${hiName} is very comfortable with direct feedback, a noteworthy gap. ${hiName} needs to slow down delivery. One thing, specific, followed by silence. Not a list, not a conversation. ${loName} needs time to sit with the feedback.",
+  "why": "'sit with it' = the feedback"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.feedback['3_3']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Feedback, scores bucket 3 and 3 (1 = left pole, 5 = right pole)",
+  "current": "You're both in the middle. Watch for: feedback needing to happen but neither person reaching for it. A norm: one thing each month that each person wants to mention, raised gently. Small volume, regular cadence.",
+  "proposed": "When it comes to being guarded or open with feedback, you are both relatively neutral. Watch for: feedback needing to happen but neither person reaching for it. A norm: one thing each month that each person wants to mention, raised gently. Small volume, regular cadence.",
+  "why": "'in the middle' shape"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "SHIFTS.feedback['3_5']",
+  "where": "Comms detail page and Communication overview action tile / What Comes Next, Feedback, scores bucket 3 and 5 (1 = left pole, 5 = right pole)",
+  "current": "${loName} is neutral; ${hiName} is very open to feedback. ${loName} can communicate what format works best, \"I'd rather you bring it up in the moment\" or the opposite. Giving ${hiName} the protocol makes it easier.",
+  "proposed": "When it comes to being guarded or open with feedback, ${loName} is relatively neutral; ${hiName} is very open to feedback. ${loName} can communicate what format works best, \"I'd rather you bring it up in the moment\" or the opposite. Giving ${hiName} the protocol makes giving feedback easier.",
+  "why": "'is neutral' on what; 'makes it easier' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.energy.body",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "{LO} refuels alone, {HI} refuels around people. Neither of you can read the other's tank from the outside. This week, say it out loud before you hit empty, not after. One sentence: 'I need an hour on my own' or 'I need to be around people tonight.'",
+  "proposed": "{LO} refuels alone, {HI} refuels around people. Neither of you can read the other's tank from the outside. This week, say that you're running low before you hit empty, not after. One sentence: 'I need an hour on my own' or 'I need to be around people tonight.'",
+  "why": "'say it' = that you're running low"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.expression.title",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "Close the gap between feeling it and saying it",
+  "proposed": "Close the gap between feeling something and saying it out loud",
+  "why": "'it' = a feeling"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.expression.body",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "{HI} names it in the moment. {LO} works it out inside first and brings it later. The quiet is not withholding and the speed is not pressure. This week, {LO} shares one thing while it is still half-formed, and {HI} waits a beat before filling the silence.",
+  "proposed": "{HI} names a feeling in the moment. {LO} works the feeling out inside first and brings it up later. The quiet is not withholding and the speed is not pressure. This week, {LO} shares one feeling while it is still half-formed, and {HI} waits a beat before filling the silence.",
+  "why": "'names it' = a feeling"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.reassurance.body",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "{LO} needs it said. {HI} treats it as settled. That difference decides what a long quiet stretch means to each of you. Once this week, say it plainly and unprompted. One sentence. Notice how it lands.",
+  "proposed": "{LO} needs where they stand said out loud. {HI} treats the relationship as settled. That difference decides what a long quiet stretch means to each of you. Once this week, say where you stand, plainly and unprompted. One sentence. Notice how it lands.",
+  "why": "'it said', 'treats it as settled', 'say it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.love.title",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "Give it in their currency, not yours",
+  "proposed": "Show love in their currency, not yours",
+  "why": "'Give it' = love"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.love.body",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "{LO} feels it in words, {HI} feels it in what gets done. You are both showing up, in the language that reads as love to you. This week, each of you does one thing in the other's currency instead of your own.",
+  "proposed": "{LO} feels love in words, {HI} feels love in what gets done. You are both showing up, in the language that reads as love to you. This week, each of you does one thing in the other's currency instead of your own.",
+  "why": "'feels it' = love"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.listening.body",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "{LO} listens by reflecting it back. {HI} listens by helping fix it. Both are attention. Neither is what the other wants in the moment. This week, whoever is bringing something says first: 'I want you to just hear this' or 'I want help solving this.'",
+  "proposed": "{LO} listens by reflecting back what they hear. {HI} listens by helping fix the problem. Both are attention. Neither is what the other wants in the moment. This week, whoever is bringing something says first: 'I want you to just hear this' or 'I want help solving this.'",
+  "why": "'reflecting it back', 'fix it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.conflict.body",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "{LO} wants it resolved now. {HI} needs space before they can think. Without a plan, the pressing reads as attack and the space reads as abandonment. Agree this week on the words for a pause and the time it ends. The person who calls it is the person who restarts it.",
+  "proposed": "{LO} wants a disagreement resolved now. {HI} needs space before they can think. Without a plan, the pressing reads as attack and the space reads as abandonment. Agree this week on the words for a pause and the time it ends. The person who calls the pause is the person who restarts the conversation.",
+  "why": "'wants it resolved', 'calls it', 'restarts it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.repair.body",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "{LO} needs it said out loud to feel finished. {HI} repairs through warmth and moving on. One of you can be done while the other is still waiting. This week, name what closure takes for each of you, and say it before the next disagreement, not during.",
+  "proposed": "{LO} needs the repair said out loud to feel finished. {HI} repairs through warmth and moving on. One of you can be done while the other is still waiting. This week, name what closure takes for each of you, and say so before the next disagreement, not during.",
+  "why": "'needs it said' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DIM_ACTION_ITEMS.feedback.body",
+  "where": "DIM_ACTION_ITEMS: per comms-plan.js header and a grep, rendered nowhere today (PROTOCOLS replaced it). Fix only if revived.",
+  "current": "{LO} holds feedback until it matters enough. {HI} says it as it comes. Held-back feedback arrives heavier than it needed to be. This week, when something lands a little off, name it the same day, in one sentence, not to fight but to say it.",
+  "proposed": "{LO} holds feedback until it matters enough. {HI} says it as it comes. Held-back feedback arrives heavier than it needed to be. This week, when something lands a little off, say so the same day, in one sentence, not to fight but to let the other know.",
+  "why": "'name it', 'to say it' unnamed"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DOMAIN_ALIGNED.inner.body",
+  "where": "Communication overview action plan, What Happens Inside You tile, when the domain is aligned",
+  "current": "You process on similar rhythms, so neither of you is left guessing. That holds while life is steady. Say the quiet stuff out loud once this week anyway, so the habit is there when it is not.",
+  "proposed": "You process on similar rhythms, so neither of you is left guessing. That holds while life is steady. Once this week, say out loud one feeling you would normally keep to yourself, so the habit is there when life is not steady.",
+  "why": "'the quiet stuff' and 'when it is not' vague"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DOMAIN_ALIGNED.hard.title",
+  "where": "Communication overview action plan, When Things Get Hard tile title, when the domain is aligned",
+  "current": "Pressure-test it while things are calm",
+  "proposed": "Plan for a bad week while things are calm",
+  "why": "'Pressure-test it' = how you handle hard moments"
+ },
+ {
+  "file": "api/_content/v1.js",
+  "key": "DOMAIN_ALIGNED.hard.body",
+  "where": "Communication overview action plan, When Things Get Hard tile, when the domain is aligned",
+  "current": "You handle hard moments in similar ways, so they rarely escalate. The time to agree on what happens in a genuinely bad week is a good one. Talk it through before you need it.",
+  "proposed": "You handle hard moments in similar ways, so they rarely escalate. Agree now, during a good week, on what each of you needs in a genuinely bad one. Talk that plan through before you need it.",
+  "why": "'is a good one', 'Talk it through' unnamed"
+ },
+ {
+  "file": "api/_lib/comms-plan.js",
+  "key": "PROTOCOLS feedback (thisWeek)",
+  "where": "Communication overview 'this week' protocol card, Feedback",
+  "current": "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens.",
+  "proposed": "This week, when something bothers you, say so the same day, not to fight, just to let the other know. 'Hey, that landed a little off for me.' See what happens.",
+  "why": "'name it', 'say it' = what bothered you"
+ },
+ {
+  "file": "api/_lib/comms-plan.js",
+  "key": "commsProtocols fallback 'Name what's working' body",
+  "where": "Communication action plan when all ten dimensions are aligned",
+  "current": "Most couples only talk about their relationship when something feels off. ${youName} and ${themName} have something worth naming explicitly: real alignment. Talking about what you're doing well, alongside what feels hard, reinforces it.",
+  "proposed": "Most couples only talk about their relationship when something feels off. ${youName} and ${themName} have something worth naming explicitly: real alignment. Talking about what you're doing well, alongside what feels hard, reinforces that alignment.",
+  "why": "'reinforces it' = the alignment"
+ },
+ {
+  "file": "api/_lib/comms-plan.js",
+  "key": "commsProtocols fallback 'Keep checking in' title",
+  "where": "Communication action plan when all ten dimensions are aligned",
+  "current": "Keep checking in",
+  "proposed": "Keep asking how the other is doing",
+  "why": "'checking in' with no what; body says staying curious about each other's inner experience"
+ },
+ {
+  "file": "api/_lib/comms-plan.js",
+  "key": "personalityFeedback strengthText (different-ends branch)",
+  "where": "Communication overview action tile fallback (lead.strengthText) when no shift or aligned advice applies",
+  "current": "Even with slightly different scores, you and ${themName} navigate ${label} in compatible ways.",
+  "proposed": "Even with slightly different scores, you and ${themName} handle ${label} in compatible ways.",
+  "why": "AI tell 'navigate'; same template also in src/App.jsx generatePersonalityFeedback"
+ },
+ {
+  "file": "api/_lib/comm-domains.js",
+  "key": "PROSE.hard",
+  "where": "Communication domain page intro, When Things Get Hard",
+  "current": "All couples navigate conflict. What sets healthy relationships apart is the ability to communicate effectively in difficult situations.",
+  "proposed": "All couples face conflict. What sets healthy relationships apart is the ability to communicate effectively in difficult situations.",
+  "why": "AI tell 'navigate'"
+ },
+ {
+  "file": "api/_lib/comm-domains.js",
+  "key": "PROSE.connection",
+  "where": "Communication domain page intro, How You Connect",
+  "current": "The mechanics of your relationship. Understanding your unique dynamic helps you communicate in a way that will be interpreted clearly.",
+  "proposed": "How you ask for what you need, reach for each other, listen and show love. Understanding your dynamic helps you communicate in a way the other reads clearly.",
+  "why": "'The mechanics of your relationship' never says which mechanics"
+ },
+ {
+  "file": "api/_lib/comm-domains.js",
+  "key": "PROSE.inner",
+  "where": "Communication domain page intro, What Happens Inside You",
+  "current": "How you handle feelings before sharing thoughts aloud. Understand each other's approaches to establish supportive communication methods.",
+  "proposed": "How you handle feelings before you say them out loud. Understand how each of you recharges, expresses emotion and needs reassurance, so you can support each other.",
+  "why": "'approaches' and 'communication methods' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WW.patternsNearEngage[2].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WW (both Engage+Open), one partner near the middle of Engage/Withdraw",
+  "current": "Arguments between you can run hot, but one of you does not always engage on the spot. It's not a retreat, use the pause as an opportunity to stabilize.",
+  "proposed": "Arguments between you can run hot, but one of you does not always engage on the spot. That pause is not a retreat. Use the pause to let the heat settle before you talk.",
+  "why": "'It's not a retreat' = the pause; 'stabilize' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WW.patternsNearOpen[1].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WW (both Engage+Open), one partner near the middle of Open/Guarded",
+  "current": "Both of you bring real emotional energy, though one of you runs a touch cooler. That small difference can keep a heated moment from intensifying.",
+  "proposed": "Both of you bring real emotional energy. When it comes to being open or guarded, one of you is relatively neutral. That small difference can keep a heated moment from intensifying.",
+  "why": "'runs a touch cooler' abstract position"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WW.patternsNearOpen[1].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WW (both Engage+Open), both partners near the middle of Open/Guarded",
+  "current": "Both of you bring real emotional energy, and neither of you sits at full intensity, so a heated moment has less to feed on.",
+  "proposed": "Both of you bring real emotional energy. When it comes to being open or guarded, you are both relatively neutral, so a heated moment has less to feed on.",
+  "why": "'neither sits at full intensity' abstract position"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WW.stickingPointsNearOpen[0].one",
+  "where": "Couple type page, 'Sticking points' list, couple type WW (both Engage+Open), one partner near the middle of Open/Guarded",
+  "current": "High expressiveness can amplify when you both light up at once, but one of you sits closer to the middle here which can help tensions stay in check. Under stress, emotions can flare and that amplification returns.",
+  "proposed": "High expressiveness can amplify when you both light up at once. When it comes to being open or guarded, one of you is relatively neutral, which can help keep tensions in check. Under stress, emotions can flare and that amplification returns.",
+  "why": "'sits closer to the middle here' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WW.stickingPointsNearOpen[0].both",
+  "where": "Couple type page, 'Sticking points' list, couple type WW (both Engage+Open), both partners near the middle of Open/Guarded",
+  "current": "High expressiveness can amplify when you both light up at once. You both sit closer to neutral here, so that amplification is less of a default. Under stress, emotions can still flare and amplification returns.",
+  "proposed": "High expressiveness can amplify when you both light up at once. When it comes to being open or guarded, you are both relatively neutral, so that amplification is less of a default. Under stress, emotions can still flare and amplification returns.",
+  "why": "'sit closer to neutral here' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XX.patternsNearOpen[2].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type XX (both Engage+Guarded), one partner near the middle of Open/Guarded",
+  "current": "The feelings behind hard moments can get skipped on the way to a fix, though one of you flags it more than a fully guarded partner would. That flag creates a good opportunity for you both to take a pause.",
+  "proposed": "The feelings behind hard moments can get skipped on the way to a fix, though one of you flags those feelings more than a fully guarded partner would. When that happens, take a pause together.",
+  "why": "'flags it' = the feelings; 'That flag creates a good opportunity' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XX.patternsNearOpen[2].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type XX (both Engage+Guarded), both partners near the middle of Open/Guarded",
+  "current": "The feelings behind hard moments can get skipped on the way to a fix. Both of you flag it more than fully guarded partners would, use those flags to take a pause.",
+  "proposed": "The feelings behind hard moments can get skipped on the way to a fix. Both of you flag those feelings more than fully guarded partners would. When one of you does, take a pause.",
+  "why": "'flag it' = the feelings"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XX.stickingPointsNearOpen[0].one",
+  "where": "Couple type page, 'Sticking points' list, couple type XX (both Engage+Guarded), one partner near the middle of Open/Guarded",
+  "current": "Two internal processors can go a long time without surfacing what's going on. One of you sits closer to the middle and will often be ready to talk sooner. Use that opening instead of waiting to both be ready.",
+  "proposed": "Two internal processors can go a long time without saying what they feel. When it comes to being open or guarded, one of you is relatively neutral and will often be ready to talk sooner. When that person is ready, talk then instead of waiting until you both are.",
+  "why": "'sits closer to the middle'; 'surfacing what's going on', 'that opening' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XX.stickingPointsNearOpen[0].both",
+  "where": "Couple type page, 'Sticking points' list, couple type XX (both Engage+Guarded), both partners near the middle of Open/Guarded",
+  "current": "Two internal processors can go a long time without surfacing what's going on. You both sit closer to the middle, so you're often ready to talk sooner than two fully guarded partners. Use the opening instead of waiting to both be ready.",
+  "proposed": "Two internal processors can go a long time without saying what they feel. When it comes to being open or guarded, you are both relatively neutral, so you're often ready to talk sooner than two fully guarded partners. When one of you is ready, talk then instead of waiting until you both are.",
+  "why": "'sit closer to the middle'; 'the opening' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YY.patternsNearEngage[1].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type YY (both Withdraw+Open), one partner near the middle of Engage/Withdraw",
+  "current": "The coming-back-together step can drag because neither of you rushes it. One of you sits closer to the middle and is sometimes ready to talk sooner. Let that person open the door without it becoming their job every time.",
+  "proposed": "Coming back together after a disagreement can drag because neither of you rushes it. When it comes to engaging or withdrawing, one of you is relatively neutral and is sometimes ready to talk sooner. Let that person start the conversation, and don't make that their job every time.",
+  "why": "'sits closer to the middle'; 'open the door without it becoming' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YY.patternsNearEngage[1].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type YY (both Withdraw+Open), both partners near the middle of Engage/Withdraw",
+  "current": "The coming-back-together step can drag because neither of you rushes it. Both of you sit closer to the middle and are sometimes ready sooner than two full withdrawers. Whoever surfaces first can open the door, and it won't always be the same person.",
+  "proposed": "Coming back together after a disagreement can drag because neither of you rushes it. When it comes to engaging or withdrawing, you are both relatively neutral, so you are sometimes ready to talk sooner than two full withdrawers. Whoever is ready first can start the conversation, and that won't always be the same person.",
+  "why": "'sit closer to the middle'; 'surfaces', 'open the door' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YY.stickingPointsNearOpen[2].one",
+  "where": "Couple type page, 'Sticking points' list, couple type YY (both Withdraw+Open), one partner near the middle of Open/Guarded",
+  "current": "Two withdrawers can go long stretches without addressing things. One of you also holds a bit more back, so unsaid feelings build quietly. Standing check-ins can be a helpful solution to discuss what you are each feeling.",
+  "proposed": "Two withdrawers can go long stretches without addressing things. One of you also holds a bit more back, so unsaid feelings build quietly. A standing check-in, at a set time each week, gives you a place to say what you are each feeling.",
+  "why": "'Standing check-ins can be a helpful solution' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YY.stickingPointsNearOpen[2].both",
+  "where": "Couple type page, 'Sticking points' list, couple type YY (both Withdraw+Open), both partners near the middle of Open/Guarded",
+  "current": "Two withdrawers can go long stretches without addressing things. Both of you hold a bit more back than fully open partners, so unsaid feelings build quietly. Standing check-ins help you name what you are each feeling.",
+  "proposed": "Two withdrawers can go long stretches without addressing things. Both of you hold a bit more back than fully open partners, so unsaid feelings build quietly. A standing check-in, at a set time each week, gives you a place to say what you are each feeling.",
+  "why": "'Standing check-ins' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.ZZ.stickingPointsNearEngage[1].one",
+  "where": "Couple type page, 'Sticking points' list, couple type ZZ (both Withdraw+Guarded), one partner near the middle of Engage/Withdraw",
+  "current": "Neither of you starts the harder conversation by default. One of you sits closer to the middle and may reach first on some things. That person opening the door is the pattern-breaker, make the reach a habit not an exception.",
+  "proposed": "Neither of you starts the harder conversation by default. When it comes to engaging or withdrawing, one of you is relatively neutral and reaches first on some things. When that person starts the harder conversation, the waiting stops, so make reaching first a habit, not an exception.",
+  "why": "'sits closer to the middle'; 'opening the door', 'the pattern' vague; 'may' hedge"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.ZZ.stickingPointsNearEngage[1].both",
+  "where": "Couple type page, 'Sticking points' list, couple type ZZ (both Withdraw+Guarded), both partners near the middle of Engage/Withdraw",
+  "current": "Neither of you starts the harder conversation by default, but both of you sit closer to neutral and may reach first on some things. Either of you opening the door breaks the pattern, so make the reach a habit not an exception.",
+  "proposed": "Neither of you starts the harder conversation by default. When it comes to engaging or withdrawing, you are both relatively neutral, so either of you can reach first on some things. Either of you starting the harder conversation stops the waiting, so make reaching first a habit, not an exception.",
+  "why": "'sit closer to neutral'; 'opening the door', 'the pattern' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.ZZ.patternsNearOpen[2].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type ZZ (both Withdraw+Guarded), one partner near the middle of Open/Guarded",
+  "current": "The relationship looks stable, and mostly is. One of you reveals a little more of what's underneath, which is your early-warning system when things build up.",
+  "proposed": "The relationship looks stable, and mostly is. One of you shows a little more of what they feel, and that is your early warning when things build up.",
+  "why": "'what's underneath' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.ZZ.patternsNearOpen[2].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type ZZ (both Withdraw+Guarded), both partners near the middle of Open/Guarded",
+  "current": "The relationship looks stable, and mostly is. Both of you reveal a little more of what's underneath, which is your early-warning system when things build up.",
+  "proposed": "The relationship looks stable, and mostly is. Both of you show a little more of what you feel, and that is your early warning when things build up.",
+  "why": "'what's underneath' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.ZZ.stickingPointsNearOpen[0].one",
+  "where": "Couple type page, 'Sticking points' list, couple type ZZ (both Withdraw+Guarded), one partner near the middle of Open/Guarded",
+  "current": "Important things can go unsaid for a long time. One of you shows more than a fully guarded partner, so there are more openings than there could be. Take them when they appear.",
+  "proposed": "Important things can go unsaid for a long time. One of you shows more of what they feel than a fully guarded partner, so there are more chances to talk than there could be. When that person shows a feeling, ask about that feeling.",
+  "why": "'more openings', 'Take them' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.ZZ.stickingPointsNearOpen[0].both",
+  "where": "Couple type page, 'Sticking points' list, couple type ZZ (both Withdraw+Guarded), both partners near the middle of Open/Guarded",
+  "current": "Important things can go unsaid for a long time, but both of you show more than fully guarded partners, so there are more openings than the type implies. Take them when they appear.",
+  "proposed": "Important things can go unsaid for a long time, but both of you show more of what you feel than fully guarded partners, so there are more chances to talk than the type implies. When one of you shows a feeling, ask about that feeling.",
+  "why": "'openings', 'Take them' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WX.patternsNearOpen[1].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WX (Engage+Open with Engage+Guarded), both partners near the middle of Open/Guarded",
+  "current": "Though you both sit close to neutral, {EXP} leans slightly expressive and {GRD} tends to take a minute to process. You two both want a productive conversation, what you're experiencing is just a small difference in timing.",
+  "proposed": "When it comes to being open or guarded, you are both relatively neutral. Still, {EXP} leans slightly open and {GRD} tends to take a minute to process. You two both want a productive conversation, what you're experiencing is just a small difference in timing.",
+  "why": "'sit close to neutral' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WX.stickingPointsNearOpen[0].one",
+  "where": "Couple type page, 'Sticking points' list, couple type WX (Engage+Open with Engage+Guarded), one partner near the middle of Open/Guarded",
+  "current": "{EXP} tends to start the deeper conversations, but one of you sits closer to the middle than the label suggests, so the map placement should read less like fixed roles and more like who happens to speak first.",
+  "proposed": "{EXP} tends to start the deeper conversations. When it comes to being open or guarded, one of you is relatively neutral, more so than the label suggests, so read the map less as fixed roles and more as who happens to speak first.",
+  "why": "'sits closer to the middle' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WX.stickingPointsNearOpen[1].one",
+  "where": "Couple type page, 'Sticking points' list, couple type WX (Engage+Open with Engage+Guarded), one partner near the middle of Open/Guarded",
+  "current": "One of you sits close to the middle on how much you show. On an easy day, that person shares freely. Under stress, they can pull inward, which may feel sudden to the other.",
+  "proposed": "When it comes to being open or guarded, one of you is relatively neutral. On an easy day, that person shares freely. Under stress, they can pull inward, which can feel sudden to the other.",
+  "why": "the founder's own example; 'may' hedge"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WX.stickingPointsNearOpen[1].both",
+  "where": "Couple type page, 'Sticking points' list, couple type WX (Engage+Open with Engage+Guarded), both partners near the middle of Open/Guarded",
+  "current": "You both sit close to the middle on how much you show. On an easy day you both may share freely, but under stress, either of you can pull inward, which may feel sudden to the other.",
+  "proposed": "When it comes to being open or guarded, you are both relatively neutral. On an easy day you both share freely, but under stress, either of you can pull inward, which can feel sudden to the other.",
+  "why": "the founder's own example; 'may' hedge"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WY.patternsNearEngage[0].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WY (Engage+Open with Withdraw+Open), one partner near the middle of Engage/Withdraw",
+  "current": "When something is off, you're often not in the same place at once. {RCH} is ready sooner, {WDR} needs a moment. One of you sits close to the axis here, so the gap is smaller than the map labels suggest and may flip depending on the situation.",
+  "proposed": "When something is off, you're often not in the same place at once. {RCH} is ready sooner, {WDR} needs a moment. When it comes to engaging or withdrawing, one of you is relatively neutral, so the gap is smaller than the map labels suggest and can flip depending on the situation.",
+  "why": "'sits close to the axis' shape; 'may' hedge"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WY.patternsNearEngage[0].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WY (Engage+Open with Withdraw+Open), both partners near the middle of Engage/Withdraw",
+  "current": "When something is off, you're often not in the same place at once. {RCH} is ready sooner, {WDR} needs a moment. You both sit close to the axis here, so the gap is smaller than the map labels suggest and often flips depending on the situation.",
+  "proposed": "When something is off, you're often not in the same place at once. {RCH} is ready sooner, {WDR} needs a moment. When it comes to engaging or withdrawing, you are both relatively neutral, so the gap is smaller than the map labels suggest and often flips depending on the situation.",
+  "why": "'sit close to the axis' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WY.stickingPointsNearEngage[1].one",
+  "where": "Couple type page, 'Sticking points' list, couple type WY (Engage+Open with Withdraw+Open), one partner near the middle of Engage/Withdraw",
+  "current": "The pursue-and-retreat loop is real, but muted here. Because one of you flexes toward neutral, the loop is easy to interrupt and rarely runs far. Name it early and it will often dissolve.",
+  "proposed": "The pursue-and-retreat loop, where one of you pushes to talk and the other pulls back, is real but muted here. When it comes to engaging or withdrawing, one of you is relatively neutral, so the loop is easy to interrupt and rarely runs far. Say so early when you see one of you pushing and the other pulling back, and the loop will often dissolve.",
+  "why": "'the loop' undefined; 'flexes toward neutral'; 'Name it' unnamed"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WY.stickingPointsNearEngage[1].both",
+  "where": "Couple type page, 'Sticking points' list, couple type WY (Engage+Open with Withdraw+Open), both partners near the middle of Engage/Withdraw",
+  "current": "The pursue-and-retreat loop is real, but muted here because you both flex toward neutral. This means the loop is easy to interrupt and rarely runs far, name it early and it will often dissolve.",
+  "proposed": "The pursue-and-retreat loop, where one of you pushes to talk and the other pulls back, is real but muted here. When it comes to engaging or withdrawing, you are both relatively neutral, so the loop is easy to interrupt and rarely runs far. Say so early when you see one of you pushing and the other pulling back, and the loop will often dissolve.",
+  "why": "'the loop' undefined; 'flex toward neutral'; 'name it' unnamed"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WY.stickingPointsNearEngage[2].one",
+  "where": "Couple type page, 'Sticking points' list, couple type WY (Engage+Open with Withdraw+Open), one partner near the middle of Engage/Withdraw",
+  "current": "Repair tends to start on one person's timeline. Since the two of you are closer to neutral in this regard, whoever is ready can start the conversation, and it will not usually be the same person every time.",
+  "proposed": "Repair tends to start on one person's timeline. When it comes to engaging or withdrawing, one of you is relatively neutral, so whoever is ready can start the conversation, and that will not usually be the same person every time.",
+  "why": "'closer to neutral in this regard'; also says 'the two of you' in the one-partner variant"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WY.stickingPointsNearEngage[2].both",
+  "where": "Couple type page, 'Sticking points' list, couple type WY (Engage+Open with Withdraw+Open), both partners near the middle of Engage/Withdraw",
+  "current": "Repair tends to start on one person's timeline. Since you're both close to neutral here, whoever is ready can start, and it won't usually be the same person every time.",
+  "proposed": "Repair tends to start on one person's timeline. When it comes to engaging or withdrawing, you are both relatively neutral, so whoever is ready can start the conversation, and that won't usually be the same person every time.",
+  "why": "'close to neutral here' shape; 'start' what"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WY.patternsNearOpen[1].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WY (Engage+Open with Withdraw+Open), one partner near the middle of Open/Guarded",
+  "current": "What reads as pulling away is usually needing space, not distance. One of you shows a little less while processing, so say the reassuring part out loud rather than trusting it to land on its own.",
+  "proposed": "What reads as pulling away is usually needing space, not distance. One of you shows a little less of what they feel while processing, so say out loud that you need space, not distance, rather than trusting your silence to say so.",
+  "why": "'the reassuring part' unnamed"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WY.patternsNearOpen[1].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WY (Engage+Open with Withdraw+Open), both partners near the middle of Open/Guarded",
+  "current": "What reads as pulling away is usually needing space, not distance. You both show a little less while processing, so say the reassuring part out loud rather than trusting it to land on its own.",
+  "proposed": "What reads as pulling away is usually needing space, not distance. You both show a little less of what you feel while processing, so say out loud that you need space, not distance, rather than trusting your silence to say so.",
+  "why": "'the reassuring part' unnamed"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WZ.patternsNearOpen[0].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WZ (Engage+Open with Withdraw+Guarded), one partner near the middle of Open/Guarded",
+  "current": "You sometimes mean one thing and the other receives something different, though one of you is more communicative than a fully guarded partner, so the signal usually gets through with a little checking.",
+  "proposed": "You sometimes mean one thing and the other receives something different, though one of you is more communicative than a fully guarded partner, so what you mean usually gets through if you ask what the other heard.",
+  "why": "'the signal', 'a little checking' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WZ.patternsNearOpen[0].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type WZ (Engage+Open with Withdraw+Guarded), both partners near the middle of Open/Guarded",
+  "current": "You sometimes mean one thing and the other receives something different. You both sit closer to neutral than the labels suggest, so the signal usually gets through with a little checking.",
+  "proposed": "You sometimes mean one thing and the other receives something different. When it comes to being open or guarded, you are both more neutral than the labels suggest, so what you mean usually gets through if you ask what the other heard.",
+  "why": "'sit closer to neutral' shape; 'a little checking' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WZ.stickingPointsNearOpen[0].one",
+  "where": "Couple type page, 'Sticking points' list, couple type WZ (Engage+Open with Withdraw+Guarded), one partner near the middle of Open/Guarded",
+  "current": "{EXP} tends to start the emotional depth. But because one of you sits close to neutral this can shift with the situation.",
+  "proposed": "{EXP} tends to start the deeper emotional conversations. When it comes to being open or guarded, one of you is relatively neutral, so who starts can shift with the situation.",
+  "why": "'sits close to neutral'; 'this can shift' unnamed; 'start the emotional depth' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WZ.stickingPointsNearOpen[0].both",
+  "where": "Couple type page, 'Sticking points' list, couple type WZ (Engage+Open with Withdraw+Guarded), both partners near the middle of Open/Guarded",
+  "current": "{EXP} tends to start the emotional depth, but you both sit close to neutral here, so this role is not fixed and will often shift based on the situation.",
+  "proposed": "{EXP} tends to start the deeper emotional conversations, but when it comes to being open or guarded, you are both relatively neutral, so who starts is not fixed and will often shift based on the situation.",
+  "why": "'sit close to neutral here'; 'this role' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WZ.stickingPointsNearOpen[1].one",
+  "where": "Couple type page, 'Sticking points' list, couple type WZ (Engage+Open with Withdraw+Guarded), one partner near the middle of Open/Guarded",
+  "current": "One of you sits closer to neutral on how much you show. On steady days that person meets the other partway. Under strain they can withdraw, and that is where a rift can become noticeable.",
+  "proposed": "When it comes to being open or guarded, one of you is relatively neutral. On steady days that person meets the other partway. Under strain they can withdraw, and that is where a rift can become noticeable.",
+  "why": "'sits closer to neutral on how much you show' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.WZ.stickingPointsNearOpen[1].both",
+  "where": "Couple type page, 'Sticking points' list, couple type WZ (Engage+Open with Withdraw+Guarded), both partners near the middle of Open/Guarded",
+  "current": "You both sit close to neutral with regard to how much you show. On steady days you meet in the middle, but under strain, either of you can withdraw, and that is where a rift can become noticeable.",
+  "proposed": "When it comes to being open or guarded, you are both relatively neutral. On steady days you meet in the middle, but under strain, either of you can withdraw, and that is where a rift can become noticeable.",
+  "why": "'sit close to neutral with regard to how much you show' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XY.patternsNearEngage[0].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type XY (Engage+Guarded with Withdraw+Open), one partner near the middle of Engage/Withdraw",
+  "current": "When something is hard, you're often not in the same place at once. {RCH} is ready, {WDR} needs room. One of you sits near neutral, so the timing gap is relatively narrow and shifts by topic.",
+  "proposed": "When something is hard, you're often not in the same place at once. {RCH} is ready, {WDR} needs room. When it comes to engaging or withdrawing, one of you is relatively neutral, so the timing gap is relatively narrow and shifts by topic.",
+  "why": "'sits near neutral' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XY.patternsNearEngage[0].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type XY (Engage+Guarded with Withdraw+Open), both partners near the middle of Engage/Withdraw",
+  "current": "When something is hard, you're often not in the same place at once. {RCH} is ready, {WDR} needs room. You both sit near neutral, so the timing gap is narrow and roles shift based on the topic.",
+  "proposed": "When something is hard, you're often not in the same place at once. {RCH} is ready, {WDR} needs room. When it comes to engaging or withdrawing, you are both relatively neutral, so the timing gap is narrow and roles shift based on the topic.",
+  "why": "'sit near neutral' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XY.stickingPointsNearEngage[0].one",
+  "where": "Couple type page, 'Sticking points' list, couple type XY (Engage+Guarded with Withdraw+Open), one partner near the middle of Engage/Withdraw",
+  "current": "{RCH_pos} move toward resolution can close off the space {WDR} needs. Because one of you flexes toward neutral, that crowding is more mild here. A short agreement on when to talk usually settles it.",
+  "proposed": "{RCH_pos} move toward resolution can close off the space {WDR} needs. When it comes to engaging or withdrawing, one of you is relatively neutral, so that crowding is milder here. A short agreement on when to talk usually settles the crowding.",
+  "why": "'flexes toward neutral'; 'settles it' unnamed"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XY.stickingPointsNearEngage[0].both",
+  "where": "Couple type page, 'Sticking points' list, couple type XY (Engage+Guarded with Withdraw+Open), both partners near the middle of Engage/Withdraw",
+  "current": "{RCH_pos} move toward resolution can crowd the space {WDR} needs. Because you both flex toward neutral, that crowding is mild here. A short agreement on when to talk usually settles it.",
+  "proposed": "{RCH_pos} move toward resolution can crowd the space {WDR} needs. When it comes to engaging or withdrawing, you are both relatively neutral, so that crowding is mild here. A short agreement on when to talk usually settles the crowding.",
+  "why": "'flex toward neutral'; 'settles it' unnamed"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XY.stickingPointsNearOpen[1].one",
+  "where": "Couple type page, 'Sticking points' list, couple type XY (Engage+Guarded with Withdraw+Open), one partner near the middle of Open/Guarded",
+  "current": "{WDR_pos} visible emotion during withdrawal can read to {RCH} as something to fix now. One of you sits closer to the middle on showing, so signals can be easier to read than you may expect. Ask what things mean instead of assuming.",
+  "proposed": "{WDR_pos} visible emotion during withdrawal can read to {RCH} as something to fix now. When it comes to being open or guarded, one of you is relatively neutral, so what you each feel can be easier to read than you expect. Ask what a reaction means instead of assuming.",
+  "why": "'closer to the middle on showing'; 'signals', 'things' vague; 'may' hedge"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XY.stickingPointsNearOpen[1].both",
+  "where": "Couple type page, 'Sticking points' list, couple type XY (Engage+Guarded with Withdraw+Open), both partners near the middle of Open/Guarded",
+  "current": "{WDR_pos} visible emotion during withdrawal can read to {RCH} as something to fix now. You both sit closer to the middle on showing, so signals are easier to read than the pairing suggests. Ask what things mean instead of assuming.",
+  "proposed": "{WDR_pos} visible emotion during withdrawal can read to {RCH} as something to fix now. When it comes to being open or guarded, you are both relatively neutral, so what you each feel is easier to read than the pairing suggests. Ask what a reaction means instead of assuming.",
+  "why": "'closer to the middle on showing'; 'signals', 'things' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XZ.patternsNearEngage[1].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type XZ (Engage+Guarded with Withdraw+Guarded), one partner near the middle of Engage/Withdraw",
+  "current": "{RCH} carries a low push toward resolving, and {WDR} usually needs more time. One of you sits near neutral, so that gap is not always noticeable and depends on the issue.",
+  "proposed": "{RCH} carries a low push toward resolving, and {WDR} usually needs more time. When it comes to engaging or withdrawing, one of you is relatively neutral, so that gap is not always noticeable and depends on the issue.",
+  "why": "'sits near neutral' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XZ.patternsNearEngage[1].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type XZ (Engage+Guarded with Withdraw+Guarded), both partners near the middle of Engage/Withdraw",
+  "current": "{RCH} carries a low push toward resolving, and {WDR} usually needs more time. You both sit near neutral, so that gap is often not noticeable and depends on the issue.",
+  "proposed": "{RCH} carries a low push toward resolving, and {WDR} usually needs more time. When it comes to engaging or withdrawing, you are both relatively neutral, so that gap is often not noticeable and depends on the issue.",
+  "why": "'sit near neutral' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XZ.stickingPointsNearEngage[1].one",
+  "where": "Couple type page, 'Sticking points' list, couple type XZ (Engage+Guarded with Withdraw+Guarded), one partner near the middle of Engage/Withdraw",
+  "current": "When something is wrong, neither of you reaches first by default. Because one of you leans toward reaching, problems can sit for less time when that person leads, make that the norm.",
+  "proposed": "When something is wrong, neither of you raises it first by default. When it comes to engaging or withdrawing, one of you leans toward engaging, so problems sit for less time when that person speaks up first. Make that person speaking up first the norm.",
+  "why": "'reaches', 'leads', 'make that the norm' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XZ.stickingPointsNearEngage[1].both",
+  "where": "Couple type page, 'Sticking points' list, couple type XZ (Engage+Guarded with Withdraw+Guarded), both partners near the middle of Engage/Withdraw",
+  "current": "When something is wrong, neither of you reaches first by default. Because you both lean toward reaching, problems don't always sit for long. Though it can be uncomfortable, make reaching the norm.",
+  "proposed": "When something is wrong, neither of you raises it first by default. When it comes to engaging or withdrawing, you both lean toward engaging, so problems don't always sit for long. Though it can be uncomfortable, make raising a problem first the norm.",
+  "why": "'reaching' with no object"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XZ.stickingPointsNearOpen[0].one",
+  "where": "Couple type page, 'Sticking points' list, couple type XZ (Engage+Guarded with Withdraw+Guarded), one partner near the middle of Open/Guarded",
+  "current": "Neither of you offers much emotional visibility, so it can look more okay outside than in. One of you shows more than a fully guarded partner, which is your opening and shouldn't be taken for granted.",
+  "proposed": "Neither of you offers much emotional visibility, so things can look more okay from the outside than they are. One of you shows more of what they feel than a fully guarded partner. Treat what that person shows as your opening to talk. Those openings are easy to take for granted.",
+  "why": "'which is your opening' vague; 'more okay outside than in' unclear"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XZ.stickingPointsNearOpen[0].both",
+  "where": "Couple type page, 'Sticking points' list, couple type XZ (Engage+Guarded with Withdraw+Guarded), both partners near the middle of Open/Guarded",
+  "current": "Neither of you offers much emotional visibility, so it can look more okay outside than in. Both of you show more than fully guarded partners, which is your opening and shouldn't be taken for granted.",
+  "proposed": "Neither of you offers much emotional visibility, so things can look more okay from the outside than they are. Both of you show more of what you feel than fully guarded partners. Treat what you each show as your opening to talk. Those openings are easy to take for granted.",
+  "why": "'which is your opening' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XZ.stickingPointsNearOpen[2].one",
+  "where": "Couple type page, 'Sticking points' list, couple type XZ (Engage+Guarded with Withdraw+Guarded), one partner near the middle of Open/Guarded",
+  "current": "Two private processors can coexist without reaching emotional depth together. One of you leans toward showing a little more, so let that person set a slightly more open baseline and try to maintain it together.",
+  "proposed": "Two private processors can coexist without reaching emotional depth together. One of you leans toward showing a little more, so let that person set the pace for sharing a little more than feels natural, and keep that pace together.",
+  "why": "'baseline', 'maintain it' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.XZ.stickingPointsNearOpen[2].both",
+  "where": "Couple type page, 'Sticking points' list, couple type XZ (Engage+Guarded with Withdraw+Guarded), both partners near the middle of Open/Guarded",
+  "current": "Two private processors can coexist without reaching emotional depth together. Both of you lean toward showing a little more, so set a slightly more open baseline and maintain it together.",
+  "proposed": "Two private processors can coexist without reaching emotional depth together. Both of you lean toward showing a little more, so agree to share a little more than feels natural, and keep doing so together.",
+  "why": "'baseline', 'maintain it' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YZ.patternsNearEngage[1].one",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type YZ (Withdraw+Open with Withdraw+Guarded), one partner near the middle of Engage/Withdraw",
+  "current": "The coming-back-together step can drag because neither of you rushes it. One of you sits closer to neutral and is sometimes ready first. Let that person start conversations without it becoming their job.",
+  "proposed": "Coming back together after a disagreement can drag because neither of you rushes it. When it comes to engaging or withdrawing, one of you is relatively neutral and is sometimes ready to talk first. Let that person start conversations, but don't make starting them that person's job.",
+  "why": "'sits closer to neutral'; 'without it becoming' unnamed"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YZ.patternsNearEngage[1].both",
+  "where": "Couple type page, 'What this looks like in your relationship' list, couple type YZ (Withdraw+Open with Withdraw+Guarded), both partners near the middle of Engage/Withdraw",
+  "current": "The coming-back-together step can drag because neither of you rushes it. Both of you sit closer to neutral which means either may be ready first. Whoever is ready can start, it won't always be the same person.",
+  "proposed": "Coming back together after a disagreement can drag because neither of you rushes it. When it comes to engaging or withdrawing, you are both relatively neutral, so either of you can be ready to talk first. Whoever is ready can start the conversation, and that won't always be the same person.",
+  "why": "'sit closer to neutral'; 'start' what"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YZ.stickingPointsNearEngage[0].one",
+  "where": "Couple type page, 'Sticking points' list, couple type YZ (Withdraw+Open with Withdraw+Guarded), one partner near the middle of Engage/Withdraw",
+  "current": "You can both wait a long time for the other to return. Since one of you flexes toward reaching, the wait can sometimes be shorter. Name the feeling rather than reading it as abandonment.",
+  "proposed": "You can both wait a long time for the other to return. When it comes to engaging or withdrawing, one of you leans toward engaging, so the wait can sometimes be shorter. Say how the wait feels, rather than reading the wait as abandonment.",
+  "why": "'flexes toward reaching'; 'Name the feeling', 'reading it' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YZ.stickingPointsNearEngage[0].both",
+  "where": "Couple type page, 'Sticking points' list, couple type YZ (Withdraw+Open with Withdraw+Guarded), both partners near the middle of Engage/Withdraw",
+  "current": "You can both wait a long time for the other to return. Since you both flex toward reaching, the wait is usually shorter than it feels. Name the feeling rather than reading it as abandonment.",
+  "proposed": "You can both wait a long time for the other to return. When it comes to engaging or withdrawing, you both lean toward engaging, so the wait is usually shorter than it feels. Say how the wait feels, rather than reading the wait as abandonment.",
+  "why": "'flex toward reaching'; 'reading it' vague"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YZ.stickingPointsNearOpen[1].one",
+  "where": "Couple type page, 'Sticking points' list, couple type YZ (Withdraw+Open with Withdraw+Guarded), one partner near the middle of Open/Guarded",
+  "current": "{EXP_pos} visible emotion during withdrawal can be hard for {GRD} to interpret. One of you sits closer to neutral on showing, so emotions can be more visible than the pairing suggests. A quick \"this isn't a call to fix it\" clears up intentions.",
+  "proposed": "{EXP_pos} visible emotion during withdrawal can be hard for {GRD} to interpret. When it comes to being open or guarded, one of you is relatively neutral, so emotions can be more visible than the pairing suggests. A quick \"this isn't a call to fix it\" clears up intentions.",
+  "why": "'closer to neutral on showing' shape"
+ },
+ {
+  "file": "api/_lib/near-axis.js",
+  "key": "NEAR_AXIS_PROSE.YZ.stickingPointsNearOpen[1].both",
+  "where": "Couple type page, 'Sticking points' list, couple type YZ (Withdraw+Open with Withdraw+Guarded), both partners near the middle of Open/Guarded",
+  "current": "Visible emotion during withdrawal can be confusing to interpret. You both sit close to neutral, which means emotions are sometimes visible and may be hard for either of you to place. A quick \"this isn't a call to fix it\" clears up intentions.",
+  "proposed": "Visible emotion during withdrawal can be confusing to interpret. When it comes to being open or guarded, you are both relatively neutral, so emotions are sometimes visible and hard for either of you to place. A quick \"this isn't a call to fix it\" clears up intentions.",
+  "why": "'sit close to neutral' shape; 'may' hedge"
+ }
+]

@@ -47,7 +47,7 @@ import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
 import { highlightCards } from './_lib/highlight-cards.js';
 import { commDomains, DIMENSION_DISPLAY_ORDER } from './_lib/comm-domains.js';
-import { sideBySide } from './_lib/side-by-side.js';
+import { sideBySide, SIDE_BY_SIDE_KEY } from './_lib/side-by-side.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { personalityFeedback, commsProtocols, commsActionPlan } from './_lib/comms-plan.js';
 import { deriveAnniversaryInsights, reflectionActionTitle } from './_lib/reflection-insights.js';
@@ -990,6 +990,8 @@ export default async function handler(req) {
        * See api/_lib/side-by-side.js.
        */
       commResponses: sideBySide(mine, theirs),
+      /* The key the dots are named by, in the module's words. */
+      commResponsesKey: SIDE_BY_SIDE_KEY,
       commsPlan: { tiles: commsPlan.tiles },
 
       /**

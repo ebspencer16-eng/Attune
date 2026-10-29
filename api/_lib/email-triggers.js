@@ -9,15 +9,15 @@
 export const EMAIL_TRIGGERS = {
   "partner_invite": [
     "api/admin-actions.js:155",
-    "src/App.jsx:12275",
-    "src/App.jsx:12377",
-    "src/App.jsx:12701",
-    "src/App.jsx:18932",
-    "src/App.jsx:19728"
+    "src/App.jsx:12276",
+    "src/App.jsx:12378",
+    "src/App.jsx:12702",
+    "src/App.jsx:18933",
+    "src/App.jsx:19729"
   ],
   "results_viewed": [
-    "src/App.jsx:13754",
-    "src/App.jsx:16100"
+    "src/App.jsx:13755",
+    "src/App.jsx:16101"
   ],
   "workbook_promo": [
     "api/generate-workbook-promo.js:185"

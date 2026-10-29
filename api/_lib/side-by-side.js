@@ -24,6 +24,26 @@
  */
 
 import { PERSONALITY_QUESTIONS } from '../_questions.js';
+
+/**
+ * The key above the dots, for both surfaces.
+ *
+ * Ellie, from beta feedback: "Change side-by-side key text throughout the
+ * insights from 'How Preston views Ellie' to 'What Preston thought Ellie
+ * would say'." The small dot is a guess at an answer, and "views" read as an
+ * opinion of the person. It was typed into src/App.jsx and into the app's
+ * results.tsx separately; both read this now. {you} and {them} are the
+ * reader and their partner.
+ */
+export const SIDE_BY_SIDE_KEY = {
+  yours: "{you}'s responses",
+  theirs: "{them}'s responses",
+  theirReadOfYou: 'What {them} thought {you} would say',
+  yourReadOfThem: 'What {you} thought {them} would say',
+};
+export function sideBySideKeyText(template, you, them) {
+  return String(template).replace(/\{you\}/g, you).replace(/\{them\}/g, them);
+}
 import { FLIPPED_QUESTIONS } from '../_type-engine.js';
 
 /**

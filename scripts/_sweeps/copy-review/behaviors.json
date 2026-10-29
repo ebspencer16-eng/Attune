@@ -1,0 +1,82 @@
+[
+ {
+  "id": "WW",
+  "type": "The ignition",
+  "split": "No split: you are the same type",
+  "current": "",
+  "proposed": "Given how alike your approaches are, you can share one rule: when you are both upset at the same time, whoever notices first says \"Let's pause for ten minutes,\" and you both come back to the conversation after.",
+  "why": "Same type, so nothing decides who does which half. One shared behavior instead."
+ },
+ {
+  "id": "XX",
+  "type": "The collaboration",
+  "split": "No split: you are the same type",
+  "current": "",
+  "proposed": "Given how alike your approaches are, you can both add one step before you close a disagreement: each of you says how you feel about the outcome, not only what you decided.",
+  "why": "Built from the tip 'Check if it's resolved or just closed'."
+ },
+ {
+  "id": "YY",
+  "type": "The safe space",
+  "split": "No split: you are the same type",
+  "current": "",
+  "proposed": "Given how alike your approaches are, you can both give a return time whenever you step away, like \"I need until tonight.\" Whoever is ready first goes to the other and says so.",
+  "why": "Built from 'Bound the space with a time' and 'Someone has to come back first'."
+ },
+ {
+  "id": "ZZ",
+  "type": "The depth",
+  "split": "No split: you are the same type",
+  "current": "",
+  "proposed": "Given how alike your approaches are, you can both keep a fifteen-minute check-in each week, and each bring one thing you have not said yet, even if you are still working it out.",
+  "why": "Built from 'Build in the opening' and 'Share the rougher draft'."
+ },
+ {
+  "id": "WX",
+  "type": "The jumpstart",
+  "split": "Open or guarded: {EXP} is the more open partner, {GRD} the more guarded",
+  "current": "",
+  "proposed": "Given your unique approaches, {EXP} can ask {GRD} once how things feel for {GRD_obj} and then wait for the answer, and {GRD} can share a first, unfinished version of the feeling, like \"I'm still figuring out how I feel about this.\"",
+  "why": "The two role tips, as one tile."
+ },
+ {
+  "id": "WY",
+  "type": "The orbit",
+  "split": "Engage or withdraw: {RCH} reaches first, {WDR} needs space first",
+  "current": "",
+  "proposed": "Given your unique approaches, {WDR} can give a return time before stepping away, like \"I need an hour,\" and {RCH} can leave the conversation alone until that hour is up.",
+  "why": "From 'Make space bounded, not open-ended'."
+ },
+ {
+  "id": "WZ",
+  "type": "The opening",
+  "split": "Engage or withdraw: {RCH} reaches first, {WDR} needs space first",
+  "current": "",
+  "proposed": "Given your unique approaches, {RCH} can ask once what is on {WDR_pos} mind and then give {WDR} time to think, and {WDR} can say the early version out loud, like \"Something has been on my mind and I want to say it before I lose it.\"",
+  "why": "The two role tips, as one tile. This pair differs on both axes; it names them by the engage axis, as its tips do."
+ },
+ {
+  "id": "XY",
+  "type": "The translators",
+  "split": "Engage or withdraw: {RCH} reaches first, {WDR} needs space first",
+  "current": "",
+  "proposed": "Given your unique approaches, {RCH} can hold a hard conversation until {WDR} is ready to talk, and {WDR} can name when that will be, like \"I need until tomorrow morning.\"",
+  "why": "The two role tips, as one tile."
+ },
+ {
+  "id": "XZ",
+  "type": "The stethoscope",
+  "split": "Engage or withdraw: {RCH} reaches first, {WDR} needs space first",
+  "current": "",
+  "proposed": "Given your unique approaches, {RCH} can ask a real question, like \"What's actually going on for you right now?\", and {WDR} can answer with one honest sentence, even before the thought is finished.",
+  "why": "From 'Build a practice of asking'."
+ },
+ {
+  "id": "YZ",
+  "type": "The sanctuary",
+  "split": "Open or guarded: {EXP} is the more open partner, {GRD} the more guarded",
+  "current": "",
+  "proposed": "Given your unique approaches, {EXP} can say plainly how {EXP} feels while taking space, so {GRD} does not have to guess, and {GRD} can name a time to come back and talk, like \"Let's talk after dinner.\"",
+  "why": "From the sticking point 'visible emotion is hard to read during withdrawal' and 'Bound the space with a time'."
+ }
+]

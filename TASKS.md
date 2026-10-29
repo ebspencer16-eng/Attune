@@ -10,6 +10,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A187 | **Review the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** 543 sentences where "it", "this" or "that" points at nothing, or a position is described without naming its two ends, each with a proposed rewrite. Your example is there: "once a week, name one thing you actually need" (Communicating Needs). For each row, take the proposal, edit it in the box, or keep what is live. Your choices save as you go, and I apply them when you say you're done. Filter by area to work through it in sittings. Two things to look at first. Several couple type sentences describe the wrong person for about half of readers: they use the reader's name where they mean "the one who reaches first" (The translators description, The orbit's third tip), and two sticking points open with a bare "her"/"his". And some rows are copy no screen shows today (the reflection insights, Communication action items); they're marked "not shown" in the "where" line, so you can keep those as they are. |
+| A190 | **Review the ten Behavior to try tiles, same page, Behavior to try tab.** One per couple type, in your shape: "Given your unique approaches, {name} can … and {name} can …". The names fill in from who is more open or guarded, or who reaches first. The four same-type couples (both Initiators, both Anchors, and so on) can't split into two jobs, because nothing says which person is which, so each of those is one behavior you both do. Once you approve them, I add the tile above Phrases to try and in What Comes Next under Things to consider. |
 | A171 | **Please run migration 098 again. The fixed version is below.** Your run stopped on "relation public.lmft_requests does not exist": that table was never created on your database, and the first version tried to change a rule on it anyway. Supabase runs the whole file as one step, so nothing applied and nothing changed. The new version skips any table your database does not have. What it does is unchanged: it closes the promo codes and the other open access rules, and changes no data. Same four steps, then the check, which should come back empty. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
@@ -164,7 +166,7 @@ order by 1, 2;
 
 ## 2. Open
 
-**Nothing open.** Your 29 October list is built: A172 to A186 are in section 3.
+**Nothing open.** A187 and A190 are waiting on you in section 1; A188 and A189 are in section 3.
 
 ## 3. For you to review
 
@@ -173,6 +175,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A188 | **The app's Communication overview now shows the pole labels (Inward / Outward and so on), small, under each end of every bar.** Putting them either side would have taken a third of the bar's width on a phone, so they sit underneath, and every row is still the same height. Seen on the simulator: all ten fit. |
+| A189 | **The Side by Side key now says "What Preston thought Ellie would say" instead of "How Preston views Ellie", on the website and in the app.** The wording now lives in one place on the server, so the two can't drift apart again. |
 | A172 | **The website's Experienced column now shows the full answer, like the app ("Usually Mum, sometimes Dad" rather than "Both").** Both now use the same server function, and a check fails if the website goes back to the plain word. |
 | A173 | **Explore has 12 recommended views, in your three groups: Keep an eye on, Could change our approach, Already surfacing.** Hover a button for why it's there. Honest caveat: I'm not allowed to read your live data, so I picked these from what the product measures, not from current results. Use Already surfacing to tell me which ones show something, and I'll reshuffle. The six old presets are hidden, not deleted. Views you've saved still show, under Saved. |
 | A174 | **Life & Values is now horizontal bars, so every label reads in full.** It and Responsibilities beside it are both taller (340), to fit all twelve rows. |

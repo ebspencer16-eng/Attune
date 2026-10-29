@@ -792,6 +792,7 @@ function Results({ results, owned, onAccent, menuFooter }: {
       commsPlan={results.commsPlan}
       commDomains={results.commDomains ?? []}
       commResponses={results.commResponses ?? []}
+      commResponsesKey={results.commResponsesKey ?? null}
       storycardStyle={results.storycardStyle ?? null}
       reflectionPlan={results.reflectionPlan}
       expectations={results.expectations}

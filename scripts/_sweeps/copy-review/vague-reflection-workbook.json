@@ -1,0 +1,1458 @@
+[
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "overall-feel explore .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Ask each other: what would make this feel even better from where you're standing right now? Don't defend your own rating, get curious about theirs first.",
+    "proposed": "Ask each other: what would make the relationship feel even better from where you're standing right now? Don't defend your own rating. Ask about your partner's rating first.",
+    "why": "\"this\" never named"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "overall-feel strength .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Build on this\"",
+    "proposed": "priority: \"Build on your shared read\"",
+    "why": "\"this\" never named"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "overall-feel strength .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Name it together. When you both feel good about things but don't say it out loud, that warmth stays private. Saying \"I feel like things are really good between us right now\" creates a shared moment instead of parallel ones.",
+    "proposed": "Tell each other out loud that the relationship feels good right now. When you both feel good about the relationship and neither of you says so, that warmth stays private. Saying \"I feel like things are really good between us right now\" creates a shared moment instead of two private ones.",
+    "why": "\"Name it\": the core complaint"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "fun explore .body",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "This isn't a complaint about the relationship, it's a signal about what's been deprioritized.",
+    "proposed": "This isn't a complaint about the relationship. It's a signal that fun has slipped down your list.",
+    "why": "\"what's been deprioritized\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "fun strength .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Keep prioritizing it\"",
+    "proposed": "priority: \"Keep making time for fun\"",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "fun strength .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Don't let busyness quietly crowd out the small pleasures. Whatever's been creating lightness lately, protect it.",
+    "proposed": "Don't let busyness crowd out the small pleasures. Work out together what has been bringing you lightness lately, and keep making room for that.",
+    "why": "\"Whatever... protect it\" names nothing"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "hard-conversations explore .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Worth naming explicitly\"",
+    "proposed": "priority: \"Worth saying out loud\"",
+    "why": "\"naming\" what"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "hard-conversations explore .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "${lowPerson}: try naming one thing that's been sitting unspoken, not a criticism, just something you've been carrying. The other person likely doesn't know it's there.",
+    "proposed": "${lowPerson}: say one thing out loud that you have been holding back. Not a criticism. Something you have been carrying. The other person likely does not know you are carrying anything.",
+    "why": "\"naming\", \"it's there\" vague"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "feels-seen both .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "The things you're each most grateful for are the things most worth protecting. Whatever you're each doing that makes the other feel known, keep doing it deliberately. These are the first things to quietly erode when life gets full.",
+    "proposed": "The things you're each most grateful for are the things most worth protecting. Each of you, name the specific thing you do that makes your partner feel known, and keep doing that on purpose. Small habits like these are the first to erode when life gets full.",
+    "why": "\"Whatever... it\", \"These\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "feels-seen one .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Keep doing it\",",
+    "proposed": "priority: \"Keep doing what makes them feel known\",",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "feels-seen one .body",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "That is a description of being understood rather than simply appreciated, and it is worth knowing that it lands that way.",
+    "proposed": "That describes being understood rather than simply appreciated. Whatever ${who}'s partner is doing there is landing as being known.",
+    "why": "second \"it\" has no referent"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "feels-seen one .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Whatever produces that feeling, it is probably something small and repeated rather than grand. Identify it and protect it, because these are the first things to erode when life gets full.",
+    "proposed": "What makes ${who} feel known is probably small and repeated rather than grand. Work out together which habit that is, and keep doing that habit on purpose. Small habits are the first things to erode when life gets full.",
+    "why": "\"Identify it and protect it\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "memory strength .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Say these out loud\"",
+    "proposed": "priority: \"Say why you chose your moment\"",
+    "why": "\"these\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "memory strength .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Read each other's answer, then say why that one.",
+    "proposed": "Read each other's answer. Then each of you says why you picked that moment.",
+    "why": "\"why that one\" fragment"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "connected strength .body",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "It is also the first thing to slip when a season gets busy.",
+    "proposed": "Day-to-day closeness is also the first thing to slip when a season gets busy.",
+    "why": "\"It\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "connected strength .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Work out what is actually producing this. It is almost never the big things. Name the small repeated one, and guard it when the calendar fills up.",
+    "proposed": "Work out together what creates your day-to-day closeness. The cause is almost never a big thing. Name the small habit you repeat, and protect that habit when the calendar fills up.",
+    "why": "\"this\", \"the small repeated one\", \"it\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "want-more explore .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Put both answers side by side and find the overlap. Most couples discover these are two routes to the same thing: more intentional time that actually feels like you. Pick one concrete version of each and try both this month.",
+    "proposed": "Put both answers side by side and find the overlap. Most couples discover the two wishes point to the same thing: more intentional time together. Pick one concrete plan from each answer and do both this month.",
+    "why": "\"these\", \"feels like you\", \"version of each\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "five-year explore .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Block an evening for this one specifically. Where these two pictures overlap is your shared plan. Where they differ is not a problem to solve tonight, it is the thing to keep talking about. Get concrete: numbers, places, timelines.",
+    "proposed": "Block an evening to talk through your two five-year pictures. Where they overlap is your shared plan. Where they differ is not a problem to solve tonight. Those differences are what you keep talking about. Get concrete: numbers, places, timelines.",
+    "why": "\"this one\", \"the thing\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "growth-edges strength .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Make this mutual\"",
+    "proposed": "priority: \"Tell each other what you are working on\"",
+    "why": "\"this\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "growth-edges strength .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Saying it out loud creates accountability and removes the guesswork.",
+    "proposed": "Saying those two sentences out loud creates accountability and removes the guesswork.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "admire-same strength .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Say it out loud\",",
+    "proposed": "priority: \"Say what you admire out loud\",",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "admire-different strength .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Make it direct\"",
+    "proposed": "priority: \"Say what you admire directly\"",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "admire-different strength .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Say it to each other: \"${partnerName}, I most admire your ${admiredNounLower(mine.a8)} right now.\" It takes about eight seconds and lands better than you'd think.",
+    "proposed": "Tell each other out loud what you most admire: \"${partnerName}, I most admire your ${admiredNounLower(mine.a8)} right now.\" Saying it takes about eight seconds and lands better than you'd think.",
+    "why": "\"Say it\" before the referent"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "handled-differently (both on theme) .prompt",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Let's talk about that moment when things broke down under pressure. I want to understand what each of us needed then.",
+    "proposed": "Let's talk about the moments we each named, when we stopped hearing each other under pressure. I want to understand what each of us needed then.",
+    "why": "\"that moment\", \"things\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "handled-differently (both on theme) .body",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Both point at something not fully said or heard. Landing there independently, without coordinating, suggests it is a real pattern rather than a one-off.",
+    "proposed": "Both answers point at something not fully said or heard. You each named a moment like this without coordinating, which points to a real pattern rather than a one-off.",
+    "why": "\"Landing there\", \"it\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "handled-differently (both on theme) .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Don't relitigate the specific situation, instead, talk about the pattern. \"When things get hard between us, what does each of us actually need in the first hour?\" Getting to that agreement before the next hard moment changes how it plays out.",
+    "proposed": "Don't relitigate the specific situation. Talk instead about what happens between you under pressure. Ask: \"When things get hard between us, what does each of us actually need in the first hour?\" Agreeing on that answer before the next hard moment changes how the next hard moment goes.",
+    "why": "\"the pattern\", \"that agreement\", \"it\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "handled-differently (different themes) .body",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "The fact that both of you can identify something shows self-awareness, which is the first requirement for handling it better next time.",
+    "proposed": "That both of you can name a moment shows self-awareness, which is the first requirement for handling a moment like that better next time.",
+    "why": "\"something\", \"it\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "handled-differently (different themes) .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Talk about it directly\"",
+    "proposed": "priority: \"Talk about one of these moments\"",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "handled-differently (different themes) .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Pick one of these to talk about. Not to assign blame, to understand what each person was feeling in that moment that the other person didn't know. \"When that happened, I was feeling X and I didn't say it because Y.\" That's the whole conversation.",
+    "proposed": "Pick one of the two moments you named and talk about it. Not to assign blame. The goal is to understand what each of you was feeling in that moment that the other didn't know. \"When that happened, I was feeling X and I didn't say so because Y.\" That's the whole conversation.",
+    "why": "\"one of these\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "handled-differently (one answered) .prompt",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Let's talk about the moment one of us had in mind. I want to hear what made it stick.",
+    "proposed": "Let's talk about the moment one of us wishes had gone differently. I want to hear why that moment stuck with you.",
+    "why": "\"the moment\", \"it\" vague"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "handled-differently (one answered) .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "${other}, ask ${who} to walk through it, not to defend anything, just to hear what it was like from the inside.",
+    "proposed": "${other}, ask ${who} to walk you through the moment they named. Not to defend anything. Just to hear what that moment was like from the inside.",
+    "why": "\"walk through it\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "priority-same strength .body",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "When two people rank the same thing first without discussing it, that alignment is real, and it makes it much easier to act on.",
+    "proposed": "When two people rank the same thing first without discussing it, that alignment is real, and a shared priority is much easier to act on.",
+    "why": "\"it makes it\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "priority-same strength .priority",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "priority: \"Turn it into a plan\"",
+    "proposed": "priority: \"Turn your shared priority into a plan\"",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "priority-different explore .body",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Neither is wrong, but without naming it, this difference quietly shapes decisions, energy allocation, and what each of you feels is being neglected.",
+    "proposed": "Neither is wrong. Left unsaid, this difference in priorities quietly shapes decisions, energy allocation, and what each of you feels is being neglected.",
+    "why": "\"naming it\""
+  },
+  {
+    "file": "api/_lib/reflection-insights.js",
+    "key": "priority-different explore .action",
+    "where": "Relationship Reflection insight. Sent to both surfaces in reflectionPlan (body and action); neither surface draws body or action today. Priority/prompt/coupleTypeNote are not sent at all.",
+    "current": "Start with something small and specific.",
+    "proposed": "Pick one small, specific step for each priority this month.",
+    "why": "\"something\" vague action"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.energy.closeText",
+    "where": "Workbook (PDF), communication dimension page, \"close\" paragraph",
+    "current": "{U} and {P} recover in similar ways. This quietly removes friction, you're rarely on opposite ends after a hard week.",
+    "proposed": "{U} and {P} recover in similar ways. That removes friction: after a hard week, you rarely find one of you wanting quiet while the other wants company.",
+    "why": "\"opposite ends\" of what"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.energy.gapText",
+    "where": "Workbook (PDF), communication dimension page, \"gap\" paragraph",
+    "current": "Without understanding, the inward partner's need for quiet",
+    "proposed": "If you don't know how the other recharges, the inward partner's need for quiet",
+    "why": "\"understanding\" of what"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.energy.thisWeek",
+    "where": "Workbook (PDF), communication dimension page, This week",
+    "current": "Before it happens, name what you'll each need afterward. Then check in.",
+    "proposed": "Before it happens, tell each other what you'll each need afterward: time alone or time with people. Afterward, ask each other whether you got what you needed.",
+    "why": "\"check in\" with no what"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.expression.closeText",
+    "where": "Workbook (PDF), communication dimension page, \"close\" paragraph",
+    "current": "{U} and {P} are operating in the same register.",
+    "proposed": "When it comes to sharing feelings as they come or holding them until processed, {U} and {P} sit in a similar place.",
+    "why": "abstract position; name the two ends"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.expression.prompts[1]",
+    "where": "Workbook (PDF), communication dimension page, prompts",
+    "current": "Or is it usually carried privately?",
+    "proposed": "Or is the struggle usually carried privately?",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.expression.thisWeek",
+    "where": "Workbook (PDF), communication dimension page, This week",
+    "current": "Each of you shares one thing you'd normally hold back or let pass, not something big, just something that's been sitting there. Notice what happens.",
+    "proposed": "Each of you tells the other one feeling you'd normally hold back or let pass. Not something big. Just something that's been on your mind. Notice how your partner responds.",
+    "why": "\"one thing\", \"sitting there\", \"what happens\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.reassurance.measures",
+    "where": "Workbook (PDF), communication dimension page, what it measures",
+    "current": "Voiced: hearing it said keeps you close.",
+    "proposed": "Voiced: hearing where you stand said out loud keeps you close.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.reassurance.gapText",
+    "where": "Workbook (PDF), communication dimension page, \"gap\" paragraph",
+    "current": "The other treats it as settled and does not think to say it.",
+    "proposed": "The other treats where you stand as settled and does not think to say so.",
+    "why": "\"it\" twice"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.reassurance.prompts[3]",
+    "where": "Workbook (PDF), communication dimension page, prompts",
+    "current": "If each of you set the number, how often would it get said?",
+    "proposed": "If each of you set the number, how often would reassurance get said out loud?",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.reassurance.thisWeek",
+    "where": "Workbook (PDF), communication dimension page, This week",
+    "current": "Once this week, say where you stand out loud without being asked for it. One sentence. Notice how it lands.",
+    "proposed": "Once this week, tell your partner out loud where you stand with them, without being asked. One sentence. Notice how your partner responds.",
+    "why": "\"it\" twice"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.needs.prompts[2]",
+    "where": "Workbook (PDF), communication dimension page, prompts",
+    "current": "Has it been said, or are you guessing?",
+    "proposed": "Has that need been said out loud, or are you guessing?",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.bids.gapText",
+    "where": "Workbook (PDF), communication dimension page, \"gap\" paragraph",
+    "current": "not naturally tracking the relational current.",
+    "proposed": "not naturally noticing the small ways the other reaches out.",
+    "why": "abstract phrase"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.bids.prompts[3]",
+    "where": "Workbook (PDF), communication dimension page, prompts",
+    "current": "What would it look like to be slightly more tuned in, without it feeling performative?",
+    "proposed": "What would it look like to notice each other's small bids a bit more, without that feeling performative?",
+    "why": "\"tuned in\" to what"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.conflict.closeText",
+    "where": "Workbook (PDF), communication dimension page, \"close\" paragraph",
+    "current": "This symmetry removes the most common friction point in conflict, the pursuer-withdrawer dynamic.",
+    "proposed": "That removes the most common friction point in conflict: one of you pressing to talk while the other pulls away.",
+    "why": "jargon; name the pattern"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.conflict.thisWeek",
+    "where": "Workbook (PDF), communication dimension page, This week",
+    "current": "Write it down. Refer to it next time.",
+    "proposed": "Write both answers down. Read them again the next time you argue.",
+    "why": "\"it\", \"next time\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.repair.measures",
+    "where": "Workbook (PDF), communication dimension page, what it measures",
+    "current": "One end needs explicit verbal acknowledgment. The other can move forward once the warmth is back, without needing the formal exchange.",
+    "proposed": "Formal: you need a spoken acknowledgment that it's over. Informal: you can move forward once the warmth is back, without that exchange.",
+    "why": "abstract \"one end\"; name the poles"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.listening.measures",
+    "where": "Workbook (PDF), communication dimension page, what it measures",
+    "current": "Reflective: you go quiet and stay with it.",
+    "proposed": "Reflective: you go quiet and stay with what you heard.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.listening.closeText",
+    "where": "Workbook (PDF), communication dimension page, \"close\" paragraph",
+    "current": "That works until one of you needs the other mode. Ask which one is wanted before you give it.",
+    "proposed": "That works until one of you needs the other kind of listening. Before you respond, ask whether your partner wants quiet attention or questions.",
+    "why": "\"the other mode\", \"which one\", \"it\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.listening.gapText",
+    "where": "Workbook (PDF), communication dimension page, \"gap\" paragraph",
+    "current": "The other listens by engaging and drawing it out. The quiet can read as absence. The questions can read as pressure. Neither is what is happening.",
+    "proposed": "The other listens by engaging and drawing the speaker out. The quiet can read as absence. The questions can read as pressure. Neither reading is accurate.",
+    "why": "\"it\", \"Neither is what is happening\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.love.closeText",
+    "where": "Workbook (PDF), communication dimension page, \"close\" paragraph",
+    "current": "{U} and {P} express and receive love through compatible channels.",
+    "proposed": "When it comes to love through words or through actions, {U} and {P} give and receive it in similar ways.",
+    "why": "abstract \"channels\"; name the ends"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.love.thisWeek",
+    "where": "Workbook (PDF), communication dimension page, This week",
+    "current": "Then do more of it.",
+    "proposed": "Then do more of that thing.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.feedback.closeText",
+    "where": "Workbook (PDF), communication dimension page, \"close\" paragraph",
+    "current": "{U} and {P} are in a similar place on feedback.",
+    "proposed": "When it comes to being guarded or open with feedback, {U} and {P} sit in a similar place.",
+    "why": "abstract position; name the ends"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "DIM_CONTENT.feedback.thisWeek",
+    "where": "Workbook (PDF), communication dimension page, This week",
+    "current": "\\\"Hey, this thing last week, can I mention it?\\\"",
+    "proposed": "\\\"Hey, about ___ last week, can I mention it?\\\"",
+    "why": "\"this thing\" in the script"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_W.hard_workday.happening",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "Once it's said, most of it's out of their system and they can move on.",
+    "proposed": "Once the day is said out loud, most of it is out of their system and they can move on.",
+    "why": "\"it's said\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_W.during_conflict.happening",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "They want to engage so the thing can move, not so it can escalate.",
+    "proposed": "They want to engage so the disagreement can move forward, not so it can escalate.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_W.after_conflict.happening",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "For {U}, repair isn't done until it's named.",
+    "proposed": "For {U}, repair isn't done until someone says out loud that you're okay.",
+    "why": "\"it's named\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_W.external_stress.happening",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "They're not asking you to fix it; they're asking you to be present in it.",
+    "proposed": "They're not asking you to fix the problem; they're asking you to stay with them while they deal with it.",
+    "why": "\"it\" twice"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_X.after_conflict.moment",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "{U} is moving forward like the thing is closed.",
+    "proposed": "{U} is moving forward like the disagreement is closed.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_X.after_conflict.happening",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "Once the working-through is done, they experience the thing as resolved.",
+    "proposed": "Once the working-through is done, they experience the disagreement as resolved.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_X.external_stress.works",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "Tell them after the fact that you did the thing.",
+    "proposed": "Tell them afterward what you took off their plate.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_Y.after_conflict.happening",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "they don't experience the thing as resolved, even if the issue itself is sorted.",
+    "proposed": "they don't experience the conflict as resolved, even if the issue itself is sorted.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_Y.external_stress.not",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "Don't try to fix the outside thing.",
+    "proposed": "Don't try to fix the outside problem.",
+    "why": "\"thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_Z.hard_workday.not",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "Don't ask probing questions hoping to crack it open.",
+    "proposed": "Don't ask probing questions hoping to get them to open up about the day.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_Z.during_conflict.not",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "Don't push for emotional volume to prove the thing matters.",
+    "proposed": "Don't push for emotional volume to prove the issue matters to them.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_Z.external_stress.works",
+    "where": "Workbook (PDF), Six Moments page",
+    "current": "Handle one normal thing without comment.",
+    "proposed": "Handle one routine chore without comment.",
+    "why": "\"normal thing\" vague action"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_W.after_conflict.moment",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "The room is quieter, but the thing isn't quite closed yet.",
+    "proposed": "The room is quieter, but the disagreement isn't quite closed yet.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_W.after_conflict.happening",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "For Ws, the closure happens when one of you names it out loud.",
+    "proposed": "For Ws, the closure happens when one of you says out loud that you're okay.",
+    "why": "\"names it\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_W.after_conflict.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Or circling back into it because the relief hasn't landed yet.",
+    "proposed": "Or circling back into the argument because the relief hasn't landed yet.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_W.after_conflict.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "One of you names the close. A short clear sentence. Not a recap, just a flag that you're both okay. The other confirms back.",
+    "proposed": "One of you says out loud that it's over. A short clear sentence. Not a recap, just a flag that you're both okay. The other confirms back.",
+    "why": "\"names the close\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_W.wanting_closeness.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Half-meeting it. Answering the question while keeping your eyes on your screen.",
+    "proposed": "Half-meeting the bid. Answering the question while keeping your eyes on your screen.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_W.external_stress.happening",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Under pressure, Ws reach outward. Not to be fixed. To be present in.",
+    "proposed": "Under pressure, Ws reach outward. Not to have the problem fixed. To have someone present with them.",
+    "why": "\"To be present in\" what"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.quiet_worry.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Ask about the thing rather than the mood.",
+    "proposed": "Ask about the specific situation rather than the mood.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.during_conflict.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "neither of you has said the true thing yet.",
+    "proposed": "neither of you has said what actually hurt yet.",
+    "why": "\"the true thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.during_conflict.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "One of you names the feeling first, out loud, without justifying it. It will feel disproportionate to say. It is the part the other one cannot guess.",
+    "proposed": "One of you says what you feel first, out loud, without justifying it. Saying it will feel disproportionate. The feeling is the part the other one cannot guess.",
+    "why": "\"It\" twice"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.after_conflict.moment",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "It is finished. You are both being kind. Neither of you has mentioned it since.",
+    "proposed": "The argument is finished. You are both being kind. Neither of you has mentioned the argument since.",
+    "why": "\"It\" with no referent"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.after_conflict.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Assuming the warmth means it is closed for both of you. It might be closed for one.",
+    "proposed": "Assuming the warmth means the argument is closed for both of you. It might be closed for only one of you.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.after_conflict.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Say the sentence anyway, even though it feels redundant.",
+    "proposed": "Say out loud that you're okay anyway, even though it feels redundant.",
+    "why": "\"the sentence\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.wanting_closeness.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "More proximity does not answer the question that is actually being asked.",
+    "proposed": "More proximity does not answer whether you were chosen.",
+    "why": "\"the question\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.wanting_closeness.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Name the wanting once, plainly. It is the thing neither of you does by default, and it is the only thing that answers it.",
+    "proposed": "Say once, plainly, that you want to be with them. Neither of you does that by default, and it is the only thing that tells the other they were chosen.",
+    "why": "\"It is the thing... answers it\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_X.external_stress.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "It gives the other person permission they will not ask for.",
+    "proposed": "Saying so gives the other person permission to admit they are struggling, which they will not ask for.",
+    "why": "\"permission\" for what"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Y.quiet_worry.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Waiting for it to surface on its own.",
+    "proposed": "Waiting for whatever is wrong to surface on its own.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Y.quiet_worry.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Ask once, directly, and then leave it with them. A Y will not answer on demand and will almost always come back to it.",
+    "proposed": "Ask once, directly, what is on their mind. Then let them answer in their own time. A Y will not answer on demand and will almost always come back to the question.",
+    "why": "\"Ask\" what; \"it\" twice"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Y.after_conflict.moment",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "It is not clear to either of you whether it is over.",
+    "proposed": "It is not clear to either of you whether the argument is over.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Y.after_conflict.happening",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "so the thing looks resolved and is only paused.",
+    "proposed": "so the argument looks resolved and is only paused.",
+    "why": "\"the thing\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Y.after_conflict.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Come back to it once, briefly, when you are both level. It does not need to be long. It needs to happen.",
+    "proposed": "Come back to the argument once, briefly, when you are both calm. The conversation does not need to be long. It needs to happen.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.hard_workday.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "It is proof that you are both doing what you do.",
+    "proposed": "It only proves you are both keeping things in.",
+    "why": "\"doing what you do\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.quiet_worry.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Ask on a schedule rather than on instinct. It feels mechanical and it is the only reliable way in",
+    "proposed": "Ask how they are on a schedule rather than on instinct. Asking on a schedule feels mechanical and it is the only reliable way in",
+    "why": "\"Ask\" what; \"It\""
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.during_conflict.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Calling it resolved because it stopped. It did not resolve.",
+    "proposed": "Calling the disagreement resolved because it stopped. It did not resolve.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.during_conflict.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Put it in writing if saying it is too much.",
+    "proposed": "Put what you want to say in writing if saying it out loud is too much.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.after_conflict.moment",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "A day has passed. Things are normal again. Neither of you has mentioned it.",
+    "proposed": "A day has passed since the argument. Things are normal again. Neither of you has mentioned it.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.after_conflict.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Letting normal stand in for repaired. For two Zs it always will, and it is what accumulates.",
+    "proposed": "Letting normal stand in for repaired. For two Zs normal always will stand in, and the unrepaired arguments are what accumulate.",
+    "why": "\"it\" twice"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.after_conflict.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "One sentence, once, even days later. It does not have to reopen anything. It has to acknowledge that something happened.",
+    "proposed": "Say one sentence about the argument, once, even days later. The sentence does not have to reopen anything. It has to acknowledge that the argument happened.",
+    "why": "\"One sentence\" about what"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.wanting_closeness.works",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Make it explicit and make it easy to say yes to.",
+    "proposed": "Ask for closeness out loud, and make the ask easy to say yes to.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-prose.js",
+    "key": "MOMENTS_SHARED_Z.external_stress.not",
+    "where": "Workbook (PDF), Six Moments page, same-type couples",
+    "current": "Admiring the competence. Both of you are good at this, and being good at it is what keeps it invisible.",
+    "proposed": "Admiring the competence. Both of you are good at coping alone, and being good at it is what keeps the struggle invisible.",
+    "why": "\"this\", \"it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "EXP_DOMAINS.household.discussText",
+    "where": "Workbook (PDF), expectations domain page",
+    "current": "Some of these gaps are probably running in the background, costing more than you realize.",
+    "proposed": "Some of these differences go unspoken, and they cost more than you realize.",
+    "why": "\"running in the background\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "EXP_DOMAINS.emotional.compatibleText",
+    "where": "Workbook (PDF), expectations domain page",
+    "current": "The mental load, the remembering, the repair, you both clock it.",
+    "proposed": "The mental load, the remembering, the repair: you both notice that work.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "EXP_DOMAINS.emotional.discussText",
+    "where": "Workbook (PDF), expectations domain page",
+    "current": "Worth surfacing before it accumulates.",
+    "proposed": "Talk about who carries which part before the imbalance builds.",
+    "why": "\"surfacing\" what; \"it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "EXP_DOMAINS.extended_family.discussText",
+    "where": "Workbook (PDF), expectations domain page",
+    "current": "Some of it is quietly carried by one of you, often along the lines of whose family it is. Worth saying out loud.",
+    "proposed": "Some of that work is quietly carried by one of you, often along the lines of whose family it is. Say out loud who is carrying which part.",
+    "why": "\"Worth saying\" what"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.energy.aligned",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "You recharge in similar ways. You move together in this sense and the rhythm feels right to both of you without negotiation.",
+    "proposed": "When it comes to recharging inward or outward, you sit in a similar place. The rhythm feels right to both of you without negotiation.",
+    "why": "\"in this sense\"; name the ends"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.expression.aligned",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "You wear emotion and process situations similarly. This often means that neither has to translate what the other feels.",
+    "proposed": "When it comes to showing emotion or keeping it in, you sit in a similar place. Neither of you has to translate what the other feels.",
+    "why": "abstract; name the ends"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.expression.some_gap",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "You express emotion at slightly different levels.",
+    "proposed": "When it comes to showing emotion or keeping it in, you sit slightly apart.",
+    "why": "\"levels\" abstract"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.expression.notable_gap",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "You express at very different levels. One wears it; the other holds it. The balance is found once you learn each other\\'s signals.",
+    "proposed": "When it comes to showing emotion or keeping it in, you sit far apart. One of you shows feelings openly; the other keeps them in. You find the balance once you learn each other\\'s signals.",
+    "why": "\"wears it\", \"holds it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.reassurance.notable_gap",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "The other treats it as settled. Unnamed, the quiet reads as distance to one of you and as ordinary to the other.",
+    "proposed": "The other treats where you stand as settled. Until you talk about this difference, the quiet reads as distance to one of you and as ordinary to the other.",
+    "why": "\"it\", \"Unnamed\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.needs.aligned",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "Whether direct or indirect, you share a protocol, which keeps small things from accumulating. Consider checking in with your partner on if the current state is still serving you both.",
+    "proposed": "Whether you both ask directly or both hint, you share a way of asking, which keeps small things from accumulating. Ask each other now and then whether that way of asking still works for you both.",
+    "why": "\"the current state\", hedge \"Consider\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.needs.notable_gap",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "Unspoken, this is the gap where needs go unmet.",
+    "proposed": "If you never talk about this difference, needs go unmet.",
+    "why": "\"this\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.conflict.notable_gap",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "Without an agreement, conflicts can compound.",
+    "proposed": "Without an agreement on when to talk, conflicts can compound.",
+    "why": "\"an agreement\" on what"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.love.aligned",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "What works for one tends to work for the other. Less translation needed.",
+    "proposed": "What works for one tends to work for the other. Neither of you has to translate how the other shows love.",
+    "why": "\"Less translation\" of what"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.feedback.aligned",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "You give and receive feedback at similar comfort levels.",
+    "proposed": "When it comes to being guarded or open with feedback, you sit in a similar place.",
+    "why": "abstract; name the ends"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "GAP_BLURBS.feedback.notable_gap",
+    "where": "Workbook (PDF), communication dimension callout, first paragraph",
+    "current": "Useful conversations may need both of you to stretch.",
+    "proposed": "Useful conversations need each of you to move a little toward the other\\'s way of giving feedback.",
+    "why": "\"stretch\" vague; hedge"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.WW",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "You\\'ll feel it after social weekends. Both of you refill through connection, so you can miss when one of you is drained. After full days, check in before making more plans.",
+    "proposed": "Your recharge style shows up after social weekends. Both of you refill through connection, so you can miss when one of you is drained. After full days, ask each other how drained you are before making more plans.",
+    "why": "\"feel it\"; \"check in\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.XX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "You\\'ll feel it after busy stretches when neither has named being tired. Both of you recover by doing, not talking, so exhaustion builds quietly. Name the feeling before it turns into irritability.",
+    "proposed": "Your recharge style shows up after busy stretches when neither of you has said you are tired. Both of you recover by doing, not talking, so exhaustion builds quietly. Say \\'I\\'m tired\\' before the tiredness turns into irritability.",
+    "why": "\"feel it\"; \"Name the feeling\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.YY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "You\\'ll feel it after dinners, family visits, work events.",
+    "proposed": "Your recharge style shows up after dinners, family visits, work events.",
+    "why": "\"feel it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.ZZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "You\\'ll feel it when one of you is depleted and the other can\\'t tell. Neither broadcasts the drain. Consider naming the feeling: \\'I\\'m running low today.\\'",
+    "proposed": "Your recharge style shows up when one of you is depleted and the other can\\'t tell. Neither of you broadcasts being drained. Say it plainly: \\'I\\'m running low today.\\'",
+    "why": "\"feel it\"; hedge \"Consider\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.WX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "You\\'ll feel it when one wants to debrief and the other is done talking.",
+    "proposed": "The difference in how you recharge shows up when one of you wants to debrief and the other is done talking.",
+    "why": "\"feel it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.WY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "You\\'ll feel it on the way home from anything social.",
+    "proposed": "The difference in how you recharge shows up on the way home from anything social.",
+    "why": "\"feel it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.WZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "You\\'ll feel it after social events.",
+    "proposed": "The difference in how you recharge shows up after social events.",
+    "why": "\"feel it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.XY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Having different recovery timelines does not mean avoidance. Name what you both need.",
+    "proposed": "Having different recovery timelines does not mean avoidance. Say out loud how much recovery time you each need.",
+    "why": "\"Name what\" vague"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.energy.XZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Efficient, but it can tip into isolation.",
+    "proposed": "Recovering alone is efficient, but it can tip into isolation.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.expression.WW",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "When one of you has been quieter than usual, name it out loud instead of waiting to see if it clears.",
+    "proposed": "When one of you has been quieter than usual, say so out loud instead of waiting for the quiet to pass.",
+    "why": "\"name it\", \"it clears\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.expression.WY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "[W partner name] can keep the instinct to name things",
+    "proposed": "[W partner name] can keep the instinct to say feelings as they come",
+    "why": "\"name things\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.expression.WZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "When [W partner name] feels a gap, name it:",
+    "proposed": "When [W partner name] feels distance, say so:",
+    "why": "\"a gap\", \"name it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.expression.XZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Both of you default to holding. Schedule a specific time,",
+    "proposed": "Both of you default to keeping feelings in. Schedule a specific time to talk about how you each feel,",
+    "why": "\"holding\" what; schedule what"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.expression.YZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "If the quiet doesn\\'t break on its own after two days, check in. Consider scheduling a specific time to check in.",
+    "proposed": "If the quiet doesn\\'t break on its own after two days, ask how the other is feeling. Schedule a specific time to ask.",
+    "why": "\"check in\" twice; hedge"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.WW",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Both of you say where you stand readily, so it rarely goes unsaid. The risk is that it turns into a routine and stops carrying weight. Make it specific. Name the thing, not the category.",
+    "proposed": "Both of you say where you stand readily, so reassurance rarely goes unsaid. The risk is that it turns into a routine and stops carrying weight. Make your reassurance specific. Name the exact thing you value, not the general category.",
+    "why": "\"it\" three times; \"the thing\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.XX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Neither of you says it much, and both of you assume it is understood. That holds until a hard stretch, when neither of you thinks to check. Say it plainly once a month anyway.",
+    "proposed": "Neither of you says much about where you stand, and both of you assume it is understood. That holds until a hard stretch, when neither of you thinks to check. Once a month, say plainly where you stand anyway.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.YY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Whoever notices the gap says it first.",
+    "proposed": "Whoever notices the distance first offers reassurance first.",
+    "why": "\"says it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.ZZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Both of you treat it as settled, and mostly it is. The gap shows up after a rough patch, when neither of you names that you are okay. Say it once out loud. Short is fine.",
+    "proposed": "Both of you treat where you stand as settled, and mostly it is. The gap shows up after a rough patch, when neither of you says that you are okay. Say \\'we\\'re okay\\' once, out loud. Short is fine.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.WX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "[X partner name] treats it as given and does not think to say it. [X partner name] can offer it without being asked",
+    "proposed": "[X partner name] treats where they stand as given and does not think to say so. [X partner name] can offer reassurance without being asked",
+    "why": "\"it\" three times"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.WY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Both of you want it said.",
+    "proposed": "Both of you want to hear where you stand.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.WY-2",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "so [W partner name] can offer it first.",
+    "proposed": "so [W partner name] can offer reassurance first.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.WZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "[Z partner name] holds it as obvious and stays quiet. When [W partner name] asks, they are not doubting the relationship. When [Z partner name] does not say it, they are not withholding.",
+    "proposed": "[Z partner name] holds where they stand as obvious and stays quiet. When [W partner name] asks, they are not doubting the relationship. When [Z partner name] does not say where they stand, they are not withholding.",
+    "why": "\"it\" twice"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.XY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "[Y partner name] feels a long quiet and starts to wonder about it. [X partner name] does not register the gap at all. One unprompted sentence from [X partner name] closes it.",
+    "proposed": "[Y partner name] feels a long quiet and starts to wonder where they stand. [X partner name] does not register the gap at all. One unprompted sentence of reassurance from [X partner name] closes the gap.",
+    "why": "\"it\" twice"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.XZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Neither of you asks for it and neither of you offers it. That is comfortable right up until something is actually off and there is no signal either way. Build one small check-in you both do on purpose.",
+    "proposed": "Neither of you asks for reassurance and neither of you offers it. That is comfortable right up until something is actually off and there is no signal either way. Build one small habit where you each say where you stand, on purpose.",
+    "why": "\"it\"; \"check-in\" vague"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.reassurance.YZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Whoever notices the gap names it, even briefly.",
+    "proposed": "Whoever notices the distance says so, even briefly.",
+    "why": "\"names it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.needs.WX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "while [X partner name] often won\\'t return the question.",
+    "proposed": "while [X partner name] often won\\'t ask for what they need.",
+    "why": "\"the question\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.bids.WW",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "When you notice, address it kindly.",
+    "proposed": "When you notice a missed bid, mention it kindly.",
+    "why": "\"notice\", \"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.bids.XX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "It will be helpful to understand each others\\' methods of communicating to ensure it still works.",
+    "proposed": "Learn how each of you reaches out and responds, so a practical response still lands as care.",
+    "why": "\"it still works\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.bids.YY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Your bids tend to be gentle, a song they liked, a comment about the weekend. They can be easy to miss, but important to recognize and respond to in the appropriate manner.",
+    "proposed": "Your bids tend to be gentle: a song you liked, a comment about the weekend. These bids are easy to miss, and important to notice and answer in kind.",
+    "why": "\"they\" ambiguous"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.bids.ZZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "If one is missed, you may not either try again that day.",
+    "proposed": "If a bid is missed, neither of you is likely to try again that day.",
+    "why": "\"one\" unnamed; garbled"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.bids.WX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "[W partner name] can name the response they\\'d like.",
+    "proposed": "[W partner name] can say what kind of response they\\'d like.",
+    "why": "\"name\" vague"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.bids.XZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Every so often, mark appreciation out loud to reinforce the pattern.",
+    "proposed": "Every so often, say out loud that you noticed a bid and appreciated it.",
+    "why": "\"the pattern\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.conflict.WW",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "except when \\'now\\' means neither of you is regulated. It may prove productive for you to each recognize your temperature:",
+    "proposed": "except when \\'now\\' means you are both too heated to listen. Say out loud where your temperature is:",
+    "why": "jargon; hedge"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.conflict.ZZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "which works fine until it doesn\\'t. It may be helpful to schedule a time to revisit.",
+    "proposed": "which works fine until something important goes unsaid. Schedule a time to revisit what was left unsaid.",
+    "why": "\"until it doesn't\"; revisit what"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.conflict.XY",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Try naming it:",
+    "proposed": "Say the difference in timing out loud:",
+    "why": "\"naming it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.repair.XX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Every few times, make it explicit.",
+    "proposed": "Every few times, say out loud that you are okay.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.repair.WZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Give it a full day",
+    "proposed": "Give [Z partner name] a full day",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.listening.WZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "so [W partner name] knows it landed.",
+    "proposed": "so [W partner name] knows what they said landed.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.love.XX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Say it out loud, even when you think it\\'s obvious.",
+    "proposed": "Say \\'I love you\\' out loud, even when you think it\\'s obvious.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.love.ZZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Every so often, add the sentence out loud.",
+    "proposed": "Every so often, say \\'I love you\\' out loud.",
+    "why": "\"the sentence\" unnamed"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.love.WX",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "[W partner name] needs to hear it, and [X partner name] needs to see it. Say it out loud and show up consistently.",
+    "proposed": "[W partner name] needs to hear love said, and [X partner name] needs to see love shown. Say it out loud and show it in what you do.",
+    "why": "\"it\" three times"
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.love.YZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "both of you may sometimes wonder if it\\'s still there. It is. Once in a while, mark it explicitly.",
+    "proposed": "both of you may sometimes wonder if the love is still there. It is. Once in a while, say so out loud.",
+    "why": "\"it\", \"mark it\""
+  },
+  {
+    "file": "api/_workbook-content.js",
+    "key": "WHEN_THIS_SHOWS_UP.feedback.YZ",
+    "where": "Workbook (PDF), communication dimension page, \"When this shows up\" paragraph",
+    "current": "Both of you want to deliver it well, but may overwait.",
+    "proposed": "Both of you want to deliver feedback well, but may wait too long.",
+    "why": "\"it\" unnamed"
+  },
+  {
+    "file": "src/App.jsx",
+    "key": "Expectations intro, under \"Who were the primary adults in your home growing up?\"",
+    "where": "Website, Expectations exercise, the screen asking who raised you",
+    "current": "This shapes how you answer the next section, and helps us give you more personalized context in your results.",
+    "proposed": "Who raised you shapes how you answer the next section, and helps us give you more personalized context in your results.",
+    "why": "\"This\" sits under a separate heading"
+  },
+  {
+    "file": "src/App.jsx",
+    "key": "Expectations overview, all-aligned panel",
+    "where": "Website, Expectations at a glance, when every area is aligned",
+    "current": "Nothing to work through. Keep staying current with each other.",
+    "proposed": "Nothing to work through. Keep telling each other when an expectation changes.",
+    "why": "\"staying current\" vague"
+  },
+  {
+    "file": "src/App.jsx",
+    "key": "Storycard: couple map card",
+    "where": "Website, Highlights storycard with the couple map",
+    "current": "Explore your full results to learn what this looks like for the two of you.",
+    "proposed": "Explore your full results to learn what your couple type looks like for the two of you.",
+    "why": "\"this\" unnamed"
+  },
+  {
+    "file": "src/App.jsx",
+    "key": "Storycard: Physical Intimacy card",
+    "where": "Website, Highlights storycard for Physical Intimacy",
+    "current": "Explore what you each expect out of this part of your relationship.",
+    "proposed": "Explore what you each expect from physical intimacy.",
+    "why": "\"this part\" unnamed"
+  },
+  {
+    "file": "src/App.jsx",
+    "key": "Intimacy exercise, both done",
+    "where": "Website, Physical Intimacy exercise, finished screen",
+    "current": "It lives with the rest of your results.",
+    "proposed": "Your comparison is with the rest of your results.",
+    "why": "\"It\" sits under a separate heading"
+  },
+  {
+    "file": "attune-app/src/components/expectations.tsx",
+    "key": "Expectations intro, under the primary-adults question (JSX text wraps across two lines)",
+    "where": "App, Expectations exercise, the screen asking who raised you",
+    "current": "This shapes how you answer the next section, and helps us give you",
+    "proposed": "Who raised you shapes how you answer the next section, and helps us give you",
+    "why": "same line as the website; \"This\""
+  },
+  {
+    "file": "attune-app/src/components/results.tsx",
+    "key": "Expectations overview, all-aligned panel",
+    "where": "App, Expectations at a glance, when every area is aligned",
+    "current": "Nothing to work through. Keep staying current with each other.",
+    "proposed": "Nothing to work through. Keep telling each other when an expectation changes.",
+    "why": "same line as the website; vague"
+  },
+  {
+    "file": "attune-app/src/components/results.tsx",
+    "key": "Side by Side empty state",
+    "where": "App, Relationship Reflection Side by Side, when nothing is shared",
+    "current": "There is nothing here yet. These appear where you both wrote an answer to the same question.",
+    "proposed": "There is nothing here yet. Your answers appear side by side where you both answered the same question.",
+    "why": "\"These\" unnamed"
+  },
+  {
+    "file": "attune-app/src/components/conflict-results.tsx",
+    "key": "Partner not finished line",
+    "where": "App, Conflict Patterns results, before the partner finishes",
+    "current": "has not finished this yet. Their side fills in when they do.",
+    "proposed": "has not finished Conflict Patterns yet. Their answers fill in when they do.",
+    "why": "\"this\", \"their side\""
+  },
+  {
+    "file": "attune-app/src/constants/waiting.ts",
+    "key": "WAITING.LOCKED_BY_YOU",
+    "where": "App, a locked results section",
+    "current": "Finish your exercises to open this.",
+    "proposed": "Finish your exercises to open this section.",
+    "why": "\"this\" unnamed"
+  },
+  {
+    "file": "attune-app/src/components/screen-states.tsx",
+    "key": "offline body",
+    "where": "App, any screen that could not load offline",
+    "current": "You're offline. This will load as soon as you're back.",
+    "proposed": "You're offline. This page will load as soon as you're back online.",
+    "why": "\"This\" unnamed"
+  },
+  {
+    "file": "attune-app/src/components/screen-states.tsx",
+    "key": "profile not set up body",
+    "where": "App, a screen shown before the profile exists",
+    "current": "Finish setting up on the website and this will fill in.",
+    "proposed": "Finish setting up on the website and this page will fill in.",
+    "why": "\"this\" unnamed"
+  },
+  {
+    "file": "attune-app/src/components/settings.tsx",
+    "key": "delete account, offline error",
+    "where": "App, Settings, deleting the account while offline",
+    "current": "You are offline. This needs a connection.",
+    "proposed": "You are offline. Deleting your account needs a connection.",
+    "why": "\"This\" unnamed"
+  },
+  {
+    "file": "attune-app/src/components/annotation-sheet.tsx",
+    "key": "tag step hint",
+    "where": "App, the sheet for tagging a note or highlight",
+    "current": "Tap the tags this belongs in.",
+    "proposed": "Tap the tags this note or highlight belongs in.",
+    "why": "\"this\" unnamed"
+  },
+  {
+    "file": "attune-app/src/app/notes.tsx",
+    "key": "delete-tag alert body",
+    "where": "App, Notes, confirming a tag delete",
+    "current": "It moves to the bottom of your tag list. Typing the name again brings it back.",
+    "proposed": "The tag moves to the bottom of your tag list. Typing its name again brings the tag back.",
+    "why": "\"It\" unnamed"
+  },
+  {
+    "file": "attune-app/src/app/notes.tsx",
+    "key": "moved-anchor notice",
+    "where": "App, Notes, a note whose page text changed",
+    "current": "This has been updated since you wrote this.",
+    "proposed": "This page has been updated since you wrote this note.",
+    "why": "two \"this\"es, two referents"
+  },
+  {
+    "file": "attune-app/src/components/conflict-exercise.tsx",
+    "key": "save-failed line",
+    "where": "App, inside an exercise, when an answer fails to save",
+    "current": "That answer has not saved yet. It will try again on the next one.",
+    "proposed": "That answer has not saved yet. We will save it again when you answer the next question.",
+    "why": "\"It\", \"the next one\""
+  },
+  {
+    "file": "attune-app/src/components/exercise.tsx",
+    "key": "save-failed line",
+    "where": "App, inside an exercise, when an answer fails to save",
+    "current": "That answer has not saved yet. It will try again on the next one.",
+    "proposed": "That answer has not saved yet. We will save it again when you answer the next question.",
+    "why": "\"It\", \"the next one\""
+  },
+  {
+    "file": "attune-app/src/components/intimacy-exercise.tsx",
+    "key": "save-failed line",
+    "where": "App, inside an exercise, when an answer fails to save",
+    "current": "That answer has not saved yet. It will try again on the next one.",
+    "proposed": "That answer has not saved yet. We will save it again when you answer the next question.",
+    "why": "\"It\", \"the next one\""
+  },
+  {
+    "file": "attune-app/src/components/reflection-exercise.tsx",
+    "key": "save-failed line",
+    "where": "App, inside an exercise, when an answer fails to save",
+    "current": "That answer has not saved yet. It will try again on the next one.",
+    "proposed": "That answer has not saved yet. We will save it again when you answer the next question.",
+    "why": "\"It\", \"the next one\""
+  },
+  {
+    "file": "attune-app/src/components/expectations.tsx",
+    "key": "save-failed line",
+    "where": "App, inside an exercise, when an answer fails to save",
+    "current": "That answer has not saved yet. It will try again on the next one.",
+    "proposed": "That answer has not saved yet. We will save it again when you answer the next question.",
+    "why": "\"It\", \"the next one\""
+  },
+  {
+    "file": "attune-app/src/components/checklist.tsx",
+    "key": "save-failed line",
+    "where": "App, Starting Out checklist, when a tick fails to save",
+    "current": "That tick has not saved yet. It will try again on the next one.",
+    "proposed": "That tick has not saved yet. We will save it again when you tick the next item.",
+    "why": "\"It\", \"the next one\""
+  },
+  {
+    "file": "attune-app/src/components/budget.tsx",
+    "key": "save-failed line",
+    "where": "App, Shared Budget, when an entry fails to save",
+    "current": "That has not saved yet. It will try again when you leave the next field.",
+    "proposed": "That entry has not saved yet. We will save it again when you leave the next field.",
+    "why": "\"That\", \"It\" unnamed"
+  },
+  {
+    "file": "attune-app/src/components/conflict-exercise.tsx",
+    "key": "ranking hint",
+    "where": "App, Conflict Patterns, a ranking question",
+    "current": "Tap them in order, best first. Tap one again to take it back.",
+    "proposed": "Tap the options in order, best first. Tap an option again to take it back.",
+    "why": "\"them\", \"one\" unnamed"
+  },
+  {
+    "file": "attune-app/src/components/exercise-chrome.tsx",
+    "key": "ranking hint default",
+    "where": "App, any ranking question in an exercise",
+    "current": "Tap them in order, most important first. Tap one again to take it back.",
+    "proposed": "Tap the options in order, most important first. Tap an option again to take it back.",
+    "why": "\"them\", \"one\" unnamed"
+  }
+]

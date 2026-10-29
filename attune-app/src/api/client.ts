@@ -769,6 +769,8 @@ export type ResultsResponse =
         you: number | null; them: number | null;
         readOfYou: number | null; readOfThem: number | null;
       }[];
+      /** The words for the side-by-side key, {you} and {them} to fill. */
+      commResponsesKey?: { yours: string; theirs: string; theirReadOfYou: string; yourReadOfThem: string };
       /** The Reflection action plan. Null unless they own it and both finished. */
       reflectionPlan?: ReflectionInsight[] | null;
       /** What the couple owns, so nothing has to be inferred from the payload. */

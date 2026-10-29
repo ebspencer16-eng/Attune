@@ -4732,3 +4732,20 @@ All built and in TASKS.md section 3. Points worth knowing:
 - The A180 title is fixed while its dropdown still offers eight questions:
   asked Ellie in the row.
 - The simulator had crashed on a nine-day-old Metro; restarted with --clear.
+
+## 29 October, later: beta feedback (A187 to A190)
+
+- A188 (pole labels under the app's Communication overview bars) and A189
+  (Side by Side key from SIDE_BY_SIDE_KEY in api/_lib/side-by-side.js) are
+  built and in section 3.
+- A187 and A190 wait on Ellie's review at
+  https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC. Her choices are in that
+  artifact's db, collection "decisions", one doc per row id (v-<area>-<n> or
+  b-<couple type>): {choice: proposed|edited|current, text}. Rows and the
+  page builder are in scripts/_sweeps/copy-review/. To apply: read_db the
+  collection, map ids back through build_review.py's numbering, and replace
+  `current` with `text` in each row's file (current is verbatim and unique).
+  Run check-mark-reach afterwards: a changed sentence orphans marks on it.
+- Expo Go on the simulator crashes ("Cannot find native module
+  'ExpoAsset'") on an in-place reload after a code change. A cold start
+  works: terminate host.exp.Exponent and reopen the exp:// URL.

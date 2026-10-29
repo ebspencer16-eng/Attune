@@ -380,7 +380,7 @@ export function showResultsFromStart() {
 export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
-  commsPlan = null, commDomains = [], commResponses = [], storycardStyle = null,
+  commsPlan = null, commDomains = [], commResponses = [], commResponsesKey = null, storycardStyle = null,
   reflectionPlan = null, pageTitles = null, pageCopy: serverCopy = null,
   onAccent, menuFooter = null,
 }: {
@@ -415,6 +415,7 @@ export default function Results({
   commsPlan?: CommsPlan | null;
   commDomains?: CommDomain[];
   commResponses?: SbsRow[];
+  commResponsesKey?: SbsKey | null;
   storycardStyle?: StorycardStyle | null;
   reflectionPlan?: ReflectionInsight[] | null;
   /**
@@ -1174,6 +1175,7 @@ export default function Results({
           commsPlan={commsPlan}
           commDomains={commDomains}
           commResponses={commResponses}
+          commResponsesKey={commResponsesKey}
           storycardStyle={storycardStyle}
           reflectionPlan={reflectionPlan}
           intimacy={intimacy}
@@ -1354,7 +1356,7 @@ export default function Results({
  */
 function SectionBody({
   section, step, coverTitle, coverContents, coverIcon, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
-  expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
+  expectations, highlights, commsPlan, commDomains, commResponses, commResponsesKey, storycardStyle, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection, onOpenJournal, pageTitle, pageCopy,
 }: {
   section: string;
@@ -1381,6 +1383,7 @@ function SectionBody({
   commsPlan: CommsPlan | null;
   commDomains: CommDomain[];
   commResponses: SbsRow[];
+  commResponsesKey?: SbsKey | null;
   storycardStyle: StorycardStyle | null;
   reflectionPlan: ReflectionInsight[] | null;
   intimacy: IntimacyResults | null;
@@ -1507,6 +1510,7 @@ function SectionBody({
         tile={commsPlan?.tiles?.find((t) => t.domain === domainId) ?? null}
         domain={d}
         responses={commResponses}
+        responsesKey={commResponsesKey ?? null}
         you={you}
         them={them}
         viewer={viewer}
@@ -4487,14 +4491,27 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
       disabled={!dim.section}
       accessibilityRole="link"
       accessibilityLabel={dim.section ? `${dim.label}. Open ${dim.domainLabel || 'this page'}.` : undefined}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 26 }}>
+      style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 34 }}>
       {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
       <Text
         numberOfLines={1}
-        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.65)', width: GLANCE_LABEL_W }}>
+        /* Lifted level with the bar rather than centred on bar and poles
+           together: 16 under it moves its middle up 8, which is half of the
+           poles' 5 + 11. */
+        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.65)', width: GLANCE_LABEL_W, marginBottom: 16 }}>
         {dim.label}
       </Text>
-      <View style={{ flex: 1, height: 6, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.10)' }}>
+      {/* ── THE POLES, UNDER EACH END OF THE BAR ─────────────────────────
+          Ellie: "Any way for the comms overview to fit the pole labels?
+          Hoping to find a way to make that fit nicely on the app view."
+
+          Either side of the bar, as the website has them, takes about a
+          hundred points out of a bar that is already the narrowest thing on
+          the row. Under its two ends they cost no width at all and eight
+          points of height, the same on every row, so the rows stay even. The
+          words are the server's, the same ones the detail pages print. */}
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+      <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.10)' }}>
         {[
           { v: theirs, col: GLANCE_THEM, dy: close ? (mineLeft ? 4 : -4) : 0 },
           { v: mine, col: GLANCE_YOU, dy: close ? (mineLeft ? -4 : 4) : 0 },
@@ -4511,6 +4528,15 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
             }}
           />
         ))}
+      </View>
+      {dim.left || dim.right ? (
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+          {/* not markable: a pole label, one word, laid out beside its twin. */}
+          <Text numberOfLines={1} style={{ ...Type.small, fontSize: 9, lineHeight: 11, color: 'rgba(255,255,255,0.45)' }}>{dim.left || ''}</Text>
+          {/* not markable: a pole label, one word, laid out beside its twin. */}
+          <Text numberOfLines={1} style={{ ...Type.small, fontSize: 9, lineHeight: 11, color: 'rgba(255,255,255,0.45)', textAlign: 'right' }}>{dim.right || ''}</Text>
+        </View>
+      ) : null}
       </View>
     </RowTap>
   );
@@ -4973,7 +4999,7 @@ function Cover({ title, contents, accent, icon, onOpen }: {
 
 /** One Communication domain: every dimension in it, both partners on each. */
 function Domain({
-  title, accent, dims, you, them, viewer, tile = null, domain = null, responses = [], step = null,
+  title, accent, dims, you, them, viewer, tile = null, domain = null, responses = [], responsesKey = null, step = null,
 }: {
   title: string; accent: string; dims: ResultDimension[];
   step?: { index: number; total: number } | null;
@@ -4981,6 +5007,7 @@ function Domain({
   tile?: CommsPlan['tiles'][number] | null;
   domain?: { label: string; color: string; prose: string; ground: string[] } | null;
   responses?: SbsRow[];
+  responsesKey?: SbsKey | null;
 }) {
   const ground = (domain?.ground?.length === 3
     ? domain.ground
@@ -5066,7 +5093,7 @@ function Domain({
           ) : null}
 
           {/* block: comm-domain/side-by-side */}
-          <SideBySide dims={dims} you={you} them={them} viewer={viewer} label={title} rows={responses} />
+          <SideBySide dims={dims} you={you} them={them} viewer={viewer} label={title} rows={responses} keyText={responsesKey ?? null} />
     </PageTile>
   );
 }
@@ -5109,11 +5136,16 @@ function Domain({
 const SBS_NEAR = 7;
 const SBS_STEP = 9;
 
+type SbsKey = { yours: string; theirs: string; theirReadOfYou: string; yourReadOfThem: string };
+const fillKey = (t: string | undefined, you: string, them: string) =>
+  (t ? t.replace(/\{you\}/g, you).replace(/\{them\}/g, them) : '');
+
 function SideBySide({
-  dims, you, them, viewer, label, rows,
+  dims, you, them, viewer, label, rows, keyText,
 }: {
   dims: ResultDimension[]; you: string; them: string; viewer: 'a' | 'b';
   label: string; rows?: CoupleResults['content'] extends never ? never : SbsRow[];
+  keyText?: SbsKey | null;
 }) {
   const keys = new Set(dims.map((d) => d.key));
   const qs = (rows || []).filter((r) => keys.has(r.dimension));
@@ -5131,11 +5163,14 @@ function SideBySide({
               them. */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginBottom: Spacing.lg }}>
             {[
-              { size: 14, color: U, text: `${you}'s responses`, ini: same ? '' : uInit },
-              { size: 14, color: P, text: `${them}'s responses`, ini: same ? '' : pInit },
-              { size: 9, color: U, text: `How ${them} views ${you}`, ini: '' },
-              { size: 9, color: P, text: `How ${you} views ${them}`, ini: '' },
-            ].map((it) => (
+              /* The words are the server's (api/_lib/side-by-side.js). With
+                 no key, the dots go unnamed rather than this file inventing
+                 a wording of its own. */
+              { size: 14, color: U, text: fillKey(keyText?.yours, you, them), ini: same ? '' : uInit },
+              { size: 14, color: P, text: fillKey(keyText?.theirs, you, them), ini: same ? '' : pInit },
+              { size: 9, color: U, text: fillKey(keyText?.theirReadOfYou, you, them), ini: '' },
+              { size: 9, color: P, text: fillKey(keyText?.yourReadOfThem, you, them), ini: '' },
+            ].filter((it) => it.text).map((it) => (
               <View key={it.text} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
                 <View
                   style={{

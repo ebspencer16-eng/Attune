@@ -1,0 +1,206 @@
+<title>Attune Copy Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,400&family=Playfair+Display:wght@600;700&display=swap">
+<style>
+/* Layout: one reading column of review cards, a sticky filter bar, the brand's own faces. */
+:root{
+  --ground:#F6F5F9; --paper:#FFFFFF; --ink:#1B2547; --muted:#5D6580; --line:#E2E1EA;
+  --accent:#5C4FC4; --accent-soft:#ECE9FB; --old:#B5533E; --old-soft:#FBEDE8; --ok:#1F7A55; --ok-soft:#E4F4EC;
+  --tok:#EEF0F7;
+  --display:"Playfair Display", Georgia, serif;
+  --body:"DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#13151F; --paper:#1C1F2C; --ink:#ECEDF5; --muted:#A3A8BE; --line:#2E3244;
+    --accent:#A89CFF; --accent-soft:#2A2747; --old:#F0957F; --old-soft:#3A2520; --ok:#6FD3A6; --ok-soft:#1B3328;
+    --tok:#2A2E40; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#13151F; --paper:#1C1F2C; --ink:#ECEDF5; --muted:#A3A8BE; --line:#2E3244;
+  --accent:#A89CFF; --accent-soft:#2A2747; --old:#F0957F; --old-soft:#3A2520; --ok:#6FD3A6; --ok-soft:#1B3328;
+  --tok:#2A2E40; color-scheme:dark;
+}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--ground);}
+.wrap{max-width:980px;margin:0 auto;padding-block:32px 64px;display:flex;flex-direction:column;gap:20px;}
+h1{font-family:var(--display);font-size:2rem;line-height:1.15;margin:0;text-wrap:balance;}
+.lede{color:var(--muted);max-width:68ch;margin:0;}
+.lede strong{color:var(--ink);}
+.bar{position:sticky;top:env(safe-area-inset-top, 0px);z-index:5;background:var(--ground);padding-block:10px;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line);}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--paper);}
+.seg button{border:0;background:transparent;color:var(--muted);font:500 .82rem var(--body);padding:7px 14px;cursor:pointer;}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff;}
+select{font:500 .82rem var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:7px 12px;max-width:100%;}
+.count{margin-left:auto;font:500 .8rem var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;}
+.status{font:.78rem var(--mono);color:var(--muted);}
+.legend{font-size:.82rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 14px;}
+.tok{font-family:var(--mono);font-size:.82em;background:var(--tok);border-radius:4px;padding:0 4px;color:var(--ink);}
+.list{display:flex;flex-direction:column;gap:14px;}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+.card.done{border-color:color-mix(in srgb, var(--ok) 45%, var(--line));}
+.head{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;justify-content:space-between;}
+.where{font-weight:600;font-size:.92rem;}
+.meta{font:.72rem var(--mono);color:var(--muted);word-break:break-word;}
+.pill{font:600 .68rem var(--body);letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 9px;}
+.pill.todo{background:var(--accent-soft);color:var(--accent);}
+.pill.ok{background:var(--ok-soft);color:var(--ok);}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:720px){.cols{grid-template-columns:1fr;}}
+.lbl{font:600 .66rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.now{background:var(--old-soft);border-radius:8px;padding:10px 12px;font-size:.92rem;}
+.now em.v{font-style:normal;color:var(--old);font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;}
+textarea{width:100%;box-sizing:border-box;min-height:96px;resize:vertical;font:inherit;font-size:.92rem;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;line-height:1.5;}
+textarea:focus-visible, button:focus-visible, select:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.why{font-size:.8rem;color:var(--muted);}
+.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.acts button{font:600 .8rem var(--body);border-radius:8px;padding:8px 12px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);}
+.acts button.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.acts button[aria-pressed="true"]{outline:2px solid var(--ok);outline-offset:1px;}
+.saved{font:.74rem var(--mono);color:var(--ok);}
+.empty{color:var(--muted);padding:24px 0;text-align:center;}
+.note{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:.9rem;color:var(--muted);}
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Attune Copy Review</h1>
+    <p class="lede">Two tables from the beta feedback. <strong>Behavior to try</strong> is the new couple type tile (A190), one per pairing. <strong>Vague language</strong> is every sentence I found where "it", "this" or "that" points at nothing, or a position is described without naming its two ends (A187). For each row, take the proposal, edit it, or keep what is live. Your choices save as you go, and nothing reaches the product until I apply them.</p>
+    <div class="legend"><span><span class="tok">${you}</span> <span class="tok">{U}</span> the reader</span><span><span class="tok">${them}</span> <span class="tok">{P}</span> their partner</span><span><span class="tok">${loName}</span> <span class="tok">${hiName}</span> the partner lower or higher on that scale</span><span><span class="tok">{EXP}</span> <span class="tok">{GRD}</span> more open, more guarded</span><span><span class="tok">{RCH}</span> <span class="tok">{WDR}</span> reaches first, needs space first</span><span><span class="tok">_sub _obj _pos</span> their pronoun</span></div>
+  </header>
+
+  <div class="bar" role="toolbar" aria-label="Filters">
+    <span class="seg" role="group" aria-label="Table">
+      <button type="button" id="tab-b" aria-pressed="true">Behavior to try</button>
+      <button type="button" id="tab-v" aria-pressed="false">Vague language</button>
+    </span>
+    <span class="seg" role="group" aria-label="Show">
+      <button type="button" id="f-todo" aria-pressed="true">To review</button>
+      <button type="button" id="f-all" aria-pressed="false">All</button>
+    </span>
+    <select id="area" aria-label="Area" hidden></select>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="status" id="status">Connecting to your saved choices…</div>
+  <div class="note" id="behnote">Four pairings are two people of the same type, so nothing in the product says which of them would do which half. Those four are written as one behavior you both do. If you would rather each person get a different job, say how to decide who is who.</div>
+  <div class="list" id="list"></div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const state = { tab: 'b', filter: 'todo', area: '', decisions: {} };
+let db = null;
+const $ = (id) => document.getElementById(id);
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const markTokens = (s) => esc(s).replace(/(\$\{\w+\}|\{[A-Z]{1,4}(?:_\w+)?\}|\[[A-Z] partner name\])/g, '<span class="tok">$1</span>');
+const VAGUE = /\b(it|this|that|these|those|them|things)\b/gi;
+const markNow = (s) => markTokens(s).replace(/(^|>)([^<]+)(?=<|$)/g, (m, a, txt) => a + txt.replace(VAGUE, '<em class="v">$1</em>'));
+
+function rowsFor() {
+  const list = state.tab === 'b' ? DATA.behaviors : DATA.vague;
+  return list.filter((r) => (!state.area || r.area === state.area) && (state.filter === 'all' || !state.decisions[r.id]));
+}
+function choiceLabel(d) {
+  if (!d) return null;
+  return d.choice === 'current' ? 'Keeping current' : d.choice === 'edited' ? 'Your edit' : 'Using proposal';
+}
+async function save(id, rec) {
+  state.decisions[id] = rec;
+  if (!db) { $('status').textContent = 'Not saved: this view cannot reach the saved choices. Open the page signed in to claude.ai.'; return; }
+  try {
+    await db.collection('decisions').doc(id).set(rec);
+    $('status').textContent = 'Saved ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    $('status').textContent = 'That choice did not save (' + (e && e.code || 'error') + '). Try again.';
+  }
+}
+function card(r) {
+  const d = state.decisions[r.id];
+  const el = document.createElement('article');
+  el.className = 'card' + (d ? ' done' : '');
+  const isB = state.tab === 'b';
+  const title = isB ? (r.id.slice(2) + ' · ' + r.type) : r.where;
+  const meta = isB ? r.split : (r.file + (r.key ? ' · ' + r.key : ''));
+  const text = d && d.text != null ? d.text : r.proposed;
+  el.innerHTML =
+    '<div class="head"><div><div class="where">' + esc(title) + '</div><div class="meta">' + markTokens(meta) + '</div></div>'
+    + '<span class="pill ' + (d ? 'ok' : 'todo') + '">' + (d ? esc(choiceLabel(d)) : 'To review') + '</span></div>'
+    + '<div class="cols">'
+    + (isB ? '<div><div class="lbl">Where it goes</div><div class="now" style="background:var(--tok)">On the couple type page, a shaded tile headed Behavior to try, above Phrases to try. The same tile in What Comes Next, under Things to consider.</div></div>'
+           : '<div><div class="lbl">Live now</div><div class="now">' + markNow(r.current) + '</div></div>')
+    + '<div><label class="lbl" for="t-' + r.id + '">Proposed</label><textarea id="t-' + r.id + '"></textarea></div>'
+    + '</div>'
+    + (r.why ? '<div class="why">' + markTokens(r.why) + '</div>' : '')
+    + '<div class="acts">'
+    + '<button type="button" class="primary" data-a="use">' + (isB ? 'Use this' : 'Use proposal') + '</button>'
+    + (isB ? '' : '<button type="button" data-a="keep">Keep current</button>')
+    + (d ? '<button type="button" data-a="undo">Undo</button>' : '')
+    + '</div>';
+  const ta = el.querySelector('textarea');
+  ta.value = text;
+  ta.addEventListener('change', () => {
+    if (ta.value.trim() === r.proposed.trim()) return;
+    save(r.id, { choice: 'edited', text: ta.value, at: Date.now() }).then(render);
+  });
+  el.querySelector('[data-a="use"]').onclick = () => {
+    const edited = ta.value.trim() !== r.proposed.trim();
+    save(r.id, { choice: edited ? 'edited' : 'proposed', text: ta.value, at: Date.now() }).then(render);
+  };
+  const keep = el.querySelector('[data-a="keep"]');
+  if (keep) keep.onclick = () => save(r.id, { choice: 'current', text: r.current, at: Date.now() }).then(render);
+  const undo = el.querySelector('[data-a="undo"]');
+  if (undo) undo.onclick = async () => {
+    delete state.decisions[r.id];
+    if (db) { try { await db.collection('decisions').doc(r.id).delete(); } catch (e) {} }
+    render();
+  };
+  return el;
+}
+function render() {
+  $('tab-b').setAttribute('aria-pressed', String(state.tab === 'b'));
+  $('tab-v').setAttribute('aria-pressed', String(state.tab === 'v'));
+  $('f-todo').setAttribute('aria-pressed', String(state.filter === 'todo'));
+  $('f-all').setAttribute('aria-pressed', String(state.filter === 'all'));
+  $('behnote').hidden = state.tab !== 'b';
+  const area = $('area');
+  area.hidden = state.tab !== 'v';
+  const all = state.tab === 'b' ? DATA.behaviors : DATA.vague;
+  const done = all.filter((r) => state.decisions[r.id]).length;
+  $('count').textContent = done + ' of ' + all.length + ' decided';
+  const list = $('list');
+  list.replaceChildren();
+  const rows = rowsFor();
+  if (!rows.length) { list.innerHTML = '<div class="empty">Nothing left to review here. Switch to All to see your choices.</div>'; return; }
+  rows.forEach((r) => list.appendChild(card(r)));
+}
+(function init() {
+  const areas = [...new Set(DATA.vague.map((r) => r.area))];
+  $('area').innerHTML = '<option value="">Every area (' + DATA.vague.length + ')</option>'
+    + areas.map((a) => '<option value="' + esc(a) + '">' + esc(a) + ' (' + DATA.vague.filter((r) => r.area === a).length + ')</option>').join('');
+  $('area').onchange = (e) => { state.area = e.target.value; render(); };
+  $('tab-b').onclick = () => { state.tab = 'b'; render(); };
+  $('tab-v').onclick = () => { state.tab = 'v'; render(); };
+  $('f-todo').onclick = () => { state.filter = 'todo'; render(); };
+  $('f-all').onclick = () => { state.filter = 'all'; render(); };
+  render();
+  (async () => {
+    try { db = window.claude ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { $('status').textContent = 'Read only: choices cannot be saved in this view. Open the page signed in to claude.ai.'; return; }
+    db.collection('decisions').onSnapshot((snap) => {
+      const next = {};
+      snap.docs.forEach((d) => { next[d.id] = d.data(); });
+      state.decisions = next;
+      $('status').textContent = 'Your choices are saved as you make them.';
+      if (!document.activeElement || document.activeElement.tagName !== 'TEXTAREA') render();
+    }, (e) => { $('status').textContent = 'Could not load saved choices (' + (e && e.code || 'error') + ').'; });
+  })();
+})();
+</script>
