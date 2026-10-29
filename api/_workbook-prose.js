@@ -118,7 +118,7 @@ export const DIM_CONTENT = {
   },
   "listening": {
     "measures": "How each of you shows you are listening. Reflective: you go quiet and stay with it. Responsive: you engage, ask, reflect back. Both are attention. They just look nothing alike from the outside.",
-    "closeText": "{U} and {P} listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
+    "closeText": "{U} and {P} listen in similar ways. This works until one of you needs the other kind of listening, quiet attention or questions and a response. It is completely fine to ask your partner which kind of listening they want when they begin a discussion.",
     "gapText": "One of you listens by going quiet. The other listens by engaging and drawing it out. The quiet can read as absence. The questions can read as pressure. Neither is what is happening.",
     "prompts": [
       "When you bring something to each other, do you want to be heard, or do you want a response?",
