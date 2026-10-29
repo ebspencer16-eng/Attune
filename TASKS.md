@@ -10,10 +10,10 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A191 | **Fixed: the app now refuses any account with nothing bought, so it can't be used without a purchase. One query below for you to run.** How Mya got in: the app's "Continue with Google" and "Continue with Apple" create an account for any email, and the app then let her set up a profile. Now the server checks for a purchase before setup and on every app launch, and an account with none sees a "No Attune package on this account yet" screen with Get started (opens the website) and Sign out. Invited partners still get in through the buyer's order. **For Mya:** buy on the website with her promo code, using the same email she signed in to the app with. If the website then says the email is already registered, sign in the way she did in the app (Google, Apple, or reset the password). Then open the app and tap "I just bought one". It opens as soon as the order exists under that email, even if she skips the website's account step. One exception: if she used Apple and chose "Hide My Email", her app account is under an Apple relay address, not her Gmail. The query shows that. In that case, tell her to sign out in the app and sign back in with Google or her email. **The words on the new screen are mine, standing in for yours:** "No Attune package on this account yet" / "Attune starts with a package, bought on our website. Use the same email you signed in with here, and this account opens as soon as the order is through." / "I just bought one". Edit them whenever you like. |
+| A191 | **Mya's app account is under a different Gmail address from the one you gave me.** Your query shows it: she signed in with Google, made the account on 29 October, and nobody has joined on her invite code. An order under the address you gave me won't open that account. Two ways through. (1) Simplest: she buys with her promo code using the Gmail address on that row, then opens the app and taps "I just bought one". (2) If she wants the other address: she buys under it, then signs out in the app and signs back in with that address. Her first account stays behind, empty. She can delete it from Settings before signing out, or leave it. Either way the app lets her in once the order exists. **Still yours whenever you like:** the words on the "No Attune package" screen are mine. |
 | A187 | **Review the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** 543 sentences where "it", "this" or "that" points at nothing, or a position is described without naming its two ends, each with a proposed rewrite. Your example is there: "once a week, name one thing you actually need" (Communicating Needs). For each row, take the proposal, edit it in the box, or keep what is live. Your choices save as you go, and I apply them when you say you're done. Filter by area to work through it in sittings. Two things to look at first. Several couple type sentences describe the wrong person for about half of readers: they use the reader's name where they mean "the one who reaches first" (The translators description, The orbit's third tip), and two sticking points open with a bare "her"/"his". And some rows are copy no screen shows today (the reflection insights, Communication action items); they're marked "not shown" in the "where" line, so you can keep those as they are. |
 | A190 | **Review the ten Behavior to try tiles, same page, Behavior to try tab.** One per couple type, in your shape: "Given your unique approaches, {name} can … and {name} can …". The names fill in from who is more open or guarded, or who reaches first. The four same-type couples (both Initiators, both Anchors, and so on) can't split into two jobs, because nothing says which person is which, so each of those is one behavior you both do. Once you approve them, I add the tile above Phrases to try and in What Comes Next under Things to consider. |
-| A171 | **Please run migration 098 again. The fixed version is below.** Your run stopped on "relation public.lmft_requests does not exist": that table was never created on your database, and the first version tried to change a rule on it anyway. Supabase runs the whole file as one step, so nothing applied and nothing changed. The new version skips any table your database does not have. What it does is unchanged: it closes the promo codes and the other open access rules, and changes no data. Same four steps, then the check, which should come back empty. |
+| A192 | **Please run migration 099. Your check after 098 found one last open rule, on a table called partner_sync.** Its name says "service role only", but it lets anybody holding the site's public key read and change every row. No code here creates or reads that table: it was made by hand in the dashboard, so nothing breaks when the rule goes. 099 removes it, and skips quietly if the table isn't there. Steps below, then the same check as last time, which should now come back empty. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -24,105 +24,59 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### Three things to run, for A171 and A191
+### Two things to run, for A192
 
-**Step 1. Paste this into Terminal.** It copies the migration and prints `copied`.
+**Step 1. Paste this into Terminal.** It copies migration 099 and prints `copied`.
 
 ```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/098_close_open_policies.sql | pbcopy && echo copied
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/099_close_partner_sync_policy.sql | pbcopy && echo copied
 ```
 
 **Step 2. Paste that into the Supabase SQL Editor**, not Terminal, and run it.
 It should say "Success. No rows returned."
 
-<!-- SQL 098_close_open_policies.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 099_close_partner_sync_policy.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 098: nothing outside the server may read or write a table it does not own.
+-- 099: close the last open rule the 098 check found.
 --
--- ── WHAT IS OPEN ────────────────────────────────────────────────────────────
--- 010 removed the original wide-open policies, `using (true) with check
--- (true)` with no role, which grant the table to anybody holding the public
--- key, and that key is in every visitor's browser. It also added two of its
--- own, and nothing since has taken them away:
+-- After 098, supabase/diagnostics/open-policies.sql printed one row:
 --
---   beta_codes_anon_select   every promo code, free ones included, readable
---                            by anybody. Opened "so client-side validation
---                            works"; validation moved to /api/validate-promo
---                            on the server, and nothing in a browser reads
---                            this table any more.
---   feedback_anon_insert     anybody may write rows into feedback_submissions.
---                            Nothing writes that table from a browser now: the
---                            questionnaire it held is retired.
+--   policy | partner_sync | service role only lets public ALL
 --
--- beta_codes_setup.sql, which created that table, made a second open read of
--- it, beta_codes_read_all. If it was run, both are live.
+-- Its name says it is for the server, and its test is `true` for the role
+-- every browser holds, so anybody with the site's public key can read and
+-- change every row of partner_sync. No file in this repo creates that table
+-- or reads it: it was made by hand in the dashboard, and the server reaches
+-- every table with the service key, which ignores these rules altogether.
+-- So the rule grants the server nothing and the public everything.
 --
--- ── AND WHAT schema.sql WOULD HAVE REOPENED ─────────────────────────────────
--- supabase/schema.sql still created the six policies 010 removed. It could
--- not be run until A164b made it runnable, so from then until this commit,
--- pasting it into the live project reopened profiles, orders, partner_sessions,
--- feedback_submissions and lmft_requests to anybody. Nothing suggests it was
--- pasted. They are dropped here too, so this one file closes them whichever
--- way the database got to where it is. schema.sql no longer creates them.
+-- ── SAFE TO RUN AGAIN, AND ON A DATABASE WITHOUT THE TABLE ──────────────────
+-- DROP POLICY IF EXISTS skips a missing rule but still fails on a missing
+-- table (that is what stopped the first 098), so the drop runs only when the
+-- table is there. It writes no rows and reads none.
 --
--- ── WHY NOTHING BREAKS ──────────────────────────────────────────────────────
--- Every endpoint uses the service key, which bypasses row level security, so
--- a "service" policy never granted the server anything. The scoped policies
--- 010 and 019 created for a signed-in person's own rows are untouched.
---
--- ── SAFE TO RUN AGAIN ───────────────────────────────────────────────────────
--- Every statement is DROP POLICY IF EXISTS. A policy that is not there is
--- skipped. It writes no rows and reads none.
---
--- And a TABLE that is not there is skipped too. The first version failed on
--- the live project with "relation public.lmft_requests does not exist": IF
--- EXISTS covers the policy and not the table, and that table was never created
--- there. Supabase runs a pasted file as one transaction, so nothing applied.
--- Each drop now runs only if its table exists.
---
--- Afterwards, supabase/diagnostics/open-policies.sql lists anything still
--- open. It should print nothing.
+-- Afterwards, run open-policies.sql again. It should print nothing.
 -- ============================================================================
 
 do $$
 begin
-  if to_regclass('public.beta_codes') is not null then
-    drop policy if exists "beta_codes_anon_select"  on public.beta_codes;
-    -- And the same open read from supabase/beta_codes_setup.sql, the script
-    -- that created the table, which no migration ever removed.
-    drop policy if exists "beta_codes_read_all"     on public.beta_codes;
-  end if;
-  if to_regclass('public.feedback_submissions') is not null then
-    drop policy if exists "feedback_anon_insert"    on public.feedback_submissions;
-    drop policy if exists "feedback_service"        on public.feedback_submissions;
-  end if;
-  if to_regclass('public.profiles') is not null then
-    drop policy if exists "profiles_service"         on public.profiles;
-  end if;
-  if to_regclass('public.partner_sessions') is not null then
-    drop policy if exists "partner_sessions_write"   on public.partner_sessions;
-    drop policy if exists "partner_sessions_service" on public.partner_sessions;
-  end if;
-  if to_regclass('public.orders') is not null then
-    drop policy if exists "orders_service"           on public.orders;
-  end if;
-  if to_regclass('public.lmft_requests') is not null then
-    drop policy if exists "lmft_requests_service"    on public.lmft_requests;
+  if to_regclass('public.partner_sync') is not null then
+    drop policy if exists "service role only" on public.partner_sync;
   end if;
 end
 $$;
 ```
 <!-- /SQL -->
 
-**Step 3. Paste this into Terminal.** It copies the check and prints `copied`.
+**Step 3. Paste this into Terminal.** It copies the same check you ran after 098 and prints `copied`.
 
 ```bash
 cd /Users/Ellie/Projects/unison && cat supabase/diagnostics/open-policies.sql | pbcopy && echo copied
 ```
 
 **Step 4. Paste that into the Supabase SQL Editor** and run it. It reads only.
-It should come back with no rows. If it shows any, paste them to me.
+This time it should come back with no rows. If it shows any, paste them to me.
 
 <!-- SQL open-policies.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
@@ -165,76 +119,9 @@ order by 1, 2;
 ```
 <!-- /SQL -->
 
-**For A191. Paste this into Terminal.** It copies the query and prints `copied`.
-
-```bash
-cd /Users/Ellie/Projects/unison && cat supabase/diagnostics/accounts-with-no-purchase.sql | pbcopy && echo copied
-```
-
-**Then paste that into the Supabase SQL Editor** and run it. It reads only. It lists every account the app now turns away. Mya should be on it until her order goes through, and her row shows how she signed up. Anyone else on it who should be able to get in, paste their row back to me.
-
-<!-- SQL accounts-with-no-purchase.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- Which accounts have nothing bought behind them? (A191)
---
--- Run this in the Supabase SQL Editor. It reads only; it writes nothing.
---
--- The app now turns away any account that has not bought something. This
--- lists every account that rule turns away, so you can see who they are
--- before anybody tells you. Mya's should be here until her order goes through.
---
--- An account counts as bought when ANY of these is true, the same rule as
--- api/_lib/purchase-gate.js:
---   an order under its id or its email; a comp account; its stored
---   entitlements say so; its linked partner bought; or it joined on the
---   invite code of somebody who bought.
---
--- ── WHAT ITS ANSWER MEANS ─────────────────────────────────────────────────
---   no rows       nobody is shut out.
---   a row         that account cannot get into the app. "how they signed up"
---                 says google, apple or email. A row for somebody who should
---                 get in is a gap in the rule: paste it back.
-
-with acct as (
-  select u.id, lower(u.email) as email, u.created_at,
-         coalesce(u.raw_app_meta_data->>'provider', 'email') as provider,
-         p.id is not null as has_profile, p.name, p.pkg, p.is_comp, p.entitlements,
-         p.partner_profile_id, p.invite_code, p.joined_via_invite
-  from auth.users u
-  left join public.profiles p on p.id = u.id
-),
-bought as (
-  select a.id from acct a
-  where exists (select 1 from public.orders o where o.user_id = a.id or lower(o.buyer_email) = a.email)
-     or coalesce(a.is_comp, false)
-     or coalesce((a.entitlements->>'hasGrant')::boolean, false)
-     or coalesce((a.entitlements->>'comp')::boolean, false)
-)
-select
-  a.email                                        as "email",
-  a.provider                                     as "how they signed up",
-  a.created_at::date                             as "account made",
-  case when a.has_profile then 'yes' else 'no' end as "profile",
-  coalesce(a.name, '')                           as "name on profile",
-  coalesce(a.invite_code, '')                    as "their invite code",
-  (select count(*) from public.profiles j
-     where j.invite_code = a.invite_code and j.id <> a.id) as "people joined on their code"
-from acct a
-where a.id not in (select id from bought)
-  -- a partner who bought
-  and not exists (select 1 from bought b where b.id = a.partner_profile_id)
-  -- the inviter whose code they joined on
-  and not (coalesce(a.joined_via_invite, false) and exists (
-        select 1 from public.profiles i
-        join bought b on b.id = i.id
-        where i.invite_code = a.invite_code and i.id <> a.id))
-order by a.created_at desc;
-```
-<!-- /SQL -->
-
 ## 2. Open
 
-**Nothing open.** A187, A190 and A191 are waiting on you in section 1; A188 and A189 are in section 3.
+**Nothing open.** A192, A187, A190 and A191 are waiting on you in section 1; A188 and A189 are in section 3.
 
 ## 3. For you to review
 
@@ -243,8 +130,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A188 | **The app's Communication overview now shows the pole labels (Inward / Outward and so on), small, under each end of every bar.** Putting them either side would have taken a third of the bar's width on a phone, so they sit underneath, and every row is still the same height. Seen on the simulator: all ten fit. |
-| A189 | **The Side by Side key now says "What Preston thought Ellie would say" instead of "How Preston views Ellie", on the website and in the app.** The wording now lives in one place on the server, so the two can't drift apart again. |
+| A188 | **The pole labels on the app's Communication overview now sit just under each end of the bar.** You asked for them closer, so the gap under each bar is a quarter of what it was and the rows are a little tighter. Checked on the simulator. |
+| A189 | **Checked: Side by Side is pulling correctly, and nothing in the data changed. Only the words did.** I traced it four ways. The server and the website build the dots from the same stored answers with the same one reversed question ("When you're going through a hard stretch", under Conflict Style). Every partner-view question lists its two answers in the same order as its self-question, so no guess lands on the wrong side. The app and the website give the same dot the same colour. And no commit this month touched how those answers are stored or read. What might look flipped: a guess dot is coloured for the person it is about, not the person who answered. So "What Preston thought Ellie would say" is Ellie's colour, sitting near Ellie's own dot, even though Preston answered it. That has always been the rule, and the old wording ("How Preston views Ellie") hid it. Want each guess dot in the colour of the person who made the guess instead? If something else looks flipped, tell me which question and I'll trace that row. |
 | A172 | **The website's Experienced column now shows the full answer, like the app ("Usually Mum, sometimes Dad" rather than "Both").** Both now use the same server function, and a check fails if the website goes back to the plain word. |
 | A173 | **Explore has 12 recommended views, in your three groups: Keep an eye on, Could change our approach, Already surfacing.** Hover a button for why it's there. Honest caveat: I'm not allowed to read your live data, so I picked these from what the product measures, not from current results. Use Already surfacing to tell me which ones show something, and I'll reshuffle. The six old presets are hidden, not deleted. Views you've saved still show, under Saved. |
 | A174 | **Life & Values is now horizontal bars, so every label reads in full.** It and Responsibilities beside it are both taller (340), to fit all twelve rows. |
@@ -272,6 +159,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A171 | **Migration 098 ran and closed the promo codes and the other open rules. Its check found one more, partner_sync, which is A192.** |
 | A170 | **Five sweep rounds, A170a to A170m: failed reads no longer shown as facts about people, sends claimed before sending, every big read paged, open database rules found (A171).** |
 | A170a | **Saving an edit to a live In Practice article could unpublish it when the read failed. Now refuses.** |
 | A170b | **Eight places showed a failed read as a statement about a person; two also wrote over real data. All now say they could not check.** |

@@ -4491,14 +4491,14 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
       disabled={!dim.section}
       accessibilityRole="link"
       accessibilityLabel={dim.section ? `${dim.label}. Open ${dim.domainLabel || 'this page'}.` : undefined}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 34 }}>
+      style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 32 }}>
       {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
       <Text
         numberOfLines={1}
         /* Lifted level with the bar rather than centred on bar and poles
-           together: 16 under it moves its middle up 8, which is half of the
-           poles' 5 + 11. */
-        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.65)', width: GLANCE_LABEL_W, marginBottom: 16 }}>
+           together: 12 under it moves its middle up 6, which is half of the
+           poles' 1 + 11. Ellie: "Move the labels up closer to the bars." */
+        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.65)', width: GLANCE_LABEL_W, marginBottom: 12 }}>
         {dim.label}
       </Text>
       {/* ── THE POLES, UNDER EACH END OF THE BAR ─────────────────────────
@@ -4530,7 +4530,7 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
         ))}
       </View>
       {dim.left || dim.right ? (
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 1 }}>
           {/* not markable: a pole label, one word, laid out beside its twin. */}
           <Text numberOfLines={1} style={{ ...Type.small, fontSize: 9, lineHeight: 11, color: 'rgba(255,255,255,0.45)' }}>{dim.left || ''}</Text>
           {/* not markable: a pole label, one word, laid out beside its twin. */}
