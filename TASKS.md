@@ -9,7 +9,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A187 | **Going through the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** Your ask: "As I go through and click use this once I'm done with the edit, please remove that tile from my view and apply that change to the live site and app." Edit the box if you want to, then press Use this, or Keep current. The tile leaves your list, and about every 20 minutes while this session is open I put your decisions live on the site and in the app. They then show "· live" under All. Text you are partway through is kept as a draft until you press a button. One thing to know: a highlight someone made on a sentence you change loses its marker. The note itself stays in their Notes. **So far: 5 sentences live, none failed.** One to look at again: the WZ behavior you approved reads "say it before while I'm thinking about it", which looks like two edits overlapping. Look first at the couple type sentences that name the wrong person (The translators description, The orbit's third tip). |
+| A195 | **Please run migration 101. It gives Rebecca and Abram the Physical Intimacy exercise.** It turns the add-on on for both of them: the flag the app reads and the record the website reads. It finds them by first name, as their linked couple. If that matches anything other than exactly the two of them, it changes nothing and tells you so. Once it has run, Physical Intimacy appears for both the next time they open the app or the site. |
+| A187 | **Going through the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** Your ask: "As I go through and click use this once I'm done with the edit, please remove that tile from my view and apply that change to the live site and app." Edit the box if you want to, then press Use this, or Keep current. The tile leaves your list, and about every 20 minutes while this session is open I put your decisions live on the site and in the app. They then show "· live" under All. Text you are partway through is kept as a draft until you press a button. One thing to know: a highlight someone made on a sentence you change loses its marker. The note itself stays in their Notes. **So far: 10 sentences live, none failed.** One to look at again: the WZ behavior you approved reads "say it before while I'm thinking about it", which looks like two edits overlapping. Look first at the couple type sentences that name the wrong person (The translators description, The orbit's third tip). |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -20,9 +21,72 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
+### One thing to run, for A195
+
+**Paste this into Terminal.** It copies migration 101 and prints `copied`.
+
+```bash
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/101_grant_intimacy_rebecca_abram.sql | pbcopy && echo copied
+```
+
+**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned." If it says "Expected Rebecca and Abram as one linked couple", nothing changed: paste me the message.
+
+<!-- SQL 101_grant_intimacy_rebecca_abram.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 101: give Rebecca and Abram the Physical Intimacy exercise (A195).
+--
+-- Ellie: "Please also grant rebecca and abram the physical intimacy exercise."
+--
+-- A grant is the add-on flag on both profiles. Two places read it, and both
+-- are set so neither surface can disagree with the other:
+--   profiles.addon_intimacy       what the app's ownership check reads
+--   profiles.entitlements         the stored union the website reads,
+--     .addonIntimacy              recomputed grant-only, so it never removes
+--                                 this again
+--
+-- ── FOUND AS A COUPLE, AND ONLY IF IT IS EXACTLY ONE COUPLE ─────────────────
+-- By first name, linked to each other both ways, as migration 093 found
+-- Rebecca. No address is written here: this file is in a public repository.
+-- If anything other than exactly two profiles match, nothing changes and the
+-- message says how many were found.
+--
+-- Safe to run again: setting a flag that is already on changes nothing.
+-- ============================================================================
+
+do $$
+declare
+  n int;
+begin
+  create temporary table _pair on commit drop as
+  select r.id
+  from public.profiles r
+  join public.profiles a on a.id = r.partner_profile_id and a.partner_profile_id = r.id
+  where (lower(coalesce(r.name, '')) like 'rebecca%' and lower(coalesce(a.name, '')) like 'abram%')
+     or (lower(coalesce(r.name, '')) like 'abram%'   and lower(coalesce(a.name, '')) like 'rebecca%');
+
+  select count(*) into n from _pair;
+  if n <> 2 then
+    raise exception 'Expected Rebecca and Abram as one linked couple (2 profiles), found %. Nothing was changed.', n;
+  end if;
+
+  update public.profiles p
+     set addon_intimacy = true,
+         entitlements = jsonb_set(coalesce(p.entitlements, '{}'::jsonb), '{addonIntimacy}', 'true'::jsonb, true)
+   where p.id in (select id from _pair);
+
+  raise notice 'Physical Intimacy granted to both.';
+end
+$$;
+```
+<!-- /SQL -->
+
 ## 2. Open
 
-**Nothing open.** A187 is waiting on you in section 1; A188, A189 and A193 are in section 3.
+| # | What I am doing |
+|--|--|
+| A194 | **Your ask: "review your proposed vs my approved for each of the prose sections I submitted and change the remaining ones to be closer to what I'm envisioning."** Comparing my ten proposals against your ten approved versions for the patterns, then rewriting the remaining proposals on the review page to match. Nothing goes live until you press Use this, same as before. |
+
 
 ## 3. For you to review
 

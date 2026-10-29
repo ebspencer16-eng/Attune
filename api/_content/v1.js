@@ -47,13 +47,13 @@ export const ALIGNED_ADVICE = {
     high: "You both tend to hint at needs rather than asking explicitly. That keeps things gentle, but when neither of you says what you need plainly, needs are missed by both of you. Try to occasionally ask for what you need in plain words even if it feels uncomfortable.",
   },
   bids: {
-    low:  "You're both reserved with the small reaches for connection. Neither of you makes a show of them, which keeps things low-key. It also means they can pass unnoticed. Name one out loud now and then. The reach only lands when the other person knows it happened.",
-    high: "You both catch the small reaches for connection. Keep catching them out loud. The acknowledgment is what makes a bid land, not just the noticing.",
+    low:  "You're both reserved when it comes to small reaches for connection. This means that attempts to connect can pass unnoticed. Now and then, say out loud that you noticed the other reach for you. It is important that the person who made an attempt feels like it was noticed.",
+    high: "You both usually notice each other's small reaches for connection. When you notice one, try to say so out loud. Acknowledging a bid makes your partner feel cared for, not just noticing the attempt.",
   },
-  listening:  "You listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
-  conflict:   "You handle conflict in similar ways. If you both engage, it can escalate fast. If you both step back, things go unsaid. Watch for whichever one is yours.",
+  listening:  "You listen in similar ways. This works until one of you needs the other kind of listening, quiet attention or questions and a response. It is completely fine to ask your partner which kind of listening they want when they begin a discussion.",
+  conflict:   "You handle conflict in similar ways. If you both engage, feelings can escalate fast. If you both step back, things can go unsaid. Try to find a happy medium together where feelings can be shared freely, while at the same time calmly and safely.",
   repair: {
-    low:  "You both repair deliberately, with a real reset. That makes repairs count. It can also leave small ruptures waiting for a big enough moment. Let some be smaller and sooner.",
+    low:  "You both repair deliberately, by taking a real reset. That can increase the effectiveness of those attempts to repair, but it can also leave small, unresolved feelings that rise up in meaningful moments. It is fine to let some repairs be smaller and sooner so that you can avoid unresolved feelings.",
     high: "You both repair casually, without much ceremony. Because it comes so naturally, it's easy to skip naming that a repair even happened. Say it landed.",
   },
   love:       "Love lands in similar ways for both of you. That's rare. Keep giving it in that form on purpose, not just by default.",
