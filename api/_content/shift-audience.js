@@ -10,7 +10,7 @@
  * two, so the surface turns this into "mine", "theirs" or "ours".
  *
  * The rule that produced it, and why it refuses to guess, is in the builder's
- * header. 40 of 150 entries are one-sided; the rest are both.
+ * header. 43 of 150 entries are one-sided; the rest are both.
  */
 
 export const SHIFT_AUDIENCE = {
@@ -51,7 +51,7 @@ export const SHIFT_AUDIENCE = {
   expression: {
     '1_1': 'both',
     '1_2': 'both',
-    '1_3': 'both',
+    '1_3': 'lo',
     '1_4': 'lo',
     '1_5': 'both',
     '2_2': 'both',
@@ -128,7 +128,7 @@ export const SHIFT_AUDIENCE = {
     '2_5': 'hi',
     '3_3': 'both',
     '3_4': 'lo',
-    '3_5': 'both',
+    '3_5': 'hi',
     '4_4': 'both',
     '4_5': 'both',
     '5_5': 'both',
@@ -176,7 +176,7 @@ export const SHIFT_AUDIENCE = {
     '2_2': 'both',
     '2_3': 'hi',
     '2_4': 'both',
-    '2_5': 'both',
+    '2_5': 'hi',
     '3_3': 'both',
     '3_4': 'lo',
     '3_5': 'lo',

@@ -69,7 +69,9 @@ const INSTRUCTS = (who) => new RegExp(
   /* Ellie's own way of asking, from her A187 edits: "It is completely fine
      for X to ask outright." Without it, "Y can miss X's need" was the only
      modal in that sentence and the item went to the wrong person. */
-  + `|\\bfine for ${who} to\\b`,
+  + `|\\bfine for ${who} to\\b`
+  /* "It is important that X does not read Y's quiet as withdrawal" asks X. */
+  + `|\\bimportant that ${who}`,
 );
 
 /** A sentence that asks the pair, which makes the whole entry theirs. */
