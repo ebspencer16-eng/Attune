@@ -1794,8 +1794,10 @@ export function createProfile(input: {
    *
    * /api/create-profile has accepted both of these since long before anything
    * sent them. The link itself is a second call, because partner-sync needs
-   * the profile to exist first; this is what puts the code on the row so the
-   * admin and the digest can tell an invitee from a buyer.
+   * the profile to exist first. joinedViaInvite is what tells the admin and
+   * the digest an invitee from a buyer; the code itself is checked against
+   * the buyer's purchase and never stored on the invitee, because invite_code
+   * is unique to the buyer (A193).
    */
   inviteCode?: string; joinedViaInvite?: boolean;
 }) {

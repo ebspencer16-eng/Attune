@@ -143,12 +143,19 @@ export default async function handler(req) {
      * The code this couple is found by.
      *
      * Taken from the body when the client sent one, which is the website
-     * building the invite URL in the same breath, and the second partner
-     * joining on the first one's code. Minted below when it is neither,
-     * because a first partner with no code can never invite anybody and the
-     * app has never sent one: see api/_lib/invite-code.js.
+     * building the invite URL in the same breath. Minted below when it did
+     * not, because a first partner with no code can never invite anybody.
+     *
+     * Never the code a second partner is JOINING on. invite_code is unique
+     * (migration 022), so storing the buyer's code on the invitee failed the
+     * insert, and /api/partner-sync finds the buyer by that code expecting
+     * one row. The app's invite step sent it, so every partner who joined in
+     * the app was told "Could not create your profile" (A193). The website
+     * sends an empty code for an invitee and always has; this makes the
+     * endpoint say so rather than the caller. The code still reaches the
+     * purchase check below and the link, which is a separate call.
      */
-    invite_code:          (typeof body.inviteCode === 'string' && body.inviteCode.trim()) ? body.inviteCode.slice(0, 32) : null,
+    invite_code:          (!body.joinedViaInvite && typeof body.inviteCode === 'string' && body.inviteCode.trim()) ? body.inviteCode.slice(0, 32) : null,
     partner_joined:       false,
     // pkg is NOT taken from the body. See the block below: it is derived from
     // a real order, and defaults to core.

@@ -197,7 +197,7 @@ import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT
 // was transcribed from, which is why the app matches them today.
 import { cardTypeCss as scType, PERSON_COLORS as SC_PEOPLE, CARD_REF_WIDTH as SC_REF_WIDTH, CARD_MAP_PCT as SC_MAP_PCT, PERSON_GLANCE_COLORS as GLANCE_COLORS } from "../api/_lib/storycard-style.js";
 import { individualBlurb } from "../api/_lib/individual-profile.js";
-import { pronounForm } from "../api/_lib/role-tokens.js";
+import { pronounForm, resolveRoleTokens as resolveRoleTokensShared } from "../api/_lib/role-tokens.js";
 import { commsProtocols, commsActionPlan } from "../api/_lib/comms-plan.js";
 import { whatComesNext } from "../api/_lib/what-comes-next.js";
 import { APP_LIVE, APP_STORE_URL, PHYSICAL_ENABLED } from "../api/_lib/flags.js";
@@ -5793,32 +5793,16 @@ function MaybeNav({ noSideNav, navItems, currentStep, onGo, accent, children }) 
 // plus their _sub/_obj/_pos/_isC pronoun forms. Tokens only resolve when the
 // two partners actually differ on that axis. Anything unresolved is stripped
 // back to a generic phrase so a raw token never reaches the page.
+/* One resolver, the server's (api/_lib/role-tokens.js), which the app also
+   uses. This file had its own copy, with no fallback: for a couple not split
+   on an axis it left "{RCH}" on the page where the app said "the partner who
+   reaches first". Found by scripts/_sweeps/sweep-role-tokens.mjs (A193). */
 function resolveRoleTokens(str, myS, partS, userName, partnerName, userPronouns = "", partnerPronouns = "") {
   if (!str) return str;
-  let out = str;
   const a = computeIndividualType(myS), b = computeIndividualType(partS);
-  const uOpen = a.openScore >= 3.0, pOpen = b.openScore >= 3.0;
-  const uEngage = a.withdrawScore <= 3.0, pEngage = b.withdrawScore <= 3.0;
-  const fill = (nameA, nameB, pronA, pronB, A, B) => {
-    out = out.replace(new RegExp(`\\{${A}\\}`, "g"), nameA).replace(new RegExp(`\\{${B}\\}`, "g"), nameB);
-    ["sub", "obj", "pos", "isC"].forEach(f => {
-      out = out.replace(new RegExp(`\\{${A}_${f}\\}`, "g"), pronoun(pronA, f))
-               .replace(new RegExp(`\\{${B}_${f}\\}`, "g"), pronoun(pronB, f));
-    });
-  };
-  if (uOpen !== pOpen) {
-    const expName = uOpen ? userName : partnerName, grdName = uOpen ? partnerName : userName;
-    const expPron = uOpen ? userPronouns : partnerPronouns, grdPron = uOpen ? partnerPronouns : userPronouns;
-    fill(expName, grdName, expPron, grdPron, "EXP", "GRD");
-    out = out.replace(/\b(the )?(expressive|open) partner\b/gi, expName).replace(/\b(the )?(guarded|reserved) partner\b/gi, grdName);
-  }
-  if (uEngage !== pEngage) {
-    const rchName = uEngage ? userName : partnerName, wdrName = uEngage ? partnerName : userName;
-    const rchPron = uEngage ? userPronouns : partnerPronouns, wdrPron = uEngage ? partnerPronouns : userPronouns;
-    fill(rchName, wdrName, rchPron, wdrPron, "RCH", "WDR");
-    out = out.replace(/\b(the )?(reaching|engaging) partner\b/gi, rchName).replace(/\b(the )?(withdrawing|quieter) partner\b/gi, wdrName);
-  }
-  return out;
+  return resolveRoleTokensShared(str,
+    { name: userName, axes: { open: a.openScore, withdraw: a.withdrawScore }, pronouns: userPronouns },
+    { name: partnerName, axes: { open: b.openScore, withdraw: b.withdrawScore }, pronouns: partnerPronouns });
 }
 
 

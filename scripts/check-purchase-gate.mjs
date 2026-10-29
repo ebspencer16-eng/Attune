@@ -57,7 +57,7 @@ function stub(db) {
       return ok((db.orders || []).filter((o) => o.user_id === key || o.buyer_email === key));
     }
     if (u.includes('/rest/v1/profiles')) {
-      if (method !== 'GET') { writes.push({ u, method }); return ok([]); }
+      if (method !== 'GET') { writes.push({ u, method, body: String(opts.body || '') }); return ok([]); }
       const byCode = /invite_code=eq\.([^&]+)/.exec(u);
       if (byCode) return ok((db.profiles || []).filter((p) => p.invite_code === byCode[1]));
       const or = /or=\(([^)]*)\)/.exec(u);
@@ -102,7 +102,7 @@ const cases = [
   ['a linked partner who bought', { profiles: [profile({ partner_profile_id: PT }), { id: PT, email: 'p@example.invalid', pkg: 'core' }], orders: [order({ user_id: PT })] }, {}, true],
   ['joining on the code of a buyer', { profiles: [{ id: PT, email: 'p@example.invalid', invite_code: 'BUYER123' }], orders: [order({ buyer_email: 'p@example.invalid' })] }, { inviteCode: 'BUYER123' }, true],
   ['joining on the code of somebody who bought nothing', { profiles: [{ id: PT, email: 'p@example.invalid', invite_code: 'FREE1234' }] }, { inviteCode: 'FREE1234' }, false],
-  ['joined earlier on a buyer\'s code, link not made', { profiles: [profile({ invite_code: 'BUYER123', joined_via_invite: true }), { id: PT, email: 'p@example.invalid', invite_code: 'BUYER123' }], orders: [order({ user_id: PT })] }, {}, true],
+  ['a partner who joined and is linked, buyer found by email', { profiles: [profile({ invite_code: null, joined_via_invite: true, partner_profile_id: PT }), { id: PT, email: 'p@example.invalid', invite_code: 'BUYER123' }], orders: [order({ buyer_email: 'p@example.invalid' })] }, {}, true],
 ];
 for (const [what, db, extra, want] of cases) {
   const r = await ask(db, extra);
@@ -141,9 +141,16 @@ const post = (db, { token = true, body = {} } = {}) => withDb(db, async () => {
   if (out.status !== 200) fails.push(`create-profile from the app for a buyer found by email answered ${out.status}, so somebody who bought as a guest cannot set up in the app.`);
 }
 {
-  const { out } = await post({ profiles: [{ id: PT, email: 'p@example.invalid', invite_code: 'BUYER123' }], orders: [order({ user_id: PT })] },
+  const { out, writes } = await post({ profiles: [{ id: PT, email: 'p@example.invalid', invite_code: 'BUYER123' }], orders: [order({ user_id: PT })] },
     { body: { inviteCode: 'BUYER123', joinedViaInvite: true } });
   if (out.status !== 200) fails.push(`create-profile from the app for a partner joining a buyer's invite answered ${out.status}. An invited partner never pays.`);
+  /* invite_code is unique, so a partner who stores the buyer's code fails the
+     insert in the real database, and partner-sync could no longer find the
+     buyer by it. Every app invitee hit this (A193). */
+  const insert = writes.find((w) => w.method === 'POST');
+  if (insert && /"invite_code":"BUYER123"/.test(insert.body)) {
+    fails.push("create-profile stored the buyer's invite code on the partner joining it. The code is unique, so the real insert fails and the partner cannot set up.");
+  }
 }
 {
   const { out } = await post({}, { token: false });

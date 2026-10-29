@@ -23,7 +23,7 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
-**Nothing open.** A187 and A190 are waiting on you in section 1; A188 and A189 are in section 3.
+**Nothing open.** A187 and A190 are waiting on you in section 1; A188, A189 and A193 are in section 3.
 
 ## 3. For you to review
 
@@ -32,6 +32,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A193 | **Bug scan done. Two real bugs found and fixed; everything else came back clean.** (1) An invited partner who joined in the app with their invite code was told "Could not create your profile". The app tried to save the buyer's code on the partner's profile too, and the database allows each code only once. Today's fix made that the only way in for an invited partner on the app, so it mattered. Fixed: the partner's profile no longer stores the code, as the website already did, and a check now fails if it ever does again. (2) The website had its own copy of the rule that fills in "Preston" or "Ellie" for "the more guarded partner" and similar. It left raw placeholders like {RCH} where the app said "the partner who reaches first". The website now uses the app's version, and a sentence that opens with that phrase gets a capital letter. What came back clean: all 62 endpoints from outside, every page and results section in a real browser, all five exercises driven to the end, 24 checkout carts, and a review of today's code. One rare case is left: an invited partner whose link to the buyer never completed sees the "no package" screen with no box to re-enter the code. Say if you want that built. |
 | A188 | **The pole labels on the app's Communication overview now sit just under each end of the bar.** You asked for them closer, so the gap under each bar is a quarter of what it was and the rows are a little tighter. Checked on the simulator. |
 | A189 | **Checked: Side by Side is pulling correctly, and nothing in the data changed. Only the words did.** I traced it four ways. The server and the website build the dots from the same stored answers with the same one reversed question ("When you're going through a hard stretch", under Conflict Style). Every partner-view question lists its two answers in the same order as its self-question, so no guess lands on the wrong side. The app and the website give the same dot the same colour. And no commit this month touched how those answers are stored or read. What might look flipped: a guess dot is coloured for the person it is about, not the person who answered. So "What Preston thought Ellie would say" is Ellie's colour, sitting near Ellie's own dot, even though Preston answered it. That has always been the rule, and the old wording ("How Preston views Ellie") hid it. Want each guess dot in the colour of the person who made the guess instead? If something else looks flipped, tell me which question and I'll trace that row. |
 | A172 | **The website's Experienced column now shows the full answer, like the app ("Usually Mum, sometimes Dad" rather than "Both").** Both now use the same server function, and a check fails if the website goes back to the plain word. |

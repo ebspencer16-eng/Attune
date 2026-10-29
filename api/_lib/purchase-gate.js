@@ -19,7 +19,7 @@
  *   - the account has an order, by its id or by its email (a guest checkout
  *     writes buyer_email before any account exists), or is a comp account;
  *   - its partner does, by the couple link;
- *   - it joined, or is joining, on the invite code of somebody who does.
+ *   - it is joining on the invite code of somebody who does.
  * "Has an order" is computeEntitlements' hasGrant, through entitlementsFor,
  * which is the one answer this codebase has to "what does this account own".
  * A profile's own pkg of core is not a purchase: it is what create-profile
@@ -58,10 +58,8 @@ async function inviterFor({ supabaseUrl, serviceKey, code, notId }) {
   const r = await get(supabaseUrl, serviceKey,
     `profiles?invite_code=eq.${encodeURIComponent(code)}&select=id,email,joined_via_invite&limit=5`);
   if (r.error) return { ok: false, error: r.error };
-  const rows = (r.data || []).filter((p) => p.id !== notId);
-  /* The buyer is the one who did not join on it. Two rows share a code only
-     when a partner joined on it, and the partner carries joined_via_invite. */
-  const inviter = rows.find((p) => !p.joined_via_invite) || rows[0] || null;
+  /* invite_code is unique, so this is one row: the buyer's. */
+  const inviter = (r.data || []).find((p) => p.id !== notId) || null;
   return { ok: true, id: inviter?.id || null, email: inviter?.email || null };
 }
 
@@ -97,9 +95,10 @@ export async function purchaseStatus({ supabaseUrl, serviceKey, userId, email, i
     if (p.owns) return { ok: true, owns: true, via: 'partner' };
   }
 
-  /* The inviter, by the code: one being joined now, or the one this profile
-     joined on before the link was made. */
-  const code = inviteCode || (profile?.joined_via_invite ? profile.invite_code : null);
+  /* The inviter, by the code being joined now. A profile never keeps the code
+     it joined on (invite_code is unique, so it is the buyer's alone), which is
+     why a joined partner is found through the link above instead. */
+  const code = inviteCode;
   if (code) {
     const inv = await inviterFor({ supabaseUrl, serviceKey, code, notId: userId });
     if (!inv.ok) return inv;

@@ -96,6 +96,12 @@ export function resolveRoleTokens(text, a, b) {
       out = out.replace(new RegExp(`\\{${tok}_${f}\\}`, 'g'), pronounForm('', f));
     }
   }
+  /* A phrase that opens a sentence takes a capital: "The more guarded
+     partner can feel…", not "the more guarded partner can feel…" (A193). */
+  for (const phrase of Object.values(GENERIC)) {
+    out = out.replace(new RegExp(`(^|[.!?]\\s+)${phrase}`, 'g'),
+      (m, lead) => lead + phrase.charAt(0).toUpperCase() + phrase.slice(1));
+  }
   out = swapRolePhrases(out, a, b);
 
   return out.replace(/\{[A-Za-z0-9_]+\}/g, (m) => (m === '{U}' || m === '{P}' ? m : ''))

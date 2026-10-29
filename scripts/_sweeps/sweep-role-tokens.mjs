@@ -42,7 +42,7 @@ const computeIndividualType = (s) => ({ openScore: s.open, withdrawScore: s.with
 const PRONOUNS = ${JSON.stringify(PRONOUN_TABLE)};
 const pronoun = ${pronounForm.toString()};
 `;
-const site = (await lift('src/App.jsx', 'resolveRoleTokens', stub)).default;
+const site = (await lift('src/App.jsx', 'resolveRoleTokens', stub + `\nimport { resolveRoleTokens as resolveRoleTokensShared } from '${new URL('../../api/_lib/role-tokens.js', import.meta.url).href}';`)).default;
 
 /** Four couples: opposite on both axes, alike on both, and one of each. */
 const COUPLES = [
