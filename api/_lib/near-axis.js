@@ -22,20 +22,20 @@ export const NEAR_AXIS_PROSE = {
   WW: {
     patternsNearEngage: {
       2: {
-        one: `Arguments between you can run hot, but one of you does not always engage on the spot. It's not a retreat, use the pause as an opportunity to stabilize.`,
+        one: `Arguments between you can get heated, but one of you does not always engage right away. That pause isn't a retreat, but rather can be used to let feelings settle before you talk.`,
         both: `Arguments between you can run hot, but neither of you consistently engages on the spot. Those pauses shouldn't be interpreted as retreating, you can use them to let the heat settle before the conversation starts.`,
       },
     },
     patternsNearOpen: {
       1: {
-        one: `Both of you bring real emotional energy, though one of you runs a touch cooler. That small difference can keep a heated moment from intensifying.`,
-        both: `Both of you bring real emotional energy, and neither of you sits at full intensity, so a heated moment has less to feed on.`,
+        one: `You both bring real emotional energy, but when it comes to being open or guarded, one of you is relatively neutral. That small difference is a good thing because it can keep a heated moment from escalating.`,
+        both: `You both bring real emotional energy, but when it comes to being open or guarded, you both are relatively neutral, so heated moments are less likely to escalate.`,
       },
     },
     stickingPointsNearOpen: {
       0: {
-        one: `High expressiveness can amplify when you both light up at once, but one of you sits closer to the middle here which can help tensions stay in check. Under stress, emotions can flare and that amplification returns.`,
-        both: `High expressiveness can amplify when you both light up at once. You both sit closer to neutral here, so that amplification is less of a default. Under stress, emotions can still flare and amplification returns.`,
+        one: `When you are both very expressive at the same time, feelings can escalate. You can work together to keep emotions in check, but under stress, those emotions can still flare.`,
+        both: `When you are both very expressive at the same time, feelings can escalate. When it comes to being open or guarded, you both are relatively neutral, so that happens less often. Under stress, though, feelings can still flare and escalate.`,
       },
     },
   },
@@ -54,22 +54,22 @@ export const NEAR_AXIS_PROSE = {
     },
     patternsNearOpen: {
       2: {
-        one: `The feelings behind hard moments can get skipped on the way to a fix, though one of you flags it more than a fully guarded partner would. That flag creates a good opportunity for you both to take a pause.`,
-        both: `The feelings behind hard moments can get skipped on the way to a fix. Both of you flag it more than fully guarded partners would, use those flags to take a pause.`,
+        one: `The feelings behind hard moments can get brushed over when you rush to fix a problem. When one of you points out those feelings, try to take a pause together and talk about how you each feel.`,
+        both: `The feelings behind hard moments can get skipped when you rush to fix the problem. When it comes to being open or guarded, you both are relatively neutral, so you will each sometimes point out those feelings. When one of you does, try to take a pause together and talk about how you each feel.`,
       },
     },
     stickingPointsNearOpen: {
       0: {
-        one: `Two internal processors can go a long time without surfacing what's going on. One of you sits closer to the middle and will often be ready to talk sooner. Use that opening instead of waiting to both be ready.`,
-        both: `Two internal processors can go a long time without surfacing what's going on. You both sit closer to the middle, so you're often ready to talk sooner than two fully guarded partners. Use the opening instead of waiting to both be ready.`,
+        one: `Two people who process feelings privately can go a long time without saying how they feel. One of you will sometimes be ready to talk sooner. When that happens try to talk then, even if one of you is sharing half-formed thoughts.`,
+        both: `Two people who process feelings privately can go a long time without saying how they feel. When it comes to being open or guarded, you both are relatively neutral, so you are often ready to talk sooner than two very private people would be. When one of you is ready, try to talk then, even if you're sharing half-formed thoughts.`,
       },
     },
   },
   YY: {
     patternsNearEngage: {
       1: {
-        one: `The coming-back-together step can drag because neither of you rushes it. One of you sits closer to the middle and is sometimes ready to talk sooner. Let that person open the door without it becoming their job every time.`,
-        both: `The coming-back-together step can drag because neither of you rushes it. Both of you sit closer to the middle and are sometimes ready sooner than two full withdrawers. Whoever surfaces first can open the door, and it won't always be the same person.`,
+        one: `Coming back together after a disagreement can take a while, because neither of you rushes it. One of you is sometimes ready to talk sooner. It is fine to let that person start the conversation, as long as it does not become their job every time.`,
+        both: `Coming back together after a disagreement can take a while, because neither of you rushes it. When it comes to engaging or withdrawing, you both are relatively neutral, so you are sometimes ready to talk sooner than two people who both need a lot of space. Whoever is ready first can start the conversation, and that will not always be the same person.`,
       },
     },
     stickingPointsNearEngage: {
@@ -80,8 +80,8 @@ export const NEAR_AXIS_PROSE = {
     },
     stickingPointsNearOpen: {
       2: {
-        one: `Two withdrawers can go long stretches without addressing things. One of you also holds a bit more back, so unsaid feelings build quietly. Standing check-ins can be a helpful solution to discuss what you are each feeling.`,
-        both: `Two withdrawers can go long stretches without addressing things. Both of you hold a bit more back than fully open partners, so unsaid feelings build quietly. Standing check-ins help you name what you are each feeling.`,
+        one: `When you both tend to take space, things can go unaddressed for a long time, and unspoken feelings can quietly build up. A regular check-in, at a set time each week, gives you both a chance to share what you are feeling.`,
+        both: `When you both tend to take space, things can go unaddressed for a long time. You both also hold back a bit more than very open partners would, so unspoken feelings can quietly build up. A regular check-in, at a set time each week, gives you both a chance to share what you are feeling.`,
       },
     },
   },

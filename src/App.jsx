@@ -3553,7 +3553,7 @@ function generatePersonalityFeedback(myS, partS, userName, partnerName, content)
       strengthText: (isStrength || isNote)
         ? (isSame
           ? `You and ${partnerName} both tend toward the ${myEnd.toLowerCase()} end of ${meta.label.toLowerCase()}.`
-          : `Even with slightly different scores, you and ${partnerName} navigate ${meta.label.toLowerCase()} in compatible ways.`)
+          : `Even with slightly different scores, you and ${partnerName} handle ${meta.label.toLowerCase()} in ways that work well together.`)
         : null,
       insightText: isOpportunity
         ? `${userName} tends ${myEnd.toLowerCase()} while ${partnerName} tends ${partEnd.toLowerCase()} on ${meta.label.toLowerCase()}.`

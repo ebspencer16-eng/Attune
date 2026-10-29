@@ -279,7 +279,7 @@ export const DIM_ACTION_ITEMS = {
   },
   love: {
     title: "Show love the way your partner feels it",
-    body: "{LO} feels it in words, {HI} feels it in what gets done. You are both showing up, in the language that reads as love to you. This week, each of you does one thing in the other's currency instead of your own.",
+    body: "{LO} feels loved through words, and {HI} feels loved through what gets done. You are both showing love in the way that feels like love to you. This week, try to each do one thing the way your partner feels love, rather than your own way.",
   },
   needs: {
     title: "Ask straight, once",
@@ -291,19 +291,19 @@ export const DIM_ACTION_ITEMS = {
   },
   listening: {
     title: "Say which kind of listening you want",
-    body: "{LO} listens by reflecting it back. {HI} listens by helping fix it. Both are attention. Neither is what the other wants in the moment. This week, whoever is bringing something says first: 'I want you to just hear this' or 'I want help solving this.'",
+    body: "{LO} listens by reflecting back what they hear. {HI} listens by helping solve the problem. Both are ways of paying attention, but neither may be what your partner wants in the moment. This week, whoever brings something up can say first: 'I want you to just hear this' or 'I want help solving this.'",
   },
   conflict: {
     title: "Build a pause you both agreed to in advance",
-    body: "{LO} wants it resolved now. {HI} needs space before they can think. Without a plan, the pressing reads as attack and the space reads as abandonment. Agree this week on the words for a pause and the time it ends. The person who calls it is the person who restarts it.",
+    body: "{LO} wants a disagreement resolved right away. {HI} needs space before they can think clearly. Without a plan, {LO} pressing can feel like an attack, and {HI} stepping away can feel like abandonment. This week, try to agree on the words for asking for a pause and on when the pause ends. The person who asks for the pause is the one who restarts the conversation.",
   },
   repair: {
     title: "Agree on what repaired actually looks like",
-    body: "{LO} needs it said out loud to feel finished. {HI} repairs through warmth and moving on. One of you can be done while the other is still waiting. This week, name what closure takes for each of you, and say it before the next disagreement, not during.",
+    body: "{LO} needs a repair said out loud to feel finished. {HI} repairs through warmth and moving on, which means one of you can feel done while the other is still waiting. This week, try to tell each other what helps you feel a disagreement is truly over, and do it before the next disagreement, not during.",
   },
   feedback: {
     title: "Say the small thing early",
-    body: "{LO} holds feedback until it matters enough. {HI} says it as it comes. Held-back feedback arrives heavier than it needed to be. This week, when something lands a little off, name it the same day, in one sentence, not to fight but to say it.",
+    body: "{LO} holds feedback until it matters enough. {HI} shares feedback as it comes up. Feedback that has been held back tends to feel heavier than it needed to. This week, when something bothers you a little, try to say so the same day in one sentence, not to start a fight but to let your partner know.",
   },
 };
 
@@ -312,15 +312,15 @@ export const DIM_ACTION_ITEMS = {
 export const DOMAIN_ALIGNED = {
   inner: {
     title: "Keep telling each other what is going on inside",
-    body: "You process on similar rhythms, so neither of you is left guessing. That holds while life is steady. Say the quiet stuff out loud once this week anyway, so the habit is there when it is not.",
+    body: "You process feelings at a similar pace, so neither of you is left guessing, and that works well while life is steady. This week, try to share one feeling out loud that you would usually keep to yourself, so the habit is ready for times when life is more complicated.",
   },
   connection: {
     title: "Name what already works",
     body: "You connect in compatible currencies, which is rarer than it sounds. Once this week, tell each other one specific thing the other does that lands. Specific, not general.",
   },
   hard: {
-    title: "Pressure-test it while things are calm",
-    body: "You handle hard moments in similar ways, so they rarely escalate. The time to agree on what happens in a genuinely bad week is a good one. Talk it through before you need it.",
+    title: "Plan for a hard week while things are calm",
+    body: "You handle hard moments in similar ways, so disagreements rarely escalate. A good week is the best time to agree on what each of you needs during a genuinely bad one. Try to talk that plan through before you need it.",
   },
 };
 

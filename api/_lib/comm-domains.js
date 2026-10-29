@@ -51,9 +51,9 @@ export function groundFor(id) {
  * this module owns.
  */
 const PROSE = {
-  inner: "How you handle feelings before sharing thoughts aloud. Understand each other's approaches to establish supportive communication methods.",
-  connection: "The mechanics of your relationship. Understanding your unique dynamic helps you communicate in a way that will be interpreted clearly.",
-  hard: 'All couples navigate conflict. What sets healthy relationships apart is the ability to communicate effectively in difficult situations.',
+  inner: "How you handle feelings before you share them out loud. Understanding how each of you recharges, shares emotion, and needs reassurance helps you support each other.",
+  connection: "How you ask for what you need, reach for each other, listen, and show love. Understanding how you each do these things helps you communicate in a way your partner understands clearly.",
+  hard: 'All couples face conflict. What sets healthy relationships apart is the ability to communicate well in difficult situations.',
 };
 
 export const COMM_DOMAINS = DOMAINS.map((d) => ({ ...d, prose: PROSE[d.id] }));

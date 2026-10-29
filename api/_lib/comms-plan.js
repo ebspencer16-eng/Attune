@@ -65,7 +65,7 @@ export function personalityFeedback({ dimensions, viewer, youName, themName, cop
       strengthText: (isStrength || isNote)
         ? (isSame
           ? `You and ${themName} both tend toward the ${myEnd.toLowerCase()} end of ${label}.`
-          : `Even with slightly different scores, you and ${themName} navigate ${label} in compatible ways.`)
+          : `Even with slightly different scores, you and ${themName} handle ${label} in ways that work well together.`)
         : null,
       insightText: isOpportunity
         ? `${youName} tends ${myEnd.toLowerCase()} while ${themName} tends ${partEnd.toLowerCase()} on ${label}.`
@@ -108,7 +108,7 @@ export const PROTOCOLS = [
   ['bids', 'Stay tuned to small moments', "Once a day this week, when the other person does something small for you, makes you coffee, sends you something, acknowledge it specifically. Not just 'thanks,' but 'I noticed that.'"],
   ['listening', 'Match presence to what’s needed', "This week, when one of you brings something up, ask first: 'do you want me to just listen, or do you want me to weigh in?' Then do that one thing."],
   ['expression', 'Build toward more openness', "This week, each of you says one thing out loud that you'd normally hold back or let pass. Not something big, just something that's been sitting there."],
-  ['feedback', 'Practice the small direct mention', "This week, when something bothers you, name it within the same day, not to fight, just to say it. 'Hey, that landed a little off for me.' See what happens."],
+  ['feedback', 'Practice the small direct mention', "This week, when something bothers you, try to say so the same day, not to start a fight, but to let your partner know. 'Hey, that landed badly for me.'"],
   ['love', "Learn each other's language", "Ask your partner: 'What's one thing I do that makes you feel really cared for that I might not realize has that effect?' Then listen without commenting."],
 ];
 
@@ -123,9 +123,9 @@ export function commsProtocols(byDim, youName, themName) {
   // blank action plan reads as the product having nothing to say.
   if (!out.length) {
     out.push(
-      { dim: null, title: 'Keep checking in', body: `${youName} and ${themName} are closely aligned across all ten dimensions. The work here is about staying connected rather than catching up. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.` },
+      { dim: null, title: 'Keep asking how your partner is doing', body: `${youName} and ${themName} are closely aligned across all ten dimensions. The work here is about staying connected rather than catching up. Couples who stay curious about each other's inner experience, even when things feel stable, tend to stay that way longer.` },
       { dim: null, title: 'Stay curious as things change', body: "When two people are this in sync, it's easy to assume the picture stays the same. But what each of you needs, values, and envisions can shift gradually. A brief check-in every few months keeps you current with each other." },
-      { dim: null, title: "Name what's working", body: `Most couples only talk about their relationship when something feels off. ${youName} and ${themName} have something worth naming explicitly: real alignment. Talking about what you're doing well, alongside what feels hard, reinforces it.` },
+      { dim: null, title: "Name what's working", body: `Most couples only talk about their relationship when something feels wrong. ${youName} and ${themName} have something worth saying out loud: you are closely aligned. Talking about what you do well, alongside what feels hard, helps you keep doing it.` },
     );
   }
   return out;
