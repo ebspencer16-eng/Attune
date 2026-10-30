@@ -259,7 +259,7 @@ export default function ReflectionExercise({
 
           {saveFailed ? (
             <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
-              That answer has not saved yet. It will try again on the next one.
+              That answer has not saved yet. We will try again when you answer the next question.
             </Text>
           ) : null}
 

@@ -316,7 +316,7 @@ export default function Expectations({
             Who were the primary adults in your home growing up?
           </Text>
           <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
-            This shapes how you answer the next section, and helps us give you
+            Who raised you shapes how Attune frames your next section
             more personalized context in your results.
           </Text>
           {/* ── TWO PICKERS, NOT EIGHT SHAPES ──────────────────────────
@@ -585,7 +585,7 @@ export default function Expectations({
           />
           {saveFailed ? (
             <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
-              That answer has not saved yet. It will try again on the next one.
+              That answer has not saved yet. We will try again when you answer the next question.
             </Text>
           ) : null}
         </ScrollView>

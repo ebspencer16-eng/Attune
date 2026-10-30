@@ -9,9 +9,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A195 | **Please run migration 101. It gives Rebecca and Abram the Physical Intimacy exercise.** It turns the add-on on for both of them: the flag the app reads and the record the website reads. It finds them by first name, as their linked couple. If that matches anything other than exactly the two of them, it changes nothing and tells you so. Once it has run, Physical Intimacy appears for both the next time they open the app or the site. |
-| A187 | **Going through the vague-language table: https://claude.ai/artifact/29R5dSt9ebDwqj5iUZcEUC (Vague language tab).** Your ask: "As I go through and click use this once I'm done with the edit, please remove that tile from my view and apply that change to the live site and app." Edit the box if you want to, then press Use this, or Keep current. The tile leaves your list, and about every 20 minutes while this session is open I put your decisions live on the site and in the app. They then show "· live" under All. Text you are partway through is kept as a draft until you press a button. One thing to know: a highlight someone made on a sentence you change loses its marker. The note itself stays in their Notes. **So far: 516 sentences live, none failed. 37 left for you, redrafted again from your latest edits (A199).** One to look at again: the WZ behavior you approved reads "say it before while I'm thinking about it", which looks like two edits overlapping. Look first at the couple type sentences that name the wrong person (The translators description, The orbit's third tip). |
-| A198 | **Why the reflection insight rows show nowhere: the Action Plan page they belonged to was removed from the website and the app on 14 September, at your ask.** The words are still computed and nothing draws them, so 35 rows on the review page are copy no customer sees. Say "drop them" and I take them off the review page so they stop costing you time. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -22,72 +19,13 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### One thing to run, for A195
-
-**Paste this into Terminal.** It copies migration 101 and prints `copied`.
-
-```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/101_grant_intimacy_rebecca_abram.sql | pbcopy && echo copied
-```
-
-**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned." If it says "Expected Rebecca and Abram as one linked couple", nothing changed: paste me the message.
-
-<!-- SQL 101_grant_intimacy_rebecca_abram.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 101: give Rebecca and Abram the Physical Intimacy exercise (A195).
---
--- Ellie: "Please also grant rebecca and abram the physical intimacy exercise."
---
--- A grant is the add-on flag on both profiles. Two places read it, and both
--- are set so neither surface can disagree with the other:
---   profiles.addon_intimacy       what the app's ownership check reads
---   profiles.entitlements         the stored union the website reads,
---     .addonIntimacy              recomputed grant-only, so it never removes
---                                 this again
---
--- ── FOUND AS A COUPLE, AND ONLY IF IT IS EXACTLY ONE COUPLE ─────────────────
--- By first name, linked to each other both ways, as migration 093 found
--- Rebecca. No address is written here: this file is in a public repository.
--- If anything other than exactly two profiles match, nothing changes and the
--- message says how many were found.
---
--- Safe to run again: setting a flag that is already on changes nothing.
--- ============================================================================
-
-do $$
-declare
-  n int;
-begin
-  create temporary table _pair on commit drop as
-  select r.id
-  from public.profiles r
-  join public.profiles a on a.id = r.partner_profile_id and a.partner_profile_id = r.id
-  where (lower(coalesce(r.name, '')) like 'rebecca%' and lower(coalesce(a.name, '')) like 'abram%')
-     or (lower(coalesce(r.name, '')) like 'abram%'   and lower(coalesce(a.name, '')) like 'rebecca%');
-
-  select count(*) into n from _pair;
-  if n <> 2 then
-    raise exception 'Expected Rebecca and Abram as one linked couple (2 profiles), found %. Nothing was changed.', n;
-  end if;
-
-  update public.profiles p
-     set addon_intimacy = true,
-         entitlements = jsonb_set(coalesce(p.entitlements, '{}'::jsonb), '{addonIntimacy}', 'true'::jsonb, true)
-   where p.id in (select id from _pair);
-
-  raise notice 'Physical Intimacy granted to both.';
-end
-$$;
-```
-<!-- /SQL -->
-
 ## 2. Open
-
-**Nothing open.**
 
 | # | What I am doing |
 |--|--|
+| A180 | **Your ask: "I want each of these to be a separate chart, all of them should be vertically stacked with slicers of their own, and unique categories built as answers to the question the chart is asking. Title the chart the way we just retitled the first one."** Splitting the written-answers tile into one chart per question, each with its own slicer, its own answer categories and a title phrased like "What recent memories evoke joy". |
+| A198 | **Your ask: "Remove them."** Removing the reflection insight copy nothing draws (the old Action Plan page) from the server, the website and the app, so it stops being computed and sent. |
+| A200 | **Your ask: "Admin is getting really slow... can we improve that at all?"** Measuring what each admin page loads and how long each request takes, then cutting the slowest. |
 
 
 ## 3. For you to review
@@ -97,29 +35,6 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A197 | **Workbook rows: all 121 are live in the workbook as drafted.** I cut one, the reassurance line, by 27 characters so its page still fits. Look at a workbook when you can. |
-| A199 | **Your ask: "Please adjust the remaining prose options again based on my changes." The 89 rows left are redrafted.** Your latest edits kept cutting "you have slightly different views" and turning "usually" into "may", so the ten drafts that still said either now follow you. Nothing else changed. |
-| A196 | **The 281 rows you haven't reached are rebuilt from your decisions, and one is approved for you.** You took about three in four of my proposals as written. Your edits mostly cut the "When it comes to …, one of you is relatively neutral" clause where it explained a point instead of describing where you sit, and cut lines like "This is a noteworthy gap." The new drafts follow both. Where the workbook says the same thing as a results sentence you approved, it now uses your wording. Only one row fully repeated something you'd approved: the workbook's listening line. It is approved with your Communication wording and goes live with the next pickup. Four more shared a single sentence with an approved row; their drafts reuse your words for it and still wait for you. |
-| A194 | **Every proposal you haven't decided yet on the review page is rewritten to sound like your ten edits.** What I took from them: name the thing instead of "it" ("reassurance", "feelings", "needs"). Cut the clipped one-liners. Use plain words for jargon ("small ruptures" became "small, unresolved feelings"). Make the action an invitation ("Try to…", "It is completely fine to…"). Say why it matters to your partner. Join short sentences into flowing ones. Say "your partner" rather than "the other". Middle-of-the-scale sentences now read the way you asked: "When it comes to being open or guarded, you both are relatively neutral." 483 of 533 changed; the rest were short labels that already fit. Anything you had half-typed in a box is kept as you left it. Worth a glance: a few rows add a short "why" the old copy didn't say (for example "…and hearing it can help you both feel closer"); cut those if you'd rather not add claims. |
-| A193 | **Bug scan done. Two real bugs found and fixed; everything else came back clean.** (1) An invited partner who joined in the app with their invite code was told "Could not create your profile". The app tried to save the buyer's code on the partner's profile too, and the database allows each code only once. Today's fix made that the only way in for an invited partner on the app, so it mattered. Fixed: the partner's profile no longer stores the code, as the website already did, and a check now fails if it ever does again. (2) The website had its own copy of the rule that fills in "Preston" or "Ellie" for "the more guarded partner" and similar. It left raw placeholders like {RCH} where the app said "the partner who reaches first". The website now uses the app's version, and a sentence that opens with that phrase gets a capital letter. What came back clean: all 62 endpoints from outside, every page and results section in a real browser, all five exercises driven to the end, 24 checkout carts, and a review of today's code. One rare case is left: an invited partner whose link to the buyer never completed sees the "no package" screen with no box to re-enter the code. Say if you want that built. |
-| A188 | **The pole labels on the app's Communication overview now sit just under each end of the bar.** You asked for them closer, so the gap under each bar is a quarter of what it was and the rows are a little tighter. Checked on the simulator. |
-| A189 | **Checked: Side by Side is pulling correctly, and nothing in the data changed. Only the words did.** I traced it four ways. The server and the website build the dots from the same stored answers with the same one reversed question ("When you're going through a hard stretch", under Conflict Style). Every partner-view question lists its two answers in the same order as its self-question, so no guess lands on the wrong side. The app and the website give the same dot the same colour. And no commit this month touched how those answers are stored or read. What might look flipped: a guess dot is coloured for the person it is about, not the person who answered. So "What Preston thought Ellie would say" is Ellie's colour, sitting near Ellie's own dot, even though Preston answered it. That has always been the rule, and the old wording ("How Preston views Ellie") hid it. Want each guess dot in the colour of the person who made the guess instead? If something else looks flipped, tell me which question and I'll trace that row. |
-| A172 | **The website's Experienced column now shows the full answer, like the app ("Usually Mum, sometimes Dad" rather than "Both").** Both now use the same server function, and a check fails if the website goes back to the plain word. |
-| A173 | **Explore has 12 recommended views, in your three groups: Keep an eye on, Could change our approach, Already surfacing.** Hover a button for why it's there. Honest caveat: I'm not allowed to read your live data, so I picked these from what the product measures, not from current results. Use Already surfacing to tell me which ones show something, and I'll reshuffle. The six old presets are hidden, not deleted. Views you've saved still show, under Saved. |
-| A174 | **Life & Values is now horizontal bars, so every label reads in full.** It and Responsibilities beside it are both taller (340), to fit all twelve rows. |
-| A175 | **Both tiles now show alignment (% of couples who answered the same), sorted most to least aligned.** Titles: "Responsibilities Alignment" and "Life & Values Alignment". Life & Values used to show the % who differed. |
-| A176 | **Both inheritance charts now show percentages: each colour (category) adds to 100%.** Hover shows the count behind each bar. |
-| A176b | **Explore's chart has a Count / % toggle.** % means each colour's share of its own answers. While building it I found the "% of column" chart was dividing by the overall total, so the chart and table disagreed. Fixed. |
-| A177 | **Both inheritance charts have slicers.** |
-| A178 | **"Other change" is gone from Expectations modeled on experience.** Its count is listed in the subtitle under "Left out" with the unclassified answers, so nothing disappears silently. |
-| A179 | **Gender roles over generations is now three clusters: Keeps, Abandons, Assumes the other gender's role.** The old fourth bucket, leaving the other gender's role to your partner, is the same pattern repeating, so it now counts under Keeps. |
-| A180 | **Retitled "What recent memories evoke joy".** One thing to know: that tile's dropdown still switches to the other seven written questions (proudest moment, a challenge, and so on), and the title stays the same when you pick them. Want the dropdown removed, or the title to follow the question? |
-| A181 | **The five "Shows [horseman]" rows are out of Conflict All questions.** They can still be used to slice data in Explore. |
-| A182 | **Every two-answer question in All questions is now a bar between its two answers.** The first answer is on the left and fills from the left, the second fills from the right, and anyone who answered neither shows grey in the middle. That covers both disagreement questions and every other two-choice row. |
-| A183 | **Marketing time per page now always shows H, OP, BP, WR, IP and FAQ, in that order, with the full name on hover.** It used to make one column per page anyone had visited, under its web address, so pages nobody had timed were missing and checkout or sign-in showed up instead. Articles count under IP. |
-| A184 | **Hovering an article name in In Practice reads shows the full name straight away.** |
-| A185 | **NPS over time now sits after "What is behind that?"** |
-| A186 | **The simulator wasn't frozen. The app had crashed on start ("Cannot find native module 'ExpoAsset'") after the dev server ran for nine days.** I restarted it with a clean cache and the app opens on Home again. If it happens again, closing Expo Go and reopening it fixes it. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -131,6 +46,30 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A195 | **Migration 101 ran: Rebecca and Abram have the Physical Intimacy exercise.** |
+| A187 | **Vague-language copy review: all 543 sentences decided by you and live on the website, in the app and in the workbook.** |
+| A197 | **Workbook rows: all 121 live as drafted; the reassurance line trimmed 27 characters to fit its page.** |
+| A199 | **The last 89 copy-review drafts redrafted again from your latest edits.** |
+| A196 | **Remaining copy-review drafts rebuilt from your decisions; one exact repeat auto-approved.** |
+| A194 | **Undecided copy-review drafts rewritten to match your ten edits.** |
+| A193 | **Bug scan: invited partners can make a profile in the app again, and role words start sentences with a capital.** |
+| A188 | **App Communication overview: pole labels sit just under each end of the bar.** |
+| A189 | **Side by Side checked four ways: data pulls correctly, only the key wording changed.** |
+| A172 | **Website Experienced column shows the full answer, like the app, from one server function.** |
+| A173 | **Explore has 12 recommended views in three groups.** |
+| A174 | **Life & Values is horizontal bars; it and Responsibilities are taller.** |
+| A175 | **Responsibilities Alignment and Life & Values Alignment show % aligned, sorted.** |
+| A176 | **Both inheritance charts show % per category, with counts on hover.** |
+| A176b | **Explore chart has a Count / % toggle; % of column now divides by the right total.** |
+| A177 | **Both inheritance charts have slicers.** |
+| A178 | **"Other change" removed from Expectations modeled on experience; its count is listed under Left out.** |
+| A179 | **Gender roles over generations is three clusters: Keeps, Abandons, Assumes the other role.** |
+| A181 | **The five "Shows [horseman]" rows are out of Conflict All questions.** |
+| A182 | **Two-answer questions in All questions are a bar between the two answers.** |
+| A183 | **Marketing time per page: H, OP, BP, WR, IP, FAQ in order, full name on hover.** |
+| A184 | **In Practice reads: hover an article name for the full name.** |
+| A185 | **NPS over time sits after "What is behind that?".** |
+| A186 | **Simulator was a crashed dev server, not a frozen app; restarted clean.** |
 | A190 | **Behavior to try: your ten tiles are live on the couple type page above Phrases to try, in the app and on the website, and first under Things to consider in What Comes Next.** |
 | A191 | **The app no longer lets anyone in without a purchase (Google and Apple sign-in used to make a free account). Mya's stray app account removed by migration 100; she buys, then signs in with the same address.** |
 | A192 | **Migration 099 closed the last open database rule (partner_sync); the open-rules check now comes back empty.** |

@@ -167,7 +167,7 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
 
       {saveFailed ? (
         <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
-          That tick has not saved yet. It will try again on the next one.
+          That tick has not saved yet. We will try again when you tick the next item.
         </Text>
       ) : null}
 

@@ -433,7 +433,7 @@ export default function NotesScreen() {
    * the filing that points at it, and says so in the words Ellie wrote.
    */
   const binTag = useCallback((tag: Tag) => {
-    Alert.alert(`Delete ${tag.name}?`, 'It moves to the bottom of your tag list. Typing the name again brings it back.', [
+    Alert.alert(`Delete ${tag.name}?`, 'The tag moves to the bottom of your tag list. Typing its name again brings the tag back.', [
       { text: 'Keep', style: 'cancel' },
       {
         text: 'Delete',
@@ -2020,7 +2020,7 @@ function NoteCard({
 
       {moved ? (
         <Text style={{ ...Type.small, color: c.accentQuiet, marginBottom: Spacing.sm }}>
-          This has been updated since you wrote this.
+          This page has changed since you wrote this note.
         </Text>
       ) : null}
 

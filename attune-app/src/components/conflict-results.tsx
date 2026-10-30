@@ -471,7 +471,7 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
         })}
         {!partner ? (
           <Text style={{ ...Type.small, color: INK_QUIET, marginTop: Spacing.lg }}>
-            {names.partner} has not finished this yet. Their side fills in when they do.
+            {names.partner} has not finished Conflict Patterns yet. Their answers will fill in when they do.
           </Text>
         ) : null}
       </View>

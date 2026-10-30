@@ -107,7 +107,7 @@ export function ScreenError({
   const onLight = tone === 'light';
   const copy =
     error.kind === 'offline'
-      ? { title: 'No connection', body: "You're offline. This will load as soon as you're back.", action: 'Try again' }
+      ? { title: 'No connection', body: "You're offline. This page will load as soon as you're back online.", action: 'Try again' }
     : error.kind === 'unauthorized'
       ? { title: 'Sign in to continue', body: 'Your session has ended. Signing in again picks up exactly where you left off.', action: 'Sign in' }
     : error.kind === 'not_found' && /profile/i.test(error.detail || '')
@@ -118,7 +118,7 @@ export function ScreenError({
       // only shows where a screen has not been taught to, and the website is
       // still a real answer there.
       ? { title: 'Your account is not set up yet',
-          body: 'Finish setting up on the website and this will fill in.',
+          body: 'Finish setting up on the website and this page will fill in.',
           action: 'Open the website' }
     : error.kind === 'not_found'
       ? { title: 'Not here', body: 'That is no longer available.', action: 'Try again' }

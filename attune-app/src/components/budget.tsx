@@ -358,7 +358,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
 
       {saveFailed ? (
         <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
-          That has not saved yet. It will try again when you leave the next field.
+          That entry has not saved yet. We will try again when you leave the next field.
         </Text>
       ) : null}
 

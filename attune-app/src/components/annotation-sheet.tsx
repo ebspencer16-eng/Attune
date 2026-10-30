@@ -260,7 +260,7 @@ export default function AnnotationSheet({
           {step === 'tag' ? (
             <View>
               <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
-                Tap the tags this belongs in.
+                Tap the tags this note or highlight belongs in.
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.lg }}>
                 {localTags.map((t) => {

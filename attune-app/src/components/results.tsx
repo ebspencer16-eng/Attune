@@ -1849,7 +1849,7 @@ function ExpectationsOverview({
                 Aligned across every area.
               </Text>
               <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)', textAlign: 'center', marginTop: Spacing.xs }}>
-                Nothing to work through. Keep staying current with each other.
+                Nothing to discuss at this point. Be sure to tell each other if any of your expectations change.
               </Text>
             </View>
           )}
@@ -3383,7 +3383,7 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
     return (
       <Waiting
         title="Side by Side"
-        body="There is nothing here yet. These appear where you both wrote an answer to the same question."
+        body="There is nothing here yet. Your answers appear side by side when you both answer the same question."
       />
     );
   }

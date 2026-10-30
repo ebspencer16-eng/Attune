@@ -372,7 +372,7 @@ export function RankInOrder({
   return (
     <View style={{ marginTop: Spacing.lg }}>
       <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
-        {hint || 'Tap them in order, most important first. Tap one again to take it back.'}
+        {hint || 'Tap the options in order, most important first. Tap an option again to remove it.'}
       </Text>
 
       {picked.map((o, i) => (

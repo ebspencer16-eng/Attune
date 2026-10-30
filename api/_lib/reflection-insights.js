@@ -257,7 +257,7 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       prompt: "Let's talk about where we each see us in five years. I want to know if we're building toward the same picture.",
       body: `${userName} pictures ${quoted(mine.a5)}. ${partnerName} pictures ${quoted(theirs.a5)}. These do not have to match. What matters is whether you have said them out loud to each other in this much detail.`,
       priority: "Build a shared map",
-      action: `Block an evening for this one specifically. Where these two pictures overlap is your shared plan. Where they differ is not a problem to solve tonight, it is the thing to keep talking about. Get concrete: numbers, places, timelines.`,
+      action: `Set aside an evening to talk through your two five-year pictures. Where they overlap is your shared plan. Where they differ is not a problem to solve tonight, but something to keep talking about over time. Try to get concrete: numbers, places, timelines.`,
     });
   }
 
@@ -281,8 +281,8 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       evidence: ["a6:mine","a6:theirs"],
       title: "Where you each struggle is exactly what the other one offers",
       body: `${presencePerson} is working on being more present. ${expressionPerson} is working on saying what they need directly. Notice what's happening: each of you independently identified the thing that would most benefit the other person. That's rare.`,
-      priority: "Make this mutual",
-      action: `Tell each other. ${presencePerson}: "I know I disappear sometimes. I'm working on it, and I want you to tell me when it's happening." ${expressionPerson}: "I'm going to try to say what I actually need instead of waiting for you to notice." Saying it out loud creates accountability and removes the guesswork.`,
+      priority: "Tell each other what you are working on",
+      action: `Tell each other. ${presencePerson}: "I know I disappear sometimes. I'm working on it, and I want you to tell me when it's happening." ${expressionPerson}: "I'm going to try to say what I actually need instead of waiting for you to notice." Saying what you are working on out loud creates accountability and takes away the guesswork about what your partner is trying to change.`,
       coupleTypeNote: coupleType ? `${ctNote}this complementary dynamic is characteristic of your pairing, name it explicitly rather than hoping the other person notices.` : "",
     });
   }
@@ -296,7 +296,7 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
         evidence: ["a8:mine","a8:theirs"],
         title: `You both admire the same thing in each other`,
         body: `Both of you independently named "${admiredNoun(mine.a8)}" as the quality you most admire in your partner right now. When two people independently land on the same word to describe what they value in the other, it usually means that quality is genuinely visible in daily life, not only in words.`,
-        priority: "Say it out loud",
+        priority: "Say what you admire out loud",
         action: `Tell each other directly. "The thing I most admire about you right now is your ${admiredNounLower(mine.a8)}." Hearing it said plainly lands differently than assuming the other person knows.`,
         coupleTypeNote: coupleType ? `${ctNote}shared admiration for the same quality is a meaningful signal of mutual recognition in your dynamic.` : "",
       });
@@ -307,8 +307,8 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
         evidence: ["a8:mine","a8:theirs"],
         title: `You admire different things in each other, both real`,
         body: `${userName} most admires ${partnerName}'s ${admiredNounLower(mine.a8)}. ${partnerName} most admires ${userName}'s ${admiredNounLower(theirs.a8)}. Different qualities, both freely given. This suggests each of you is genuinely being seen for something specific rather than getting generic praise.`,
-        priority: "Make it direct",
-        action: `Say it to each other: "${partnerName}, I most admire your ${admiredNounLower(mine.a8)} right now." It takes about eight seconds and lands better than you'd think.`,
+        priority: "Tell each other what you admire",
+        action: `Tell each other what you most admire: "${partnerName}, I most admire your ${admiredNounLower(mine.a8)} right now." Saying this takes about eight seconds and tends to land better than you'd expect.`,
         coupleTypeNote: coupleType ? `${ctNote}the ability to name specific admiration rather than general appreciation is a sign of real attunement.` : "",
       });
     }
@@ -334,11 +334,11 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
         tier: 2,
         evidence: ["a7:mine","a7:theirs"],
         title: "You both identified a moment where communication broke down under pressure",
-      prompt: "Let's talk about that moment when things broke down under pressure. I want to understand what each of us needed then.",
-        body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. Both point at something not fully said or heard. Landing there independently, without coordinating, suggests it is a real pattern rather than a one-off.`,
+      prompt: "Let's talk about the moments we each named, when we struggled under pressure. I want to understand what each of us needed then.",
+        body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. Both answers point to something that was not fully said or heard. You each named a moment like this without talking about it first, which suggests it is a real pattern between you rather than a one-off.`,
         quotes: [{ name: userName, text: mineA7 }, { name: partnerName, text: theirsA7 }],
         priority: "Have the meta-conversation",
-        action: `Don't relitigate the specific situation, instead, talk about the pattern. "When things get hard between us, what does each of us actually need in the first hour?" Getting to that agreement before the next hard moment changes how it plays out.`,
+        action: `Try not to go back over the specific situation. Instead, talk about what tends to happen between you under pressure: "When things get hard between us, what does each of us actually need in the first hour?" Agreeing on an answer before the next hard moment can change how that moment goes.`,
         coupleTypeNote: coupleType ? `${ctNote}understanding your default stress responses is one of the highest-leverage things you can do together.` : "",
       } : {
         type: "explore",
@@ -346,10 +346,10 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
         evidence: ["a7:mine","a7:theirs"],
         title: "You each identified something you wish had gone differently",
       prompt: "Let's talk about what we each wish had gone differently. I want to hear it without either of us getting defensive.",
-        body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. These don't have to match to be useful. The fact that both of you can identify something shows self-awareness, which is the first requirement for handling it better next time.`,
+        body: `${userName} named ${quoted(mineA7)} and ${partnerName} named ${quoted(theirsA7)}. These don't have to match to be useful. You can both name a moment like this, which shows self-awareness. That is the first step toward handling a similar moment better next time.`,
         quotes: [{ name: userName, text: mineA7 }, { name: partnerName, text: theirsA7 }],
-        priority: "Talk about it directly",
-        action: `Pick one of these to talk about. Not to assign blame, to understand what each person was feeling in that moment that the other person didn't know. "When that happened, I was feeling X and I didn't say it because Y." That's the whole conversation.`,
+        priority: "Talk through one moment together",
+        action: `Pick one of the two moments you named and talk about it. The goal is not to assign blame, but to understand what each of you was feeling in that moment that your partner didn't know. "When that happened, I was feeling X and I didn't say so because Y." That's the whole conversation.`,
         coupleTypeNote: coupleType ? `${ctNote}naming what should have gone differently is more useful than relitigating what actually happened.` : "",
       });
     } else if (mineA7 || theirsA7) {
@@ -363,11 +363,11 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
         tier: 2,
         evidence: ["a7:one"],
         title: `Only one of you had a moment in mind`,
-        prompt: `Let's talk about the moment one of us had in mind. I want to hear what made it stick.`,
+        prompt: `Let's talk about the moment one of us named. I want to hear why that moment stayed with you.`,
         body: `${who} named ${quoted(text)}. ${other} didn't have something that came to mind. That difference is worth noticing on its own: it can mean the moment landed harder for one of you, or simply that you were tracking different things. It does not mean either answer is wrong.`,
         quotes: [{ name: who, text }],
         priority: "Compare notes",
-        action: `${other}, ask ${who} to walk through it, not to defend anything, just to hear what it was like from the inside. "Tell me what that was like for you" is the whole opener.`,
+        action: `${other}, ask ${who} to walk you through the moment they named. This is not about defending anything, just about hearing what that moment felt like for them. "Tell me what that was like for you" is the whole opener.`,
         coupleTypeNote: coupleType ? `${ctNote}one partner carrying a moment the other didn't register is common, and worth surfacing rather than assuming.` : "",
       });
     }
@@ -398,8 +398,8 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
         evidence: ["a_priority:mine","a_priority:theirs"],
         title: `You agree on what matters most this year`,
         prompt: `Let's talk about what matters most to us this year. We're aligned, and I want to make sure we actually act on it.`,
-        body: `Both of you independently ranked "${myTop}" as your top priority for the year ahead. When two people rank the same thing first without discussing it, that alignment is real, and it makes it much easier to act on.`,
-        priority: "Turn it into a plan",
+        body: `Both of you independently ranked "${myTop}" as your top priority for the year ahead. When two people rank the same thing first without discussing it, that alignment is real, and a priority you share is much easier to act on.`,
+        priority: "Turn your shared priority into a plan",
         action: `Alignment on priorities is only useful if it produces decisions. Agree on one concrete thing you'll do differently in the next 30 days that reflects this priority. Even one change made on purpose counts.`,
         coupleTypeNote: coupleType ? `${ctNote}shared priority alignment reduces the invisible negotiation that often drains energy between partners.` : "",
       });
@@ -410,9 +410,9 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
         evidence: ["a_priority:mine","a_priority:theirs"],
         title: `Your top priorities for this year are different`,
         prompt: `Let's talk about our different priorities this year. I want to understand what's behind each of them.`,
-        body: `${userName}'s top priority: "${myTop}." ${partnerName}'s top priority: "${theirTop}." Neither is wrong, but without naming it, this difference quietly shapes decisions, energy allocation, and what each of you feels is being neglected.`,
+        body: `${userName}'s top priority: "${myTop}." ${partnerName}'s top priority: "${theirTop}." Neither priority is wrong, but if you never talk about this difference, it can quietly shape your decisions, where your energy goes, and what each of you feels is being neglected.`,
         priority: "Negotiate, not compromise",
-        action: `Both priorities deserve to be real. The question is how to protect both, not which one wins. What would it look like to honor "${myTop}" and "${theirTop}" in the same month? Start with something small and specific.`,
+        action: `Both priorities deserve to be real. The question is how to protect both, not which one wins. What would it look like to honor "${myTop}" and "${theirTop}" in the same month? Try to start with one small, specific step for each priority.`,
         coupleTypeNote: coupleType ? `${ctNote}different investment priorities are common in your pairing, naming them explicitly tends to clear a lot of unspoken frustration.` : "",
       });
     }

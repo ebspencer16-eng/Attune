@@ -210,7 +210,7 @@ export default function ConflictExercise({
         />
         {saveFailed ? (
           <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
-            That answer has not saved yet. It will try again on the next one.
+            That answer has not saved yet. We will try again when you answer the next question.
           </Text>
         ) : null}
       </ScrollView>
@@ -303,7 +303,7 @@ function Body({
         order={Array.isArray(value) ? (value as string[]) : null}
         onChange={onChange}
         color={exerciseColor('conflict')}
-        hint="Tap them in order, best first. Tap one again to take it back."
+        hint="Tap the options in order, best first. Tap an option again to remove it."
       />
     );
   }

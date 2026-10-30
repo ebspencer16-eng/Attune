@@ -432,7 +432,7 @@ export default function Settings({
         : res.error.kind === 'unauthorized'
           ? 'Your session has ended. Sign in again, then try once more.'
           : res.error.kind === 'offline'
-            ? 'You are offline. This needs a connection.'
+            ? 'You are offline. Deleting your account needs a connection.'
             : 'That did not go through. Try again, or email hello@attune-relationships.com.',
       );
       return;

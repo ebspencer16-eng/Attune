@@ -1434,7 +1434,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
           Who were the primary adults<br /><em style={{ fontStyle: "normal", color: "inherit" }}>in your home growing up?</em>
         </h2>
         <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
-          This shapes how you answer the next section, and helps us give you more personalized context in your results.
+          Who raised you shapes how you answer the next section, and helps us give you more personalized context in your results.
         </p>
         <button onClick={() => setPhase("part-two")}
           style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", cursor: "pointer", fontFamily: font.body, padding: "0 0 1rem", textAlign: "left" }}>
@@ -6520,7 +6520,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             ) : (
               <div style={{ background: "rgba(16,185,129,0.16)", border: "1px solid rgba(16,185,129,0.35)", borderRadius: 16, padding: "1.5rem", textAlign: "center", marginBottom: "1rem" }}>
                 <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", fontFamily: BFONT }}>Aligned across every area.</div>
-                <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, marginTop: "0.35rem" }}>Nothing to work through. Keep staying current with each other.</div>
+                <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, marginTop: "0.35rem" }}>Nothing to discuss at this point. Be sure to tell each other if any of your expectations change.</div>
               </div>
             )}
 
@@ -11759,7 +11759,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             <CoupleMapSVG myS={myB} partS={partB} userName={userName} partnerName={partnerName} size={Math.round(SC_REF_WIDTH * SC_MAP_PCT)} hideCaption axisLabelColor="rgba(255,255,255,0.62)" />
           </div>
           <div style={{ ...scType("lead"), marginBottom: "0.55rem", animation: "fadeUp 0.4s 0.4s both" }}>Your couple type: <span style={{ fontWeight: 700, color: "white" }}>{coupleType?.name || "The orbit"}</span></div>
-          <p style={{ ...scType("bodySm"), maxWidth: 258, margin: 0, animation: "fadeUp 0.4s 0.5s both" }}>Explore your full results to learn what this looks like for the two of you.</p>
+          <p style={{ ...scType("bodySm"), maxWidth: 258, margin: 0, animation: "fadeUp 0.4s 0.5s both" }}>Explore your full results to learn what your couple type looks like for the two of you.</p>
         </div>
       </div>
     </WrappedCard>,
@@ -11854,7 +11854,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         <div style={{ ...scType("eyebrowTint"), color: "rgba(224,141,166,0.85)", marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.15s both" }}>Physical Intimacy</div>
         {intimacyAlignPct != null && (<div style={{ ...scType("statMid"), color: "#E08DA6", marginBottom: "0.7rem", animation: "numCount 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both" }}>{intimacyAlignPct}%</div>)}
         <div style={{ ...scType("statLabelSm"), marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.3s both" }}>aligned</div>
-        <p style={{ ...scType("bodyMd", { alpha: 0.58 }), maxWidth: 280, margin: 0, animation: "fadeUp 0.4s 0.38s both" }}>Explore what you each expect out of this part of your relationship.</p>
+        <p style={{ ...scType("bodyMd", { alpha: 0.58 }), maxWidth: 280, margin: 0, animation: "fadeUp 0.4s 0.38s both" }}>Explore what you each expect from physical intimacy.</p>
       </div>
     </WrappedCard>
     
@@ -18740,7 +18740,7 @@ export default function App() {
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#B5546E", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Physical Intimacy Expectations</div>
                 <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Your comparison is ready.</h2>
                 <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
-                  It lives with the rest of your results.
+                  You can find your comparison with the rest of your results.
                 </p>
                 <button onClick={() => { setActiveResult("intimacy-overview"); setHighlightsSeen(true); setView("results"); }}
                   style={{ background: "#B5546E", color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
