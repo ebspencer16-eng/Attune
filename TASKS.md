@@ -9,7 +9,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A205a | **Two steps so a refund takes the access away (your answer to A204f).** Run migration 104 and add one event in Stripe; both are just below this table. Until both are done a refund changes nothing, as now. Refunds made before then are not picked up. |
+| A205a | **Migration 104 ran. Left: one Stripe row, pointed at www, with four events.** Stripe had no deliveries, as expected with no card sales yet, so nothing is missing. In the row whose signing secret matches Vercel's STRIPE_WEBHOOK_SECRET: URL `https://www.attune-relationships.com/api/stripe-webhook` (the address without www redirects, and Stripe treats a redirect as a failure), events `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `charge.dispute.closed`. Delete the other row. Optional: one small real purchase and refund to test the whole path. |
 | A205b | **Gifts: the couple is never told how to get in. How should they be?** Checkout never asks for the couple's email, so the "A gift from…" email has never been sent to anyone. The buyer's confirmation then says "We've sent 's access link in a separate email", with the name missing, and their thank-you page says "We sent a link to your email. Use it to set up your account." Neither is true. The couple can only get in with the order number. Options: (a) checkout asks for the couple's email and they get the gift email with their own link; (b) the buyer's confirmation carries the couple's link, for the buyer to forward; (c) both. I recommend (c): (b) alone fails when the buyer forgets, and wedding registry guests often don't know the couple's email, which (a) alone can't handle. Your words would be needed for the new lines either way. Related, smaller: someone who buys a gift and also has their own account gets the gift's package on their own account too. Fine to leave? |
 | A205c | **Remove an unused address that lets anyone make an Attune login?** /api/account-signup creates a login for any email address and makes us send that address a confirmation email. Checkout stopped using it in 9d053ab5 and nothing calls it now. Removing it is the same as the two removals you approved in A201b. Yes or no? |
 | A205d | **Your words for the new unsubscribe question, when you have them.** Opening an unsubscribe link now asks instead of acting (why in A205, section 3). Mine, to replace: the heading "Unsubscribe?", the line "You will stop getting emails from Attune." (or "…emails about new In Practice articles."), and the button "Unsubscribe". |
@@ -23,63 +23,6 @@ Every code block says which window it goes in, above the block.
 | O16 | Download numbers need an App Store Connect key. After launch. |
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
-
-### One thing to run, and one Stripe setting, for A205a
-
-**1. Paste this into Terminal.** It copies migration 104 and prints `copied`.
-
-```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/104_refunded_orders.sql | pbcopy && echo copied
-```
-
-**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned."
-
-<!-- SQL 104_refunded_orders.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 104: where a refunded order goes (A204f).
---
--- Ellie, asked what a refund in Stripe should do: "A", which was "take the
--- access away and stop counting the sale".
---
--- A fully refunded order is moved out of `orders` into this table by
--- /api/stripe-webhook. Moving it, rather than marking it, is the point: about
--- twenty places read `orders` to decide what somebody owns or what the admin
--- counts, and every one of them stops seeing the order without being edited.
--- A flag would have needed all twenty to remember to read it.
---
---   order_num                 the order's own number, so a retried refund
---                             signal cannot write it twice
---   user_id, buyer_email      who it belonged to, so deleting an account
---                             also deletes this (api/delete-account.js)
---   stripe_payment_intent_id  the payment it came from
---   refunded_at               when Stripe said it was refunded
---   order_row                 the whole order as it was, kept as one value
---                             so a column added to `orders` later cannot
---                             stop a refund from moving
---
--- Row level security on, with no policies: only the server's key reads or
--- writes it, the same as `orders`.
---
--- Safe to run again: every statement checks before it creates.
--- ============================================================================
-
-create table if not exists public.refunded_orders (
-  order_num                text primary key,
-  user_id                  uuid,
-  buyer_email              text,
-  stripe_payment_intent_id text,
-  refunded_at              timestamptz not null default now(),
-  order_row                jsonb not null
-);
-alter table public.refunded_orders enable row level security;
-
-create index if not exists refunded_orders_user_id_idx on public.refunded_orders (user_id);
-create index if not exists refunded_orders_buyer_email_idx on public.refunded_orders (buyer_email);
-```
-<!-- /SQL -->
-
-**2. In the Stripe dashboard** (in your browser, nothing to paste): Developers, then Webhooks, then the attune-relationships.com endpoint. Edit it, add two events to the ones it listens to, `charge.refunded` and `charge.dispute.closed`, and save. Without them Stripe never tells Attune about a refund or a chargeback.
 
 ## 2. Open
 
