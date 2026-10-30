@@ -9,8 +9,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A208i | **Please run migration 106.** It lets a promo code include Conflict Patterns free (A208g). Until it runs, creating a code with Conflict Patterns ticked will fail with an error. Steps just below this table. |
-| A208d | **Apple Pay: the code is in place, so it is two Stripe settings.** In Stripe, in Live mode: (1) Settings, then Payment methods: make sure Apple Pay is on. (2) Settings, then Payment method domains: `www.attune-relationships.com` should be listed with Apple Pay enabled; if it is not there, add it. Then try on an iPhone or Mac in Safari with a card in Apple Wallet; Chrome never shows Apple Pay. Tell me what each screen shows and which device you tested on. Separately, I found and fixed the Apple Pay sheet showing a total that left out Conflict Patterns. |
+| A210 | **When the app is live, the order email's "Attune app" and "app" become App Store links.** Nothing to do now: they switch on with the same setting as the rest of the app links (O1). This row is the reminder to check one real confirmation email that day. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
@@ -22,41 +21,22 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### One thing to run, for A208i
-
-**Paste this into Terminal.** It copies migration 106 and prints `copied`.
-
-```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/106_promo_includes_conflict.sql | pbcopy && echo copied
-```
-
-**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned."
-
-<!-- SQL 106_promo_includes_conflict.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 106: a promo code can include Conflict Patterns free (A208g).
---
--- Ellie, making a code in the admin: the form said Conflict Patterns "isn't
--- here because the checkout has no column for it, so a tick would do
--- nothing. Is that true? We need to add conflict patterns to checkout."
---
--- It was true: beta_codes had a column for every other add-on and none for
--- this one. This is that column. The admin form, the code check, the price,
--- the tax and the order all read it from the same release as this file.
---
--- Safe to run again.
--- ============================================================================
-
-alter table public.beta_codes add column if not exists includes_conflict boolean not null default false;
-```
-<!-- /SQL -->
-
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
-| A209 | **More sweeps.** |
+| A211 | **Gift: "Your first name", so we can say who it is from, moves into section 1, above a gift message box.** The gift message box went missing on the phone; it comes back, and the message goes into the recipient's invitation email. |
+| A212 | **Explore: the Men / Women / Both picker sits in line with the other controls on the right, with the chosen one shaded (Both to start).** |
+| A213 | **Promo codes: some codes would not delete and turned into "Always active".** Finding out why and fixing it. |
+| A214 | **Checkout: when Complete order cannot be pressed, red text under the box that needs filling says why** (for example "Fill in your partner's first name"). |
+| A215 | **Checkout: an email that already has an Attune account cannot buy another package for itself; it is told it can add exercises or tools instead.** |
+| A216 | **Thank-you page: a cream check mark in the circle, not black.** |
+| A217 | **Thank-you page: "Order Number:" before the number.** |
+| A218 | **"Finish setting up your profile" stays on the dashboard and opens "Profile details":** name box half width with the three pronoun choices to its right, middle aligned; the note about names under the pop-up's header; the partner's email box only when we do not have it; then each demographic question; save and exit once all are answered. |
+| A219 | **Account page: personal info shows only names and emails; "Edit profile" becomes "Edit details" and opens the Profile details pop-up.** |
+| A220 | **The "Invite your partner" card opens a pop-up with only the partner's email and a send button.** |
+| A221 | **Account page: the "Invite your partner" tile comes out.** |
+| A222 | **More sweeps.** |
 
 
 ## 3. For you to review
@@ -66,7 +46,6 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A208 | **Your notes from the test checkout, built.** (1) Your email wording, as written. "Attune app" links to the App Store once the app is live; until then it is the same words without a link. "website" goes to the set-up link for a new account, because a sign-in page would ask for a password they do not have yet, and to sign in for an existing one. (2) Cart suggestions in your order and titles, leaving out anything already in the cart or the package. (3) Section 1 "Account details": only "Who is this purchase for?" and your two buttons at first, then your fields in your layout; the line under the title and "We will send them their invitation" are gone, and your line is under the recipient's email. One addition to check: a gift buyer is asked "Your first name" beside their email in Contact & payment, because section 1 now holds the recipient's name and the gift email needs to say who it is from. (4) TESTEMAILS: checkout only ever asked the server about codes named ATTUNE-BETA-something, so every code made in the admin was refused on the page as "Invalid code." It asks about every code now. (5) Admin: Men / Women / Both above the Explore chart, default Both; a bin on each promo code row, which asks "Delete?" before deleting and takes nothing from people who used the code; active codes first, then A to Z; the new-code add-ons in your order, with Conflict Patterns (needs A208i). Also fixed: with a free code, the page left Conflict Patterns out of what was still owed, so it could hide the card form while there was $40 to pay. One wording note: the dashboard's "invite your partner" email reuses your partner invitation, so it also says "[Name] purchased the Attune Experience for you", including when a gift recipient invites their partner. Tell me if that needs its own words. |
 | A206b | **/api/account-signup removed (A205c).** |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
@@ -79,6 +58,9 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A208i | **Migration 106 ran: promo codes can include Conflict Patterns.** |
+| A208d | **Apple Pay: the Stripe domain was missing www; fixed by you.** |
+| A208 | **Email wording, cart suggestions, account details layout, TESTEMAILS, promo code changes, partner invitation wording: approved.** |
 | A206 | **Checkout asks who it is for, the account is made at purchase, invitations go out; your wording replaced mine (A208).** |
 | A206a | **Migration 105 ran: what checkout records about who an order is for, and the dashboard invitation limit.** |
 | A205a | **Migration 104 ran; the live Stripe destination points at www with four events, and Vercel holds its live signing secret.** |
