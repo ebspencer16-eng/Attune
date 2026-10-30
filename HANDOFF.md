@@ -4805,3 +4805,21 @@ All built and in TASKS.md section 3. Points worth knowing:
   check-tasks-doc and check-tasks-run-block now read ids like A204a.
 - Waiting on Ellie: A204a (migration 103 and words), A204b (words, masked or
   full address), A204f (refunds), A204h (postal address for email footers).
+
+## 30 October, night: A204f and A205
+
+- Refunds (A204f, Ellie: "A"): `charge.refunded` in api/stripe-webhook.js calls
+  api/_lib/refund-order.js, which MOVES the orders to `refunded_orders`
+  (migration 104) so every reader of `orders` stops seeing them, clears the
+  profile columns only that order granted (buyer and invitees), and rewrites
+  entitlements with `revokedAt`; the website's `forgetRevokedGrants` drops its
+  device copy once per mark. Waiting on Ellie: migration 104 and adding the
+  event in Stripe (A205a). check-refunds.
+- Unsubscribe asks on GET and acts on POST; scheduled emails carry
+  List-Unsubscribe headers (check-unsubscribe-asks). Placeholder words, A205d.
+- Workbook promo reads the partner from the account, quotes filter values
+  (api/_lib/filter-value.js; check-workbook-promo-recipients).
+- Sign-in help names the account that owns the order, and says when an
+  order is an unclaimed gift.
+- Questions: A205b (gifts never reach the couple), A205c (remove
+  /api/account-signup).

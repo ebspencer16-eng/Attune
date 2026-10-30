@@ -320,6 +320,15 @@ export default async function handler(req) {
     summary.ordersRemoved = count || 0;
   } catch (e) { notRemoved.push('orders (' + (e?.message || 'failed') + ')'); }
 
+  // ── 3a. And any refunded ones, which carry the same names and address ────
+  // A refunded order is moved to its own table (migration 104, A204f). Before
+  // that migration has run the table is not there, which PostgREST answers
+  // PGRST205: nothing to remove, rather than a reason to stop.
+  {
+    const { error: refErr } = await admin.from('refunded_orders').delete().eq('user_id', userId);
+    if (refErr && refErr.code !== 'PGRST205') notRemoved.push('refunded orders (' + refErr.message + ')');
+  }
+
   /**
    * ── 3b. Take the person off any feedback they left ───────────────────────
    * The instrument that wrote this table is retired, so there are no new

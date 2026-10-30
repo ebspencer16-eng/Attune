@@ -51,6 +51,23 @@ export default async function handler(req) {
   const look = await findOrders({ rest, svc, orderNum }).catch(() => ({ ok: false }));
   if (!look.ok) return json({ ok: false, error: 'could not check that right now' }, 503);
 
+  if (!look.orders.length) return json({ ok: true, found: false });
+
+  /* Which address signs in to it. Once an order is claimed, the account that
+     claimed it: a gift is claimed by the couple, under their own address, and
+     a buyer can sign up with an address other than the one they paid with
+     (Apple's relay is the common case). Only an unclaimed order of one's own
+     is signed up for with the purchase address. An unclaimed gift has no
+     address to show anybody: the buyer's would send the couple to an account
+     that is not theirs (A205, from a sweep of every link in every email). */
+  const owner = look.orders.map((o) => o.user_id).find(Boolean);
+  if (owner) {
+    const pRes = await rest(`profiles?id=eq.${encodeURIComponent(owner)}&select=email`, { headers: svc }).catch(() => null);
+    if (!pRes?.ok) return json({ ok: false, error: 'could not check that right now' }, 503);
+    const account = (await pRes.json().catch(() => []))?.[0]?.email;
+    if (account) return json({ ok: true, found: true, hint: maskAddress(account) });
+  }
+  if (look.orders.some((o) => o.is_gift)) return json({ ok: true, found: true, gift: true });
   const address = look.orders.map((o) => o.buyer_email).find(Boolean);
   if (!address) return json({ ok: true, found: false });
   return json({ ok: true, found: true, hint: maskAddress(address) });

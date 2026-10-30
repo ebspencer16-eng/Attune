@@ -133,6 +133,8 @@ for (const f of files) {
      address. cron-push wrote every opted-in person's id that way, which the
      `.in(` scan above could not see (A170). */
   for (const m of code.matchAll(/=in\.\(\$\{([^}]*)\.join\(/g)) {
+    // Inside an inBatches callback, the list is one batch (refund-order.js).
+    if (/inBatches\([^;]*$/.test(code.slice(Math.max(0, m.index - 220), m.index))) continue;
     /* A list built from a fixed array literal is bounded by its own length:
        store-workbook-pdf joins [subject, partner], which is a couple and
        never more. Anything built by .map or a spread is as long as a query

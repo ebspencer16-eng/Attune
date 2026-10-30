@@ -24,6 +24,7 @@ import { capabilitiesFor } from './_lib/ownership.js';
 export const config = { runtime: 'edge', regions: ['iad1'] };
 import { SITE_URL } from './_lib/site.js';
 import { redactEmail } from './_lib/log-redact.js';
+import { filterValue } from './_lib/filter-value.js';
 
 const DISCOUNT_PERCENT = 30;
 const VALID_DAYS = 30;
@@ -46,7 +47,11 @@ export default async function handler(req) {
   body = _parsed.body;
 
   const accountEmail = (body.accountEmail || '').toLowerCase().trim();
-  const partnerEmail = (body.partnerEmail || '').toLowerCase().trim();
+  /* The partner's address is the account's, never the request's (below). A
+     typed one let any signed-in person have us mail a code to any address,
+     as often as they liked: the guard on accountEmail covered one of the two
+     people this emails (A205). */
+  let partnerEmail = '';
   const toName       = (body.toName || '').toString().slice(0, 60);
   const partnerName  = (body.partnerName || '').toString().slice(0, 60);
 
@@ -59,6 +64,7 @@ export default async function handler(req) {
   const sUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const sAnon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
+  let callerId = null;
   // Require the caller to prove they own accountEmail. Without this, anyone
   // could POST an arbitrary address and have us email it (from our verified
   // sending domain) and mint a promo code bound to it.
@@ -74,7 +80,8 @@ export default async function handler(req) {
         headers: { apikey: sAnon || process.env.SUPABASE_SERVICE_KEY || '', Authorization: `Bearer ${token}` },
       });
       const u = ur.ok ? await ur.json().catch(() => null) : null;
-      if (!u?.email || u.email.toLowerCase().trim() !== accountEmail) {
+      callerId = u?.id || null;
+      if (!u?.email || !callerId || u.email.toLowerCase().trim() !== accountEmail) {
         return new Response(JSON.stringify({ error: 'Not authorized for this account' }), {
           status: 403, headers: { 'Content-Type': 'application/json' } });
       }
@@ -94,10 +101,27 @@ export default async function handler(req) {
   }
   const dbHeaders = { apikey: sKey, Authorization: `Bearer ${sKey}`, 'Content-Type': 'application/json' };
 
+  // Who the partner is: the linked account's address, or before they have
+  // joined, the address this person invited. A read that fails sends
+  // nothing rather than guessing.
+  {
+    const read = async (path) => {
+      const r = await fetch(`${sUrl}/rest/v1/${path}`, { headers: dbHeaders }).catch(() => null);
+      return r?.ok ? (await r.json().catch(() => null))?.[0] ?? {} : null;
+    };
+    const me = await read(`profiles?id=eq.${encodeURIComponent(callerId)}&select=partner_profile_id,partner_email`);
+    const them = me?.partner_profile_id ? await read(`profiles?id=eq.${encodeURIComponent(me.partner_profile_id)}&select=email`) : {};
+    if (!me || !them) {
+      return new Response(JSON.stringify({ ok: false, error: 'could not read the couple' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+    }
+    partnerEmail = String(them.email || me.partner_email || '').toLowerCase().trim();
+    if (partnerEmail === accountEmail) partnerEmail = '';
+  }
+
   // ── Idempotency: a workbook flash code already bound to either email? ──
   try {
-    const conds = [`bound_emails.cs.{${accountEmail}}`];
-    if (partnerEmail && partnerEmail.includes('@')) conds.push(`bound_emails.cs.{${partnerEmail}}`);
+    const conds = [`bound_emails.cs.{${filterValue(accountEmail)}}`];
+    if (partnerEmail && partnerEmail.includes('@')) conds.push(`bound_emails.cs.{${filterValue(partnerEmail)}}`);
     const q = `${sUrl}/rest/v1/beta_codes?select=code&applies_to=eq.workbook&or=(${conds.join(',')})`;
     const chk = await fetch(q, { headers: dbHeaders });
     const existing = await chk.json();
@@ -117,7 +141,7 @@ export default async function handler(req) {
     if (partnerEmail && partnerEmail.includes('@')) emails.push(partnerEmail);
     // Encoded: a `+` left bare in a query string reads as a space, so
     // jane+x@example.com was looked up as "jane x@example.com" and matched nothing.
-    const inList = emails.map(e => `"${encodeURIComponent(String(e).replace(/[",()]/g, ''))}"`).join(',');
+    const inList = emails.map(filterValue).join(',');
     const oq = `${sUrl}/rest/v1/orders?select=addon_workbook,pkg_key&buyer_email=in.(${inList})`;
     const or = await fetch(oq, { headers: dbHeaders });
     const orders = or.ok ? await or.json().catch(() => []) : [];

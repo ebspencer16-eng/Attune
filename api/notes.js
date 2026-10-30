@@ -45,6 +45,7 @@
 export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { jsonBody } from './_lib/http.js';
+import { filterValue } from './_lib/filter-value.js';
 import { isValidAnchor, JOURNAL_ANCHOR, standardTags, TAG_SUGGESTIONS, TAG_PLACEHOLDER } from './_lib/tags.js';
 import { isValidAnnotation } from './_lib/annotations.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
@@ -826,7 +827,7 @@ export default async function handler(req) {
           // skips the filter entirely and removes them all, which is what
           // clearing every chip means.
           const keep = wanted.length
-            ? `&tag_id=not.in.(${wanted.map((t) => encodeURIComponent(t)).join(',')})`
+            ? `&tag_id=not.in.(${wanted.map(filterValue).join(',')})`
             : '';
           const drop = await rest(`note_tags?note_id=eq.${noteId}${keep}`, { method: 'DELETE', headers: svc });
           if (!drop.ok) tagsSaved = false;

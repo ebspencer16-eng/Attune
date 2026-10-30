@@ -9,10 +9,11 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A204a | **Please run migration 103, then send me your words for the new-article email.** The migration makes the two tables the In Practice list needs: the addresses, and which articles have been announced. Until it runs, the signup says it did not go through. Placeholder words of mine to replace: the email subject "New on In Practice: [title]", the line under the title "A new article is up on In Practice.", the button "Read it", the signup's failure line "That did not go through. Try again in a moment.", and the unsubscribe page's "You will not get emails about new In Practice articles any more." The article's own title and summary fill the rest. |
-| A204b | **Your words for the sign-in help page, when you have them.** It is live at attune-relationships.com/sign-in-help. Yours already: "Having trouble signing in? Click here" and "reach out to our team". Mine, to replace: the line under the heading, the box label "Order number", the button "Find my email", the answer "Your order was placed with [m•••@g•••.com]. Sign in with that email.", "We could not find that order number. It is in your order confirmation email.", and "Still stuck?". One thing to know: the page shows the email partly hidden (first letter and ending). Anyone can type an order number, and the older ones are short enough to guess, so the full address would give a stranger a customer's email. Say if you want it in full anyway. |
-| A204f | **When you refund someone in Stripe, Attune never hears about it.** They keep everything they bought, and the admin still counts the sale. Want a refund to (a) take the access away and stop counting the sale, (b) only stop counting it, or (c) stay as it is? |
-| A204h | **The marketing emails have no postal address in them, and US law (CAN-SPAM) requires one.** That covers the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box or a registered agent's address works. Send me the address you want shown and I will put it in the one footer they all share. Worth a word with your lawyer alongside R12. |
+| A205a | **Two steps so a refund takes the access away (your answer to A204f).** Run migration 104 and add one event in Stripe; both are just below this table. Until both are done a refund changes nothing, as now. Refunds made before then are not picked up. |
+| A205b | **Gifts: the couple is never told how to get in. How should they be?** Checkout never asks for the couple's email, so the "A gift from…" email has never been sent to anyone. The buyer's confirmation then says "We've sent 's access link in a separate email", with the name missing, and their thank-you page says "We sent a link to your email. Use it to set up your account." Neither is true. The couple can only get in with the order number. Options: (a) checkout asks for the couple's email and they get the gift email with their own link; (b) the buyer's confirmation carries the couple's link, for the buyer to forward; (c) both. I recommend (c): (b) alone fails when the buyer forgets, and wedding registry guests often don't know the couple's email, which (a) alone can't handle. Your words would be needed for the new lines either way. Related, smaller: someone who buys a gift and also has their own account gets the gift's package on their own account too. Fine to leave? |
+| A205c | **Remove an unused address that lets anyone make an Attune login?** /api/account-signup creates a login for any email address and makes us send that address a confirmation email. Checkout stopped using it in 9d053ab5 and nothing calls it now. Removing it is the same as the two removals you approved in A201b. Yes or no? |
+| A205d | **Your words for the new unsubscribe question, when you have them.** Opening an unsubscribe link now asks instead of acting (why in A205, section 3). Mine, to replace: the heading "Unsubscribe?", the line "You will stop getting emails from Attune." (or "…emails about new In Practice articles."), and the button "Unsubscribe". |
+| A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -23,68 +24,68 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### One thing to run, for A204a
+### One thing to run, and one Stripe setting, for A205a
 
-**Paste this into Terminal.** It copies migration 103 and prints `copied`.
+**1. Paste this into Terminal.** It copies migration 104 and prints `copied`.
 
 ```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/103_article_subscribers.sql | pbcopy && echo copied
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/104_refunded_orders.sql | pbcopy && echo copied
 ```
 
 **Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned."
 
-<!-- SQL 103_article_subscribers.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 104_refunded_orders.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 103: the In Practice list, and which articles it has been told about (A204a).
+-- 104: where a refunded order goes (A204f).
 --
--- Ellie: "Can we build an automatic email that goes out to anyone who put
--- their email in that list and sends a notification that there's a new
--- article along with the article link?"
+-- Ellie, asked what a refund in Stripe should do: "A", which was "take the
+-- access away and stop counting the sale".
 --
--- The signup on the In Practice page has never saved an address. These are
--- the two tables that let it:
+-- A fully refunded order is moved out of `orders` into this table by
+-- /api/stripe-webhook. Moving it, rather than marking it, is the point: about
+-- twenty places read `orders` to decide what somebody owns or what the admin
+-- counts, and every one of them stops seeing the order without being edited.
+-- A flag would have needed all twenty to remember to read it.
 --
---   article_subscribers    one row per address. `token` is the unsubscribe
---                          link's secret; nobody on this list has an account,
---                          so the account-based unsubscribe cannot reach them.
---                          Unsubscribing stamps unsubscribed_at rather than
---                          deleting, so signing up again is a fresh yes.
---   article_announcements  one row per article already announced, so each new
---                          article is emailed once. The first run of the job
---                          records every article that exists then without
---                          sending anything, so nobody gets thirteen emails.
+--   order_num                 the order's own number, so a retried refund
+--                             signal cannot write it twice
+--   user_id, buyer_email      who it belonged to, so deleting an account
+--                             also deletes this (api/delete-account.js)
+--   stripe_payment_intent_id  the payment it came from
+--   refunded_at               when Stripe said it was refunded
+--   order_row                 the whole order as it was, kept as one value
+--                             so a column added to `orders` later cannot
+--                             stop a refund from moving
 --
 -- Row level security on, with no policies: only the server's key reads or
--- writes either table. An email list is not something the public key may see.
+-- writes it, the same as `orders`.
 --
 -- Safe to run again: every statement checks before it creates.
 -- ============================================================================
 
-create table if not exists public.article_subscribers (
-  id              uuid primary key default gen_random_uuid(),
-  email           text not null unique,
-  token           uuid not null unique default gen_random_uuid(),
-  created_at      timestamptz not null default now(),
-  unsubscribed_at timestamptz
+create table if not exists public.refunded_orders (
+  order_num                text primary key,
+  user_id                  uuid,
+  buyer_email              text,
+  stripe_payment_intent_id text,
+  refunded_at              timestamptz not null default now(),
+  order_row                jsonb not null
 );
-alter table public.article_subscribers enable row level security;
+alter table public.refunded_orders enable row level security;
 
-create table if not exists public.article_announcements (
-  slug         text primary key,
-  announced_at timestamptz not null default now(),
-  sent         integer not null default 0
-);
-alter table public.article_announcements enable row level security;
+create index if not exists refunded_orders_user_id_idx on public.refunded_orders (user_id);
+create index if not exists refunded_orders_buyer_email_idx on public.refunded_orders (buyer_email);
 ```
 <!-- /SQL -->
 
-## 2. Open
+**2. In the Stripe dashboard** (in your browser, nothing to paste): Developers, then Webhooks, then the attune-relationships.com endpoint. Edit it, add two events to the ones it listens to, `charge.refunded` and `charge.dispute.closed`, and save. Without them Stripe never tells Attune about a refund or a chargeback.
 
-**Nothing open.**
+## 2. Open
 
 | # | What I am doing |
 |--|--|
+| A206 | **More sweeps.** |
 
 
 ## 3. For you to review
@@ -94,10 +95,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A204g | **A promo code was spent before the card was charged.** A declined card or a closed tab used up the code and bought nothing, and trying again said "This code has already been used." The per-couple workbook discounts are single-use, so that lost a couple their discount. A paid order now counts its code only once the payment has gone through. |
-| A204 | **Your four answers, built.** (1) The In Practice signup saves addresses, and a daily job emails everyone on the list when a new article goes up, with its link and a way off the list; the first run only records the articles already up, so nobody gets thirteen emails. Posts published from the admin are not included: they show only in the app and have no web page to link to. (2) "Having trouble signing in? Click here" is under "Use the same email you signed in with" on the app screen, and opens the new help page; its "Forgot your password?" goes straight to the reset. (3) One confirmation per order, yours, sent when the payment lands, so it also reaches someone who closes the tab, and Apple Pay buyers, who only ever got the old one. (4) The checkout summary, the confirmation email and the email preview all use the shop's names now: "Build a Budget", "Relationship Reflection", "Physical Intimacy Expectations". The receipt also stopped charging an add-on the package already includes. |
-| A203 | **Five sweeps, ten fixes, all the same kind: something failed and the product answered as if it had an answer.** Ran every server address with the database switched off and listed every one that still said "fine". Fixed: telling your partner you finished, and starting the workbook, could be skipped by one failed read and was never retried (now retried, on the site and in the app); signing in with Google or Apple could tell an existing customer "There is no Attune account" and sign them out when it simply could not look; the website could put an older copy of an exercise over a newer one after a failed read; the check-in and notification jobs reported "nobody due" and "not set up" during an outage, and the data-retention job reported success when it failed, so none of them showed up as failing; the beta tile and marking an alert read said things they had not checked. Also: the daily insight and word notifications moved by an hour at every clock change (Europe changed on 25 October, the US changes on Sunday); they now follow the phone's clock. Questions in A203a and A203b. |
-| A202 | **Nineteen sweeps, fourteen fixes.** The biggest: every card order was stored under a different number from the one the customer was shown, emailed and given in their setup link, so the link could not find their order, and a repeated payment signal from Stripe could have written a second order. One number now, and old numbers are found through the payment. Also: checkout saved emails with capitals and sign-in does not, so those orders could not be found by email (migration 102 in A202a); promo codes skipped every check when their record could not be read, and two people could redeem a single-use code at once; deleting an account went ahead when it failed to remove the person's orders, workbook or feedback address; a retake could replace a couple's results without keeping the old version; survey answers could be overwritten by an older save; in the app, a failed note delete, notification time change or notifications-off looked done and was not (each now puts itself back and says so, in your existing lines); two emails put typed names in unescaped; error reports were cut off before they sent; both unused addresses are removed; the waitlist shows your line. The sign-in screen's "Let us know" pointed at support@, the only place anything did; it is hello@ now. Checked and clean: scheduled jobs, the Stripe signature and retries, app retries. |
+| A204f | **A full refund in Stripe now takes the access away and stops the sale counting (your answer: a).** The order moves out of the orders list into a separate refunds list, so the admin stops counting it and nothing grants from it. Both partners lose what only that order gave them; anything another order or a hand grant gives stays. A browser that already showed it drops it on the next visit. A chargeback the customer wins is treated the same way, since the money went back either way. A partial refund changes nothing, because that is usually a goodwill credit; say if you want otherwise. Live once you do A205a. |
+| A205 | **Sweeps of every link in every email, and of every server address any page calls.** Found and fixed: (1) opening an unsubscribe link unsubscribed the person, and mail security scanners (Outlook's among them) open every link automatically, so people behind one could stop getting check-ins without ever choosing to; opening it now asks, and the button does it. (2) None of the scheduled emails carried the one-click unsubscribe header Gmail and Yahoo have required of bulk senders since 2024, which pushes mail towards spam; the check-ins, survey nudges and new-article emails carry it now. (3) The sign-in help page I built in A204b showed the buyer's address for every order. For a gift that is the wrong person, and for anyone who signed up under a different address it is the wrong address. It now shows the address of the account the order belongs to, and says when an order is a gift nobody has set up yet. (4) The workbook discount email went to whatever partner address the browser sent, so any signed-in person could have us mail a discount code to any address, as often as they liked; it now goes only to the partner the account is linked to, or the one they invited. The same typed address could also be shaped to make the server hand back another couple's code, and a + in an address made the duplicate check miss; both closed. Questions in A205b, A205c, A205d. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -109,6 +108,12 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A204a | **Migration 103 ran; your approval of my words for the new-article email, the signup's failure line and the unsubscribe page.** |
+| A204b | **Sign-in help page: my words approved, and the email stays partly hidden.** |
+| A204g | **A paid order uses up its promo code only once the payment goes through.** |
+| A204 | **In Practice list and new-article email, sign-in help page, one confirmation per order, receipt names match the shop.** |
+| A203 | **Every server address run with the database off; ten places that said "fine" now say they could not check; notifications follow clock changes.** |
+| A202 | **Nineteen sweeps, fourteen fixes: one order number, lower-case emails, promo code checks, deletion stops on failure, two unused addresses removed.** |
 | A201 | **Seven sweeps, six fixes: checkout's error message, exercise-done and results-ready retries, admin survey shares its request.** |
 | A201b | **Yes to removing the unused PDF builder and order-editing addresses, and yes to a waitlist failure line (yours).** |
 | A201a | **Contact form delivers (it never had); failure line approved.** |

@@ -13,7 +13,7 @@
  */
 export async function findOrders({ rest, svc, orderNum }) {
   let filter = `or=(order_num.eq.${encodeURIComponent(orderNum)},order_num.like.${encodeURIComponent(orderNum + '-')}*)`;
-  const oRes = await rest(`orders?${filter}&select=order_num,user_id,buyer_email`, { headers: svc });
+  const oRes = await rest(`orders?${filter}&select=order_num,user_id,buyer_email,is_gift`, { headers: svc });
   // A failed read is not "no such order": that answer sends a customer who
   // paid to the no-purchase screen, or tells them their order does not exist.
   if (!oRes.ok) return { ok: false };
@@ -39,7 +39,7 @@ export async function findOrders({ rest, svc, orderNum }) {
     const lRes = await rest(
       `orders?or=(stripe_payment_intent_id.ilike.*${tail},stripe_payment_intent_id.ilike.*${tail}_*)`
       + `&created_at=gte.${encodeURIComponent(from)}&created_at=lt.${encodeURIComponent(to)}`
-      + '&select=order_num,user_id,buyer_email,stripe_payment_intent_id',
+      + '&select=order_num,user_id,buyer_email,is_gift,stripe_payment_intent_id',
       { headers: svc });
     if (!lRes.ok) return { ok: false };
     const found = (await lRes.json().catch(() => null)) || [];

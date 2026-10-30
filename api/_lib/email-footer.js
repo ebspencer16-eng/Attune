@@ -30,6 +30,19 @@ export function unsubscribeUrl(userId) {
   return `${BASE}/api/unsubscribe?token=${token}`;
 }
 
+/**
+ * The two headers that put an Unsubscribe button in the mail app itself, and
+ * that Gmail and Yahoo have required of bulk senders since 2024: without them
+ * a scheduled email is more likely to be filed as spam. The second header
+ * says the address takes a one-click POST, which /api/unsubscribe answers
+ * (A205). A mailto has no POST, so it gets the first header alone.
+ */
+export function listUnsubscribeHeaders(url) {
+  if (!url) return {};
+  if (url.startsWith('mailto:')) return { 'List-Unsubscribe': `<${url}>` };
+  return { 'List-Unsubscribe': `<${url}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' };
+}
+
 /** The line itself, styled as the order email styles it. */
 export function unsubscribeLink(userId) {
   return `<a href="${unsubscribeUrl(userId)}" style="color:#B8A898;text-decoration:underline">Manage email preferences</a>`;

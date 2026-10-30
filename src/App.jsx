@@ -321,6 +321,8 @@ const USER_LOCALSTORAGE_KEYS = [
   // An order number whose claim did not land. Kept so the next sign-in can try
   // again, and cleared on sign-out like everything else that names a purchase.
   'attune_pending_order',
+  // The last refund notice this browser acted on (A204f, forgetRevokedGrants).
+  'attune_revoked_seen',
 ];
 // Deliberately NOT here: attune_dev_intimacy, a developer toggle rather than
 // user data. Everything a person creates or that identifies them belongs in
@@ -556,6 +558,43 @@ function loadStoredOrderEnt() {
   catch { return null; }
 }
 
+/**
+ * A refund took something away (A204f). Every copy of a purchase this browser
+ * keeps is merged grant-only, which is right for a read that failed and wrong
+ * for a refund: a refunded add-on would stay on any browser that had seen it.
+ * The server marks the stored entitlements with `revokedAt` when it takes
+ * something back (api/_lib/refund-order.js), and the first time this browser
+ * sees a given mark it overwrites what it kept with the server's answer and
+ * reloads, so every screen starts from the smaller set. Once per mark, and
+ * only when the mark could be written down, so it cannot reload in a loop.
+ */
+function forgetRevokedGrants(blob) {
+  if (!blob?.revokedAt) return false;
+  const SEEN = 'attune_revoked_seen';
+  try { if (localStorage.getItem(SEEN) === blob.revokedAt) return false; } catch { return false; }
+  const grant = {
+    pkg: blob.pkg || 'core', pkgKey: blob.pkg || 'core', orderNum: blob.orderNum || '',
+    isPhysical: !!blob.isPhysical,
+    addonReflection: !!blob.addonReflection, addonBudget: !!blob.addonBudget,
+    addonChecklist: !!blob.addonChecklist, addonIntimacy: !!blob.addonIntimacy,
+    addonConflict: !!blob.addonConflict, addonWorkbook: blob.addonWorkbook || '',
+  };
+  try {
+    for (const key of ['attune_order', 'attune_account']) {
+      const kept = JSON.parse(localStorage.getItem(key) || 'null');
+      if (!kept) continue;
+      localStorage.setItem(key, JSON.stringify({ ...kept, ...grant }));
+    }
+    localStorage.setItem(SEEN, blob.revokedAt);
+    if (localStorage.getItem(SEEN) !== blob.revokedAt) return false;
+    // And once per tab whatever happens, the same backstop as the answers fill.
+    if (sessionStorage.getItem('attune_revoke_reloaded') === '1') return false;
+    sessionStorage.setItem('attune_revoke_reloaded', '1');
+  } catch { return false; }
+  window.location.reload();
+  return true;
+}
+
 async function resolveEntitlements(sb, session, profile) {
   // A claim that did not land at signup gets one more chance here, because
   // this is the one place that runs on every signed-in load and the thing at
@@ -567,6 +606,7 @@ async function resolveEntitlements(sb, session, profile) {
     partnerAId: (profile?.joined_via_invite && profile?.partner_profile_id) ? profile.partner_profile_id : null,
   }, profile);
   const blob = profile?.entitlements || null;
+  forgetRevokedGrants(blob);
   // Comp is authoritative on its own: render immediately, never block on the
   // server. Still refresh the stored blob in the background so the DB stays
   // truthful (an early return here is why comp accounts never wrote one).
@@ -8745,7 +8785,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           method: 'POST', headers: { 'Content-Type': 'application/json', ...(_sp?.access_token ? { Authorization: `Bearer ${_sp.access_token}` } : {}) },
           body: JSON.stringify({
             accountEmail: _acct.email,
-            partnerEmail: _acct.partnerEmail || '',
             toName:       _acct.name || '',
             partnerName:  _acct.partnerName || '',
           }),
@@ -13798,7 +13837,6 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
               method: 'POST', headers: { 'Content-Type': 'application/json', ...(_sp2?.access_token ? { Authorization: `Bearer ${_sp2.access_token}` } : {}) },
               body: JSON.stringify({
                 accountEmail: acct.email,
-                partnerEmail: acct.partnerEmail || '',
                 toName:       acct.name || '',
                 partnerName:  acct.partnerName || '',
               }),

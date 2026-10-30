@@ -9,21 +9,21 @@
 export const EMAIL_TRIGGERS = {
   "partner_invite": [
     "api/admin-actions.js:155",
-    "src/App.jsx:12296",
-    "src/App.jsx:12398",
-    "src/App.jsx:12722",
-    "src/App.jsx:18953",
-    "src/App.jsx:19749"
+    "src/App.jsx:12335",
+    "src/App.jsx:12437",
+    "src/App.jsx:12761",
+    "src/App.jsx:18991",
+    "src/App.jsx:19787"
   ],
   "results_viewed": [
-    "src/App.jsx:13775",
-    "src/App.jsx:16122"
+    "src/App.jsx:13814",
+    "src/App.jsx:16160"
   ],
   "contact": [
     "public/contact.html:173"
   ],
   "workbook_promo": [
-    "api/generate-workbook-promo.js:187"
+    "api/generate-workbook-promo.js:211"
   ]
 };
 

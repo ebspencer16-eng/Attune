@@ -147,7 +147,7 @@ async function restGet(url, serviceKey, path) {
  * account own", which is the question the whole file exists to have one answer
  * to. So writeEntitlements calls this and then patches the row.
  */
-export async function entitlementsFor({ supabaseUrl, serviceKey, userId, email }) {
+export async function entitlementsFor({ supabaseUrl, serviceKey, userId, email, ordersOnly = false }) {
   if (!supabaseUrl || !serviceKey || !userId) {
     return { ok: false, error: 'missing supabaseUrl/serviceKey/userId' };
   }
@@ -169,7 +169,12 @@ export async function entitlementsFor({ supabaseUrl, serviceKey, userId, email }
   };
   // Profile's own columns as a grant source. Missing columns read as
   // undefined, which computeEntitlements treats as "no grant".
-  rows.push({
+  //
+  // `ordersOnly` leaves them out, for the one caller that needs to know what
+  // the ORDERS alone still grant: a refund, which has to work out which of
+  // the columns copied from an order should now be cleared
+  // (api/_lib/refund-order.js).
+  if (!ordersOnly) rows.push({
     order_num: null, pkg_key: profile.pkg || null, is_physical: false,
     addon_reflection: profile.addon_reflection,
     addon_budget: profile.addon_budget, addon_checklist: profile.addon_checklist,
@@ -198,12 +203,20 @@ export async function entitlementsFor({ supabaseUrl, serviceKey, userId, email }
   return { ok: true, profile, entitlements: computeEntitlements(rows, profile) };
 }
 
-export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email }) {
+export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email, revokedAt }) {
   try {
     const read = await entitlementsFor({ supabaseUrl, serviceKey, userId, email });
     if (!read.ok) return read;
     const { profile, entitlements: ent } = read;
+    /* `revokedAt` says something was taken away (a refund, A204f). Every copy
+       the website keeps on a device is merged grant-only, so without it a
+       refunded add-on would stay on any browser that had seen it. The website
+       drops what it kept when it sees a revokedAt it has not seen before.
+       Carried forward from the stored blob, so an ordinary recompute between
+       the refund and that person's next visit cannot erase the notice. */
+    const prevRevoked = profile?.entitlements && typeof profile.entitlements === 'object' ? profile.entitlements.revokedAt : null;
     const blob = { ...ent, computedAt: new Date().toISOString() };
+    if (revokedAt || prevRevoked) blob.revokedAt = revokedAt || prevRevoked;
 
     const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, {
       method: 'PATCH',

@@ -32,6 +32,7 @@ import { IN_PRACTICE } from './_in-practice.js';
 import { SITE_URL } from './_lib/site.js';
 import { brandedEmail, _esc } from './_lib/branded-email.js';
 import { restAll } from './_lib/page-all.js';
+import { listUnsubscribeHeaders } from './_lib/email-footer.js';
 
 /**
  * The email, in the catalogue's shape so /email-preview renders it.
@@ -115,7 +116,7 @@ export default async function handler(req) {
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: `Attune <${from}>`, to: [p.email], ...mail }),
+        body: JSON.stringify({ from: `Attune <${from}>`, to: [p.email], ...mail, headers: listUnsubscribeHeaders(articleUnsubscribeUrl(p.token)) }),
       }).catch(() => null);
       if (r?.ok) sent++; else failed++;
     }

@@ -6,7 +6,7 @@
  * Skips anyone who has already answered anything, and skips
  * beta testers entirely (they were asked to do the beta survey directly).
  */
-import { unsubscribeLink } from './_lib/email-footer.js';
+import { unsubscribeLink, unsubscribeUrl, listUnsubscribeHeaders } from './_lib/email-footer.js';
 // Names are typed by people, so they are escaped before they become HTML (A202).
 import { _esc } from './_lib/branded-email.js';
 import { restAll } from './_lib/page-all.js';
@@ -158,7 +158,7 @@ export default async function handler(req) {
     return Array.isArray(rows) && rows.length === 1;
   };
   const release = (id, field) => fetch(`${url}/rest/v1/profiles?id=eq.${id}`, { method: 'PATCH', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ [field]: null }) }).catch(() => {});
-  const sendEmail = (to, subject, html) => fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html }) }).then(r => r.ok);
+  const sendEmail = (to, subject, html, userId) => fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html, headers: listUnsubscribeHeaders(unsubscribeUrl(userId)) }) }).then(r => r.ok);
   const isBeta = (u) => u.email && betaEmails.has(String(u.email).toLowerCase());
 
   /**
@@ -196,7 +196,7 @@ export default async function handler(req) {
       if (submitted.has(u.id) || isBeta(u)) { skipped++; await mark(u.id, field); continue; }
       const mail = build(EMAIL_CONTEXT(u));
       if (!(await claim(u.id, field))) continue;
-      const ok = await sendEmail(u.email, mail.subject, mail.html).catch(() => false);
+      const ok = await sendEmail(u.email, mail.subject, mail.html, u.id).catch(() => false);
       if (ok) sent++; else { await release(u.id, field); failed++; }
     }
     return { eligible: users.length, sent, skipped, failed };

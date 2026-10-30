@@ -65,6 +65,7 @@ const one = await run({ announced: allButOne });
 if (one.emails.length !== 2) fails.push(`one new article and two subscribers sent ${one.emails.length} emails`);
 if (!one.emails.every((m) => m.html.includes(`${SITE_URL}${fresh.path}`))) fails.push('the new-article email does not link to the article');
 if (new Set(one.emails.map((m) => (m.html.match(/articles=([0-9a-f-]+)/) || [])[1])).size !== 2) fails.push('the two subscribers did not each get their own unsubscribe link');
+if (!one.emails.every((m) => m.headers?.['List-Unsubscribe'] === `<${SITE_URL}/api/unsubscribe?articles=${(m.html.match(/articles=([0-9a-f-]+)/) || [])[1]}>` && m.headers?.['List-Unsubscribe-Post'])) fails.push('a new-article email carries no one-click unsubscribe header for its own subscriber (A205)');
 if (!/unsubscribed_at=is\.null/.test(one.subsQuery || '')) fails.push('the list is read without leaving out people who unsubscribed');
 if (!one.posts.some((p) => p.slug === fresh.slug)) fails.push('the article was sent without being claimed first');
 

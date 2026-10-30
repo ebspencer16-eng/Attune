@@ -164,6 +164,18 @@ async function hintFor(orderNum, db) {
 const h1 = await hintFor(OLD, byPayment([{ order_num: 'ATT-20261030-S27W', buyer_email: 'maya@example.com', stripe_payment_intent_id: 'pi_3Q9zLegacyWXYZ' }]));
 if (h1.body.hint !== 'm•••@e•••.com') fails.push(`the help page, given an old card number, answered ${JSON.stringify(h1.body)}; it should find the order through its payment, as claiming does, and show m•••@e•••.com`);
 if (JSON.stringify(h1.body).includes('maya@example.com')) fails.push('the help page sent the full address; anybody can type an order number');
+// A claimed order signs in under the account that claimed it, which for a
+// gift is the couple's and never the buyer's (A205).
+const byNumber = (rows, profile) => (u) => u.includes('/profiles?')
+  ? (profile === 'fail' ? new Response('{"message":"x"}', { status: 500 }) : new Response(JSON.stringify(profile ? [profile] : []), { status: 200 }))
+  : new Response(JSON.stringify(rows), { status: 200 });
+const NUM = 'ATT-20261030-GIFTED';
+const hc = await hintFor(NUM, byNumber([{ order_num: NUM, user_id: 'u1', buyer_email: 'buyer@example.com', is_gift: true }], { email: 'jo@sample.org' }));
+if (hc.body.hint !== 'j•••@s•••.org') fails.push(`a claimed order showed ${JSON.stringify(hc.body)}; it should show the address of the account that claimed it (j•••@s•••.org)`);
+const hg = await hintFor(NUM, byNumber([{ order_num: NUM, user_id: null, buyer_email: 'buyer@example.com', is_gift: true }]));
+if (!hg.body.gift || hg.body.hint) fails.push(`an unclaimed gift showed ${JSON.stringify(hg.body)}; the buyer's address would send the couple to an account that is not theirs`);
+const hf = await hintFor(NUM, byNumber([{ order_num: NUM, user_id: 'u1', buyer_email: 'buyer@example.com' }], 'fail'));
+if (hf.status !== 503) fails.push(`a claimed order whose account could not be read answered ${hf.status} ${JSON.stringify(hf.body)}; the buyer's address is a guess`);
 const h2 = await hintFor('ATT-20261030-NOSUCH', () => new Response('[]', { status: 200 }));
 if (h2.status !== 200 || h2.body.found !== false) fails.push(`an unknown order number answered ${h2.status} ${JSON.stringify(h2.body)}, not found: false`);
 const h3 = await hintFor('ATT-20261030-NOSUCH', () => new Response('{"message":"x"}', { status: 500 }));

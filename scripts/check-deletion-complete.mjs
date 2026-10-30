@@ -51,6 +51,7 @@ const POINTS = [
   ['listing a workbook folder', (m, p) => p.startsWith('/storage/v1/object/list')],
   ['removing the workbook files', (m, p) => m === 'DELETE' && p.startsWith('/storage/v1/object/workbooks')],
   ['taking their address off feedback', (m, p) => m === 'PATCH' && p.startsWith('/rest/v1/feedback_submissions')],
+  ['removing their refunded orders', (m, p) => m === 'DELETE' && p.startsWith('/rest/v1/refunded_orders')],
 ];
 for (const [what, fail] of POINTS) {
   const r = await run(what, fail);

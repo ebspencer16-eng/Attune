@@ -13,7 +13,7 @@
  */
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
-import { unsubscribeLink } from './_lib/email-footer.js';
+import { unsubscribeLink, unsubscribeUrl, listUnsubscribeHeaders } from './_lib/email-footer.js';
 // Both names are typed by people, one of them by the OTHER partner, so they
 // are escaped before they become HTML in this person's inbox (A202).
 import { _esc } from './_lib/branded-email.js';
@@ -138,11 +138,12 @@ export default async function handler(req) {
     }
 
     // ── Helper: send via Resend ───────────────────────────────────────────────
-    async function sendEmail(to, subject, html) {
+    // `userId` for the one-click unsubscribe headers (A205).
+    async function sendEmail(to, subject, html, userId) {
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html }),
+        body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html, headers: listUnsubscribeHeaders(unsubscribeUrl(userId)) }),
       });
       return r.ok;
     }
@@ -155,7 +156,7 @@ export default async function handler(req) {
       const hasRefl = hasReflectionAccess(user);
       const mail = CHECKIN_EMAILS.cron_checkin_6mo(EMAIL_CONTEXT(user, hasRefl));
       if (!(await claimSend(user.id, 'checkin_sent_at'))) continue;
-      const ok = await sendEmail(user.email, mail.subject, mail.html).catch(() => false);
+      const ok = await sendEmail(user.email, mail.subject, mail.html, user.id).catch(() => false);
       if (!ok) await releaseSend(user.id, 'checkin_sent_at');
       if (ok) { sent6mo++; sentSoFar.sent6mo = sent6mo; }
       else { console.error('[cron-checkin] 6mo email failed:', redactEmail(user.email)); failed++; sentSoFar.failed = failed; }
@@ -169,7 +170,7 @@ export default async function handler(req) {
       const hasRefl = hasReflectionAccess(user);
       const mail = CHECKIN_EMAILS.cron_checkin_12mo(EMAIL_CONTEXT(user, hasRefl));
       if (!(await claimSend(user.id, 'checkin_1yr_sent_at'))) continue;
-      const ok = await sendEmail(user.email, mail.subject, mail.html).catch(() => false);
+      const ok = await sendEmail(user.email, mail.subject, mail.html, user.id).catch(() => false);
       if (!ok) await releaseSend(user.id, 'checkin_1yr_sent_at');
       if (ok) { sent1yr++; sentSoFar.sent1yr = sent1yr; }
       else { console.error('[cron-checkin] 1yr email failed:', redactEmail(user.email)); failed++; sentSoFar.failed = failed; }

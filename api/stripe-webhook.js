@@ -2,7 +2,8 @@
  * POST /api/stripe-webhook
  *
  * Receives Stripe event notifications. Verifies the signature,
- * then handles payment_intent.succeeded and payment_intent.payment_failed.
+ * then handles payment_intent.succeeded, charge.refunded and
+ * payment_intent.payment_failed.
  *
  * Required env vars:
  *   STRIPE_SECRET_KEY
@@ -31,6 +32,7 @@ import { legacyOrderNumber } from './_lib/order-number.js';
 import { orderEmailContext } from './_lib/order-email-context.js';
 import { sendOrderEmails } from './send-order-email.js';
 import { claimPromoUse, readPromoRow } from './_lib/promo-claim.js';
+import { refundOrders } from './_lib/refund-order.js';
 
 async function verifyStripeSignature(body, signature, secret) {
   // Stripe webhook signature format: t=timestamp,v1=hash
@@ -500,6 +502,45 @@ async function handleWebhook(req) {
       // abandoned that workstream." The block here built a card URL and stored
       // it on the order for the admin to print.
 
+    }
+  }
+
+  /**
+   * ── charge.refunded ─────────────────────────────────────────────────────
+   * A full refund takes the order's access away and stops it counting
+   * (A204f, api/_lib/refund-order.js). Ellie: "A". Stripe only sends this if
+   * the endpoint is subscribed to it, which is a setting in her dashboard.
+   *
+   * A partial refund changes nothing: Stripe sets `refunded` only when the
+   * whole charge has gone back, and a partial one is usually a goodwill
+   * credit rather than a return.
+   *
+   * Answers 500 when the move did not finish, so Stripe retries; every step
+   * is safe to repeat.
+   */
+  /* A chargeback the customer won is the same thing as a full refund: the
+     money went back. Stripe reports it as a closed dispute with status
+     "lost" (lost by us), and it takes the same path. */
+  const lostDispute = event.type === 'charge.dispute.closed' && event.data?.object?.status === 'lost';
+  if (event.type === 'charge.refunded' || lostDispute) {
+    const charge = lostDispute ? { refunded: true, payment_intent: event.data.object.payment_intent, id: event.data.object.charge } : (event.data?.object || {});
+    const pi = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceKey  = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+    if (!charge.refunded || !pi) {
+      console.log(`[webhook] partial refund on ${charge.id}: access unchanged`);
+    } else if (!supabaseUrl || !serviceKey) {
+      return new Response(JSON.stringify({ received: false, error: 'database not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    } else {
+      const r = await refundOrders({
+        supabaseUrl, serviceKey, paymentIntentId: pi,
+        refundedAt: event.created ? new Date(event.created * 1000).toISOString() : null,
+      });
+      if (!r.ok) {
+        await reportToSentry(new Error(`refund not applied at ${r.stage}`), { route: '/api/stripe-webhook', extra: { intent: pi, ...r } }).catch(() => {});
+        return new Response(JSON.stringify({ received: false, error: 'refund not applied' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      }
+      console.log(`[webhook] refund on ${pi}: ${r.moved} order(s) moved, ${r.accounts} account(s) updated`);
     }
   }
 

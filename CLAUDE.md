@@ -2598,6 +2598,30 @@ the current offset on every load and now refreshes it; check-tz-refresh. Note
 `Number(null)` is 0: a check for a missing query parameter has to be `has()`,
 or a request without one sets everybody to UTC.
 
+**To make twenty readers forget a row, move the row.** A refund had to stop
+an order granting anything and stop the admin counting it, and about twenty
+places read `orders`. A `refunded` flag would have needed all twenty to
+remember it, and the one that forgot would be the one still granting. The
+order moves to `refunded_orders` instead (api/_lib/refund-order.js), copied
+first and deleted second, so nothing that reads `orders` needs to know. What
+a move cannot reach is a COPY of the row's meaning: `profiles.pkg` and the
+invitee's add-on columns were copied from the order at sign-up, and the
+browser keeps a grant-only copy on the device. Each of those had to be found
+and undone on its own, which is the argument for asking "who copied this"
+before deciding a row is the only place a fact lives.
+
+**A link that does something when opened is opened by machines.** Mail
+scanners fetch every link in an email before the person sees it, so the
+unsubscribe link was unsubscribing people nobody asked. Opening asks; a POST
+acts. The same goes for any GET that writes.
+
+**Inside `or=(...)`, `in.(...)` or `cs.{...}`, a comma is syntax, and
+percent-encoding does not hide it**: the server decodes the address before it
+reads the filter. A typed value goes through `filterValue` in
+api/_lib/filter-value.js. And a value the request supplies about somebody
+else, like a partner's email, is a question to ask the database rather than
+the request.
+
 ---
 
 ## Verification, non-negotiable
