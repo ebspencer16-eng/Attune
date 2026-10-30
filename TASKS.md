@@ -36,7 +36,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A201 | **Six sweeps, eight fixes.** Fixed: the contact form (A201a); checkout now shows the "could not reach the server" message instead of a code error when the server times out (no card is charged at that point); the website retries telling the server an exercise is done, which is what notifies the partner and starts the workbook, instead of losing it on one failed try; the two "your results are ready" emails retry instead of giving up after one failure; the admin survey pages share one request instead of sending another. Checked and clean: every link in the app goes to a screen that exists, and the two endpoints customers wait on already run their reads in parallel where they can. Questions in A201b. |
+| A201 | **Seven sweeps, six fixes.** Fixed: the contact form (A201a); checkout now shows the "could not reach the server" message instead of a code error when the server times out (no card is charged at that point); the website retries telling the server an exercise is done, which is what notifies the partner and starts the workbook, instead of losing it on one failed try; the two "your results are ready" emails retry instead of giving up after one failure; the admin survey pages share one request instead of sending another. Checked and clean: every link in the app goes to a screen that exists, and the two endpoints customers wait on already run their reads in parallel where they can. Questions in A201b. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
