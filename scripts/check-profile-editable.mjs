@@ -22,7 +22,7 @@
 
 import { readFileSync } from 'fs';
 
-import { ABOUT_YOU } from '../api/_lib/profile-setup-copy.js';
+import { ABOUT_YOU, PROFILE_SETUP_COPY } from '../api/_lib/profile-setup-copy.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const read = (f) => readFileSync(`${ROOT}${f}`, 'utf8');
@@ -114,6 +114,17 @@ if (!/view === 'profile'\)\s*return\s*\{\s*route:/.test(nextAction)) {
 const home = read('attune-app/src/app/index.tsx');
 if (!/target\.settings/.test(home)) {
   problems.push('the app ignores the settings flag on a card target, so the profile card lands on home and stops.');
+}
+
+/* The failed-save line on a profile screen is one sentence on both surfaces
+   (A218). The website reads PROFILE_SETUP_COPY.saveFailed; the app cannot
+   import from api/ and keeps SAVE_FAILED in constants/save-copy.ts for its two
+   profile screens. Compared here, with each side's words read from its own
+   file, so a change to one is a failed build rather than two sentences. */
+{
+  const m = /export const SAVE_FAILED = '([^']*)';/.exec(read('attune-app/src/constants/save-copy.ts'));
+  if (!m) problems.push('cannot find SAVE_FAILED in attune-app/src/constants/save-copy.ts. Refusing to pass: a gate that has lost its subject must never report success.');
+  else if (m[1] !== PROFILE_SETUP_COPY.saveFailed) problems.push(`the app says "${m[1]}" when a profile save fails and the website says "${PROFILE_SETUP_COPY.saveFailed}".`);
 }
 
 if (problems.length) {

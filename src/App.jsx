@@ -12047,12 +12047,162 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
 }
 
 /**
+ * "Profile details" (A218, A219). Ellie: the dashboard's "Finish setting up
+ * your profile" card stays on the dashboard and opens this; the Account
+ * page's "Edit details" opens it too. Name box half width with the three
+ * pronoun choices to its right, middle aligned; the note about names under
+ * the header; the partner's email box only when we do not have it; then each
+ * demographic question; save and exit once all are answered.
+ *
+ * Reads and writes through /api/update-profile, the endpoint the app's
+ * editor uses, so the two surfaces edit one set of fields from one
+ * whitelist, and the five questions are ABOUT_YOU rather than a copy of them.
+ * The partner's email goes to /api/invite-partner, which sends the
+ * invitation from the server (A206).
+ *
+ * At module scope, not inside App: it holds every answer in state, and a
+ * component declared inside another is a new type on each render, which
+ * would throw a half-filled form away (check-nested-components).
+ */
+function ProfileDetailsModal({ account, onClose, onSaved }) {
+  // Half a phone is too narrow for three pronoun buttons, so there the row
+  // stacks: the name box, then the choices under it.
+  const narrow = useMobile(440);
+  const [f, setF] = useState(() => ({
+    name: account?.name || '', pronouns: account?.pronouns || '',
+    partnerName: account?.partnerName || '', partnerPronouns: account?.partnerPronouns || '',
+    ...Object.fromEntries(ABOUT_YOU.fields.map((q) => [q.key, ''])),
+  }));
+  const [partnerEmail, setPartnerEmail] = useState('');
+  const [state, setState] = useState('loading'); // loading | ready | saving | failed
+  const askEmail = !account?.partnerEmail && !account?.joinedViaInvite && !account?.partnerJoined;
+  const upd = (k, v) => setF((p) => ({ ...p, [k]: v }));
+
+  const token = async () => {
+    const { supabase: sb, hasSupabase } = await import('./supabase.js');
+    if (!hasSupabase()) return null;
+    const { data: { session } } = await sb.auth.getSession();
+    return session?.access_token || null;
+  };
+
+  // What the profile says now, so an edit starts from the stored answers.
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        const t = await token();
+        const r = t ? await fetch('/api/update-profile', { headers: { Authorization: `Bearer ${t}` } }) : null;
+        const b = r && r.ok ? await r.json().catch(() => null) : null;
+        if (live && b?.profile) {
+          setF((p) => {
+            const next = { ...p };
+            for (const [k, v] of Object.entries(b.profile)) if (typeof v === 'string' && v) next[k] = v;
+            return next;
+          });
+        }
+      } catch { /* a new profile has nothing stored; the form starts from the account */ }
+      if (live) setState('ready');
+    })();
+    return () => { live = false; };
+  }, []);
+
+  const complete = !!f.name.trim() && !!f.partnerName.trim() && !!f.pronouns && !!f.partnerPronouns
+    && ABOUT_YOU.fields.every((q) => !!f[q.key]);
+
+  const save = async () => {
+    if (!complete || state === 'saving') return;
+    setState('saving');
+    try {
+      const t = await token();
+      if (!t) { setState('failed'); return; }
+      const auth = { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` };
+      // A row made at checkout may not exist yet; this makes it, and does
+      // nothing to one that does.
+      if (account?.id) {
+        await fetch('/api/create-profile', {
+          method: 'POST', headers: auth,
+          body: JSON.stringify({ userId: account.id, name: f.name.trim(), pronouns: f.pronouns,
+            partnerName: f.partnerName.trim(), partnerPronouns: f.partnerPronouns,
+            inviteCode: account?.inviteCode, pkg: account?.pkg || 'core' }),
+        }).catch(() => {});
+      }
+      const r = await fetch('/api/update-profile', { method: 'POST', headers: auth, body: JSON.stringify(f) });
+      if (!r.ok) { setState('failed'); return; }
+      let invited = null;
+      const addr = partnerEmail.trim().toLowerCase();
+      if (askEmail && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)) {
+        const ir = await fetch('/api/invite-partner', {
+          method: 'POST', headers: auth, body: JSON.stringify({ partnerEmail: addr, partnerName: f.partnerName.trim() }),
+        }).catch(() => null);
+        if (ir?.ok) invited = addr;
+      }
+      onSaved({ name: f.name.trim(), pronouns: f.pronouns, partnerName: f.partnerName.trim(),
+        partnerPronouns: f.partnerPronouns, ...(invited ? { partnerEmail: invited } : {}) });
+    } catch { setState('failed'); }
+  };
+
+  const label = { fontSize: "0.7rem", color: "#7A6753", fontFamily: font.body, fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em", display: "block" };
+  const box = { padding: "0.7rem 0.9rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: font.body, color: "#0E0B07", background: "#FFFDF9", outline: "none", boxSizing: "border-box" };
+  const person = (nameKey, pronKey, nameLabel, placeholder, groupLabel, accent, tint) => (
+    <div style={{ marginBottom: "0.9rem" }}>
+      <label style={label} htmlFor={`pd_${nameKey}`}>{nameLabel}</label>
+      <div style={{ display: "flex", flexDirection: narrow ? "column" : "row", alignItems: narrow ? "stretch" : "center", gap: "0.5rem" }}>
+        <input id={`pd_${nameKey}`} type="text" value={f[nameKey]} placeholder={placeholder}
+          onChange={(e) => upd(nameKey, e.target.value)} style={{ ...box, width: narrow ? "100%" : "50%", flexShrink: 0 }} />
+        <div role="group" aria-label={groupLabel} style={{ display: "flex", gap: "0.25rem", flex: 1, minWidth: 0 }}>
+          {PRONOUNS.map((p) => (
+            <button key={p} type="button" aria-pressed={f[pronKey] === p} onClick={() => upd(pronKey, f[pronKey] === p ? '' : p)}
+              style={{ flex: 1, minWidth: 0, whiteSpace: "nowrap", padding: "0.55rem 0.1rem", borderRadius: 8, border: `1.5px solid ${f[pronKey] === p ? accent : "#E8DDD0"}`, background: f[pronKey] === p ? tint : "white", color: f[pronKey] === p ? accent : "#7A6753", fontSize: "0.66rem", fontWeight: 600, cursor: "pointer", fontFamily: font.body }}>
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div role="dialog" aria-modal="true" aria-labelledby="pd_title"
+        style={{ background: "#FFFDF9", borderRadius: 22, padding: "clamp(1.25rem, 5vw, 2rem)", width: "100%", maxWidth: 480, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
+        <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#7A6753" }}>✕</button>
+        <div id="pd_title" style={{ fontFamily: font.display, fontSize: "1.2rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.5rem" }}>{PROFILE_SETUP_COPY.detailsTitle}</div>
+        <p style={{ fontSize: "0.72rem", color: "#7A6753", fontFamily: font.body, lineHeight: 1.55, margin: "0 0 1.25rem" }}>{PROFILE_SETUP_COPY.why}</p>
+        {person('name', 'pronouns', PROFILE_SETUP_COPY.yourName, PROFILE_SETUP_COPY.yourNamePlaceholder, 'Your pronouns', "#E8673A", "#FFF0EB")}
+        {person('partnerName', 'partnerPronouns', PROFILE_SETUP_COPY.partnerName, PROFILE_SETUP_COPY.partnerNamePlaceholder, "Partner's pronouns", "#1B5FE8", "#EEF0FF")}
+        {askEmail && (
+          <input type="email" value={partnerEmail} onChange={(e) => setPartnerEmail(e.target.value)}
+            placeholder={PROFILE_SETUP_COPY.partnerEmailPlaceholder} aria-label={INVITE_COPY.label}
+            style={{ ...box, width: "100%", marginBottom: "0.9rem" }} />
+        )}
+        <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.4rem 0 0.9rem" }} />
+        {ABOUT_YOU.fields.map(({ key: k, label: l, options }) => (
+          <div key={k} style={{ marginBottom: "0.65rem" }}>
+            <label style={label} htmlFor={`pd_${k}`}>{l}</label>
+            <select id={`pd_${k}`} value={f[k]} onChange={(e) => upd(k, e.target.value)}
+              style={{ ...box, width: "100%", padding: "0.55rem 0.75rem", fontSize: "0.8rem" }}>
+              {options.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+            </select>
+          </div>
+        ))}
+        {state === 'failed' && <div style={{ fontSize: "0.78rem", color: "#B4532A", fontFamily: font.body, margin: "0.4rem 0 0.6rem" }}>{PROFILE_SETUP_COPY.saveFailed}</div>}
+        <button onClick={save} disabled={!complete || state === 'saving' || state === 'loading'}
+          style={{ width: "100%", marginTop: "0.6rem", padding: "0.9rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: complete ? "pointer" : "default", opacity: complete ? 1 : 0.45, fontFamily: font.body }}>
+          {state === 'saving' ? <span style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem" }}><InlineSpinner /> Saving…</span> : 'Save →'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
  * The invitation for somebody whose partner has not been invited yet (A206).
  * Posts to /api/invite-partner, which sends it from the server; the
  * dashboard's "Invite your partner" card brings people here. Placeholder
  * words, listed under A206 in TASKS.md.
  */
-function PartnerInviteForm({ partnerName, onSent }) {
+function PartnerInviteForm({ partnerName, onSent, bare = false }) {
   const [email, setEmail] = useState('');
   const [state, setState] = useState('idle'); // idle | sending | failed | soon
   const send = async () => {
@@ -12071,15 +12221,8 @@ function PartnerInviteForm({ partnerName, onSent }) {
       setState(r.status === 429 ? 'soon' : 'failed');
     } catch { setState('failed'); }
   };
-  return (
-    <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
-      <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
-        <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>{INVITE_COPY.heading}</div>
-      </div>
-      <div style={{ padding: "1.1rem 1.35rem" }}>
-        <div style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body, lineHeight: 1.5, marginBottom: "0.85rem" }}>
-          {inviteLine('line', { partner: partnerName })}
-        </div>
+  const controls = (
+      <>
         <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (state !== 'sending') setState('idle'); }}
           placeholder={INVITE_COPY.placeholder} aria-label={INVITE_COPY.label}
           style={{ width: "100%", boxSizing: "border-box", padding: "0.6rem 0.8rem", border: "1.5px solid #E8DDD0", borderRadius: 10, fontSize: "0.85rem", fontFamily: font.body, marginBottom: "0.7rem" }} />
@@ -12089,6 +12232,21 @@ function PartnerInviteForm({ partnerName, onSent }) {
           style={{ background: "#E8673A", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.25rem", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", fontFamily: font.body }}>
           {state === 'sending' ? INVITE_COPY.sending : INVITE_COPY.button}
         </button>
+      </>
+  );
+  // Ellie (A220): the dashboard card opens "only the partner's email and a
+  // send button", so the pop-up takes the controls without the tile.
+  if (bare) return controls;
+  return (
+    <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
+      <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
+        <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>{INVITE_COPY.heading}</div>
+      </div>
+      <div style={{ padding: "1.1rem 1.35rem" }}>
+        <div style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body, lineHeight: 1.5, marginBottom: "0.85rem" }}>
+          {inviteLine('line', { partner: partnerName })}
+        </div>
+        {controls}
       </div>
     </div>
   );
@@ -13142,9 +13300,9 @@ function AuthModal({ mode, onClose, onSuccess }) {
               {ABOUT_YOU.fields.map(({ key: k, label, options: opts }) => (
                 <div key={k} style={{ marginBottom: "0.65rem" }}>
                   <label style={{ fontSize: "0.68rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
-                  /* The visible label is right above this and says the same thing; naming
+                  {/* The visible label is right above this and says the same thing; naming
                      the field with it costs nothing and is the difference between a
-                     screen reader saying "combo box" and saying what it is for. */
+                     screen reader saying "combo box" and saying what it is for. */}
                   <select value={form[k]} onChange={e => upd(k, e.target.value)} aria-label={label}
                     style={{ width: "100%", padding: "0.55rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.8rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
                     {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
@@ -13650,19 +13808,13 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           <p style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
             {ABOUT_YOU.why}
           </p>
-          {[
-            { k: "ageRange", label: "Your age range", opts: [["", "Prefer not to say"], ["18-24", "18–24"], ["25-34", "25–34"], ["35-44", "35–44"], ["45-54", "45–54"], ["55+", "55 or older"]] },
-            { k: "relationshipStatus", label: "Relationship status", opts: [["", "Prefer not to say"], ["dating", "Dating / together"], ["engaged", "Engaged"], ["married", "Married"], ["remarried", "Remarried"], ["partnership", "Domestic partnership"]] },
-            { k: "relationshipLength", label: "How long together", opts: [["", "Prefer not to say"], ["<1", "Less than 1 year"], ["1-2", "1–2 years"], ["3-5", "3–5 years"], ["6-10", "6–10 years"], ["11-20", "11–20 years"], ["20+", "20+ years"]] },
-            { k: "children", label: "Children", opts: [["", "Prefer not to say"], ["none", "None"], ["1", "1"], ["2", "2"], ["3+", "3 or more"], ["expecting", "Expecting"]] },
-            { k: "signupSource", label: "How did you hear about Attune?", opts: [["", "Prefer not to say"], ["friend", "Friend or family"], ["social", "Social media"], ["search", "Search"], ["gift", "Received as a gift"], ["therapist", "Therapist or counselor"], ["other", "Other"]] },
-          ].map(({ k, label, opts }) => (
+          {/* The five questions are ABOUT_YOU, as on the other sign-up form. This
+              was a hand-typed copy in which "Prefer not to say" saved as
+              blank, which is what skipping saves, so a decline was lost. */}
+          {ABOUT_YOU.fields.map(({ key: k, label, options: opts }) => (
             <div key={k} style={{ marginBottom: "0.65rem" }}>
               <label style={{ fontSize: "0.68rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
-              /* The visible label is right above this and says the same thing; naming
-                     the field with it costs nothing and is the difference between a
-                     screen reader saying "combo box" and saying what it is for. */
-                  <select value={form[k]} onChange={e => upd(k, e.target.value)} aria-label={label}
+              <select value={form[k]} onChange={e => upd(k, e.target.value)} aria-label={label}
                 style={{ width: "100%", padding: "0.55rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.8rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
                 {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
@@ -14467,27 +14619,6 @@ function DiagPanel({ renders }) {
  * `initial` is passed rather than read from a closure, which is what kept it
  * in there.
  */
-function PronounPicker({ label, fieldKey, accentColor, bgColor, initial }) {
-  const [sel, setSel] = useState(initial || "");
-  useEffect(() => {
-    const el = document.getElementById(`profile_${fieldKey}_val`);
-    if (el) el.value = sel;
-  }, [sel, fieldKey]);
-  return (
-    <div style={{ marginBottom: "0.65rem" }}>
-      <div style={{ fontSize: "0.65rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{label}</div>
-      <div style={{ display: "flex", gap: "0.4rem" }}>
-        {PRONOUNS.map(p => (
-          <button key={p} onClick={() => setSel(sel === p ? "" : p)} type="button"
-            style={{ flex: 1, padding: "0.4rem 0.2rem", borderRadius: 8, border: `1.5px solid ${sel===p ? accentColor : "#E8DDD0"}`, background: sel===p ? bgColor : "white", color: sel===p ? accentColor : "#7A6753", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s" }}>
-            {p}
-          </button>
-        ))}
-      </div>
-      <input type="hidden" id={`profile_${fieldKey}_val`} defaultValue={sel} />
-    </div>
-  );
-}
 
 export default function App() {
   const _diagOn = (() => {
@@ -14681,6 +14812,9 @@ export default function App() {
    * One engine, asked by both. Everything else here is how it is drawn.
    */
   const [homeFeed, setHomeFeed] = useState(null);
+  // Bumped after the profile or the invitation is saved, so the card that
+  // asked for it goes once the engine knows (A218, A220).
+  const [homeTick, setHomeTick] = useState(0);
   useEffect(() => {
     if (!isLoggedIn) { setHomeFeed(null); return; }
     let live = true;
@@ -14699,7 +14833,7 @@ export default function App() {
       } catch { /* the dashboard draws without it */ }
     })();
     return () => { live = false; };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, homeTick]);
 
   /**
    * How much of the In Practice sheet shows before you scroll, in pixels.
@@ -16519,6 +16653,7 @@ export default function App() {
   // link from a purchase email may belong to someone else on a shared device.
   const [showAccountGate, setShowAccountGate] = useState(isLoggedIn && (_urlSignup || _urlSignin));
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
   const [showNavDropdown, setShowNavDropdown] = useState(false); // Profile nav dropdown
   const [mobileNavOpen, setMobileNavOpen] = useState(false); // Mobile hamburger nav
   const [inviteResent, setInviteResent] = useState(false);
@@ -17694,6 +17829,9 @@ export default function App() {
                         every link the engine can produce. */
                     onCard={(card) => {
                       const to = webTargetFor(card.deepLink, RENDERABLE_VIEWS);
+                      // A218, A220: these two stay on the dashboard.
+                      if (to.modal === 'profile') { setShowProfileSetup(true); return; }
+                      if (to.modal === 'invite') { setShowInvite(true); return; }
                       if (to.href) { window.location.href = to.href; return; }
                       setView(to.view);
                     }}
@@ -19026,10 +19164,9 @@ export default function App() {
                   </div>
                   {[
                     { label: "Your name", value: userName || "—" },
+                    { label: "Your email", value: account?.email || (isLoggedIn ? "Signed in" : "Not signed in") },
                     { label: "Partner's name", value: partnerName || "—" },
-                    { label: "Your pronouns", value: userPronouns || "Not set" },
-                    { label: "Partner's pronouns", value: partnerPronouns || "Not set" },
-                    { label: "Email", value: account?.email || (isLoggedIn ? "Signed in" : "Not signed in") },
+                    { label: "Partner's email", value: account?.partnerEmail || "—" },
                   ].map((row, i, arr) => (
                     <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.35rem", borderBottom: i < arr.length - 1 ? "1px solid #F9F6F1" : "none", gap: "1rem" }}>
                       <span style={{ fontSize: "0.82rem", color: "#7A6753", fontFamily: font.body, flexShrink: 0 }}>{row.label}</span>
@@ -19039,23 +19176,13 @@ export default function App() {
                   <div style={{ padding: "0.85rem 1.35rem", borderTop: "1px solid #F3EDE6" }}>
                     <button onClick={() => setShowProfileSetup(true)}
                       style={{ fontSize: "0.75rem", fontWeight: 600, color: "#E8673A", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: 0, letterSpacing: ".02em" }}>
-                      Edit profile →
+                      Edit details →
                     </button>
                   </div>
                 </div>
 
-                {/* Partner invite — the first one, for somebody who chose "later"
-                    at checkout or was given Attune (A206). Once sent, the
-                    resend block below takes over. */}
-                {isLoggedIn && !account?.joinedViaInvite && !account?.partnerEmail && !account?.partnerJoined && (
-                  <PartnerInviteForm partnerName={partnerName}
-                    onSent={(email) => setAccount((prev) => {
-                      const next = prev ? { ...prev, partnerEmail: email } : prev;
-                      try { if (next) localStorage.setItem('attune_account', JSON.stringify(next)); } catch {}
-                      return next;
-                    })} />
-                )}
-
+                {/* The first invitation is the dashboard card's pop-up now (A220);
+                    Ellie had this tile taken out (A221). */}
                 {/* Partner invite — resend (purchaser only, until partner joins) */}
                 {isLoggedIn && !account?.joinedViaInvite && account?.partnerEmail && !account?.partnerJoined && (
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
@@ -19795,99 +19922,35 @@ export default function App() {
     )}
 
     {/* ── PROFILE SETUP MODAL (inline edit panel) ── */}
-    {showProfileSetup && (() => {
-      /* PronounPicker was declared here, inside this IIFE, inside App's JSX.
-         It is at module scope now; see the note on it. */
-      return (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
-          onClick={e => e.target === e.currentTarget && setShowProfileSetup(false)}>
-          <div style={{ background: "#FFFDF9", borderRadius: 22, padding: "2rem", width: "100%", maxWidth: 440, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
-            <button onClick={() => setShowProfileSetup(false)} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#7A6753" }}>✕</button>
-            <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.2rem", fontWeight: 700, color: "#0E0B07", marginBottom: "1.5rem" }}>{PROFILE_SETUP_COPY.title}</div>
-            <div style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.yourName}</div>
-            <input type="text" placeholder={PROFILE_SETUP_COPY.yourNamePlaceholder} defaultValue={account?.name || ""} id="profile_name"
-              style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
-            <PronounPicker label="Your pronouns" fieldKey="pronouns" accentColor="#E8673A" bgColor="#FFF0EB" initial={account?.pronouns || ""} />
-            <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.85rem" }} />
-            <div style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.partnerName}</div>
-            <input type="text" placeholder={PROFILE_SETUP_COPY.partnerNamePlaceholder} defaultValue={account?.partnerName || ""} id="profile_partnerName"
-              style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
-            <PronounPicker label="Partner's pronouns" fieldKey="partnerPronouns" accentColor="#1B5FE8" bgColor="#EEF0FF" initial={account?.partnerPronouns || ""} />
-            <input type="email" placeholder={PROFILE_SETUP_COPY.partnerEmailPlaceholder} defaultValue={account?.partnerEmail || ""} id="profile_partnerEmail"
-              style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "1.25rem", boxSizing: "border-box" }} />
-            <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.65rem 0.9rem", marginBottom: "1rem", display: "flex", gap: "0.55rem", alignItems: "flex-start" }}>
-              <span style={{ fontSize: "0.78rem", flexShrink: 0 }}>✦</span>
-              <p style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55, margin: 0 }}>{PROFILE_SETUP_COPY.why}</p>
-            </div>
-            <button onClick={() => {
-              const name = document.getElementById("profile_name")?.value.trim();
-              const partnerName = document.getElementById("profile_partnerName")?.value.trim();
-              const partnerEmail = document.getElementById("profile_partnerEmail")?.value.trim();
-              const pronouns = document.getElementById("profile_pronouns_val")?.value || account?.pronouns || "";
-              const partnerPronouns = document.getElementById("profile_partnerPronouns_val")?.value || account?.partnerPronouns || "";
-              if (!name) return;
-              const emailOptIn = document.getElementById('profile_emailOptIn')?.checked ?? (account?.emailOptIn !== false);
-              const inviteCode = account?.inviteCode || Math.random().toString(36).slice(2, 10).toUpperCase();
-              const pkg = account?.pkg || new URLSearchParams(window.location.search).get('pkg') || 'core';
-              const updated = { ...account, name, pronouns, partnerName, partnerPronouns, partnerEmail, emailOptIn, inviteCode };
-              setAccount(updated);
-              saveAccount(updated);
-              setShowProfileSetup(false);
-              const prevEmail = account?.partnerEmail || '';
-              // Persist to Supabase, then send the partner invite once the row is
-              // guaranteed to exist.
-              (async () => {
-                const { supabase: sb, hasSupabase } = await import('./supabase.js');
-                if (!hasSupabase() || !updated.id) return;
-                // Ensure a profiles row exists first. Accounts created through the
-                // checkout flow (/api/account-signup) never had one created, so a
-                // bare .update() matches zero rows and the names silently never
-                // persist — they show as "You" / "Your partner" on the next
-                // sign-in. create-profile inserts the row if missing (no-op if it
-                // already exists) and sets an invite_code so partner invites work.
-                try {
-                  await fetch('/api/create-profile', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: updated.id, name, pronouns, partnerName, partnerPronouns, partnerEmail, emailOptIn, inviteCode, pkg }),
-                  });
-                } catch (e) { console.warn('[profile-setup] create-profile failed:', e); }
-                // Apply edits for the case where the row already existed
-                // (create-profile no-ops then, so this update is what persists).
-                try {
-                  // Profile setup carries the pronouns every exercise and every
-                  // line of results prose depends on, so a silent zero-row write
-                  // here misgenders someone for the life of their results.
-                  await saveProfileData(sb, updated.id, {
-                    name: name || null,
-                    pronouns: pronouns || '',
-                    partner_name: partnerName || '',
-                    partner_pronouns: partnerPronouns || '',
-                    partner_email: partnerEmail || '',
-                    email_opt_in: emailOptIn,
-                  }, 'profile setup');
-                } catch (e) { console.warn('[profile-setup] profile update failed:', e); }
-                // Send partner invite if email newly added.
-                if (partnerEmail && partnerEmail !== prevEmail && inviteCode) {
-                  const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(name || '')}${updated?.email ? `&pae=${encodeURIComponent(updated.email)}` : ''}${partnerEmail ? `&iie=${encodeURIComponent(partnerEmail)}` : ''}`;
-                  sendEmailWithRetry({ type: 'partner_invite', fromName: name, toEmail: partnerEmail, toName: partnerName || 'Your partner', inviteUrl });
-                }
-              })();
-            }}
-              style={{ width: "100%", padding: "0.9rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-              Save →
-            </button>
-            <label style={{ display: "flex", alignItems: "flex-start", gap: "0.55rem", cursor: "pointer", marginTop: "1rem" }}>
-              <input type="checkbox" id="profile_emailOptIn" defaultChecked={account?.emailOptIn !== false}
-                style={{ marginTop: "0.15rem", accentColor: "#E8673A", width: 14, height: 14, flexShrink: 0 }} />
-              <span style={{ fontSize: "0.68rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55 }}>
-                Send me occasional opportunities to continue relationship growth through Attune.
-              </span>
-            </label>
-          </div>
+    {showProfileSetup && (
+      <ProfileDetailsModal account={account} onClose={() => setShowProfileSetup(false)}
+        onSaved={(fields) => {
+          const updated = { ...account, ...fields };
+          setAccount(updated);
+          saveAccount(updated);
+          setShowProfileSetup(false);
+          setHomeTick((n) => n + 1);
+        }} />
+    )}
+    {showInvite && (
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+        onClick={(e) => e.target === e.currentTarget && setShowInvite(false)}>
+        <div role="dialog" aria-modal="true" aria-label={INVITE_COPY.heading}
+          style={{ background: "#FFFDF9", borderRadius: 22, padding: "2.4rem 1.6rem 1.6rem", width: "100%", maxWidth: 400, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative" }}>
+          <button onClick={() => setShowInvite(false)} aria-label="Close" style={{ position: "absolute", top: "0.8rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#7A6753" }}>✕</button>
+          <PartnerInviteForm bare partnerName={partnerName}
+            onSent={(email) => {
+              setAccount((prev) => {
+                const next = prev ? { ...prev, partnerEmail: email } : prev;
+                try { if (next) localStorage.setItem('attune_account', JSON.stringify(next)); } catch {}
+                return next;
+              });
+              setShowInvite(false);
+              setHomeTick((n) => n + 1);
+            }} />
         </div>
-      );
-    })()}
+      </div>
+    )}
   </>
   );
 }

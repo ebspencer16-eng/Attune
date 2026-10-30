@@ -21,12 +21,8 @@ import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES, PACKAGE_NAMES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, compactItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
-import { isStandaloneCart, ownsCoreFor, emailOrNull } from './_lib/owns-core.js';
+import { isStandaloneCart, ownsCoreFor, emailOrNull, ALREADY_OWNS } from './_lib/owns-core.js';
 import { fulfilOrder } from './_lib/fulfil-order.js';
-
-/* Placeholder words of mine, listed under A215 in TASKS.md. The page shows
-   the same sentence under the email box (public/checkout.html). */
-export const ALREADY_OWNS = 'This email already has an Attune account. You can add exercises or tools to it instead.';
 import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
 /* What each package already includes, so this file does not say it again. */
 

@@ -191,9 +191,67 @@ if (!/owns\s*===\s*false/.test(page)) {
   }
 }
 
+/* ── 3. ONE PACKAGE PER ACCOUNT, FOR YOURSELF (A215), RUN ────────────────
+   Ellie: "make sure that an email that's already in use cannot purchase
+   another package". The other direction of the same lookup: a package bought
+   for yourself by an address that already owns one is refused with 409 and
+   the server's sentence. A gift is for somebody else and goes through, and so
+   does a check that could not run, because refusing a paying customer on a
+   failed read is the worse mistake. Run through the real handler with the
+   database stubbed, and /api/verify-core run for the sentence the page shows. */
+const { ALREADY_OWNS } = await import('../api/_lib/owns-core.js');
+const { SITE_URL } = await import('../api/_lib/site.js');
+process.env.SUPABASE_URL = 'https://db.test';
+process.env.SUPABASE_SERVICE_KEY = 'k';
+process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+const { default: payHandler } = await import('../api/create-payment-intent.js');
+const { default: verifyHandler } = await import('../api/verify-core.js');
+const OWNED = [{ order_num: 'ATT-1', pkg_key: 'core' }];
+async function runA215(handler, body, orders) {
+  const saved = [console.warn, console.error, console.log];
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes('/rest/v1/orders?buyer_email')) return orders === 'fail' ? new Response('boom', { status: 500 }) : new Response(JSON.stringify(orders), { status: 200 });
+    if (u.includes('/rest/v1/profiles')) return new Response('[]', { status: 200 });
+    return new Response('{}', { status: 200 });
+  };
+  console.warn = console.error = console.log = () => {};
+  try {
+    const r = await handler(new Request(`${SITE_URL}/api/x`, {
+      method: 'POST', headers: { 'content-type': 'application/json', origin: SITE_URL },
+      body: JSON.stringify(body),
+    }));
+    return { status: r.status, body: await r.json().catch(() => ({})) };
+  } finally { [console.warn, console.error, console.log] = saved; }
+}
+const order = (isGift) => ({
+  items: [{ pkgKey: 'core', isGift, partner1Name: 'A', partner2Name: 'B', ...(isGift ? { recipientEmail: 'r@example.com' } : { invitePartnerLater: true }) }],
+  buyerEmail: 'buyer@example.com', buyerName: 'Al',
+  customerAddress: { country: 'US', postal_code: '10001', state: 'NY', city: 'NY', line1: '1 St' },
+});
+const a215 = [
+  ['a package for yourself, by an address that owns one, is refused', payHandler, order(false), OWNED,
+    (r) => r.status === 409 && r.body.alreadyOwns === true && r.body.error === ALREADY_OWNS],
+  ['a gift from an address that owns one goes through', payHandler, order(true), OWNED, (r) => r.status !== 409],
+  ['an address that owns nothing goes through', payHandler, order(false), [], (r) => r.status !== 409],
+  ['a failed ownership read lets the order through', payHandler, order(false), 'fail', (r) => r.status !== 409],
+  ['verify-core sends the sentence to an owner', verifyHandler, { email: 'buyer@example.com' }, OWNED,
+    (r) => r.status === 200 && r.body.ownsCore === true && r.body.alreadyOwns === ALREADY_OWNS],
+  ['verify-core sends no sentence to a non-owner', verifyHandler, { email: 'buyer@example.com' }, [],
+    (r) => r.status === 200 && r.body.ownsCore === false && !('alreadyOwns' in r.body)],
+];
+for (const [name, handler, body, orders, pass] of a215) {
+  const r = await runA215(handler, body, orders);
+  if (!pass(r)) fails.push(`A215: ${name}, but it answered ${r.status} ${JSON.stringify(r.body).slice(0, 160)}`);
+}
+/* The page reads the sentence it is sent rather than keeping its own, and a
+   refusal holds the order button back. */
+if (!/j\.alreadyOwns/.test(page)) fails.push('checkout.html does not read alreadyOwns from /api/verify-core, so the buyer only finds out after the card.');
+if (!/&&\s*!ownsBlocks\(\)/.test(page)) fails.push('checkout.html does not hold the order back for an address that already owns a package.');
+
 if (fails.length) {
   console.error('check-standalone-ownership: FAIL');
   for (const f of fails) console.error(`  - ${f}`);
   process.exit(1);
 }
-console.log(`check-standalone-ownership: ok. ${ALONE.length} add-ons priced alone against the catalogue, 4 cart shapes classified, the resolver run on 6 keys, and the rule asked on the server as well as the page.`);
+console.log(`check-standalone-ownership: ok. ${ALONE.length} add-ons priced alone against the catalogue, 4 cart shapes classified, the resolver run on 6 keys, and the rule asked on the server as well as the page, and ${a215.length} one-package-per-account cases run.`);

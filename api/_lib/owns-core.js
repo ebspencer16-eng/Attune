@@ -36,6 +36,13 @@
 
 import { ORDER_SELECT, computeEntitlements, entitlementsFor } from './entitlements.js';
 
+/* What somebody who already owns a package is told when they try to buy
+   another for themselves (A215). One sentence, sent by both callers: the
+   payment endpoint's 409 and /api/verify-core, which the checkout page asks
+   as the email is typed. Placeholder words of mine, listed under A215 in
+   TASKS.md for Ellie. */
+export const ALREADY_OWNS = 'This email already has an Attune account. You can add exercises or tools to it instead.';
+
 /** The same shape of read the rest of api/ uses against PostgREST. */
 async function restGet(url, key, path) {
   const res = await fetch(`${url}/rest/v1/${path}`, {

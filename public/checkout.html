@@ -1138,6 +1138,7 @@ function onSelfEmail(el) {
   const main = document.getElementById('email');
   if (main) main.value = el.value;
   validateForm();
+  checkOwns();
 }
 /* The buyer's own name: their first name in section 1 when the order is for
    them, otherwise the gift's "Your first name" (A211). Held on window because
@@ -1153,6 +1154,7 @@ function syncContactFields() {
   const anySelf = firstSelfIdx() >= 0;
   const g = document.getElementById('emailGroup');
   if (g) g.style.display = anySelf ? 'none' : '';
+  checkOwns();
 }
 
 function whoFor(it) {
@@ -1387,7 +1389,8 @@ function validateForm() {
   }
 
   const ready = itemsValid && email.includes('@') && hasValidBilling
-    && (!_items.some((it) => it.intent === 'gift') || buyerNameFor().length >= 2);
+    && (!_items.some((it) => it.intent === 'gift') || buyerNameFor().length >= 2)
+    && !ownsBlocks();
   /* A214: the button stays pressable, muted, so a press can say what is
      missing. A disabled button takes no click, which is how Ellie sat in
      front of a grey button with no idea it wanted her partner's name. */
@@ -1395,13 +1398,14 @@ function validateForm() {
   // Only the look: `disabled` belongs to a payment in progress.
   if (btn) btn.classList.toggle('not-ready', !ready);
   if (_showMissing) drawMissing();
+  drawOwns();
   return ready;
 }
 
 /* Why the order cannot go yet, each reason under the box it is about.
    Placeholder words of mine except the partner's line, which is Ellie's
    example (A214), listed under A214 in TASKS.md. */
-let _showMissing = false;
+var _showMissing = false;   // var: validateForm runs while the page loads, above this line
 function missingReasons() {
   const out = [];
   const name = (v) => String(v || '').trim().length >= 2;
@@ -1424,8 +1428,58 @@ function missingReasons() {
   if (!cardComplete && !isFreePromo) at('cardNumber', 'Fill in your card details');
   return out;
 }
+/* A215: an email that already owns a package cannot buy another for itself.
+   The server refuses at payment (409) whatever this page does; this half asks
+   /api/verify-core as the email is typed, so the buyer finds out at the box
+   rather than after entering a card. The sentence is the server's. A check
+   that could not run says nothing, as the server lets that order through. */
+var _owns = { email: '', msg: '' };
+var _ownsTimer = null;
+function selfPackageInCart() { return _items.some((it) => it.intent === 'self' && it.pkg); }
+function ownsBlocks() {
+  const email = (document.getElementById('email')?.value || '').trim().toLowerCase();
+  // Undefined while the page is still loading: validateForm runs above this.
+  return !!(_owns && _owns.msg) && _owns.email === email && selfPackageInCart();
+}
+function checkOwns() {
+  clearTimeout(_ownsTimer);
+  _ownsTimer = setTimeout(async () => {
+    const email = (document.getElementById('email')?.value || '').trim().toLowerCase();
+    if (!selfPackageInCart() || !EMAIL_OK(email)) { _owns = { email: '', msg: '' }; validateForm(); return; }
+    try {
+      const r = await fetch('/api/verify-core', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
+      });
+      const j = r.ok ? await r.json().catch(() => ({})) : {};
+      // The answer is only about the address it was asked for.
+      if ((document.getElementById('email')?.value || '').trim().toLowerCase() !== email) return;
+      _owns = j.alreadyOwns ? { email, msg: j.alreadyOwns } : { email: '', msg: '' };
+    } catch { _owns = { email: '', msg: '' }; }
+    validateForm();
+  }, 450);
+}
+function drawOwns() {
+  document.querySelectorAll('.field-owns').forEach((n) => n.remove());
+  if (!ownsBlocks()) return;
+  const el = document.getElementById('selfEmail') || document.getElementById('email');
+  if (!el) return;
+  const msg = document.createElement('div');
+  msg.className = 'field-missing field-owns';
+  // The words that name the alternative link to it.
+  const hook = 'add exercises or tools';
+  const i = _owns.msg.indexOf(hook);
+  if (i < 0) { msg.textContent = _owns.msg; }
+  else {
+    const a = document.createElement('a');
+    a.href = '/offerings#add-ons';
+    a.textContent = hook;
+    a.style.color = 'inherit';
+    msg.append(_owns.msg.slice(0, i), a, _owns.msg.slice(i + hook.length));
+  }
+  el.insertAdjacentElement('afterend', msg);
+}
 function drawMissing() {
-  document.querySelectorAll('.field-missing').forEach((n) => n.remove());
+  document.querySelectorAll('.field-missing:not(.field-owns)').forEach((n) => n.remove());
   for (const r of missingReasons()) {
     const el = document.getElementById(r.id);
     if (!el) continue;
@@ -1704,7 +1758,7 @@ function updatePaymentRequestTotal() {
   paymentRequest.update({ total: { label: 'Attune Relationships', amount: walletTotalCents() } });
 }
 
-document.getElementById('email').addEventListener('input', validateForm);
+document.getElementById('email').addEventListener('input', () => { validateForm(); checkOwns(); });
 
 // ── Submit ────────────────────────────────────────────────────────────────────
 async function handleSubmit(e) {

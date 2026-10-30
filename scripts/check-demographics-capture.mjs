@@ -76,6 +76,23 @@ for (const [file, pattern] of SURFACES) {
     + '      signup paths stop collecting the same things.');
 }
 
+/* And no surface keeps a second copy beside its reading of the list. One
+   match of ABOUT_YOU satisfied the check above while the invited partner's
+   form in the same file asked its own typed-out five, in which "Prefer not to
+   say" saved as blank. So every answer label longer than a number is looked
+   for as a literal: found anywhere but the module, it is a copy. */
+{
+  // Distinct labels only this list uses; "Prefer not to say" and "Other" are
+  // answers to other questions in the same file.
+  const GENERIC = new Set(['Prefer not to say', 'Other', 'None']);
+  const labels = [...new Set(ABOUT_YOU.fields.flatMap((f) => f.options.map(([, l]) => l)))].filter((l) => /[a-z]{4}/i.test(l) && !/^Select one/.test(l) && !GENERIC.has(l));
+  for (const file of ['src/App.jsx', 'attune-app/src/components/profile-setup.tsx']) {
+    const src = read(file);
+    const copies = labels.filter((l) => src.includes(`"${l}"`) || src.includes(`'${l}'`));
+    if (copies.length >= 3) problems.push(`${file} spells out ${copies.length} of the answer labels itself (${copies.slice(0, 3).join(', ')}...), so it is asking from a copy of the list.`);
+  }
+}
+
 // The app gets them over the wire, so the endpoint has to send them.
 if (!/aboutYou:\s*ABOUT_YOU/.test(endpoint)) {
   problems.push(

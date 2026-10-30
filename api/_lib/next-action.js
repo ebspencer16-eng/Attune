@@ -171,11 +171,12 @@ export function webTargetFor(deepLink, renderable) {
      rather than being read as home: answering "home, confidently" to a link
      nobody can parse is the thing this function exists to stop. */
 
-  /* Profile setup is the account page on the website: it carries the name, the
-     pronouns and the partner's name, and the control that edits them. */
-  if (view === 'profile') return { view: 'account' };
-  /* So is the partner invitation, which is drawn there too (A206). */
-  if (view === 'invite') return { view: 'account' };
+  /* Both stay on the dashboard and open a pop-up there. Ellie: "Finish
+     setting up your profile" opens "Profile details" (A218), and the "Invite
+     your partner" card opens a pop-up with only the partner's email and a
+     send button (A220). The view is where the pop-up sits. */
+  if (view === 'profile') return { view: 'home', modal: 'profile' };
+  if (view === 'invite') return { view: 'home', modal: 'invite' };
 
   /* In Practice is a set of static pages here rather than a view. The post id
      rides along so the card opens the article it is about. */

@@ -157,6 +157,17 @@ for (const [link, cardId] of seen) {
    * written: `/` matched the page branch and answered `{ href: '/' }`, which is
    * a full reload of the marketing site instead of switching tab.
    */
+  /* A218, A220: Ellie wants these two cards to stay on the dashboard and
+     open their pop-ups, so the website's answer for each names the pop-up and
+     src/App.jsx opens it. */
+  for (const [link, modal] of [['/?view=profile', 'profile'], ['/?view=invite', 'invite']]) {
+    if (webTargetFor(link, RENDERABLE)?.modal !== modal) fails.push(`${link} no longer opens the ${modal} pop-up on the dashboard.`);
+  }
+  const appSrc = readFileSync(`${ROOT}src/App.jsx`, 'utf8');
+  if (!/to\.modal === 'profile'\) \{ setShowProfileSetup\(true\)/.test(appSrc)
+    || !/to\.modal === 'invite'\) \{ setShowInvite\(true\)/.test(appSrc)) {
+    fails.push('src/App.jsx does not open the pop-up webTargetFor names, so the card does nothing.');
+  }
   for (const link of ['/', '', '/?view=home']) {
     const home = webTargetFor(link, RENDERABLE);
     if (!home || home.view !== 'home' || home.href || home.unresolved) {

@@ -127,6 +127,7 @@ const OK_WHEN_DOWN = {
   'questions.js': 'serves the questions from code; the read it makes is optional',
   'featured-testimonials.js': 'quotes on the home page: an empty list hides the block, and the page has no other way to say so',
   'admin-engagement.js': 'answers 200 with queryErrors listing every read that failed, which the page prints instead of drawing zero',
+  'create-payment-intent.js': 'its one read on this body is "does this email already own a package" (A215), and an order it could not check goes through: refusing a paying customer on a failed read is the worse mistake, and the account only gains. check-standalone-ownership runs that case',
 };
 const fails = [];
 const seen = new Set();

@@ -4872,3 +4872,20 @@ Done in the branch, unchecked:
 Not started: A218 Profile details pop-up, A219 account page names/emails
 only + "Edit details", A220 invite card opens a pop-up, A221 remove the
 invite tile from the account page. Then TASKS rows, the full check, push.
+
+## 30 October, evening: A211-A221 and A225 live
+
+- wip-a211 finished, checked and merged to main. A215's page half: checkout asks
+  /api/verify-core as the email is typed and holds the order for an address
+  that owns a package (check-standalone-ownership runs six cases).
+- Found in the branch before it shipped: A214's `let _showMissing` sat below a
+  load-time call to validateForm, so checkout's script died on load. Now `var`.
+  check-static-render in the smoke is what sees this shape.
+- A218-A221: ProfileDetailsModal (module scope) reads and writes through
+  /api/update-profile; webTargetFor answers `modal` for the profile and invite
+  cards; Account page shows names and emails, the first-invite tile is gone.
+- A225: a `/* */` comment drawn as text on both sign-up forms since d2aa9b66;
+  check-jsx-comment-text is new. The invited partner's form now asks ABOUT_YOU.
+- Not driven: the invite pop-up (A220) needs a signed-in dashboard to appear.
+- check-slicer-panel-reach failed once inside the full chain while the machine
+  was in swap and passed alone. check-app-cover-fits fails on main as well (A226).

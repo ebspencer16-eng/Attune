@@ -59,18 +59,8 @@ alter table public.beta_codes add column if not exists deleted_at timestamptz;
 
 | # | What I am doing |
 |--|--|
-| A211 | **Gift: "Your first name", so we can say who it is from, moves into section 1, above a gift message box.** The gift message box went missing on the phone; it comes back, and the message goes into the recipient's invitation email. **Status:** Built, not yet checked (branch wip-a211). |
-| A212 | **Explore: the Men / Women / Both picker sits in line with the other controls on the right, with the chosen one shaded (Both to start).** **Status:** Built, not yet checked (branch wip-a211). |
-| A213 | **Promo codes: some codes would not delete and turned into "Always active".** Finding out why and fixing it. **Status:** Built, not yet checked (branch wip-a211); needs A223. |
-| A214 | **Checkout: when Complete order cannot be pressed, red text under the box that needs filling says why** (for example "Fill in your partner's first name"). **Status:** Built, not yet checked (branch wip-a211). |
-| A215 | **Checkout: an email that already has an Attune account cannot buy another package for itself; it is told it can add exercises or tools instead.** **Status:** Server half built (branch wip-a211); the page half is next. |
-| A216 | **Thank-you page: a cream check mark in the circle, not black.** **Status:** Built, not yet checked (branch wip-a211). |
-| A217 | **Thank-you page: "Order Number:" before the number.** **Status:** Built, not yet checked (branch wip-a211). |
-| A218 | **"Finish setting up your profile" stays on the dashboard and opens "Profile details":** name box half width with the three pronoun choices to its right, middle aligned; the note about names under the pop-up's header; the partner's email box only when we do not have it; then each demographic question; save and exit once all are answered. **Status:** Not started. |
-| A219 | **Account page: personal info shows only names and emails; "Edit profile" becomes "Edit details" and opens the Profile details pop-up.** **Status:** Not started. |
-| A220 | **The "Invite your partner" card opens a pop-up with only the partner's email and a send button.** **Status:** Not started. |
-| A221 | **Account page: the "Invite your partner" tile comes out.** **Status:** Not started. |
-| A222 | **More sweeps.** |
+| A226 | **The app's Physical Intimacy exercise cover is 15 points too tall on an iPhone SE, so it scrolls.** Found by the smoke test; already true on main before this round, nothing in it caused it. Finding what grew since 28 October, when it fit. **Status:** Not started. |
+| A222 | **More sweeps.** This round's: code comments drawn on a page as text. Found two, on both sign-up forms (A225), and a gate now fails the build on any more. **Status:** Next sweep not yet chosen. |
 
 
 ## 3. For you to review
@@ -81,6 +71,18 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | A206b | **/api/account-signup removed (A205c).** |
+| A211 | **Gift checkout: "Your first name" sits above a gift message box, and the message goes into the recipient's invitation.** Try a gift at checkout on your phone. |
+| A212 | **Explore: Men / Women / Both sits in line with the other controls, chosen one shaded, Both to start.** |
+| A213 | **Promo codes delete properly now.** Run migration 107 first (A223); until then the bin says "Action failed" and changes nothing. |
+| A214 | **Checkout: pressing Complete order with something missing puts red text under each box.** My words, yours to change: "Choose who this purchase is for", "Fill in your first name", "Fill in your email", "Fill in the recipient's first name", "Fill in the recipient's email", "Fill in your partner's email, or tick 'I will invite my partner later'", "Fill in your card details". "Fill in your partner's first name" is yours. |
+| A215 | **Checkout: an email that already owns a package is told so under the email box, as it is typed, and the order cannot go.** My words: "This email already has an Attune account. You can add exercises or tools to it instead.", with "add exercises or tools" linking to the add-ons. A gift from that email still goes through. |
+| A216 | **Thank-you page: cream check mark.** |
+| A217 | **Thank-you page: "Order Number:" before the number.** |
+| A218 | **"Finish setting up your profile" opens "Profile details" on the dashboard.** Your layout; on a phone the pronoun choices sit under the name box, because half a phone cannot hold three buttons. Save stays grey until everything is answered. My words for a failed save: "That did not save. Try again in a moment." The email opt-in tick box from the old pop-up is not on this one; say if you want it back. |
+| A219 | **Account page: your name, your email, partner's name, partner's email; "Edit details" opens Profile details.** |
+| A220 | **"Invite your partner" card opens a pop-up with the email box and Send invitation.** |
+| A221 | **Account page: the "Invite your partner" tile is gone.** Once an invitation is out, the "Partner invite" block with the resend button still shows there. |
+| A225 | **Both sign-up forms were showing a line of code comment on the page, under each demographic question, since the accessibility pass.** Fixed. The invited partner's form also had its own copy of the five questions, where "Prefer not to say" saved as blank; it asks the shared five now. |
 | A224 | **CLAUDE.md cut from 170,505 to 25,929 characters, no rule lost.** Every rule is one numbered line; detail a session needs is in docs/lessons.md under the same number; history and repeats are gone. Skim it if you like; nothing to run. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |

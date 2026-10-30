@@ -59,7 +59,7 @@
 export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { safeError } from './_lib/http.js';
-import { emailOrNull, ownsCoreFor } from './_lib/owns-core.js';
+import { emailOrNull, ownsCoreFor, ALREADY_OWNS } from './_lib/owns-core.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -88,7 +88,9 @@ export default async function handler(req) {
       console.error('[verify-core]', read.error);
       return json({ error: 'could not check that right now' }, 503);
     }
-    return json({ ownsCore: read.ownsCore });
+    /* The sentence travels with the answer so the checkout page does not
+       keep its own copy of it (A215). */
+    return json({ ownsCore: read.ownsCore, ...(read.ownsCore ? { alreadyOwns: ALREADY_OWNS } : {}) });
   } catch (e) {
     return json({ error: safeError('verify-core', e, 'could not check that right now') }, 500);
   }

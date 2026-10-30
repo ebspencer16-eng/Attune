@@ -18,6 +18,10 @@
  */
 export const PROFILE_SETUP_COPY = {
   title: 'Your profile',
+  /* The website's pop-up, named by Ellie (A218). */
+  detailsTitle: 'Profile details',
+  /* Placeholder words of mine, listed under A218 in TASKS.md. */
+  saveFailed: 'That did not save. Try again in a moment.',
   why: 'Attune uses names and pronouns to personalize your results, making insights feel specific to you two.',
   yourName: 'Your name',
   yourNamePlaceholder: 'Your first name',
