@@ -9,7 +9,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A206a | **Please run migration 105.** It adds what the new checkout records (the partner's and the gift recipient's addresses, "invite later", the account set-up link) and the timestamp that limits dashboard invitations to one per ten minutes. Until it runs, purchases still work and accounts are still made, but the email's button goes to the reset-password page instead of straight to "choose a password", and the dashboard's Send invitation button does not work. Steps just below this table. |
+| A208i | **Please run migration 106.** It lets a promo code include Conflict Patterns free (A208g). Until it runs, creating a code with Conflict Patterns ticked will fail with an error. Steps just below this table. |
+| A208d | **Apple Pay: the code is in place, so it is two Stripe settings.** In Stripe, in Live mode: (1) Settings, then Payment methods: make sure Apple Pay is on. (2) Settings, then Payment method domains: `www.attune-relationships.com` should be listed with Apple Pay enabled; if it is not there, add it. Then try on an iPhone or Mac in Safari with a card in Apple Wallet; Chrome never shows Apple Pay. Tell me what each screen shows and which device you tested on. Separately, I found and fixed the Apple Pay sheet showing a total that left out Conflict Patterns. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
@@ -21,57 +22,33 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### One thing to run, for A206a
+### One thing to run, for A208i
 
-**Paste this into Terminal.** It copies migration 105 and prints `copied`.
+**Paste this into Terminal.** It copies migration 106 and prints `copied`.
 
 ```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/105_order_recipients.sql | pbcopy && echo copied
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/106_promo_includes_conflict.sql | pbcopy && echo copied
 ```
 
 **Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned."
 
-<!-- SQL 105_order_recipients.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 106_promo_includes_conflict.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 105: who an order is for, and the link that sets up their account (A206).
+-- 106: a promo code can include Conflict Patterns free (A208g).
 --
--- Ellie (A205b): "If it's a purchase for you, two boxes should pop up, one
--- for your email and one for your partner's. If you select gift, one box
--- should pop up, for the email of one recipient." Plus a checkbox, "I will
--- invite my partner later".
+-- Ellie, making a code in the admin: the form said Conflict Patterns "isn't
+-- here because the checkout has no column for it, so a tick would do
+-- nothing. Is that true? We need to add conflict patterns to checkout."
 --
--- The account is made when the payment goes through, for the buyer or for
--- the gift's recipient, and the confirmation email carries a link to choose a
--- password. That link is ours, not Supabase's, because Supabase's own links
--- expire after about an hour and an email is often opened the next day.
+-- It was true: beta_codes had a column for every other add-on and none for
+-- this one. This is that column. The admin form, the code check, the price,
+-- the tax and the order all read it from the same release as this file.
 --
---   partner_email         the partner a buyer invited at checkout
---   recipient_email       who a gift is for
---   invite_partner_later  the buyer ticked "I will invite my partner later"
---   setup_token           the secret in the set-up link; every order has one
---   setup_used_at         when that link was first used. After that it
---                         sends the person to sign in rather than to set a
---                         password, so a forwarded email cannot reset it
---
--- And on profiles, partner_invited_at, for the "invite your partner" prompt
--- the dashboard shows somebody who chose "later" (below).
---
--- Safe to run again: every statement checks before it adds.
+-- Safe to run again.
 -- ============================================================================
 
-alter table public.orders add column if not exists partner_email        text;
-alter table public.orders add column if not exists recipient_email      text;
-alter table public.orders add column if not exists invite_partner_later boolean not null default false;
-alter table public.orders add column if not exists setup_token          uuid not null default gen_random_uuid();
-alter table public.orders add column if not exists setup_used_at        timestamptz;
-
-create unique index if not exists orders_setup_token_idx on public.orders (setup_token);
-
--- When this person last had us email their partner an invitation, from the
--- dashboard or the app (api/invite-partner.js). Ten minutes apart at most, so
--- the button cannot be used to send mail to anyone as often as it is pressed.
-alter table public.profiles add column if not exists partner_invited_at timestamptz;
+alter table public.beta_codes add column if not exists includes_conflict boolean not null default false;
 ```
 <!-- /SQL -->
 
@@ -79,7 +56,7 @@ alter table public.profiles add column if not exists partner_invited_at timestam
 
 | # | What I am doing |
 |--|--|
-| A207 | **More sweeps.** |
+| A209 | **More sweeps.** |
 
 
 ## 3. For you to review
@@ -89,7 +66,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A206 | **Checkout asks who it is for, and everyone gets the right email (your A205b).** Built: for yourself, the partner's email or "I will invite my partner later" (the box goes away when ticked); a gift, the recipient's email with your line about inviting their partner. When the payment goes through, the account is made for the buyer, or for a gift's recipient, and the order is theirs. Then: the partner gets an invitation; the recipient gets the gift invitation with their own set-up link; the buyer's confirmation says the order went through, links the website to set up (the App Store too once the app is live), and says the partner was invited, or that they can invite them from the dashboard, or that the invitation went to the recipient. It only says an invitation was sent if it was. People who chose "later" or got a gift see an "Invite [partner]" card on their dashboard, on the site and in the app. How sign-in works now: the email's button opens a page to choose a password, one step, no second confirmation email, and it works for 30 days and once; after that they sign in with that password, or with Google or Apple on the same email. Found on the way: the app's own profile setup saved the partner's email and never sent them anything; it does now. **Placeholder words of mine, for you to replace:** checkout: "Your partner's email", "We will send them their invitation.", "I will invite my partner later", "Recipient's email", "We will send them their invitation. They will be able to invite their partner when they set up their account."; thank-you page: "We sent a link to [email]. Use it to set up your account.", "We sent [partner] their invitation at [email].", "You can invite your partner from your dashboard.", "Your confirmation is on its way to [email].", "We sent an invitation to [email]."; confirmation: "To begin, set up your account on the website (or download the Attune app).", "It is on your account now. Sign in on the website to begin.", "We sent [partner] their invitation at [email].", "You can invite [partner] from your dashboard.", "We sent an invitation to Attune to [email].", "We could not send the invitation to [email]. Reply to this email and we will make sure it reaches them.", button "Set up your account" / "Sign in"; partner invitation: subject "[Buyer] invited you to Attune", "[Buyer] got Attune for the two of you. You each answer on your own, and your answers stay private until you have both finished. Then your results unlock together.", "Use the button below to create your account and begin.", button "Accept the invitation"; gift invitation: "You'll set up your account and choose a password, then invite your partner from your dashboard."; dashboard card "Invite [partner]" / "Send them their invitation so you can each start your exercises"; invite form: "Invite your partner", "Send [partner] their invitation so you can each start your exercises.", "Send invitation", "Invitation sent to [email].", "That did not go through. Check the address and try again.", "An invitation was just sent. Try again in a few minutes."; checkout error "Enter the email address of the person you're giving this to." |
+| A208 | **Your notes from the test checkout, built.** (1) Your email wording, as written. "Attune app" links to the App Store once the app is live; until then it is the same words without a link. "website" goes to the set-up link for a new account, because a sign-in page would ask for a password they do not have yet, and to sign in for an existing one. (2) Cart suggestions in your order and titles, leaving out anything already in the cart or the package. (3) Section 1 "Account details": only "Who is this purchase for?" and your two buttons at first, then your fields in your layout; the line under the title and "We will send them their invitation" are gone, and your line is under the recipient's email. One addition to check: a gift buyer is asked "Your first name" beside their email in Contact & payment, because section 1 now holds the recipient's name and the gift email needs to say who it is from. (4) TESTEMAILS: checkout only ever asked the server about codes named ATTUNE-BETA-something, so every code made in the admin was refused on the page as "Invalid code." It asks about every code now. (5) Admin: Men / Women / Both above the Explore chart, default Both; a bin on each promo code row, which asks "Delete?" before deleting and takes nothing from people who used the code; active codes first, then A to Z; the new-code add-ons in your order, with Conflict Patterns (needs A208i). Also fixed: with a free code, the page left Conflict Patterns out of what was still owed, so it could hide the card form while there was $40 to pay. One wording note: the dashboard's "invite your partner" email reuses your partner invitation, so it also says "[Name] purchased the Attune Experience for you", including when a gift recipient invites their partner. Tell me if that needs its own words. |
 | A206b | **/api/account-signup removed (A205c).** |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
@@ -102,6 +79,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A206 | **Checkout asks who it is for, the account is made at purchase, invitations go out; your wording replaced mine (A208).** |
+| A206a | **Migration 105 ran: what checkout records about who an order is for, and the dashboard invitation limit.** |
 | A205a | **Migration 104 ran; the live Stripe destination points at www with four events, and Vercel holds its live signing secret.** |
 | A205d | **Unsubscribe asks before acting: approved.** |
 | A205c | **Yes to removing /api/account-signup, the unused address that could make a login for anyone.** |
