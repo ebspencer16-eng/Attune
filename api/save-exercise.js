@@ -257,10 +257,18 @@ export default async function handler(req) {
   // failure here never touches the response: the answers are stored, and an
   // alert is a courtesy on the side of that.
   if (!isProgress) {
-    try {
-      await announceCompletion({ admin, userId: resolvedUserId, exerciseKey: exercise });
-    } catch (e) {
-      console.warn('[save-exercise] completion alerts failed:', e?.message);
+    // Twice, a second apart. The app has no second signal to retry with, as
+    // the website does, and a missed announcement is a partner never told
+    // and a workbook never started. announceCompletion throws only before it
+    // has sent anything, so the second try repeats nothing (A203).
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        await announceCompletion({ admin, userId: resolvedUserId, exerciseKey: exercise });
+        break;
+      } catch (e) {
+        console.warn(`[save-exercise] completion alerts failed (attempt ${attempt}):`, e?.message);
+        if (attempt === 1) await new Promise((r) => setTimeout(r, 1000));
+      }
     }
   }
 

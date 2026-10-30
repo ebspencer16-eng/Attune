@@ -10,7 +10,7 @@ export const NOTIFICATION_TRIGGERS = {
   "daily_insight": [],
   "daily_word": [],
   "partner_finished": [
-    "api/_lib/completion.js:96"
+    "api/_lib/completion.js:103"
   ],
   "partner_nudged_you": [
     "api/partner-nudge.js:104"
@@ -50,17 +50,17 @@ export const PUSH_TRIGGERS = {
   "partner_shared": [],
   "partner_deleted": [],
   "results_ready": [
-    "api/_lib/completion.js:125"
+    "api/_lib/completion.js:132"
   ],
   "workbook_ready": [],
   "journal_streak": [
-    "api/cron-push.js:213"
+    "api/cron-push.js:221"
   ],
   "exercise_unfinished": [
-    "api/cron-push.js:170"
+    "api/cron-push.js:178"
   ],
   "new_post": [
-    "api/cron-push.js:248"
+    "api/cron-push.js:256"
   ]
 };
 

@@ -2574,6 +2574,30 @@ person rather than a figure:
 The tell for all four is the same as before: a catch, a default, or a
 missing `await` that makes failure look like an ordinary answer.
 
+
+**Run every endpoint with the database switched off.** Ellie, after two
+rounds of these: "not sure why we are suddenly finding so many issues". The
+answer is where the looking moved. Earlier sweeps measured code on its working
+path; the last two asked what each part does when something it depends on
+fails, and nothing in normal use or in a happy-path test ever goes there.
+
+`check-db-down` asks it of all 59 edge endpoints at once, with a signed-in
+caller and every database request failing. Seven still answered 200: a cron
+said nobody was due, another said it was not set up, the exercise-done signal
+said it had told the partner (so the website's retry never fired), and so on.
+Its first run was blind to half the API, which is the part worth writing
+down: with one generic body, 28 write endpoints stopped at their own input
+check with a 400 and never reached a read. Each has a valid body now, and the
+gate prints the ones that still stop, so its coverage is stated next to its
+count.
+
+**A time stored as a local hour needs the zone it was local to, and an offset
+is not a zone.** The daily notification stored `getTimezoneOffset()` once, so
+every daylight-saving change moved it by an hour. /api/home already received
+the current offset on every load and now refreshes it; check-tz-refresh. Note
+`Number(null)` is 0: a check for a missing query parameter has to be `has()`,
+or a request without one sets everybody to UTC.
+
 ---
 
 ## Verification, non-negotiable

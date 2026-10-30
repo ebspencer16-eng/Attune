@@ -91,6 +91,11 @@ export default async function handler(req) {
       // Surface schema/RLS problems instead of silently returning false.
       console.error('[couple-beta-status] orders query error:', ordersErr);
       await reportToSentry(new Error('couple-beta-status orders query: ' + ordersErr.message), { route: '/api/couple-beta-status' }).catch(() => {});
+      // And say so. It went on to answer ok: true, isBeta: false, which is a
+      // statement about the couple it could not read (A203, check-db-down).
+      // The page treats any reply without isBeta as "keep the tile hidden",
+      // so nobody sees a difference; the reply just stops being untrue.
+      return new Response(JSON.stringify({ ok: false, isBeta: false, error: 'could not read orders' }), { status: 503, headers: CORS });
     }
 
     const isBeta = isBetaOrderSet(orders);

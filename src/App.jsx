@@ -12095,7 +12095,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
         // A profile with a name means this is someone who already has an
         // account, whichever tab they pressed the button on. Send them through
         // the returning-person path rather than asking them to set up again.
-        const { data: prof } = await sb.from('profiles').select('name').eq('id', session.user.id).maybeSingle();
+        const { data: prof, error: profErr } = await sb.from('profiles').select('name').eq('id', session.user.id).maybeSingle();
+        // A failed read is not "no account". It signed people out below and
+        // told them Attune had no account for their sign-in, when it had
+        // simply not been able to look (A203). The catch says something went
+        // wrong instead, which is true.
+        if (profErr) throw profErr;
         if (cancelled) return;
         if (prof?.name) {
           await completeLogin(sb, session.user);
@@ -16063,7 +16068,11 @@ export default function App() {
                   // Only push if server is missing — don't overwrite a more
                   // recent server-side completion (rare but possible).
                   const col = `ex${exNum}_answers`;
-                  const { data } = await sb.from('profiles').select(col).eq('id', accountId).maybeSingle();
+                  const { data, error: readErr } = await sb.from('profiles').select(col).eq('id', accountId).maybeSingle();
+                  // A failed read is not "the server has none": pushing then
+                  // could put this device's copy over a newer completion, the
+                  // one thing this check exists to prevent (A203).
+                  if (readErr) return;
                   if (!data || !data[col]) {
                     await saveExerciseWithRetakeSnapshot(sb, accountId, exNum, answers);
                   }

@@ -60,9 +60,16 @@ import { SITE_URL } from './site.js';
 export async function announceCompletion({ admin, userId, exerciseKey }) {
   const cols = ['id', 'name', 'pronouns', 'partner_pronouns', 'partner_profile_id', ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
 
-  const { data: me } = await admin.from('profiles').select(cols).eq('id', userId).maybeSingle();
+  /* A failed read is thrown, not read as "no partner". It returned quietly,
+     so the caller reported the follow-up done, the website's retry never
+     fired, and the partner was never told (A203, from check-db-down). Both
+     reads come before anything is sent or written, so a retry after a throw
+     repeats nothing. */
+  const { data: me, error: meErr } = await admin.from('profiles').select(cols).eq('id', userId).maybeSingle();
+  if (meErr) throw new Error(`could not read the person who finished: ${meErr.message}`);
   if (!me?.partner_profile_id) return;
-  const { data: them } = await admin.from('profiles').select(cols).eq('id', me.partner_profile_id).maybeSingle();
+  const { data: them, error: themErr } = await admin.from('profiles').select(cols).eq('id', me.partner_profile_id).maybeSingle();
+  if (themErr) throw new Error(`could not read their partner: ${themErr.message}`);
   if (!them?.id) return;
 
   /**

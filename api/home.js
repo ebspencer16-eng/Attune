@@ -235,7 +235,7 @@ export default async function handler(req) {
         { headers: svc }).catch(() => null),
     };
 
-    const DAILY_COLUMNS = ['daily_insight_at', 'daily_word_at'];
+    const DAILY_COLUMNS = ['daily_insight_at', 'daily_word_at', 'tz_offset_minutes'];
     /**
      * ── BOTH ROWS IN ONE READ ───────────────────────────────────────────
      * Ellie: "Keep trying to speed things up."
@@ -287,6 +287,31 @@ export default async function handler(req) {
       });
     })();
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
+
+    /**
+     * ── THE CLOCK CHANGES TWICE A YEAR ───────────────────────────────────
+     * The daily notification is matched against the offset stored when the
+     * time was picked, and nothing updated it, so every daylight-saving
+     * change moved everybody's 7:30 by an hour: Europe on 25 October, the
+     * US on 1 November (A203). The app sends its device's current offset on
+     * every load of this endpoint, so when it differs from the stored one
+     * for somebody who has a time set, it is written here. Once per person
+     * per change. Only when the app actually sent one: the default of 0 is
+     * not a time zone.
+     */
+    // has(), not isFinite: Number(null) is 0, so a request with no offset at
+    // all would have set everybody to UTC.
+    if (dailyKnown && new URL(req.url).searchParams.has('tzOffset')
+        && Number.isFinite(rawTz) && Math.abs(rawTz) <= 900
+        && (me.daily_insight_at || me.daily_word_at)
+        && me.tz_offset_minutes !== Math.round(rawTz)) {
+      const r = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+        method: 'PATCH',
+        headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ tz_offset_minutes: Math.round(rawTz) }),
+      }).catch(() => null);
+      if (!r?.ok) console.warn('[home] could not update the stored time zone:', r?.status);
+    }
 
     let partner = null;
     if (me.partner_profile_id) {

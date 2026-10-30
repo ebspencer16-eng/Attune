@@ -77,13 +77,15 @@ export default async function handler(req) {
   const userId = who?.id;
   if (!userId) return json(401, { ok: false, error: 'Invalid auth token' });
 
-  /* Nothing here fails the caller. The answers are already saved; this is the
-     courtesy on the side of that, exactly as it is in /api/save-exercise. */
+  /* The answers are already saved; this endpoint exists only to do the
+     follow-up, so a follow-up that failed is this endpoint failing. 503, which
+     the website retries (notifyCompleted in src/App.jsx). It answered 200 with
+     followedUp: false, which nothing read, so a failure was never retried. */
   try {
     await announceCompletion({ admin, userId, exerciseKey: exercise });
   } catch (e) {
     console.warn('[exercise-completed] completion follow-up failed:', e?.message);
-    return json(200, { ok: true, followedUp: false });
+    return json(503, { ok: false, followedUp: false });
   }
   return json(200, { ok: true, followedUp: true });
 }

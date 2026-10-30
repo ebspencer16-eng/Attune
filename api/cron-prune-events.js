@@ -57,7 +57,10 @@ export default async function handler(req) {
       // is run, and a retention job that fails quietly is a retention promise
       // that fails quietly.
       console.warn(`[prune-events] delete failed ${res.status}: ${body.slice(0, 200)}`);
-      return json({ ok: false, status: res.status, cutoff, note: 'Migration 060 may not have been run.' }, 200);
+      // 500, not 200: the privacy policy promises this deletion, and Vercel's
+      // cron log shows a run as failed only by its status. The body said
+      // ok: false inside a success that nothing reads (A203, sweep-db-down).
+      return json({ ok: false, status: res.status, cutoff, note: 'Migration 060 may not have been run.' }, 500);
     }
     return json({ ok: true, cutoff, days: DAYS });
   } catch (e) {

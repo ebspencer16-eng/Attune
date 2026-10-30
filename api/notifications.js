@@ -97,8 +97,10 @@ export default async function handler(req) {
       headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'return=representation' },
       body: JSON.stringify({ read_at: new Date().toISOString() }),
     });
+    // A refused write is not "marked" (A203, check-db-down).
+    if (!r.ok) return json({ ok: false, error: 'could not mark that read' }, 503);
     const rows = await r.json().catch(() => []);
-    return json({ ok: true, marked: rows.length });
+    return json({ ok: true, marked: Array.isArray(rows) ? rows.length : 0 });
   } catch (e) {
     console.error('[notifications] failed:', e);
     return json({ ok: false, error: 'notifications unavailable' }, 500);

@@ -125,19 +125,27 @@ export default async function handler(req) {
      * about notifications. `push_opt_in=is.true` is the one filter that makes
      * this cheap, and it is also the filter that makes it correct.
      *
-     * A 404 here means migration 078 has not been run, which is not a failure:
-     * it is the state before Ellie runs it, and the honest answer is nobody.
+     * A missing column here means migration 078 has not been run, which is
+     * not a failure: it is the state before Ellie runs it, and the honest
+     * answer is nobody. Any other error is a failure.
      */
     stage = 'reachable';
     const cols = ['id', 'name', 'partner_profile_id', 'created_at',
       ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
-    const people = await getAll(`profiles?push_opt_in=is.true&select=${cols}&order=id`);
-    if (!Array.isArray(people)) {
+    const reach = await restAll(url, key, `profiles?push_opt_in=is.true&select=${cols}&order=id`);
+    /* Only a missing column is "not set up". Any other failure used to read
+       the same way, so an outage answered 200 "not set up yet" and nothing
+       anywhere looked wrong (A203, from sweep-db-down). 42703 is Postgres's
+       "column does not exist"; everything else is thrown to the catch, which
+       answers 500 with the stage. */
+    if (reach.error && /42703|push_opt_in.*does not exist/.test(reach.error)) {
       return new Response(JSON.stringify({
         ok: true, ready: false,
         reason: 'push storage is not set up yet (migration 078)',
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
+    if (reach.error) throw new Error(reach.error);
+    const people = reach.rows;
     counts.considered = people.length;
     if (!people.length) {
       return new Response(JSON.stringify({ ok: true, ...counts, reason: 'nobody has opted in' }),

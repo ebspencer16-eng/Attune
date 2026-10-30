@@ -9,15 +9,15 @@
 export const EMAIL_TRIGGERS = {
   "partner_invite": [
     "api/admin-actions.js:155",
-    "src/App.jsx:12286",
-    "src/App.jsx:12388",
-    "src/App.jsx:12712",
-    "src/App.jsx:18939",
-    "src/App.jsx:19735"
+    "src/App.jsx:12291",
+    "src/App.jsx:12393",
+    "src/App.jsx:12717",
+    "src/App.jsx:18948",
+    "src/App.jsx:19744"
   ],
   "results_viewed": [
-    "src/App.jsx:13765",
-    "src/App.jsx:16108"
+    "src/App.jsx:13770",
+    "src/App.jsx:16117"
   ],
   "contact": [
     "public/contact.html:173"

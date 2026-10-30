@@ -4776,3 +4776,17 @@ All built and in TASKS.md section 3. Points worth knowing:
   storage are keyed by them.
 - check-slicer-panel-reach failed once under memory pressure (swap at 3.3 of
   4 GB) and passed alone. Read `sysctl vm.swapusage` before believing it.
+
+## 30 October, later: A203, failure paths
+
+- New gates: check-db-down (every edge endpoint with the database failing;
+  OK_WHEN_DOWN lists the five allowed 200s with reasons, BODIES gives each
+  write endpoint a body that gets past validation) and check-tz-refresh.
+- announceCompletion throws on a failed read of either partner, before it
+  sends anything; exercise-completed answers 503 (the website retries) and
+  save-exercise tries twice.
+- Waiting on Ellie: A203a (an "I already bought" option in the app, needs
+  her words) and A203b (two confirmation emails per card order; the fix is
+  to send her catalogue emails from the webhook and drop its inline one, and
+  it needs her choice of receipt line names first). After A203b, add a gate
+  that every email to a customer comes from a catalogue map.

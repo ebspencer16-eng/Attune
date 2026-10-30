@@ -87,8 +87,14 @@ export default async function handler(req) {
         `&created_at=lte.${window.end.toISOString()}`,
         { headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}` } }
       );
-      if (!res.ok) { console.error('[cron-checkin] Query failed:', await res.text()); return []; }
-      return res.json();
+      // Thrown, not `[]`: an empty list is "nobody is due today", and a failed
+      // read answered that for every outage, as a 200 that said sent 0 and
+      // failed 0. The catch below reports the stage as a 500, which is what
+      // Vercel's cron log shows as a failure (A203, from sweep-db-down).
+      if (!res.ok) throw new Error(`query failed: ${res.status} ${(await res.text().catch(() => '')).slice(0, 200)}`);
+      const rows = await res.json().catch(() => null);
+      if (!Array.isArray(rows)) throw new Error('query answered something that is not a list');
+      return rows;
     }
 
     // True if user already has anniversary content access. Used to suppress
