@@ -2631,6 +2631,16 @@ first and the confirmation after, built from what Resend accepted
 (api/_lib/order-emails.js), and check-purchase-fulfilment makes Resend refuse
 an invitation to prove the confirmation stops claiming it.
 
+**Keep every scratch file inside the project or the session's scratchpad.**
+On 30 October a screenshot saved to the Mac's temp folder and then read back
+set off a permission prompt; a "block" choice on it made every read outside
+the project refuse for the rest of the session, and the next hour went on
+permission steps instead of her list. Backups for plants, check logs and
+screenshots go in the scratchpad the session names (or under the project),
+never `$TMPDIR` or `/tmp`. Ellie: "you never asked for permissions like this
+until today". If a session does get stuck in prompts, save the work to a
+branch with a HANDOFF note and start a fresh session.
+
 ---
 
 ## Verification, non-negotiable

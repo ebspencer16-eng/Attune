@@ -4844,3 +4844,31 @@ All built and in TASKS.md section 3. Points worth knowing:
   check-purchase-fulfilment.
 - Not yet driven end to end against real Supabase: a test purchase after
   migration 105 is the way to see the set-password screen.
+
+## 30 October, late: where I stopped (A211-A221), on branch wip-a211
+
+Saved on branch `wip-a211`, NOT on main: none of it has been through
+`npm run check` yet. Next session: `git checkout wip-a211`, finish, run the
+check and the build, merge to main, push.
+
+Done in the branch, unchecked:
+- A211 gift block: "Your first name" and a gift message in section 1; the
+  message goes into the recipient's invitation (check-purchase-fulfilment
+  asserts it).
+- A212 Explore Men/Women/Both in the chart controls row, shaded via
+  xp-btn-primary.
+- A213 promo delete marks deleted_at instead of removing the row (built-in
+  codes showed through); migration 107 must be run by Ellie (add to TASKS
+  section 1); validate-promo answers built-in codes; checkout asks the server
+  first. check-promo-delete extended and planted.
+- A214 order button stays pressable (muted class `not-ready`); a press with
+  something missing draws red `.field-missing` lines under each box.
+- A215 server refuses a second package for an email that already owns one
+  (create-payment-intent, ALREADY_OWNS, 409 alreadyOwns). STILL TO DO: the
+  page side (call /api/verify-core when the email is typed, show ALREADY_OWNS
+  under the email box with a link to /offerings#add-ons, and handle the 409).
+- A216 cream check mark; A217 "Order Number:".
+
+Not started: A218 Profile details pop-up, A219 account page names/emails
+only + "Edit details", A220 invite card opens a pop-up, A221 remove the
+invite tile from the account page. Then TASKS rows, the full check, push.
