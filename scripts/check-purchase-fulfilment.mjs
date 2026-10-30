@@ -113,13 +113,14 @@ if (!/dashboard/i.test(text(to(w, 'maya@example.com')[0]))) fails.push('a "later
 
 // 3. a gift
 w = world();
-await buy([{ p: 'core', p1: 'Sam', p2: 'Jo', g: 1, re: 'sam@example.org' }]);
+await buy([{ p: 'core', p1: 'Sam', p2: 'Jo', g: 1, re: 'sam@example.org', gn: 'Congratulations, you two' }]);
 const recId = w.users.get('sam@example.org');
 if (!recId) fails.push("a gift made no account for its recipient");
 if (w.users.has('maya@example.com')) fails.push("a gift made an account for the buyer, who is not the one taking it");
 if (!w.claims.some((c) => c.body.user_id === recId)) fails.push("a gift's order was not given to the recipient's account");
 const giftMail = to(w, 'sam@example.org')[0];
 if (!giftMail?.html.includes(`/app?setup=${TOKEN}`)) fails.push("the recipient's invitation has no set-up link of their own");
+if (!/Congratulations, you two/.test(text(giftMail))) fails.push("the gift message the buyer wrote is not in the recipient's invitation (A211)");
 if (!/Hi Sam and Jo,/.test(text(giftMail))) fails.push(`the gift invitation greets nobody: "${(text(giftMail).match(/Hi [^,]*,/) || [''])[0]}"`);
 if (!/sam@example\.org/.test(text(to(w, 'maya@example.com')[0]))) fails.push("the gift buyer's confirmation does not say the invitation went to the recipient");
 

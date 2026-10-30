@@ -89,6 +89,7 @@ export const ORDER_EMAILS = {
       buyerName: ctx.buyerName,
       pkgName: ctx.pkgName,
       giftUrl: ctx.giftUrl,
+      giftNote: ctx.giftNote,
     }),
   }),
 };
@@ -201,13 +202,17 @@ function partnerPurchaseInviteHtml({ buyerName, partnerName, partnerInviteUrl })
 // else, which is the thing that made /email-preview wrong. Removed rather
 // than previewed.
 
-function giftRecipientHtml({ recipientName, buyerName, pkgName, giftUrl }) {
+function giftRecipientHtml({ recipientName, buyerName, pkgName, giftUrl, giftNote }) {
   const body = `
     <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${_esc(buyerName)} gave you <strong style="color:#1E1610">${_esc(pkgName)}</strong>, an experience for you and your partner. Two exercises that map how you communicate and what you each expect. The joint results only appear once you're both done.</p>
     <div style="background:#FBF8F3;border:1px solid #F3EDE6;border-radius:10px;padding:16px 20px;margin:20px 0 0">
       <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">When you claim it</div>
       <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.65;margin:0">You'll set up your account and choose a password, then invite your partner from your dashboard. They'll receive their own unique link. Answer independently. Your results unlock together when you're both finished.</p>
     </div>
+    ${giftNote ? `<div style="border-left:3px solid #E8673A;padding:4px 0 4px 16px;margin:20px 0 0">
+      <div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:11px;color:#C17F47;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px">A note from ${_esc(buyerName)}</div>
+      <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#1E1610;line-height:1.7;margin:0;white-space:pre-line">${_esc(giftNote)}</p>
+    </div>` : ''}
   `;
 
   return brandedEmail({

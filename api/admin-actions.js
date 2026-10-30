@@ -11,7 +11,7 @@
  * Actions:
  *   beta_toggle  { code, active }          → set beta code active flag
  *   beta_upsert  { row }                   → insert/update a beta code (by code)
- *   beta_delete  { code }                  → remove a beta code from the table
+ *   beta_delete  { code }                  → switch a code off and hide it (deleted_at)
  */
 
 /**
@@ -25,6 +25,7 @@
  */
 export const config = { runtime: 'edge', regions: ['iad1'] };
 
+import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 import { corsHeaders, safeError, jsonBody } from './_lib/http.js';
 
 import { createClient } from '@supabase/supabase-js';
@@ -71,15 +72,29 @@ export default async function handler(req) {
     /* Ellie (A208f): a bin on each row that "should delete the promo code row
        from the table, but should not revoke access from the users who used
        that code". Nothing grants from this table: what somebody owns is read
-       from their order (api/_lib/entitlements.js), which keeps the code's name
-       in promo_code. So deleting the row stops the code being accepted and
-       takes nothing from anyone. check-promo-delete holds that. */
+       from their order (api/_lib/entitlements.js). check-promo-delete holds
+       that.
+
+       A deleted code keeps its row, switched off and stamped deleted_at
+       (migration 107), and the admin hides it. Removing the row did not work
+       for a code that is also built into the site: the built-in copy showed
+       through as "Always active" and went on being accepted (A213). The row
+       is what outranks it. A built-in code with no row yet gets one. */
     if (body.action === 'beta_delete') {
       const code = String(body.code || '').slice(0, 64);
       if (!code) return json({ error: 'Missing code' }, 400);
-      const { data, error } = await admin.from('beta_codes').delete().eq('code', code).select('code');
+      const stamp = { active: false, deleted_at: new Date().toISOString() };
+      const { data, error } = await admin.from('beta_codes').update(stamp).eq('code', code).select('code');
       if (error) return json({ error: safeError('admin-actions', error, 'Action failed.') }, 500);
-      if (!data?.length) return json({ error: 'That code was not in the table.' }, 404);
+      if (!data?.length) {
+        const built = COMPILED_BETA_CODES[code];
+        if (!built) return json({ error: 'That code was not in the table.' }, 404);
+        const m = typeof built === 'string' ? { pkg: built, mode: 'free', amount: 0 } : built;
+        const { error: insErr } = await admin.from('beta_codes').insert({
+          code, package_key: m.pkg || '*', discount_mode: m.mode || 'free', discount_value: m.amount || 0, ...stamp,
+        });
+        if (insErr) return json({ error: safeError('admin-actions', insErr, 'Action failed.') }, 500);
+      }
       return json({ ok: true });
     }
 

@@ -23,6 +23,10 @@ import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES, PACKAGE_NAMES } from './
 import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, compactItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
 import { isStandaloneCart, ownsCoreFor, emailOrNull } from './_lib/owns-core.js';
 import { fulfilOrder } from './_lib/fulfil-order.js';
+
+/* Placeholder words of mine, listed under A215 in TASKS.md. The page shows
+   the same sentence under the email box (public/checkout.html). */
+export const ALREADY_OWNS = 'This email already has an Attune account. You can add exercises or tools to it instead.';
 import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
 /* What each package already includes, so this file does not say it again. */
 
@@ -421,6 +425,21 @@ export default async function handler(req) {
 
   const buyerEmail = body.buyerEmail || body.email || null;
   const buyerName  = body.buyerName  || items[0]?.partner1Name || null;
+
+  /* ── ONE PACKAGE PER ACCOUNT, FOR YOURSELF (A215) ──────────────────────
+     Ellie: "make sure that an email that's already in use cannot purchase
+     another package (they could be prompted that they may purchase add-on
+     exercises or resources instead)." A gift is for somebody else and is not
+     refused. A check that could not run lets the order through: refusing a
+     paying customer on a failed read is the worse mistake, and the account
+     only gains. */
+  if (!standalone && buyerEmail && items.some((it) => !it.isGift && it.pkgKey)) {
+    const owned = await ownsCoreFor({ supabaseUrl: process.env.SUPABASE_URL, serviceKey: process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY, email: buyerEmail }).catch(() => ({ ok: false }));
+    if (owned.ok && owned.ownsCore) {
+      return new Response(JSON.stringify({ alreadyOwns: true, error: ALREADY_OWNS }), {
+        status: 409, headers: { 'Content-Type': 'application/json' } });
+    }
+  }
   const promoCode  = body.promoCode || null;
   // Minted here, before the payment exists, and nowhere else: see
   // api/_lib/order-number.js. Nothing sends one in, and a client-chosen
@@ -512,7 +531,8 @@ export default async function handler(req) {
       if (rows.length) dbRow = rows[0];
     }
 
-    if (!codeEntry && !dbRow) {
+    // A deleted code (migration 107) is no code, built-in copy or not (A213).
+    if ((!codeEntry && !dbRow) || dbRow?.deleted_at) {
       return new Response(JSON.stringify({ error: 'Invalid promo code' }), {
         status: 400, headers: { 'Content-Type': 'application/json' }
       });

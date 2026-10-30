@@ -1,4 +1,5 @@
 import { jsonBody } from './_lib/http.js';
+import { COMPILED_BETA_CODES } from './_lib/beta-codes.js';
 /**
  * POST /api/validate-promo
  *
@@ -85,7 +86,19 @@ export default async function handler(req) {
     return json({ valid: true, unverified: true });
   }
 
-  if (!row) return json({ valid: false, error: "That code isn't valid." });
+  /* A deleted code is no code (A213). A code with no row may be one built
+     into the site, and is answered from there, so checkout can ask this
+     about every code rather than keeping its own list. */
+  if (row?.deleted_at) return json({ valid: false, error: "That code isn't valid." });
+  if (!row) {
+    const built = COMPILED_BETA_CODES[code];
+    if (!built) return json({ valid: false, error: "That code isn't valid." });
+    const m = typeof built === 'string' ? { pkg: built, mode: 'free', amount: 0 } : built;
+    return json({
+      valid: true, pkg: m.pkg || 'core', mode: m.mode || 'free', amount: m.amount || 0,
+      includesWorkbook: !!m.includesWorkbook, workbookVariant: m.workbookVariant || 'digital',
+    });
+  }
   if (row.active === false) return json({ valid: false, error: 'This code has been deactivated.' });
   if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) {
     return json({ valid: false, error: 'This code has expired.' });

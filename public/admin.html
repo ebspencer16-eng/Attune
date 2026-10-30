@@ -2040,21 +2040,19 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
        logic to determine what type of chart you build for the cut you make,
        and have a dropdown so the user can change chart type." -->
   <div class="xp-viz" id="xp-viz">
-    <!-- Ellie (A208e): "a toggle above explore chart to view male, female, or
-         both. This adds another cut to the data, and should default to both."
-         The cut is the stored pronoun, named the way QX_VAL_LABELS names it
-         everywhere else on this page. -->
-    <span class="xp-unit" role="group" aria-label="Men, women or both" style="display:inline-flex;gap:0;margin-bottom:.6rem;">
-      <button type="button" class="xp-btn" data-xp-gender="both" aria-pressed="true" style="border-radius:8px 0 0 8px;">Both</button>
-      <button type="button" class="xp-btn" data-xp-gender="he/him" aria-pressed="false" style="border-radius:0;border-left:0;">Men</button>
-      <button type="button" class="xp-btn" data-xp-gender="she/her" aria-pressed="false" style="border-radius:0 8px 8px 0;border-left:0;">Women</button>
-    </span>
     <div class="xp-viz-head">
       <span class="xp-viz-label" id="xp-viz-why">Chart</span>
       <!-- Ellie: "a toggle to switch between count and percentages." The same
            switch as Cells below, made one click: % is each colour's share of
            its own answers, so every colour adds to 100. -->
-      <span class="xp-unit" role="group" aria-label="Count or percent" style="margin-left:auto;display:inline-flex;gap:0;">
+      <!-- Ellie (A208e, A212): Men / Women / Both, in line with the other
+           controls, the chosen one shaded the way Count / % shades. -->
+      <span class="xp-unit" role="group" aria-label="Men, women or both" style="margin-left:auto;display:inline-flex;gap:0;">
+        <button type="button" class="xp-btn xp-btn-primary" data-xp-gender="both" aria-pressed="true" style="border-radius:8px 0 0 8px;">Both</button>
+        <button type="button" class="xp-btn" data-xp-gender="he/him" aria-pressed="false" style="border-radius:0;border-left:0;">Men</button>
+        <button type="button" class="xp-btn" data-xp-gender="she/her" aria-pressed="false" style="border-radius:0 8px 8px 0;border-left:0;">Women</button>
+      </span>
+      <span class="xp-unit" role="group" aria-label="Count or percent" style="display:inline-flex;gap:0;">
         <button type="button" class="xp-btn" id="xp-unit-count" aria-pressed="true" style="border-radius:8px 0 0 8px;">Count</button>
         <button type="button" class="xp-btn" id="xp-unit-pct" aria-pressed="false" style="border-radius:0 8px 8px 0;border-left:0;">%</button>
       </span>
@@ -2572,7 +2570,7 @@ window.adminAuthHeaders = function(extra){
        the one they were looking at was. Empty says the page is waiting for a
        question, which is what it is doing. */
     GENDER = 'both';
-    document.querySelectorAll('[data-xp-gender]').forEach((o) => o.setAttribute('aria-pressed', String(o.dataset.xpGender === 'both')));
+    document.querySelectorAll('[data-xp-gender]').forEach((o) => { const on = o.dataset.xpGender === 'both'; o.setAttribute('aria-pressed', String(on)); o.classList.toggle('xp-btn-primary', on); });
     FILTERS = [];
     if ($('xp-row-field')) $('xp-row-field').value = '';
     if ($('xp-col-field')) $('xp-col-field').value = '';
@@ -2647,7 +2645,7 @@ window.adminAuthHeaders = function(extra){
       document.querySelectorAll('[data-xp-gender]').forEach((b) => {
         b.onclick = () => {
           GENDER = b.dataset.xpGender;
-          document.querySelectorAll('[data-xp-gender]').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+          document.querySelectorAll('[data-xp-gender]').forEach((o) => { o.setAttribute('aria-pressed', String(o === b)); o.classList.toggle('xp-btn-primary', o === b); });
           render();
         };
       });
@@ -3816,7 +3814,8 @@ async function renderPromosPage(force) {
      It shows every code the product will accept, not only the ones that have
      been redeemed. A code created and never used is the one you most need to
      see, because the question you have about it is whether it is live. */
-  const codeRows = Object.values(codeByName).map((c) => {
+  /* A deleted code keeps a row so it stays off (A213); it is not shown. */
+  const codeRows = Object.values(codeByName).filter((c) => !c.deleted_at).map((c) => {
     const used = usage[String(c.code || '').toUpperCase()] || { orders: 0, revenue: 0, lastUsed: 0 };
     return {
       code: c.code,

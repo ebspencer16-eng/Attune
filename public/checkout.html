@@ -79,6 +79,8 @@
   .btn-primary{background:linear-gradient(135deg,var(--orange),#d45a2e);color:white;border:none;padding:.9rem 2.1rem;border-radius:12px;font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;font-family:var(--bfont);text-decoration:none;display:inline-block;transition:transform .18s;width:100%}
   .btn-primary:hover:not(:disabled){transform:translateY(-2px)}
   .btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .btn-primary.not-ready{opacity:.55;transform:none}
+  .field-missing{color:#C2410C;font-size:.76rem;margin-top:.35rem;line-height:1.4}
 
   /* INFO BOXES */
   .info-box{background:linear-gradient(135deg,#F0F8FF,#F5F0FF);border:1.5px solid #D4E4FF;border-radius:12px;padding:.9rem 1.1rem;display:flex;gap:.7rem;align-items:flex-start;margin-bottom:1.1rem}
@@ -115,7 +117,7 @@
   /* SUCCESS */
   .co-success{text-align:center;padding:2.64rem var(--s-2xl);max-width:480px;margin:0 auto;display:none}
   .co-success.visible{display:block}
-  .success-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#9B5DE5);display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-xl);font-size:2rem}
+  .success-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#9B5DE5);display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-xl);font-size:2rem;color:#FFFDF9}
   .co-success h1{font-family:var(--hfont);font-size:2rem;margin-bottom:var(--s-sm)}
   .co-success p{font-size:.9rem;color:var(--muted);line-height:1.75;margin-bottom:var(--s-xl)}
 
@@ -305,10 +307,6 @@
       </div>
       <div class="co-body">
         <!-- Email -->
-        <div class="form-group" id="buyerNameGroup" style="display:none">
-          <label class="form-label" for="buyerName">Your first name</label>
-          <input class="form-input" type="text" id="buyerName" autocomplete="given-name" oninput="validateForm()">
-        </div>
         <div class="form-group" id="emailGroup">
           <label class="form-label" for="email">Email address</label>
           <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
@@ -424,7 +422,7 @@
           <div class="error-msg" id="payError" style="display:none"></div>
         </div>
         <div style="margin-top:var(--s-lg)">
-          <button class="btn-primary" id="submitBtn" onclick="handleSubmit(event)" disabled>
+          <button class="btn-primary not-ready" id="submitBtn" onclick="handleSubmit(event)">
             <span id="btnLabel">Complete order</span>
           </button>
         </div>
@@ -762,7 +760,7 @@ async function refreshTax() {
 function persistOrderComplete(orderNum) {
   try {
     const onEl = document.getElementById('coOrderNum');
-    if (onEl && orderNum) onEl.textContent = 'Order ' + orderNum;
+    if (onEl && orderNum) onEl.textContent = 'Order Number: ' + orderNum;
     localStorage.setItem('attune_last_order', JSON.stringify({
       orderNum: orderNum || '',
       setupUrl: document.getElementById('startLink').href,
@@ -808,7 +806,7 @@ function persistOrderComplete(orderNum) {
       if (rec.setupUrl) document.getElementById('startLink').href = rec.setupUrl;
       if (rec.email) { try { document.getElementById('coEmailDisp').textContent = rec.email; } catch(e) {} }
       const onEl = document.getElementById('coOrderNum');
-      if (onEl && rec.orderNum) onEl.textContent = 'Order ' + rec.orderNum;
+      if (onEl && rec.orderNum) onEl.textContent = 'Order Number: ' + rec.orderNum;
       document.getElementById('coWrap').style.display = 'none';
       const s = document.getElementById('coSuccess');
       s.classList.add('visible');
@@ -992,7 +990,7 @@ function renderItemsStep() {
       <!-- Who is this purchase for? (A208b, Ellie's layout and words.) Until
            one is chosen this question is all the section shows. -->
       <div class="form-label" style="margin-bottom:.55rem">Who is this purchase for?</div>
-      <div class="item-intent">
+      <div class="item-intent" id="intent-${idx}">
         <button type="button" class="item-intent-btn ${it.intent==='self'?'active':''}" onclick="setItemIntent(${idx},'self')">
           <span class="item-intent-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="6" r="2.6"/><circle cx="17" cy="6" r="2.6"/><path d="M2.8 18.6c0-2.7 1.7-4.4 4.2-4.4 1.5 0 2.7.6 3.6 1.7"/><path d="M21.2 18.6c0-2.7-1.7-4.4-4.2-4.4-1.5 0-2.7.6-3.6 1.7"/><path d="M10.2 15.9 12 17.1l1.8-1.2"/></svg></span>
           <span>For myself and my partner</span>
@@ -1045,6 +1043,17 @@ function renderItemsStep() {
             <input class="form-input item-input" type="email" data-idx="${idx}" data-field="recipientEmail" id="remail-${idx}" value="${(it.recipientEmail||'').replace(/"/g,'&quot;')}" autocomplete="off" oninput="onItemInput(this)">
             <div class="form-hint">We will send an invitation for them to set up their account and invite their partner.</div>
           </div>
+        </div>
+        <!-- A211: who it is from, then the message, both in the recipient's
+             invitation email. -->
+        ${idx === _items.findIndex((x) => x.intent === 'gift') ? `<div class="form-group">
+          <label class="form-label" for="buyerName">Your first name</label>
+          <input class="form-input" type="text" id="buyerName" value="${(window._buyerName||'').replace(/"/g,'&quot;')}" autocomplete="given-name" oninput="window._buyerName=this.value;validateForm()">
+          <div class="form-hint">So we can say who it's from.</div>
+        </div>` : ''}
+        <div class="form-group">
+          <label class="form-label" for="giftNote-${idx}">Gift message (optional)</label>
+          <textarea class="form-input item-input" rows="2" maxlength="200" data-idx="${idx}" data-field="giftNote" id="giftNote-${idx}" oninput="onItemInput(this)">${(it.giftNote || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea>
         </div>
       ` : ''}
       ${isPhysical ? `
@@ -1131,22 +1140,19 @@ function onSelfEmail(el) {
   validateForm();
 }
 /* The buyer's own name: their first name in section 1 when the order is for
-   them, otherwise the "Your first name" beside their email, which only a gift
-   needs, because a gift's section 1 holds the recipient's name. */
+   them, otherwise the gift's "Your first name" (A211). Held on window because
+   section 1 is redrawn whenever a choice changes. */
 function buyerNameFor() {
   const self = _items.find((it) => it.intent === 'self');
   if (self) return String(self.partner1Name || '').trim();
-  return String(document.getElementById('buyerName')?.value || '').trim();
+  return String(window._buyerName || '').trim();
 }
 /* The contact email field shows only when section 1 has not asked for it,
    and the buyer's name beside it only for a gift. */
 function syncContactFields() {
   const anySelf = firstSelfIdx() >= 0;
-  const anyGift = _items.some((it) => it.intent === 'gift');
   const g = document.getElementById('emailGroup');
   if (g) g.style.display = anySelf ? 'none' : '';
-  const n = document.getElementById('buyerNameGroup');
-  if (n) n.style.display = anyGift && !anySelf ? '' : 'none';
 }
 
 function whoFor(it) {
@@ -1382,8 +1388,52 @@ function validateForm() {
 
   const ready = itemsValid && email.includes('@') && hasValidBilling
     && (!_items.some((it) => it.intent === 'gift') || buyerNameFor().length >= 2);
+  /* A214: the button stays pressable, muted, so a press can say what is
+     missing. A disabled button takes no click, which is how Ellie sat in
+     front of a grey button with no idea it wanted her partner's name. */
   const btn = document.getElementById('submitBtn');
-  if (btn) btn.disabled = !ready;
+  // Only the look: `disabled` belongs to a payment in progress.
+  if (btn) btn.classList.toggle('not-ready', !ready);
+  if (_showMissing) drawMissing();
+  return ready;
+}
+
+/* Why the order cannot go yet, each reason under the box it is about.
+   Placeholder words of mine except the partner's line, which is Ellie's
+   example (A214), listed under A214 in TASKS.md. */
+let _showMissing = false;
+function missingReasons() {
+  const out = [];
+  const name = (v) => String(v || '').trim().length >= 2;
+  const at = (id, text) => out.push({ id, text });
+  _items.forEach((it, idx) => {
+    if (!it.intent) return at(`intent-${idx}`, 'Choose who this purchase is for');
+    if (it.intent === 'self') {
+      if (!name(it.partner1Name)) at(`p1name-${idx}`, 'Fill in your first name');
+      if (idx === firstSelfIdx() && !EMAIL_OK(document.getElementById('email')?.value)) at('selfEmail', 'Fill in your email');
+      if (!name(it.partner2Name)) at(`p2name-${idx}`, "Fill in your partner's first name");
+      if (it.format !== 'physical' && !it.invitePartnerLater && !EMAIL_OK(it.partnerEmail)) at(`pemail-${idx}`, "Fill in your partner's email, or tick \"I will invite my partner later\"");
+    } else {
+      if (!name(it.partner1Name)) at(`p1name-${idx}`, "Fill in the recipient's first name");
+      if (it.format !== 'physical' && !EMAIL_OK(it.recipientEmail)) at(`remail-${idx}`, "Fill in the recipient's email");
+      if (idx === _items.findIndex((x) => x.intent === 'gift') && firstSelfIdx() < 0 && buyerNameFor().length < 2) at('buyerName', 'Fill in your first name');
+    }
+  });
+  if (firstSelfIdx() < 0 && !EMAIL_OK(document.getElementById('email')?.value)) at('email', 'Fill in your email');
+  const isFreePromo = appliedPromoCode && appliedPromoMode === 'free';
+  if (!cardComplete && !isFreePromo) at('cardNumber', 'Fill in your card details');
+  return out;
+}
+function drawMissing() {
+  document.querySelectorAll('.field-missing').forEach((n) => n.remove());
+  for (const r of missingReasons()) {
+    const el = document.getElementById(r.id);
+    if (!el) continue;
+    const msg = document.createElement('div');
+    msg.className = 'field-missing';
+    msg.textContent = r.text;
+    el.insertAdjacentElement('afterend', msg);
+  }
 }
 
 // ── Stripe setup ─────────────────────────────────────────────────────────────
@@ -1660,6 +1710,13 @@ document.getElementById('email').addEventListener('input', validateForm);
 async function handleSubmit(e) {
   if (e) e.preventDefault();
   const btn = document.getElementById('submitBtn');
+  if (!validateForm()) {
+    _showMissing = true;
+    drawMissing();
+    const first = document.querySelector('.field-missing');
+    if (first) first.previousElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   btn.disabled = true;
   // Inline spinner + text while payment is processing
   btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:.55rem">
@@ -2117,7 +2174,10 @@ async function applyPromo() {
     // $1 lets us validate the full Stripe path end-to-end with real charges.
     'BETA-CORE-1':          { pkg: 'core', mode: 'fixed', amount: 1 },
   };
-  let codeEntry = VALID_CODES[code];
+  /* The server is asked first, about every code: a code this page lists can
+     have been deleted in the admin since (A213). The list below is only what
+     to fall back on when the server cannot be reached. */
+  let codeEntry = null;
   // Numbered beta codes (ATTUNE-BETA-01, -02, …) live in the database and all
   // grant the same thing: a free Foundation assessment plus a free digital
   // workbook, single-use. Recognize the whole family here so issuing a new
@@ -2168,6 +2228,7 @@ async function applyPromo() {
     // unreachable). Server stays the source of truth at purchase time.
     // Only for the beta family, whose terms are known: any other code that
     // could not be checked is not applied on a guess.
+    if (!codeEntry && VALID_CODES[code]) codeEntry = VALID_CODES[code];
     if (!codeEntry && _betaFamily) {
       codeEntry = { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
     } else if (!codeEntry) {
