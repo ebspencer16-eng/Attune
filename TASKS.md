@@ -9,6 +9,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A223 | **Please run migration 107.** It lets a deleted promo code stay deleted: some codes are also built into the site, and deleting their row let the built-in copy come back as "Always active" (A213). Safe to run now; the fix that uses it goes live with A213. Steps just below this table. |
 | A210 | **When the app is live, the order email's "Attune app" and "app" become App Store links.** Nothing to do now: they switch on with the same setting as the rest of the app links (O1). This row is the reminder to check one real confirmation email that day. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
@@ -21,21 +22,54 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
+### One thing to run, for A223
+
+**Paste this into Terminal.** It copies migration 107 and prints `copied`.
+
+```bash
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/107_promo_deleted_at.sql | pbcopy && echo copied
+```
+
+**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned."
+
+<!-- SQL 107_promo_deleted_at.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 107: deleting a promo code (A213).
+--
+-- Ellie: "I started deleting and only some would delete, others switched to
+-- always active and the bin icon went away."
+--
+-- Some codes exist twice: built into the site (ATTUNE-BETA-01 to 12,
+-- BETA-CORE and the rest, api/_lib/beta-codes.js) and as a row here. The bin
+-- removed the row, the built-in copy showed through as "Always active", and
+-- the code went on working. So a deleted code keeps its row, marked deleted
+-- and switched off. The row is what outranks the built-in copy, it is hidden
+-- from the admin's table, and past orders on the code still read their
+-- discount from it. Nobody loses anything: access is read from orders.
+--
+-- Safe to run again.
+-- ============================================================================
+
+alter table public.beta_codes add column if not exists deleted_at timestamptz;
+```
+<!-- /SQL -->
+
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
-| A211 | **Gift: "Your first name", so we can say who it is from, moves into section 1, above a gift message box.** The gift message box went missing on the phone; it comes back, and the message goes into the recipient's invitation email. |
-| A212 | **Explore: the Men / Women / Both picker sits in line with the other controls on the right, with the chosen one shaded (Both to start).** |
-| A213 | **Promo codes: some codes would not delete and turned into "Always active".** Finding out why and fixing it. |
-| A214 | **Checkout: when Complete order cannot be pressed, red text under the box that needs filling says why** (for example "Fill in your partner's first name"). |
-| A215 | **Checkout: an email that already has an Attune account cannot buy another package for itself; it is told it can add exercises or tools instead.** |
-| A216 | **Thank-you page: a cream check mark in the circle, not black.** |
-| A217 | **Thank-you page: "Order Number:" before the number.** |
-| A218 | **"Finish setting up your profile" stays on the dashboard and opens "Profile details":** name box half width with the three pronoun choices to its right, middle aligned; the note about names under the pop-up's header; the partner's email box only when we do not have it; then each demographic question; save and exit once all are answered. |
-| A219 | **Account page: personal info shows only names and emails; "Edit profile" becomes "Edit details" and opens the Profile details pop-up.** |
-| A220 | **The "Invite your partner" card opens a pop-up with only the partner's email and a send button.** |
-| A221 | **Account page: the "Invite your partner" tile comes out.** |
+| A211 | **Gift: "Your first name", so we can say who it is from, moves into section 1, above a gift message box.** The gift message box went missing on the phone; it comes back, and the message goes into the recipient's invitation email. **Status:** Built, not yet checked (branch wip-a211). |
+| A212 | **Explore: the Men / Women / Both picker sits in line with the other controls on the right, with the chosen one shaded (Both to start).** **Status:** Built, not yet checked (branch wip-a211). |
+| A213 | **Promo codes: some codes would not delete and turned into "Always active".** Finding out why and fixing it. **Status:** Built, not yet checked (branch wip-a211); needs A223. |
+| A214 | **Checkout: when Complete order cannot be pressed, red text under the box that needs filling says why** (for example "Fill in your partner's first name"). **Status:** Built, not yet checked (branch wip-a211). |
+| A215 | **Checkout: an email that already has an Attune account cannot buy another package for itself; it is told it can add exercises or tools instead.** **Status:** Server half built (branch wip-a211); the page half is next. |
+| A216 | **Thank-you page: a cream check mark in the circle, not black.** **Status:** Built, not yet checked (branch wip-a211). |
+| A217 | **Thank-you page: "Order Number:" before the number.** **Status:** Built, not yet checked (branch wip-a211). |
+| A218 | **"Finish setting up your profile" stays on the dashboard and opens "Profile details":** name box half width with the three pronoun choices to its right, middle aligned; the note about names under the pop-up's header; the partner's email box only when we do not have it; then each demographic question; save and exit once all are answered. **Status:** Not started. |
+| A219 | **Account page: personal info shows only names and emails; "Edit profile" becomes "Edit details" and opens the Profile details pop-up.** **Status:** Not started. |
+| A220 | **The "Invite your partner" card opens a pop-up with only the partner's email and a send button.** **Status:** Not started. |
+| A221 | **Account page: the "Invite your partner" tile comes out.** **Status:** Not started. |
 | A222 | **More sweeps.** |
 
 
