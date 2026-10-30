@@ -115,7 +115,9 @@ export default async function handler(req) {
   try {
     const emails = [accountEmail];
     if (partnerEmail && partnerEmail.includes('@')) emails.push(partnerEmail);
-    const inList = emails.map(e => `"${String(e).replace(/[",()]/g, '')}"`).join(',');
+    // Encoded: a `+` left bare in a query string reads as a space, so
+    // jane+x@example.com was looked up as "jane x@example.com" and matched nothing.
+    const inList = emails.map(e => `"${encodeURIComponent(String(e).replace(/[",()]/g, ''))}"`).join(',');
     const oq = `${sUrl}/rest/v1/orders?select=addon_workbook,pkg_key&buyer_email=in.(${inList})`;
     const or = await fetch(oq, { headers: dbHeaders });
     const orders = or.ok ? await or.json().catch(() => []) : [];

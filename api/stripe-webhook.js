@@ -27,6 +27,7 @@ import { reportToSentry } from './_lib/sentry-edge.js';
 import { writeEntitlements } from './_lib/entitlements.js';
 import { SITE_URL } from './_lib/site.js';
 import { recordConsent } from './_lib/consent.js';
+import { legacyOrderNumber } from './_lib/order-number.js';
 
 async function verifyStripeSignature(body, signature, secret) {
   // Stripe webhook signature format: t=timestamp,v1=hash
@@ -68,7 +69,7 @@ export default async function handler(req) {
     return await handleWebhook(req);
   } catch (err) {
     console.error('[stripe-webhook] unhandled error:', err);
-    reportToSentry(err, { route: '/api/stripe-webhook', request: req }).catch(() => {});
+    await reportToSentry(err, { route: '/api/stripe-webhook', request: req }).catch(() => {});
     // Return 200 even on error — Stripe retries webhook failures up to
     // 72 hours, so we'd rather log + continue than get a storm of retries
     // for a bug that Sentry will let us fix.
@@ -180,9 +181,13 @@ async function handleWebhook(req) {
         console.warn('[webhook] could not parse items metadata, falling back to single-item:', e);
       }
 
-      const d = new Date();
-      const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-      const baseOrderNum = meta.orderNum || `ATT-${dateStr}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+      // The number checkout showed the customer, from the metadata. A payment
+      // made before the number was minted server-side has none, and gets the
+      // number checkout derived for it then, from the payment itself, so a
+      // retried delivery gets the same one. This was random per delivery, so
+      // the customer's number matched no row and a retry wrote a second
+      // order (A202, api/_lib/order-number.js).
+      const baseOrderNum = meta.orderNum || legacyOrderNumber(intent);
 
       // ── Stripe Tax: record the transaction ──────────────────────────────
       // If the checkout computed a tax_calculation_id, we need to convert
@@ -271,7 +276,7 @@ async function handleWebhook(req) {
               body: JSON.stringify({
                 order_num:               orderNum,
                 buyer_name:              meta.buyerName || it.p1 || null,
-                buyer_email:             intent.receipt_email || null,
+                buyer_email:             intent.receipt_email ? intent.receipt_email.trim().toLowerCase() : null, // migration 102
                 partner1_name:           it.p1 || null,
                 partner2_name:           it.p2 || null,
                 pkg_key:                 it.p,
@@ -339,7 +344,7 @@ async function handleWebhook(req) {
             body: JSON.stringify({
               order_num:               baseOrderNum,
               buyer_name:              meta.buyerName || meta.partner1Name || null,
-              buyer_email:             intent.receipt_email || null,
+              buyer_email:             intent.receipt_email ? intent.receipt_email.trim().toLowerCase() : null, // migration 102
               partner1_name:           meta.partner1Name || null,
               partner2_name:           meta.partner2Name || null,
               pkg_key:                 meta.pkgKey || null,

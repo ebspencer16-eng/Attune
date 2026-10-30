@@ -213,16 +213,11 @@ const OWNED_TABLES = {
 const OWNER_RULES = ['ownedBy', 'withoutDemoOrders', 'demoOwners'];
 
 /**
- * Endpoints that read an owned table and are not analytics.
- *
- * api/orders.js serves one customer the order they placed. A demo account has
- * to be able to read its own order like anybody else, so filtering there would
- * break the thing demos exist for. It is in ADMIN_FILES because checkAdminAuth
- * guards one of its branches, not because it draws a figure.
+ * Endpoints that read an owned table and are not analytics. Empty since
+ * api/orders.js, the one customer-facing reader that sat here, was removed
+ * (A201b: nothing had called it since 27 October).
  */
-const NOT_ANALYTICS = {
-  'orders.js': 'serves one customer their own order; a demo must still be able to read its own',
-};
+const NOT_ANALYTICS = {};
 
 /**
  * ── WHAT THIS HALF PROVES, AND WHAT IT DOES NOT ───────────────────────────

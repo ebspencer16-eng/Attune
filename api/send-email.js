@@ -381,7 +381,8 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
-function sanitizeBody(body) {
+/** Exported for check-email-escaping, which applies it exactly as the handler does. */
+export function sanitizeBody(body) {
   const out = {};
   for (const [k, v] of Object.entries(body || {})) {
     if (typeof v === 'string' && !NO_ESCAPE_FIELDS.has(k)) {

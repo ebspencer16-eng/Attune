@@ -71,7 +71,7 @@ export default async function handler(req) {
     return await handlePartnerSync(req);
   } catch (err) {
     console.error('[partner-sync] unhandled error:', err);
-    reportToSentry(err, { route: '/api/partner-sync', request: req }).catch(() => {});
+    await reportToSentry(err, { route: '/api/partner-sync', request: req }).catch(() => {});
     return new Response(JSON.stringify({ ok: false, error: 'Internal error' }), { status: 500, headers: CORS });
   }
 }

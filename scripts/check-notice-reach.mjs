@@ -36,7 +36,7 @@ const EXEMPT = new Set([
   'admin.html',            // behind a password, not a customer surface
   'email-preview.html',    // a preview of an email
   '404.html',              // an error page is not the place to ask
-  'workbook-render.html',  // print template, rendered to PDF by api/generate-pdf.js
+  'workbook-render.html',  // print template the website opens with a payload
   'portal.html',           // a redirect stub, nobody reads it
 ]);
 

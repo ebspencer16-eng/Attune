@@ -38,7 +38,7 @@ import AnnotationSheet from '@/components/annotation-sheet';
 import MarkSheet from '@/components/mark-sheet';
 import { marksIn, unplacedMarks } from '@/constants/mark-reach';
 import { deleteNote, type Note, type Tag } from '@/api/client';
-import { DELETE_NOTE, REMOVE_MARK } from '@/constants/delete-copy';
+import { DELETE_FAILED, DELETE_NOTE, REMOVE_MARK } from '@/constants/delete-copy';
 import { copyText } from '@/lib/copy-text';
 
 type Ctx = {
@@ -769,6 +769,12 @@ export function AnnotationProvider({
     railFor.current = section;
   }, [section]);
 
+  /** Puts a note back on the page, and says so, when its delete did not land. */
+  const putBackIfNotDeleted = (was: Note | undefined) => (r: Awaited<ReturnType<typeof deleteNote>>) => {
+    if (r.ok || r.error.kind === 'not_found') return;
+    if (was) onCreated(was);
+    Alert.alert(DELETE_FAILED.title, DELETE_FAILED.body);
+  };
   const value = useMemo<Ctx>(() => ({
     marks,
     railHost,
@@ -823,9 +829,14 @@ export function AnnotationProvider({
      * this as a one-tap deletion.
      */
     remove: (mark: Mark) => {
+      /* Off the page at once, back on it if the delete fails, with the same
+         line the Notes tab shows (A202). It used to disappear and return on
+         the next load, unexplained. `go` stays four lines on purpose: see
+         the note above about check-destructive-confirm's window. */
+      const putBack = putBackIfNotDeleted(notes.find((n) => n.id === mark.id));
       const go = () => {
         onRemoved?.(mark.id);
-        deleteNote(mark.id);
+        deleteNote(mark.id).then(putBack);
       };
       if (!mark.hasWords) { go(); return; }
       Alert.alert(DELETE_NOTE.title, DELETE_NOTE.body, [
@@ -838,7 +849,7 @@ export function AnnotationProvider({
     revealed,
     enabled: true,
     focus,
-  }), [marks, onRemoved, focus, claim, unplaced, markers, reportMarker, revealed, pageGesture]);
+  }), [marks, notes, onCreated, onRemoved, focus, claim, unplaced, markers, reportMarker, revealed, pageGesture]);
 
   /**
    * The row behind the mark the reader tapped.

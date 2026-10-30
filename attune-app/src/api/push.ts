@@ -144,10 +144,19 @@ export async function registerForPush({ ask = false } = {}): Promise<PushState> 
   return state;
 }
 
-/** Turn it off from Settings: the server forgets every device they own. */
-export async function turnPushOff(): Promise<void> {
-  await savePushToken({ optIn: false }).catch(() => undefined);
+/**
+ * Turn it off from Settings: the server forgets every device they own.
+ *
+ * True only when the server took it. This used to record "off" whatever the
+ * server said, so a failed save left Settings reading Off while the server
+ * went on sending, and the phone, which still allows notifications, went on
+ * showing them (A202).
+ */
+export async function turnPushOff(): Promise<boolean> {
+  const res = await savePushToken({ optIn: false }).catch(() => null);
+  if (!res?.ok) return false;
   await remember('denied');
+  return true;
 }
 
 /**

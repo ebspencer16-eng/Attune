@@ -9,8 +9,8 @@
  *      Playwright, containerised by Dockerfile.workbook, reached through
  *      /api/store-workbook-pdf. Full bleed cover, editorial layout.
  *      THIS IS THE WORKBOOK.
- *   2. public/workbook-render.html, printed by /api/generate-pdf via
- *      Browserless. A simpler page.
+ *   2. public/workbook-render.html, a simpler page the website opens in a tab.
+ *      Its server-side printer, /api/generate-pdf, was removed under A201b.
  *   3. api/generate-workbook.js, a .docx assembled with the `docx` package.
  *
  * The website has called (1) all along. The app called (3), then I changed it to

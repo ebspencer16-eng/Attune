@@ -49,7 +49,7 @@ const sectionOf = (idx) => {
 
 /** Where every id is defined, from the table rows. */
 const rowSection = {};
-for (const m of doc.matchAll(/^\| ([A-Z]+\d+) \|/gm)) rowSection[m[1]] = sectionOf(m.index);
+for (const m of doc.matchAll(/^\| ([A-Z]+\d+[a-z]?) \|/gm)) rowSection[m[1]] = sectionOf(m.index);
 
 /** The run section: from its heading to the next `## `. */
 const runHead = /^### [^\n]*\brun\b[^\n]*$/im.exec(doc);
@@ -75,7 +75,9 @@ if (!runHead) {
   const run = runWhole.replace(/```sql[\s\S]*?```/g, (m) => m.replace(/[^\n]/g, ' '));
 
   // 1 and 2: every id named in the run section.
-  const named = [...new Set([...run.matchAll(/\b([A-Z]{1,3}\d+)\b/g)].map((m) => m[1]))];
+  // A trailing letter is part of an id here: A201a and A201b are rows of
+  // their own, and the first block filed under one was read as naming none.
+  const named = [...new Set([...run.matchAll(/\b([A-Z]{1,3}\d+[a-z]?)\b/g)].map((m) => m[1]))];
   if (!named.length) {
     fails.push('the run section names no row id, so nothing connects the block to a task she can see the state of.');
   }

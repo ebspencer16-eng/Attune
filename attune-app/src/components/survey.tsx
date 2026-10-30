@@ -84,6 +84,8 @@ export default function Survey({ onDone }: { onDone: () => void }) {
      decorative: it appears once something has actually reached the server. */
   const [savedAt, setSavedAt] = useState(0);
   const latest = useRef<Record<string, Answer>>({});
+  /** The saves, one after another. See setAns. */
+  const queue = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
     let live = true;
@@ -103,16 +105,23 @@ export default function Survey({ onDone }: { onDone: () => void }) {
     const next = { ...latest.current, [id]: v };
     latest.current = next;
     setAnswers(next);
-    /* Fire and forget. The next answer resaves everything, so a dropped
-       request costs nothing and a failed one is not worth a banner. */
-    saveSurvey({ answers: next }).then((r) => { if (r.ok) setSavedAt(Date.now()); });
+    /* No await on the tap. The next answer resaves everything, so a dropped
+       request costs nothing and a failed one is not worth a banner. But one
+       save at a time, in order: the server keeps whatever arrives last, so
+       two in flight could land backwards and put an older set back (A202).
+       Each takes latest.current when it goes, not what it was queued with. */
+    queue.current = queue.current
+      .then(() => saveSurvey({ answers: latest.current }))
+      .then((r) => { if (r.ok) setSavedAt(Date.now()); }, () => {});
   }, []);
 
   const submit = useCallback(async () => {
     if (sending) return;
     setSending(true);
     setFailed(null);
-    const r = await saveSurvey({ answers: latest.current, done: true });
+    const p = queue.current.then(() => saveSurvey({ answers: latest.current, done: true }));
+    queue.current = p.then(() => {}, () => {});
+    const r = await p;
     setSending(false);
     if (!r.ok) {
       setFailed(r.error.kind === 'offline'

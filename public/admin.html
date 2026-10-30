@@ -2497,7 +2497,9 @@ window.adminAuthHeaders = function(extra){
     $('xp-title').textContent = t;
     $('xp-meta').textContent = modeTxt + ' \u00b7 ' + n + ' individuals in this cut \u00b7 ' + CUBE.count + ' total. Cells with n<5 are dimmed.';
   }
-  function esc(s){ return String(s).replace(/</g,'&lt;'); }
+  // All five, not just <: this one fills option VALUES, and a value carrying a
+  // quote would end the attribute (A202, from the sweep of typed values into markup).
+  function esc(s){ return String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
   function renderFilters(){
     const wrap = $('xp-filters'); wrap.innerHTML = '';

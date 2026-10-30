@@ -1085,7 +1085,7 @@ export function configureApi(opts: {
  * building a PDF on another service.
  */
 const REQUEST_TIMEOUT_MS = 20000;
-const SLOW_PATHS = [/store-workbook/, /generate-pdf/];
+const SLOW_PATHS = [/store-workbook/];
 const timeoutFor = (path: string) => (SLOW_PATHS.some((r) => r.test(path)) ? 70000 : REQUEST_TIMEOUT_MS);
 
 /**

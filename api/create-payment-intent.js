@@ -14,6 +14,7 @@
  */
 
 import { jsonBody } from './_lib/http.js';
+import { mintOrderNumber } from './_lib/order-number.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
@@ -215,7 +216,7 @@ async function calculateTaxWithStripe(secretKey, items, customerAddress, promoCo
       //   - Unsupported country → error.code = 'tax_location_unknown'
       // Either way: log and fall back to zero tax so checkout doesn't break.
       console.error('[tax] Stripe Tax calculation failed:', data.error?.message || data);
-      reportToSentry(new Error('Stripe Tax failed: ' + (data.error?.message || 'unknown')), {
+      await reportToSentry(new Error('Stripe Tax failed: ' + (data.error?.message || 'unknown')), {
         route: '/api/create-payment-intent',
         extra: { stripeError: data.error, customerAddress },
       }).catch(() => {});
@@ -229,7 +230,7 @@ async function calculateTaxWithStripe(secretKey, items, customerAddress, promoCo
     };
   } catch (e) {
     console.error('[tax] Exception during tax calc:', e);
-    reportToSentry(e, { route: '/api/create-payment-intent', extra: { step: 'tax_calc' } }).catch(() => {});
+    await reportToSentry(e, { route: '/api/create-payment-intent', extra: { step: 'tax_calc' } }).catch(() => {});
     return { calculationId: null, taxAmount: 0, totalAmount: itemsTotalCents(items, promoCovered) };
   }
 }
@@ -398,7 +399,10 @@ export default async function handler(req) {
   const buyerEmail = body.buyerEmail || body.email || null;
   const buyerName  = body.buyerName  || items[0]?.partner1Name || null;
   const promoCode  = body.promoCode || null;
-  const orderNum   = body.orderNum  || null;
+  // Minted here, before the payment exists, and nowhere else: see
+  // api/_lib/order-number.js. Nothing sends one in, and a client-chosen
+  // number is not one to trust.
+  const orderNum   = mintOrderNumber();
 
   const supabaseUrl        = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
@@ -449,8 +453,19 @@ export default async function handler(req) {
     // the beta_codes table, where dynamically-issued codes live: the 12 beta
     // codes and per-couple flash-promo codes. Table columns carry the full
     // grant (mode, included workbook) plus guard rails (max_uses, expiry, binding).
+    /**
+     * ── A LOOKUP THAT FAILED IS NOT A CODE WITH NO ROW ───────────────────
+     * The row carries every guard below: uses so far, deactivated, expired,
+     * bound to an address. This lookup used to swallow a timeout or an error
+     * reply and carry on with no row, so a hardcoded code already redeemed
+     * passed the single-use check as if it never had been (A202, from the
+     * sweep of read-then-write counters). Not knowing is refused now, and the
+     * page shows its own "could not reach the server" line: `unavailable`
+     * carries no sentence, so the words stay on the page that owns them.
+     */
     let dbRow = null;
     if (supabaseUrl && supabaseServiceKey) {
+      let rows = null;
       try {
         const _c = new AbortController();
         const _t = setTimeout(() => _c.abort(), 8000);
@@ -458,9 +473,14 @@ export default async function handler(req) {
           `${supabaseUrl}/rest/v1/beta_codes?code=eq.${encodeURIComponent(normalizedCode)}&select=*`,
           { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` }, signal: _c.signal }
         ).finally(() => clearTimeout(_t));
-        const rows = await r.json();
-        if (Array.isArray(rows) && rows.length) dbRow = rows[0];
+        if (r.ok) rows = await r.json().catch(() => null);
       } catch (e) { console.warn('[promo] code lookup failed:', e); }
+      if (!Array.isArray(rows)) {
+        return new Response(JSON.stringify({ unavailable: true }), {
+          status: 503, headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      if (rows.length) dbRow = rows[0];
     }
 
     if (!codeEntry && !dbRow) {
@@ -583,41 +603,64 @@ export default async function handler(req) {
     const addonsTotal = items.reduce((sum, it) => sum + billableAddons(it), 0);
 
     if (supabaseUrl && supabaseServiceKey) {
-      // Check code is active + increment uses
+      /**
+       * ── CLAIM THE USE, DO NOT COUNT IT ─────────────────────────────────
+       * This read uses_count and wrote back what it read plus one, so two
+       * redemptions at the same moment both passed the single-use check
+       * above and both wrote 1: one code, two free packages. And the read
+       * was unchecked, so a failed one counted from zero and put a used
+       * code's tally back to 1 (A202).
+       *
+       * Now a compare and swap: move the count from the value the check
+       * above saw, and only if it is still that value. One row back means
+       * this redemption is the one that counted. None means somebody else
+       * got there first, or the write failed, and the reply is the page's
+       * "could not reach the server" line; a retry reads the true count and
+       * the check above answers it. A code with no row yet (a named code's
+       * first use) is inserted, and the unique code makes a second insert
+       * fail the same way. Deactivation is already refused above, from the
+       * same row.
+       */
+      const enc = encodeURIComponent(normalizedCode);
+      const H = {
+        apikey: supabaseServiceKey,
+        Authorization: `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      };
+      const stamp = {
+        last_used_at: new Date().toISOString(),
+        last_used_by: buyerEmail ? String(buyerEmail).trim().toLowerCase() : null,
+      };
+      let claimed = false;
       try {
-        const checkRes = await fetch(
-          `${supabaseUrl}/rest/v1/beta_codes?code=eq.${encodeURIComponent(normalizedCode)}&select=active,uses_count`,
-          { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
-        );
-        const rows = await checkRes.json();
-        if (Array.isArray(rows) && rows.length > 0 && rows[0].active === false) {
-          return new Response(JSON.stringify({ error: 'This promo code has been deactivated.' }), {
-            status: 400, headers: { 'Content-Type': 'application/json' }
+        let res;
+        if (dbRow) {
+          const was = dbRow.uses_count;
+          const still = was == null ? 'uses_count=is.null' : `uses_count=eq.${Number(was)}`;
+          res = await fetch(`${supabaseUrl}/rest/v1/beta_codes?code=eq.${enc}&${still}`, {
+            method: 'PATCH', headers: H,
+            body: JSON.stringify({ uses_count: (Number(was) || 0) + items.length, ...stamp }),
+          });
+        } else {
+          res = await fetch(`${supabaseUrl}/rest/v1/beta_codes`, {
+            method: 'POST', headers: H,
+            body: JSON.stringify({ code: normalizedCode, package_key: codeUnlocks, uses_count: items.length, active: true, ...stamp }),
           });
         }
-        const currentUses = rows[0]?.uses_count ?? 0;
-        await fetch(
-          `${supabaseUrl}/rest/v1/beta_codes?on_conflict=code`,
-          {
-            method: 'POST',
-            headers: {
-              apikey: supabaseServiceKey,
-              Authorization: `Bearer ${supabaseServiceKey}`,
-              'Content-Type': 'application/json',
-              Prefer: 'resolution=merge-duplicates',
-            },
-            body: JSON.stringify({
-              code: normalizedCode,
-              package_key: codeUnlocks,
-              uses_count: currentUses + items.length,
-              active: true,
-              last_used_at: new Date().toISOString(),
-              last_used_by: buyerEmail || null,
-            }),
-          }
-        );
+        if (res.ok) {
+          const rows = await res.json().catch(() => null);
+          claimed = Array.isArray(rows) && rows.length === 1;
+        } else {
+          console.warn('[promo] claim refused:', res.status, (await res.text().catch(() => '')).slice(0, 200));
+        }
       } catch (e) {
-        console.warn('[promo] supabase tracking failed (non-blocking):', e);
+        console.warn('[promo] claim failed:', e);
+      }
+      if (!claimed && !REUSABLE_CODES.has(normalizedCode)) {
+        return new Response(JSON.stringify({ unavailable: true }), {
+          status: 503, headers: { 'Content-Type': 'application/json' }
+        });
       }
 
       // Only write orders here when the code is FREE-mode AND covers the
@@ -626,8 +669,6 @@ export default async function handler(req) {
       // with the promo code flagged.
       if (codeMeta.mode === 'free' && addonsTotal === 0) {
         try {
-          const d = new Date();
-          const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
           // Collect generated order numbers so the client can use them in the
           // success redirect URL — otherwise the client generates a different
           // order_num from a synthetic payment_intent_id and the URL doesn't
@@ -636,14 +677,18 @@ export default async function handler(req) {
           for (let i = 0; i < items.length; i++) {
             const item = items[i];
             const suffix = items.length > 1 ? `-${i+1}` : '';
-            const generatedOrderNum = orderNum
-              ? `${orderNum}${suffix}`
-              : `ATT-${dateStr}-PR${Math.random().toString(36).substring(2,5).toUpperCase()}${suffix}`;
+            // Always minted now (api/_lib/order-number.js). The three random
+            // characters this fell back to were about 47,000 a day, and a
+            // repeat was read further down as a retry: a second customer's
+            // order would have been dropped as a duplicate.
+            const generatedOrderNum = `${orderNum}${suffix}`;
             generatedOrderNums.push(generatedOrderNum);
             await writeOrderRow(supabaseUrl, supabaseServiceKey, {
               order_num:         generatedOrderNum,
               buyer_name:        buyerName || item.partner1Name || null,
-              buyer_email:       buyerEmail || null,
+              // Lower case, as sign-in stores it: every lookup by address
+              // compares exactly. Migration 102 holds it in the database too.
+              buyer_email:       buyerEmail ? String(buyerEmail).trim().toLowerCase() : null,
               partner1_name:     item.partner1Name || null,
               partner2_name:     item.partner2Name || null,
               pkg_key:           item.pkgKey || null,
@@ -856,6 +901,11 @@ export default async function handler(req) {
 
     return new Response(JSON.stringify({
       clientSecret: data.client_secret,
+      // The number the customer is shown, emailed and linked with, and the one
+      // the webhook will store. Read back from Stripe: a retry with the same
+      // idempotency key returns the payment made the first time, whose
+      // metadata carries the number minted then, not the one minted now.
+      orderNum: data.metadata?.orderNum || orderNum,
       // Tax breakdown for the UI to display:
       //   subtotalCents: what the user is buying (pre-tax)
       //   taxCents:      sales tax for their jurisdiction
@@ -874,7 +924,7 @@ export default async function handler(req) {
   } catch (err) {
     console.error('Payment intent creation failed:', err);
     // Fire-and-forget to Sentry — don't block response if Sentry is slow
-    reportToSentry(err, { route: '/api/create-payment-intent', request: req }).catch(() => {});
+    await reportToSentry(err, { route: '/api/create-payment-intent', request: req }).catch(() => {});
     return new Response(JSON.stringify({ error: 'Payment service unavailable' }), {
       status: 500, headers: { 'Content-Type': 'application/json' }
     });

@@ -41,7 +41,19 @@ export default async function handler(req) {
                    || process.env.SUPABASE_SERVICE_KEY
                    || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (supabaseUrl && serviceKey) {
+  /**
+   * ── A FAILED SAVE IS SAID, NOT HIDDEN ─────────────────────────────────
+   * This used to soft-fail: a refused insert was logged and the person was
+   * told "You're on the list." Ellie, A201b, asked for the failure to be
+   * said instead, in her words, which live in public/home.html. So anything
+   * short of a stored row, including no database configured, answers 503
+   * and nothing below runs.
+   */
+  const unsaved = () => new Response(JSON.stringify({ error: 'not saved' }), {
+    status: 503, headers: { 'Content-Type': 'application/json' },
+  });
+  if (!supabaseUrl || !serviceKey) return unsaved();
+  {
     try {
       const res = await fetch(`${supabaseUrl}/rest/v1/waitlist?on_conflict=email`, {
         method: 'POST',
@@ -57,17 +69,19 @@ export default async function handler(req) {
       if (!res.ok && res.status !== 409) {
         const txt = await res.text();
         console.warn('[waitlist] insert failed:', res.status, txt);
+        return unsaved();
       }
     } catch (e) {
       console.warn('[waitlist] insert error:', e);
-      // Soft-fail: don't block the user. They still see success.
+      return unsaved();
     }
   }
 
   // Also add to a Resend segment so the launch email can go out in one click.
   // Resend renamed "audiences" to "segments"; contacts are global now. One call
   // creates the global contact and attaches the segment. Gated on
-  // RESEND_SEGMENT_ID (set it in Vercel once the segment exists). Soft-fails.
+  // RESEND_SEGMENT_ID (set it in Vercel once the segment exists). Soft-fails:
+  // the row above is the record, and the person is on the list without this.
   const resendKey = process.env.RESEND_API_KEY;
   const segmentId = process.env.RESEND_SEGMENT_ID || process.env.RESEND_AUDIENCE_ID;
   if (resendKey && segmentId) {

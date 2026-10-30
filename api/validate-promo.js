@@ -74,8 +74,12 @@ export default async function handler(req) {
       }
     );
     clearTimeout(to);
-    const rows = await r.json();
-    row = Array.isArray(rows) ? rows[0] : null;
+    // An error reply is not "no such code". It used to fall through to "That
+    // code isn't valid." for a valid code whenever the database answered with
+    // an error; it is the same unknown as a timeout, and gets the same answer.
+    const rows = r.ok ? await r.json().catch(() => null) : null;
+    if (!Array.isArray(rows)) return json({ valid: true, unverified: true });
+    row = rows[0] || null;
   } catch (e) {
     // Network / timeout -> don't block; purchase-time validates.
     return json({ valid: true, unverified: true });

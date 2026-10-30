@@ -1013,7 +1013,7 @@ function renderItemsStep() {
       ${it.intent === 'gift' ? `
         <div class="form-group" style="margin-top:.65rem">
           <label class="form-label">Personal note (optional)</label>
-          <textarea class="form-input item-input" rows="2" data-idx="${idx}" data-field="giftNote" placeholder="Thinking of you both..." oninput="onItemInput(this)">${it.giftNote || ''}</textarea>
+          <textarea class="form-input item-input" rows="2" data-idx="${idx}" data-field="giftNote" placeholder="Thinking of you both..." oninput="onItemInput(this)">${(it.giftNote || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea>
           <div class="form-hint">Printed inside their QR card. Max 200 characters.</div>
         </div>
       ` : ''}
@@ -1520,7 +1520,7 @@ function validateForm() {
                 customerAddress,
               }),
             });
-            const { clientSecret, error } = await res.json();
+            const { clientSecret, error, orderNum: serverOrderNum } = await res.json();
             if (error) throw new Error(error);
 
             // Confirm the payment with Apple Pay's payment method ID
@@ -1545,9 +1545,10 @@ function validateForm() {
 
             // Mirror post-payment UI from handleSubmit(): show success state
             try { localStorage.removeItem('attune_cart'); } catch {}
-            const realOrderNum = paymentIntent?.id
+            // The server's number, which is the one the order is stored under.
+            const realOrderNum = serverOrderNum || (paymentIntent?.id
               ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
-              : 'ATT-' + Date.now();
+              : 'ATT-' + Date.now());
             const params = new URLSearchParams({
               signup: '1', pkg: first.pkg,
               p1: first.partner1Name, p2: first.partner2Name,
@@ -1728,7 +1729,10 @@ async function handleSubmit(e) {
     let serverResponse;
     try { serverResponse = await res.json(); }
     catch (_) { throw new Error(UNREACHABLE); }
-    const { clientSecret, error: serverErr, free: isFreePromo, orderNums: freeOrderNums } = serverResponse;
+    const { clientSecret, error: serverErr, free: isFreePromo, orderNums: freeOrderNums, orderNum: serverOrderNum } = serverResponse;
+    // The server could not check something it needs (a promo code's record)
+    // and refused rather than guess. Nothing was charged; same sentence.
+    if (serverResponse && serverResponse.unavailable) throw new Error(UNREACHABLE);
     if (serverErr) throw new Error(serverErr);
 
     let paymentIntent = null;
@@ -1752,12 +1756,14 @@ async function handleSubmit(e) {
       }
       paymentIntent = stripePi;
     }
-    // Generate order number from payment intent ID. For free promos the
-    // server already wrote the orders and returned their order_nums; use
-    // the first one so the URL/localStorage match what's in the DB.
+    // The order number the server minted and the order is stored under
+    // (api/_lib/order-number.js). For free promos the server already wrote the
+    // orders and returned their numbers; for a card it returned the number the
+    // webhook will store. The derivation from the payment id is only for a
+    // server too old to send one, and it is what made card orders unfindable.
     const realOrderNum = (isFreePromo && Array.isArray(freeOrderNums) && freeOrderNums.length > 0)
       ? freeOrderNums[0]
-      : (paymentIntent?.id
+      : serverOrderNum || (paymentIntent?.id
         ? 'ATT-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + paymentIntent.id.slice(-4).toUpperCase()
         : 'ATT-' + Date.now());
 
@@ -1850,7 +1856,7 @@ async function handleSubmit(e) {
       if (window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.APP_BANNER_ENABLED) {
         var _c = document.getElementById('coInboxCopy');
         if (_c) _c.innerHTML = 'Download Attune Relationships from the App Store, then sign in with the'
-          + ' link we sent to <strong id="coEmailDisp">' + (email || 'your email') + '</strong>.'
+          + ' link we sent to <strong id="coEmailDisp">' + String(email || 'your email').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</strong>.'
           + ' Your partner gets their invite as soon as you add their email.';
       }
     } catch(e) {}

@@ -18,7 +18,8 @@ import { useEffect, useState } from 'react';
 import Constants from 'expo-constants';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import * as Updates from 'expo-updates';
-import { ActivityIndicator, Linking, Modal, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, ScrollView, Text, TextInput, View } from 'react-native';
+import { SAVE_FAILED } from '@/constants/save-copy';
 import { Pressable } from '@/components/pressable';
 import { openExternal } from '@/api/open-external';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -177,7 +178,11 @@ function NotificationsRow() {
     if (busy) return;
     setBusy(true);
     try {
-      if (state === 'granted') { await turnPushOff(); setState('denied'); return; }
+      if (state === 'granted') {
+        if (await turnPushOff()) setState('denied');
+        else Alert.alert('Not saved', SAVE_FAILED);
+        return;
+      }
       if (state === 'not_asked') { setState(await registerForPush({ ask: true })); return; }
       /* Said no already. iOS owns that answer; the app can only point at it. */
       await Linking.openSettings().catch(() => undefined);
@@ -328,8 +333,16 @@ function DailyPushRows() {
   const pick = (kind: 'insight' | 'word', at: string | null) => {
     /* The row moves at once and the write follows it. A list of 49 options is
        a sheet somebody closes expecting it to have taken. */
+    const before = state[kind];
     setState((prev) => (prev ? { ...prev, [kind]: at } : prev));
-    setDailyPush(kind, at).catch(() => undefined);
+    /* And back again if the server did not take it, which the row used to
+       hide: it showed the new time while the old one went on arriving, or
+       showed off while notifications kept coming (A202). */
+    setDailyPush(kind, at).then((r) => {
+      if (r.ok) return;
+      setState((prev) => (prev && prev[kind] === at ? { ...prev, [kind]: before } : prev));
+      Alert.alert('Not saved', SAVE_FAILED);
+    });
   };
 
   return (

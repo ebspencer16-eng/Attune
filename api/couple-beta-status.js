@@ -90,7 +90,7 @@ export default async function handler(req) {
     if (ordersErr) {
       // Surface schema/RLS problems instead of silently returning false.
       console.error('[couple-beta-status] orders query error:', ordersErr);
-      reportToSentry(new Error('couple-beta-status orders query: ' + ordersErr.message), { route: '/api/couple-beta-status' }).catch(() => {});
+      await reportToSentry(new Error('couple-beta-status orders query: ' + ordersErr.message), { route: '/api/couple-beta-status' }).catch(() => {});
     }
 
     const isBeta = isBetaOrderSet(orders);
@@ -98,7 +98,7 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ ok: true, isBeta }), { headers: CORS });
   } catch (err) {
     console.error('[couple-beta-status] error:', err);
-    reportToSentry(err, { route: '/api/couple-beta-status', request: req }).catch(() => {});
+    await reportToSentry(err, { route: '/api/couple-beta-status', request: req }).catch(() => {});
     // Fail closed-but-quiet: tile just stays hidden.
     return new Response(JSON.stringify({ ok: false, isBeta: false }), { status: 200, headers: CORS });
   }

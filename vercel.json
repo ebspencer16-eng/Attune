@@ -58,10 +58,6 @@
       "destination": "/api/partner-sync.js"
     },
     {
-      "source": "/api/orders",
-      "destination": "/api/orders.js"
-    },
-    {
       "source": "/home",
       "destination": "/home.html"
     },
@@ -208,10 +204,6 @@
     {
       "source": "/start",
       "destination": "/start.html"
-    },
-    {
-      "source": "/api/generate-pdf",
-      "destination": "/api/generate-pdf.js"
     },
     {
       "source": "/workbook-render",

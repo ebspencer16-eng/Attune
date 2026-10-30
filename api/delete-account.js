@@ -269,16 +269,34 @@ export default async function handler(req) {
   // for everybody; they read the order now.
   // Workbooks contain names, personalized language, and couple-specific
   // content — they're PII even though the underlying couple_type is not.
+  //
+  // ── WHAT MUST BE GONE BEFORE THE ACCOUNT GOES ──────────────────────────
+  // supabase-js returns its errors rather than throwing them, so the try
+  // around each step never caught a failed one. A failed order read meant no
+  // workbook was removed; a failed order delete left the person's name,
+  // email and address on rows whose owner the account deletion then nulls,
+  // so nothing could ever find them again; a failed feedback update kept
+  // their address on what they wrote. Each reported zero and the deletion
+  // went on (A202, from the sweep of server writes whose answer is unread).
+  //
+  // So each of those three steps says what it could not remove, and if
+  // anything is left, the request stops before step 6, the one that cannot
+  // be undone. The person sees "That did not go through" and tries again,
+  // and every step is safe to repeat; the one cost is a second research
+  // archive row, which identifies nobody.
+  const notRemoved = [];
   try {
-    const { data: orderRows } = await admin.from('orders')
+    const { data: orderRows, error: orderReadErr } = await admin.from('orders')
       .select('order_num')
       .eq('user_id', userId);
+    if (orderReadErr) notRemoved.push('workbooks (could not read orders: ' + orderReadErr.message + ')');
     if (orderRows && orderRows.length) {
       const pathsToRemove = [];
       for (const row of orderRows) {
         if (!row.order_num) continue;
         // List files under the order_num prefix
-        const { data: files } = await admin.storage.from('workbooks').list(row.order_num);
+        const { data: files, error: listErr } = await admin.storage.from('workbooks').list(row.order_num);
+        if (listErr) notRemoved.push(`workbooks for ${row.order_num} (could not list: ${listErr.message})`);
         if (files && files.length) {
           files.forEach(f => pathsToRemove.push(`${row.order_num}/${f.name}`));
         }
@@ -286,20 +304,61 @@ export default async function handler(req) {
       if (pathsToRemove.length) {
         const { error: rmErr } = await admin.storage.from('workbooks').remove(pathsToRemove);
         if (!rmErr) summary.storageRemoved = pathsToRemove.length;
-        else console.warn('[delete-account] storage remove failed:', rmErr.message);
+        else notRemoved.push('workbook files (' + rmErr.message + ')');
       }
       summary.workbooksRemoved = pathsToRemove.length;
     }
-  } catch (e) { console.warn('[delete-account] workbook cleanup failed:', e?.message); }
+  } catch (e) { notRemoved.push('workbooks (' + (e?.message || 'failed') + ')'); }
 
   // ── 3. Delete orders (shipping addresses, buyer/partner names/emails are PII) ─
   // orders.user_id is ON DELETE SET NULL, so we must delete explicitly.
   try {
-    const { count } = await admin.from('orders')
+    const { count, error: ordersErr } = await admin.from('orders')
       .delete({ count: 'exact' })
       .eq('user_id', userId);
+    if (ordersErr) notRemoved.push('orders (' + ordersErr.message + ')');
     summary.ordersRemoved = count || 0;
-  } catch (e) { console.warn('[delete-account] orders cleanup failed:', e?.message); }
+  } catch (e) { notRemoved.push('orders (' + (e?.message || 'failed') + ')'); }
+
+  /**
+   * ── 3b. Take the person off any feedback they left ───────────────────────
+   * The instrument that wrote this table is retired, so there are no new
+   * rows; the old ones are the point. What identifies somebody in them is
+   * `email`, and the row carries what they wrote.
+   *
+   * This used to null `user_id`, which is not a column on this table: the
+   * update answered 42703, the error went into a field nobody reads, the
+   * catch below never ran, and `feedbackNulled` stayed 0. So a legacy
+   * feedback row kept that person's address after they asked to be forgotten,
+   * for as long as this has existed.
+   *
+   * The comment above it said the same mistake had already been made once
+   * here, with the table name rather than the column: "an earlier version of
+   * this code referenced 'feedback' which doesn't exist — silent failure".
+   * Found by checking every column written against the schema, which is the
+   * only way this shows up: it does not throw, and it does not log.
+   *
+   * Nulled rather than deleted, so what somebody said about the product
+   * survives without saying who said it, which is the same choice the survey
+   * makes.
+   */
+  try {
+    const address = notify.self?.email || caller.email || null;
+    if (address) {
+      const { count, error } = await admin.from('feedback_submissions')
+        .update({ email: null }, { count: 'exact' })
+        .eq('email', address);
+      if (error) notRemoved.push('feedback address (' + error.message + ')');
+      summary.feedbackNulled = count || 0;
+    }
+  } catch (e) { notRemoved.push('feedback address (' + (e?.message || 'failed') + ')'); }
+
+  // Checked here, before step 4 marks the partner's account as "your partner
+  // deleted theirs": a stop after that would tell them something untrue.
+  if (notRemoved.length) {
+    console.error('[delete-account] stopped before deleting the account; not removed:', notRemoved.join('; '));
+    return err(503, 'Not everything could be removed yet, so the account was kept. Try again.');
+  }
 
   // ── 4. Unlink partner (both directions) ──────────────────────────────────
   // In the unified model, both partners have their own profiles row. The
@@ -340,38 +399,6 @@ export default async function handler(req) {
     if (markErr) console.warn('[delete-account] results not marked (migration 059 may not be run):', markErr.message);
   } catch (e) { console.warn('[delete-account] results not marked:', e?.message); }
 
-  /**
-   * ── 5. Take the person off any feedback they left ───────────────────────
-   * The instrument that wrote this table is retired, so there are no new
-   * rows; the old ones are the point. What identifies somebody in them is
-   * `email`, and the row carries what they wrote.
-   *
-   * This used to null `user_id`, which is not a column on this table: the
-   * update answered 42703, the error went into a field nobody reads, the
-   * catch below never ran, and `feedbackNulled` stayed 0. So a legacy
-   * feedback row kept that person's address after they asked to be forgotten,
-   * for as long as this has existed.
-   *
-   * The comment above it said the same mistake had already been made once
-   * here, with the table name rather than the column: "an earlier version of
-   * this code referenced 'feedback' which doesn't exist — silent failure".
-   * Found by checking every column written against the schema, which is the
-   * only way this shows up: it does not throw, and it does not log.
-   *
-   * Nulled rather than deleted, so what somebody said about the product
-   * survives without saying who said it, which is the same choice the survey
-   * makes.
-   */
-  try {
-    const address = notify.self?.email || caller.email || null;
-    if (address) {
-      const { count, error } = await admin.from('feedback_submissions')
-        .update({ email: null }, { count: 'exact' })
-        .eq('email', address);
-      if (error) console.warn('[delete-account] feedback anonymise failed:', error.message);
-      summary.feedbackNulled = count || 0;
-    }
-  } catch (e) { console.warn('[delete-account] feedback anonymise failed:', e?.message); }
 
   // ── 6. Delete auth user ───────────────────────────────────────────────────
   // This cascades: profiles (FK on delete cascade), exercise_sessions

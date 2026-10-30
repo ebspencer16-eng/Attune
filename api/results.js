@@ -701,7 +701,7 @@ export default async function handler(req) {
         return (await r.json().catch(() => []))?.[0] || null;
       },
       archive: async (row) => {
-        await fetch(`${supabaseUrl}/rest/v1/couple_results_history`, {
+        const r = await fetch(`${supabaseUrl}/rest/v1/couple_results_history`, {
           method: 'POST',
           headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
           body: JSON.stringify({
@@ -712,6 +712,7 @@ export default async function handler(req) {
             frozen_at: row.frozen_at || row.computed_at || new Date().toISOString(),
           }),
         });
+        if (!r.ok) throw new Error(`archive ${r.status}`);
       },
       write: async (row) => {
         const r = await fetch(`${table}?on_conflict=partner_a,partner_b`, {

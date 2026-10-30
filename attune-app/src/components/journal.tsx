@@ -73,6 +73,7 @@ import {
   Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { SAVE_FAILED } from '@/constants/save-copy';
+import { DELETE_FAILED } from '@/constants/delete-copy';
 
 const c = Colors.light;
 
@@ -565,7 +566,15 @@ export default function Journal({ onClose }: { onClose: () => void }) {
         style: 'destructive',
         onPress: () => {
           setEntries((prev) => prev.filter((n) => n.id !== note.id));
-          deleteNote(note.id);
+          /* The entry leaves at once and the delete follows. If the delete
+             fails it comes back, and says so: it used to vanish and then
+             return on the next load with nothing having said why (A202).
+             Not found means it is already gone, which is what was asked. */
+          deleteNote(note.id).then((r) => {
+            if (r.ok || r.error.kind === 'not_found') return;
+            setEntries((prev) => (prev.some((n) => n.id === note.id) ? prev : [note, ...prev]));
+            Alert.alert(DELETE_FAILED.title, DELETE_FAILED.body);
+          });
         },
       },
     ]);

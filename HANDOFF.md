@@ -4761,3 +4761,18 @@ All built and in TASKS.md section 3. Points worth knowing:
 - Ellie runs supabase/diagnostics/accounts-with-no-purchase.sql to see who
   the rule turns away. The tester who reported it buys under the same email
   she signed in with, and her order is then found by email.
+
+## 30 October: A202, sweeps
+
+- Done and pushed: see the A202 row in TASKS.md for the list. New gates:
+  check-server-awaits, check-buyer-email-case, check-promo-claim,
+  check-email-escaping, check-app-write-results, check-deletion-complete,
+  check-order-number; check-survey and check-frozen-split gained cases.
+- Waiting on Ellie: migration 102 (A202a, lower-cases buyer emails and adds
+  the trigger), and A202b (remove the In Practice signup or keep it).
+- Order numbers are minted in api/_lib/order-number.js. Card orders before
+  this were stored under random numbers; claim-order finds them through
+  their payment id. Do not rename stored order numbers: workbook folders in
+  storage are keyed by them.
+- check-slicer-panel-reach failed once under memory pressure (swap at 3.3 of
+  4 GB) and passed alone. Read `sysctl vm.swapusage` before believing it.

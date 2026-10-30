@@ -296,7 +296,7 @@ export default async function handler(req) {
     const st = await purchaseStatus({
       supabaseUrl, serviceKey, userId,
       email: authEmail || caller.email,
-      inviteCode: body.joinedViaInvite && typeof body.inviteCode === 'string' ? body.inviteCode.trim().slice(0, 32) : null,
+      inviteCode: body.joinedViaInvite && typeof body.inviteCode === 'string' ? body.inviteCode.trim().toUpperCase().slice(0, 32) : null, // codes are stored upper case; partner-sync does the same
     });
     if (st.ok && !st.owns) {
       return new Response(JSON.stringify({ ok: false, reason: 'no_purchase', copy: NO_PURCHASE_COPY }), { status: 403, headers: CORS });

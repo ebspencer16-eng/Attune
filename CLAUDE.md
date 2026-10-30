@@ -883,9 +883,8 @@ look like the workbook we render on the site. Please use the exact same pdf
 builder."
 
 `public/workbook-render.html` had been there the whole time. It is the
-workbook: a designed page the website hands a payload to and prints, through
-`api/generate-pdf.js` when Browserless is configured and html2pdf in the
-browser when it is not. Two greps would have found it. Instead there were two
+workbook: a designed page the website hands a payload to and prints in the
+browser. (Its server-side printer was removed under A201b; nothing called it.) Two greps would have found it. Instead there were two
 workbooks for a day, and the one the app showed was the wrong one.
 
 The rule this file already states, pointed at myself: a second renderer of
@@ -2544,6 +2543,36 @@ for the heaviest payload nine times. Share the promise, not the result, and
 drop a failed one so the next ask retries. `TIMING=1 node
 scripts/probe-admin.mjs overview` counts requests per endpoint; read that
 before guessing where time goes.
+
+
+**What a sweep of "unknown read as no" found when it looked at money and
+deletion.** Four in one round, each in a place where the cost lands on a
+person rather than a figure:
+
+- A promo code's record was read inside a try that swallowed a timeout, so
+  a failed read meant no record, and every guard the record carries
+  (single-use, deactivated, expired, bound to an address) was skipped. And the
+  use was counted by reading the count and writing it back plus one, so two
+  redemptions at once both passed. Claimed by compare and swap now
+  (`PATCH ...&uses_count=eq.N`, one row back means it is yours), the same shape
+  as the email claims above. check-promo-claim drives the endpoint.
+- Account deletion removed orders, workbook files and feedback addresses
+  inside tries that could never fire, because supabase-js returns its errors.
+  Each failure reported zero and the deletion went on, and deleting the auth
+  user then nulled the owner on whatever was left: personal data nothing could
+  find again, after the person asked for it to go. The irreversible step goes
+  last and only after the reversible ones have said they worked.
+  check-deletion-complete fails one point at a time and asks the network.
+- Checkout stored the buyer's address as typed and sign-in stores it in lower
+  case, and every lookup compares exactly. Normalise where a value is WRITTEN,
+  and when the rule matters, put it in the database (a trigger) so a writer
+  that forgets cannot break it.
+- An edge function is frozen when it returns its Response. A promise started
+  and not awaited is cut off, and here those were the Sentry reports from the
+  error paths, the ones worth having. check-server-awaits.
+
+The tell for all four is the same as before: a catch, a default, or a
+missing `await` that makes failure look like an ordinary answer.
 
 ---
 

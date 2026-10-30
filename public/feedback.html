@@ -204,7 +204,17 @@ textarea::placeholder{color:var(--faint)}
     return true;
   }
 
+  /* One save at a time, in order. The server replaces the stored answers
+     with whatever arrives, so two in flight could land backwards and an
+     older set would overwrite a newer one (A202). Each save waits for the
+     one before it, and takes the answers as they are when it is sent. */
+  var chain = Promise.resolve();
   function save(done) {
+    var p = chain.then(function () { return send(done); });
+    chain = p.then(function () {}, function () {});
+    return p;
+  }
+  function send(done) {
     var payload = { answers: answers, source: 'link' };
     if (done) payload.done = true;
     return fetch('/api/survey', {

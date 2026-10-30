@@ -391,8 +391,22 @@ const lift = (src, needle, where) => {
   if (!/save\(next\)/.test(app)) {
     problems.push('the website does not save an answer as it is given, so a half-finished survey is lost.');
   }
-  if (!/saveSurvey\(\{ answers: next \}\)/.test(read('attune-app/src/components/survey.tsx'))) {
+  const appSurvey = read('attune-app/src/components/survey.tsx');
+  const setAns = (appSurvey.match(/const setAns = useCallback\([\s\S]*?\n  \}, \[\]\);/) || [''])[0];
+  if (!/saveSurvey\(\{ answers: (next|latest\.current) \}\)/.test(setAns)) {
     problems.push('the app does not save an answer as it is given, so a half-finished survey is lost.');
+  }
+  /**
+   * One save at a time, in order, on both. The server replaces the stored
+   * answers with whatever arrives last, so two saves in flight could land
+   * backwards and put an older set back (A202). Each surface chains its saves,
+   * the submit included, and sends the answers as they are when it goes.
+   */
+  if (!/queue\.current = queue\.current\s*\.then\(\(\) => saveSurvey\(\{ answers: latest\.current \}\)\)/.test(setAns)) {
+    problems.push('the app sends survey saves without waiting for the one before, so an older save can land last and overwrite a newer answer.');
+  }
+  if (!/queue\.current\.then\(\(\) => saveSurvey\(\{ answers: latest\.current, done: true \}\)\)/.test(appSurvey)) {
+    problems.push('the app sends the final survey save outside the queue, so an earlier save can land after it.');
   }
   /**
    * The ends of the 0 to 10 row.
@@ -439,6 +453,9 @@ const lift = (src, needle, where) => {
   if (!/saveSoon\(\)/.test(page) || !/save\(false\)/.test(page)) {
     problems.push('public/feedback.html does not save an answer as it is given. It used to hold every'
       + ' answer in the DOM until the submit button and lose all of them if that one request failed.');
+  }
+  if (!/var p = chain\.then\(function \(\) \{ return send\(done\); \}\);/.test(page)) {
+    problems.push('public/feedback.html sends survey saves without waiting for the one before, so an older save can land last and overwrite a newer answer.');
   }
   if (/submit-beta-survey/.test(page)) {
     problems.push('public/feedback.html still posts to /api/submit-beta-survey, which is the old'

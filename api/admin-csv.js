@@ -474,8 +474,8 @@ async function exportOrders(admin) {
   ];
 
   // "When" inference: Addon columns in orders are set at checkout time
-  // (addon_* fields). Post-results upsells go through a separate flow that
-  // calls /api/orders with action='update'. To track when accurately we'd
+  // (addon_* fields). Post-results upsells write the same order row later.
+  // To track when accurately we'd
   // need a dedicated addon_log table; for now, the rule is:
   //   - If addon exists when the order was first created, "initial_checkout"
   //   - If addon was added later (updated_at > created_at + 1h), "post_results"

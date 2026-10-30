@@ -202,7 +202,7 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
               </Pressable>
               <Pressable
                 accessibilityRole="link"
-                onPress={() => { Linking.openURL('mailto:support@attune-relationships.com?subject=Sign%20in%20problem').catch(() => {}); }}
+                onPress={() => { Linking.openURL('mailto:hello@attune-relationships.com?subject=Sign%20in%20problem').catch(() => {}); }}
                 style={{ marginTop: Spacing.sm, alignSelf: 'center' }}>
                 <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)' }}>
                   Is this an error?{' '}

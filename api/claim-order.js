@@ -79,11 +79,45 @@ export default async function handler(req) {
 
     // Multi-item orders are written as ORDER-1, ORDER-2 by the stripe webhook,
     // so the whole family is claimed together.
-    const filter = `or=(order_num.eq.${encodeURIComponent(orderNum)},order_num.like.${encodeURIComponent(orderNum + '-')}*)`;
+    let filter = `or=(order_num.eq.${encodeURIComponent(orderNum)},order_num.like.${encodeURIComponent(orderNum + '-')}*)`;
     const oRes = await rest(`orders?${filter}&select=order_num,user_id,buyer_email`, { headers: svc });
-    const orders = await oRes.json().catch(() => []);
+    // A failed read is not "no such order": that answer sends a customer who
+    // paid to the no-purchase screen.
+    if (!oRes.ok) return json({ ok: false, error: 'claim unavailable' }, 503);
+    let orders = await oRes.json().catch(() => null);
+    if (!Array.isArray(orders)) return json({ ok: false, error: 'claim unavailable' }, 503);
 
-    if (!Array.isArray(orders) || !orders.length) {
+    /**
+     * ── A CARD ORDER PLACED BEFORE ITS NUMBER WAS MINTED ──────────────────
+     * Until A202, checkout showed a card buyer `ATT-<date>-<last four of the
+     * payment id>` while the webhook stored the row under a random number, so
+     * the number in their setup link matches no row (api/_lib/order-number.js).
+     * For that shape only, find the order by the payment it came from: the
+     * same four characters at the end of its payment id, written within a day
+     * either side of that date. More than one payment matching is a guess,
+     * and a guess is refused rather than made.
+     */
+    const legacy = !orders.length && /^ATT-(\d{4})(\d{2})(\d{2})-([A-Z0-9]{4})$/.exec(orderNum);
+    if (legacy) {
+      const day = Date.UTC(+legacy[1], +legacy[2] - 1, +legacy[3]);
+      const from = new Date(day - 86400000).toISOString();
+      const to = new Date(day + 2 * 86400000).toISOString();
+      const tail = legacy[4];
+      const lRes = await rest(
+        `orders?or=(stripe_payment_intent_id.ilike.*${tail},stripe_payment_intent_id.ilike.*${tail}_*)`
+        + `&created_at=gte.${encodeURIComponent(from)}&created_at=lt.${encodeURIComponent(to)}`
+        + '&select=order_num,user_id,buyer_email,stripe_payment_intent_id',
+        { headers: svc });
+      if (!lRes.ok) return json({ ok: false, error: 'claim unavailable' }, 503);
+      const found = (await lRes.json().catch(() => null)) || [];
+      const payments = new Set(found.map((o) => String(o.stripe_payment_intent_id || '').replace(/_\d+$/, '')));
+      if (payments.size === 1) {
+        orders = found;
+        filter = `order_num=in.(${found.map((o) => `"${encodeURIComponent(o.order_num)}"`).join(',')})`;
+      }
+    }
+
+    if (!orders.length) {
       return json({ ok: false, error: 'order not found', claimed: false }, 404);
     }
 

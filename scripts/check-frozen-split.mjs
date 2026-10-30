@@ -156,6 +156,35 @@ if (!written) {
   }
 }
 
+/**
+ * A retake replaces the row only once the old one is archived (A202). The
+ * archive could not report a failure and the overwrite went on regardless,
+ * which lost the previous results for good; holding the overwrite loses
+ * nothing, since the fresh results are served and the next load tries again.
+ */
+for (const archiveWorks of [false, true]) {
+  let replaced = false;
+  const retakeDb = {
+    read: async () => ({ ...stored, answers_hash: 'answers that have since changed' }),
+    write: async () => { replaced = true; },
+    archive: async () => { if (!archiveWorks) throw new Error('archive 500'); },
+  };
+  const warn = console.warn; console.warn = () => {};
+  const got = await getOrComputeResults({
+    db: retakeDb, aId: 'a', bId: 'b',
+    aAnswers: answers, bAnswers: answers, aName: 'A', bName: 'B',
+  });
+  console.warn = warn;
+  if (!got?.results) fails.push('a retake served no results, so the archive case below proved nothing.');
+  if (!archiveWorks && replaced) {
+    fails.push('a retake replaced the stored results when archiving them failed, so the'
+      + ' previous version is lost for good and every note made on it with it.');
+  }
+  if (archiveWorks && !replaced) {
+    fails.push('a retake whose archive succeeded did not replace the stored results.');
+  }
+}
+
 if (fails.length) {
   console.error('\n check-frozen-split: the scores and the words are frozen together'
     + ' again.\n');

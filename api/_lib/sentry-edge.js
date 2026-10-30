@@ -9,13 +9,18 @@
  * Usage in an API route:
  *   import { reportToSentry } from '../lib/sentry-edge.js';
  *   try { ... } catch (e) {
- *     reportToSentry(e, { route: '/api/foo', request: req }).catch(() => {});
+ *     await reportToSentry(e, { route: '/api/foo', request: req }).catch(() => {});
  *     return new Response('error', { status: 500 });
  *   }
  *
- * The .catch(()=>{}) ensures Sentry reporting never breaks the response
- * path — if Sentry is down, the user still gets a response.
+ * AWAITED, not fired and forgotten. An edge function is frozen when it
+ * returns its Response, so a report still in flight then is cut off, and
+ * these are sent from exactly the moments worth knowing about. Eight callers
+ * dropped it (sweep-floating-promises, A202). The send gives up after
+ * REPORT_CAP_MS, so a slow Sentry costs an error reply at most that long.
+ * The .catch(()=>{}) still ensures reporting never breaks the response.
  */
+const REPORT_CAP_MS = 1500;
 
 // Sentry DSN is split into project + key + ingest host.
 // Example DSN: https://KEY@PROJECT.ingest.us.sentry.io/PROJECT_ID
@@ -103,6 +108,7 @@ export async function reportToSentry(error, context = {}) {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-sentry-envelope' },
       body: envelope,
+      signal: AbortSignal.timeout(REPORT_CAP_MS),
     });
   } catch {
     // Silently swallow — never let Sentry reporting break the API response

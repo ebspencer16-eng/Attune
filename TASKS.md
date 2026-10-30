@@ -9,8 +9,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A201a | **The contact page can send messages now. It never could: since 7 April every message was refused and the page said "Message sent".** Messages go to hello@attune-relationships.com with Reply-To set to the sender. For the failure case I wrote one line, shaped like your journal edit: "Your message did not send. Email us at hello@attune-relationships.com." It is live; change it if you want different words. |
-| A201b | **Two questions from the sweep, both yes or no.** (1) Two server addresses still answer although nothing in the product has called them since you removed what used them: the old PDF builder (gone with the Word workbook, 2 October) and an order-editing address (gone with the dead admin functions, 27 October). Remove both? I recommend yes: anything reachable from outside that nothing uses is risk with no benefit. (2) The home page waitlist tells people "you are on the list" even when saving them failed, and the server is built to do that on purpose. Want it to say it did not work instead? If yes, I need your line for that moment. |
+| A202a | **Please run migration 102. It makes every order's email address lower case, now and from now on.** Checkout saved the address exactly as typed and sign-in saves it in lower case, and every order lookup by address compares the two exactly. So anyone who typed a capital at checkout had an order the app and site could not find by address, and the app could refuse them as not having bought. The code is fixed for new orders; this fixes the ones already stored and makes the database enforce it. It tells you how many it changed. |
+| A202b | **One yes or no: remove the "New posts, when they're ready" signup on the In Practice page?** It has never saved an address: it says "Thanks, you're on the list." and sends nothing anywhere. Nothing sends new-post emails, so collecting addresses would make a promise we cannot keep. I recommend removing it. If you would rather keep it, say so and I will save the addresses to the waitlist table, marked as from In Practice, and leave them out of the launch email. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -20,6 +20,70 @@ Every code block says which window it goes in, above the block.
 | O16 | Download numbers need an App Store Connect key. After launch. |
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
+
+### One thing to run, for A202a
+
+**Paste this into Terminal.** It copies migration 102 and prints `copied`.
+
+```bash
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/102_buyer_email_lowercase.sql | pbcopy && echo copied
+```
+
+**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It shows one number, `orders_lower_cased`: how many orders had capitals or spaces in the address. Tell me that number.
+
+<!-- SQL 102_buyer_email_lowercase.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 102: every order's buyer email in lower case, now and from now on (A202).
+--
+-- Checkout and the Stripe webhook stored the address exactly as the buyer
+-- typed it. Sign-in addresses are stored in lower case. Everything that finds
+-- a buyer's order by address compares the two exactly: the row rule that lets
+-- somebody read their own order, the website's order restore, and the
+-- server's purchase check, entitlements and core-ownership lookups. So a
+-- buyer who typed "Jane@Example.com" had an order nothing could find by
+-- address, and unless it had already been linked to their account, the app
+-- could refuse them as somebody who had not bought.
+--
+-- Two parts:
+--   1. A trigger lower-cases buyer_email on every insert and update, so the
+--      rule holds whoever writes the row: checkout, the webhook, or the SQL
+--      editor. The code lower-cases too; this is what makes it a guarantee.
+--   2. One update for the rows already stored.
+--
+-- Safe to run again: the function and trigger are replaced, and the update
+-- only touches rows that are not already lower case.
+-- ============================================================================
+
+create or replace function public.orders_buyer_email_lower()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.buyer_email is not null then
+    new.buyer_email := lower(trim(new.buyer_email));
+  end if;
+  return new;
+end
+$$;
+
+drop trigger if exists orders_buyer_email_lower on public.orders;
+create trigger orders_buyer_email_lower
+  before insert or update of buyer_email on public.orders
+  for each row execute function public.orders_buyer_email_lower();
+
+-- The count comes back as a result row: the SQL Editor shows a table, and
+-- a NOTICE can go unseen.
+with changed as (
+  update public.orders
+     set buyer_email = lower(trim(buyer_email))
+   where buyer_email is not null
+     and buyer_email <> lower(trim(buyer_email))
+  returning 1
+)
+select count(*) as orders_lower_cased from changed;
+```
+<!-- /SQL -->
 
 ## 2. Open
 
@@ -36,7 +100,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A201 | **Seven sweeps, six fixes.** Fixed: the contact form (A201a); checkout now shows the "could not reach the server" message instead of a code error when the server times out (no card is charged at that point); the website retries telling the server an exercise is done, which is what notifies the partner and starts the workbook, instead of losing it on one failed try; the two "your results are ready" emails retry instead of giving up after one failure; the admin survey pages share one request instead of sending another. Checked and clean: every link in the app goes to a screen that exists, and the two endpoints customers wait on already run their reads in parallel where they can. Questions in A201b. |
+| A202 | **Nineteen sweeps, fourteen fixes.** The biggest: every card order was stored under a different number from the one the customer was shown, emailed and given in their setup link, so the link could not find their order, and a repeated payment signal from Stripe could have written a second order. One number now, and old numbers are found through the payment. Also: checkout saved emails with capitals and sign-in does not, so those orders could not be found by email (migration 102 in A202a); promo codes skipped every check when their record could not be read, and two people could redeem a single-use code at once; deleting an account went ahead when it failed to remove the person's orders, workbook or feedback address; a retake could replace a couple's results without keeping the old version; survey answers could be overwritten by an older save; in the app, a failed note delete, notification time change or notifications-off looked done and was not (each now puts itself back and says so, in your existing lines); two emails put typed names in unescaped; error reports were cut off before they sent; both unused addresses are removed; the waitlist shows your line. The sign-in screen's "Let us know" pointed at support@, the only place anything did; it is hello@ now. Checked and clean: scheduled jobs, the Stripe signature and retries, app retries. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -48,6 +112,9 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A201 | **Seven sweeps, six fixes: checkout's error message, exercise-done and results-ready retries, admin survey shares its request.** |
+| A201b | **Yes to removing the unused PDF builder and order-editing addresses, and yes to a waitlist failure line (yours).** |
+| A201a | **Contact form delivers (it never had); failure line approved.** |
 | A180 | **Reflection written answers: eight stacked charts, each with its own slicer, title and answer categories.** |
 | A200 | **Admin speed: one request per data set instead of up to nine, and the cube reads its nine tables at once.** |
 | A198 | **Removed the reflection insight copy nothing showed: no longer computed, sent or stored in the code, on the server, the website or the app.** |

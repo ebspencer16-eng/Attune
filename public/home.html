@@ -1224,9 +1224,17 @@ function toggleMenu() {
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; err.style.display='block'; return; }
     err.style.display='none'; submitting=true;
     var btn=this; btn.textContent='Joining...'; btn.style.opacity='.7';
+    // Ellie, A201b: a failed save is said, in her words, and the form stays.
+    var ok=false;
     try{
-      await fetch('/api/join-waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'popup'})});
+      var res=await fetch('/api/join-waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'popup'})});
+      ok=res.ok;
     }catch(e){}
+    if(!ok){
+      err.textContent='You could not be added to the waitlist at this time, please try again later.';
+      err.style.display='block'; btn.textContent='Join the list'; btn.style.opacity=''; submitting=false;
+      return;
+    }
     try{ localStorage.setItem(KEY,'1'); }catch(e){}
     document.getElementById('wl-form-state').style.display='none';
     document.getElementById('wl-done-state').style.display='block';

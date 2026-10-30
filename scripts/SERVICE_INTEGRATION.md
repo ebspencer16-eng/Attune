@@ -399,7 +399,7 @@ const endpoint = ord.workbookFormat === 'pdf'
   : '/api/store-workbook';
 ```
 
-`workbookFormat` would default to `pdf` for new orders going forward, with old orders left as `docx`. Set the default at order-creation time in `api/orders.js` action='create'.
+`workbookFormat` would default to `pdf` for new orders going forward, with old orders left as `docx`. Set the default at order-creation time, where the order row is first written.
 
 ---
 

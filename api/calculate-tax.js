@@ -261,7 +261,7 @@ export default async function handler(req) {
 
   } catch (err) {
     console.error('[calculate-tax] error:', err);
-    reportToSentry(err, { route: '/api/calculate-tax', request: req }).catch(() => {});
+    await reportToSentry(err, { route: '/api/calculate-tax', request: req }).catch(() => {});
     return new Response(JSON.stringify({ error: 'Tax calculation failed' }), {
       status: 500, headers: { 'Content-Type': 'application/json' }
     });

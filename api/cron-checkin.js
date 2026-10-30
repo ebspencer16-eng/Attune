@@ -14,6 +14,9 @@
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
 import { unsubscribeLink } from './_lib/email-footer.js';
+// Both names are typed by people, one of them by the OTHER partner, so they
+// are escaped before they become HTML in this person's inbox (A202).
+import { _esc } from './_lib/branded-email.js';
 import { SITE_URL } from './_lib/site.js';
 import { redactEmail } from './_lib/log-redact.js';
 
@@ -267,9 +270,9 @@ function checkinHtml({ toName, partnerName, months, hasReflection, retakeUrl, us
   </div>
   <div class="grad-bar"></div>
   <h1>${is6mo ? "Six months in." : "One year."}</h1>
-  <p>Hi ${toName}, ${is6mo
-    ? `six months ago you and ${partnerName} took Attune together. Most couples find their results have shifted by now, in ways that reflect real changes in how they're relating.`
-    : `a year ago you and ${partnerName} took Attune together. A retake at this point usually surfaces something different. The early patterns are clearer, and the things you've been navigating together tend to show up in the results.`
+  <p>Hi ${_esc(toName)}, ${is6mo
+    ? `six months ago you and ${_esc(partnerName)} took Attune together. Most couples find their results have shifted by now, in ways that reflect real changes in how they're relating.`
+    : `a year ago you and ${_esc(partnerName)} took Attune together. A retake at this point usually surfaces something different. The early patterns are clearer, and the things you've been navigating together tend to show up in the results.`
   }</p>
   <p>The retake is the same exercises, answered independently. Your new results sit alongside your original ones so you can see what's changed.</p>
   ${reflBlock}

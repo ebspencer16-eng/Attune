@@ -125,13 +125,22 @@ export async function getOrComputeResults({ db, aId, bId, aAnswers, bAnswers, aN
 
   // Archive before overwriting, so annotations written against the previous
   // results still have something to resolve to.
+  //
+  // And only overwrite once the archive has landed. This went on regardless,
+  // and the archive could not even report a failure: a refused insert is an
+  // answer, not a throw, so the catch never ran (A202, from the sweep of
+  // server writes whose answer is unread). An overwrite without its archive
+  // loses the old version for good; holding it loses nothing, because the
+  // fresh results are served either way and the next load tries again, the
+  // same as a failed write below.
+  let archived = true;
   if (stored && db.archive) {
     try { await db.archive(stored); }
-    catch (e) { console.warn('[results-store] archive failed:', e?.message || e); }
+    catch (e) { archived = false; console.warn('[results-store] archive failed, not overwriting:', e?.message || e); }
   }
 
   const frozenAtIso = new Date().toISOString();
-  try {
+  if (archived) try {
     await db.write({
       partner_a: a, partner_b: b,
       version: RESULTS_VERSION,

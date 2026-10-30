@@ -80,7 +80,6 @@ const NOTE = {
   RESEND_API_KEY: 'Without it, no email is sent at all.',
   SUPABASE_SERVICE_KEY: 'The server\'s own database key. Everything needs it.',
   ADMIN_SECRET: 'The admin sign-in.',
-  BROWSERLESS_TOKEN: 'Optional. Without it the workbook prints in the browser instead.',
   GOOGLE_BOOKS_KEY: 'Optional. Only the quotation check uses it, and only here.',
 };
 

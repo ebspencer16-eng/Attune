@@ -70,13 +70,9 @@ globalThis.fetch = async (u) => new Response(
  * look at the body. Their 5xx is the right answer to "you have not set this
  * up", not a handler falling over, and on the live site the variable is set
  * so the path never runs.
- *
- * generate-pdf.js joined them when the two nodejs handlers stopped being
- * skipped: it answers 503 "PDF renderer not configured" with no Browserless
- * key, which is exactly this.
  */
 const UNCONFIGURED = new Set([
-  'admin-login.js', 'stripe-webhook.js', 'recompute-entitlements.js', 'generate-pdf.js',
+  'admin-login.js', 'stripe-webhook.js', 'recompute-entitlements.js',
 ]);
 
 const BODIES = [
