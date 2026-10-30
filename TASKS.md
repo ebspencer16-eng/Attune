@@ -9,6 +9,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A201a | **The contact page can send messages now. It never could: since 7 April every message was refused and the page said "Message sent".** Messages go to hello@attune-relationships.com with Reply-To set to the sender. For the failure case I wrote one line, shaped like your journal edit: "Your message did not send. Email us at hello@attune-relationships.com." It is live; change it if you want different words. |
+| A201b | **Two questions from the sweep, both yes or no.** (1) Two server addresses still answer although nothing in the product has called them since you removed what used them: the old PDF builder (gone with the Word workbook, 2 October) and an order-editing address (gone with the dead admin functions, 27 October). Remove both? I recommend yes: anything reachable from outside that nothing uses is risk with no benefit. (2) The home page waitlist tells people "you are on the list" even when saving them failed, and the server is built to do that on purpose. Want it to say it did not work instead? If yes, I need your line for that moment. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -34,8 +36,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A180 | **The written answers are now eight charts, stacked, each with its own slicer and its own answer categories.** Titles follow the first: What recent memories evoke joy; What makes couples proudest of themselves; What challenges made relationships stronger; What people want to work on in themselves; What people wish they had approached differently; What matters most in the five-year picture; What people are most grateful for; What couples want to do more of together. Each has eight categories written as answers to its question, plus "No theme matched". I wrote the categories, so look at them: they are one list per question in api/_lib/reflection-codes.js and easy to change. |
-| A200 | **The admin asks for much less now.** One visit to every page asked for the big data set 9 times and the summary data up to 4 times; it is now once each. The big data set also reads its nine tables at the same time instead of one after another. Expect the first load and switching pages to be faster. The first load still has to gather everything once, so it will not be instant. |
+| A201 | **Six sweeps, eight fixes.** Fixed: the contact form (A201a); checkout now shows the "could not reach the server" message instead of a code error when the server times out (no card is charged at that point); the website retries telling the server an exercise is done, which is what notifies the partner and starts the workbook, instead of losing it on one failed try; the two "your results are ready" emails retry instead of giving up after one failure; the admin survey pages share one request instead of sending another. Checked and clean: every link in the app goes to a screen that exists, and the two endpoints customers wait on already run their reads in parallel where they can. Questions in A201b. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -47,6 +48,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A180 | **Reflection written answers: eight stacked charts, each with its own slicer, title and answer categories.** |
+| A200 | **Admin speed: one request per data set instead of up to nine, and the cube reads its nine tables at once.** |
 | A198 | **Removed the reflection insight copy nothing showed: no longer computed, sent or stored in the code, on the server, the website or the app.** |
 | A195 | **Migration 101 ran: Rebecca and Abram have the Physical Intimacy exercise.** |
 | A187 | **Vague-language copy review: all 543 sentences decided by you and live on the website, in the app and in the workbook.** |

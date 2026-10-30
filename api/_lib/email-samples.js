@@ -49,6 +49,10 @@ export const EMAIL_SAMPLES = {
     trackingNumber: '1Z999AA10123456784',
     trackingUrl: 'https://www.ups.com/track?tracknum=1Z999AA10123456784',
   },
+  contact: {
+    name: 'Maya', replyEmail: 'maya@example.com', topic: 'purchase',
+    message: 'Hi, I bought the Core package for my partner and me. Can I add the workbook later?',
+  },
 };
 
 /**

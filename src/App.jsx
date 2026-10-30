@@ -1025,11 +1025,26 @@ async function notifyCompleted(exerciseKey) {
     if (!hasSupabase()) return;
     const { data: { session } } = await sb.auth.getSession();
     if (!session?.access_token) return;
-    await fetch('/api/exercise-completed', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ exercise: exerciseKey }),
-    });
+    /* ── THREE TRIES, NOT ONE ──────────────────────────────────────────
+       This is the website's only "done" signal: it is what tells the partner
+       and starts the workbook. The answer was never read, so a 500 lost both
+       for good and a network blip did the same through the catch. A sweep for
+       writes whose answer nobody reads found it (A201). api/_lib/completion.js
+       is written to be called twice (a duplicate notification is refused and
+       the workbook asks whether one exists), so trying again is safe. A 4xx
+       is a refusal, not a blip, and is not retried. */
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt) await new Promise((r) => setTimeout(r, attempt === 1 ? 1500 : 4000));
+      try {
+        const res = await fetch('/api/exercise-completed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ exercise: exerciseKey }),
+        });
+        if (res.ok || (res.status >= 400 && res.status < 500)) return;
+      } catch { /* a network failure: try again */ }
+    }
+    console.warn('[Attune] exercise-completed did not land after three tries:', exerciseKey);
   } catch { /* a courtesy, never a blocker */ }
 }
 
@@ -13743,10 +13758,10 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
         // Find pkg flags from order/account so the upsell block matches
         // what Partner B already has access to
         const ord = (() => { try { return JSON.parse(localStorage.getItem('attune_order') || 'null'); } catch { return null; } })();
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        /* Through the retry helper. The flag above is set before this runs,
+           so a send that failed once was never tried again: the partner was
+           simply not told their results were ready (A201). */
+        await sendEmailWithRetry({
             type: 'results_viewed',
             userId: acct.id || null,
             toEmail: acct.email,
@@ -13761,7 +13776,6 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
             hasWorkbook: !!(ord?.addon_workbook),
             hasIntimacy: !!(ord?.addon_intimacy),
             hasChecklist: !!(ord?.addon_checklist || acct?.pkg === 'newlywed'),
-          }),
         });
 
         // Also fire the workbook flash promo (idempotent on the server).
@@ -16089,10 +16103,8 @@ export default function App() {
     const fired = localStorage.getItem('attune_results_email_sent');
     if (fired) return;
     localStorage.setItem('attune_results_email_sent', '1');
-    fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    // The retry helper, for the same reason as the partner's copy of this send.
+    sendEmailWithRetry({
         type: 'results_viewed',
             userId: account?.id || null,
         toEmail: account.email,
@@ -16105,7 +16117,6 @@ export default function App() {
         hasWorkbook: !!(order?.addonWorkbook),
         hasIntimacy: pkg.hasIntimacy,
         hasChecklist: pkg.hasChecklist,
-      }),
     }).catch(() => {});
   }, [highlightsSeen]);
 

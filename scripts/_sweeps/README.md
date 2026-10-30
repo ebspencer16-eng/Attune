@@ -48,6 +48,24 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 | `sweep-percentage-range.mjs` | every percentage the product computes, over its whole input space | nothing: 6 producers, 93 inputs either side of every band edge, all whole and within 0..100 |
 | `sweep-nan-reach.mjs` | a NaN that reaches a person | nothing, after the scope learned to follow the binding rather than a line window |
 | `sweep-masquerading-defaults.mjs` | a default that stands in for a failed read | seven admin reads where a broken query and an empty table were the same figure; now `check-admin-read-errors` |
+| `sweep-inflight-caches.mjs` | a cache filled when the answer arrives, asked before it has | two in the admin: the cube (nine requests for one visit) and the survey; both share the request in flight now |
+| `sweep-uncalled-endpoints.mjs` | every deployed endpoint, against everything that could call it | two left behind by deliberate removals, `/api/generate-pdf` and `/api/orders`; put to Ellie under A201 |
+| `sweep-unchecked-json.mjs` | a response body used as data with nothing asking whether the request worked | one: checkout showed a parser error ("Unexpected token '<'") on a platform error page; it reads as the connection message now |
+| `sweep-discarded-writes.mjs` | a write request whose answer nobody reads | the contact form, which had never delivered a message since 7 April and said "Message sent" every time; the website's exercise-done signal, sent once with no retry; two results-ready emails marked sent before sending |
+
+The 29 October four, and how each was wrong first:
+
+- `sweep-uncalled-endpoints` reported nothing on its first run, because
+  vercel.json rewrites every endpoint to its own file, so every route looked
+  called. Only a cron path, or a rewrite from some other address, counts now.
+- `sweep-inflight-caches` went on reporting the two caches it had found after
+  both were fixed, because the fix (a promise kept beside the cache) is not
+  the shape it matched. It learned the fixed form, and still finds the broken
+  one: the survey loader was found by it, unfixed, on the run that taught it.
+- `sweep-unchecked-json` saw 44 reads and the code has 59: most clients write
+  `.then(r => r.json())`, and the static pages write `function (r) { return
+  r.json(); }`. It knows the first two; the third (four sites) was read by hand
+  and all four check what came back.
 
 The 20 October four were wrong five times between them before they were right,
 which is worse than the usual ratio and worth the detail:

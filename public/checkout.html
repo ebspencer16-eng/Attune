@@ -1666,6 +1666,7 @@ async function handleSubmit(e) {
     const _ctrl = new AbortController();
     const _to = setTimeout(() => _ctrl.abort(), 30000);
     let res;
+    const UNREACHABLE = 'We could not reach the server. Check your connection and try again, your card was not charged.';
     try {
     res = await fetch('/api/create-payment-intent', {
       method: 'POST',
@@ -1715,12 +1716,18 @@ async function handleSubmit(e) {
     });
     } catch (netErr) {
       if (netErr.name === 'AbortError') throw new Error('The request timed out. We could not reach the server, so your card was not charged.');
-      throw new Error('We could not reach the server. Check your connection and try again, your card was not charged.');
+      throw new Error(UNREACHABLE);
     } finally {
       clearTimeout(_to);
     }
 
-    const serverResponse = await res.json();
+    /* A body that is not JSON (a platform timeout page, a 502) used to throw
+       a parser error, and the customer read "Unexpected token '<'" under
+       "Payment didn't go through". Nothing has been charged at this point, and
+       the sentence for that is the one above. */
+    let serverResponse;
+    try { serverResponse = await res.json(); }
+    catch (_) { throw new Error(UNREACHABLE); }
     const { clientSecret, error: serverErr, free: isFreePromo, orderNums: freeOrderNums } = serverResponse;
     if (serverErr) throw new Error(serverErr);
 

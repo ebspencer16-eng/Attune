@@ -4543,8 +4543,17 @@ function restorePageFromHash() {
 const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,feedback:false,types:false,'survey-explorer':false,'ux-views':true,'explore':true,'engagement':true};
 let SURVEY_DATA = null;
 
-async function loadSurvey(force) {
-  if (SURVEY_DATA && !force) return SURVEY_DATA;
+/* The request in flight is shared, like ensureCube's: a filter changed while
+   the first load was still on its way used to send a second one. */
+let __surveyInFlight = null;
+function loadSurvey(force) {
+  if (SURVEY_DATA && !force) return Promise.resolve(SURVEY_DATA);
+  if (__surveyInFlight && !force) return __surveyInFlight;
+  const p = fetchSurvey().finally(() => { if (__surveyInFlight === p) __surveyInFlight = null; });
+  __surveyInFlight = p;
+  return p;
+}
+async function fetchSurvey() {
   const res = await fetch('/api/admin-survey', { headers: window.adminAuthHeaders() });
   const j = noteDemoFilter(await res.json());
   if (!j || !j.ok) throw new Error((j && j.error) || ('request failed with ' + res.status));

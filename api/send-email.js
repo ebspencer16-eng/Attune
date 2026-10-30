@@ -312,7 +312,42 @@ export const SEND_EMAILS = {
   workbook_promo:              (body) => workbookPromoEmail(body),
   results_viewed:              (body) => resultsViewedEmail(body),
   shipping_notification:       (body) => shippingNotificationEmail(body),
+  contact:                     (body) => contactEmail(body),
 };
+
+/**
+ * ── THE CONTACT FORM, WHICH HAD NEVER DELIVERED A MESSAGE ──────────────────
+ * public/contact.html posted { to, from, subject, text } with no `type`, and
+ * this endpoint answers an unknown type with a 400, so every message sent
+ * from that page since it went live on 7 April was refused. The page caught
+ * the failure under a comment reading "silently fail – show success anyway"
+ * and told each person "Message sent. We'll be in touch within one business
+ * day." Found by a sweep for response bodies nobody checked (A201).
+ *
+ * This email goes to us, never to an address the caller chose: the recipient
+ * is fixed below, and the sender's address only becomes Reply-To, so the
+ * endpoint cannot be used to mail a stranger. The fields are already escaped
+ * by sanitizeBody, except the message, which is escaped here because it is
+ * allowed to be longer than the 500 characters a name gets.
+ */
+const CONTACT_TO = 'hello@attune-relationships.com';
+const CONTACT_TOPICS = {
+  purchase: 'Question about a purchase', results: 'Question about my results',
+  gift: 'Gift purchase help', technical: 'Technical issue',
+  feedback: 'Feedback or suggestion', other: 'Something else',
+};
+function contactEmail(body) {
+  const topic = CONTACT_TOPICS[body.topic] || 'No topic chosen';
+  const message = String(body.messageHtml || body.message || '');
+  return {
+    subject: `Contact form: ${topic}`,
+    html: `<div style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1C1C1E">`
+      + `<p><strong>From:</strong> ${body.name || '(no name)'} &lt;${body.replyEmail || ''}&gt;<br><strong>Topic:</strong> ${topic}</p>`
+      + `<p style="white-space:pre-wrap">${message}</p>`
+      + `<p style="color:#8E8E93;font-size:12px">Sent from the contact form at /contact. Reply to this email to answer them.</p></div>`,
+    replyTo: body.replyEmail || null,
+  };
+}
 
 function isAllowedUrl(u) {
   if (!u || typeof u !== 'string') return true; // null/empty is fine, template will skip it
@@ -402,7 +437,16 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ ok: false, error: 'Invalid toEmail' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
+  /* The contact message may be longer than sanitizeBody's 500 characters,
+     so it is capped and escaped on its own before the rest is sanitised. */
+  const contactMessage = (body.type === 'contact' && typeof body.message === 'string')
+    ? escapeHtml(body.message.slice(0, 5000)) : null;
+  /* And the reply address raw, for the Reply-To header; the escaped copy is
+     the one that goes into the HTML. Anything that is not plainly an address
+     (markup characters included) is refused below. */
+  const contactReply = body.type === 'contact' ? String(body.replyEmail || '').trim() : '';
   body = sanitizeBody(body);
+  if (contactMessage != null) body.messageHtml = contactMessage;
 
   const { type } = body;
   let email;
@@ -460,6 +504,13 @@ export default async function handler(req) {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
+  } else if (type === 'contact') {
+    if (!EMAIL_RE.test(contactReply) || /[<>"'&,;]/.test(contactReply) || !String(body.message || '').trim()) {
+      return new Response(JSON.stringify({ ok: false, error: 'An email address and a message are needed.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+    email = SEND_EMAILS[type](body, userId);
+    email.to = CONTACT_TO;
+    email.replyTo = contactReply;
   } else {
     return new Response(`Unknown type: ${type}`, { status: 400 });
   }
@@ -477,7 +528,8 @@ export default async function handler(req) {
     // Wrap the address in a display name. A bare address makes mail clients
     // show the local part ("hello") as the sender. Every other sender in api/
     // uses this form. If FROM_EMAIL is already "Name <addr>", leave it alone.
-    body: JSON.stringify({ from: FROM.includes('<') ? FROM : `Attune <${FROM}>`, to: email.to, subject: email.subject, html: email.html }),
+    body: JSON.stringify({ from: FROM.includes('<') ? FROM : `Attune <${FROM}>`, to: email.to, subject: email.subject, html: email.html,
+      ...(email.replyTo ? { reply_to: email.replyTo } : {}) }),
   });
 
   const data = await res.json().catch(() => ({}));

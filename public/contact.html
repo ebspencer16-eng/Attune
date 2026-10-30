@@ -131,7 +131,8 @@
     <label for="message">Message</label>
     <textarea id="message" placeholder="Tell us what's on your mind..."></textarea>
 
-    <button class="btn" onclick="submitContact()">Send message</button>
+    <button class="btn" id="contact-send" onclick="submitContact()">Send message</button>
+    <p id="send-failed" hidden style="margin-top:.9rem;color:var(--clay);font-size:.9rem">Your message did not send. Email us at hello@attune-relationships.com.</p>
   </div>
 
   <div class="success" id="success-msg">
@@ -156,18 +157,25 @@ async function submitContact() {
     return;
   }
 
+  /* This posted a shape /api/send-email has never accepted, then showed
+     "Message sent" whatever came back, so no message from this page ever
+     arrived. It says sent only when the server says so now, and on a failure
+     the form and what was typed stay put. */
+  const btn = document.getElementById('contact-send');
+  const failed = document.getElementById('send-failed');
+  btn.disabled = true;
+  failed.hidden = true;
+  let ok = false;
   try {
-    await fetch('/api/send-email', {
+    const res = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: 'hello@attune-relationships.com',
-        from: email,
-        subject: `Attune contact: ${subject || 'General'}`,
-        text: `From: ${name} <${email}>\nTopic: ${subject}\n\n${message}`
-      })
+      body: JSON.stringify({ type: 'contact', name, replyEmail: email, topic: subject, message }),
     });
-  } catch(e) { /* silently fail – show success anyway */ }
+    ok = res.ok;
+  } catch (e) { ok = false; }
+  btn.disabled = false;
+  if (!ok) { failed.hidden = false; return; }
 
   document.getElementById('contact-form').style.display = 'none';
   document.getElementById('success-msg').style.display = 'block';
