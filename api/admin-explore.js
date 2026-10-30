@@ -776,18 +776,57 @@ export default async function handler(req) {
   const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   try {
-    /* Demo accounts are not people: see api/_lib/demo-accounts.js. */
-    const { data: profiles = [], error, demoFilterApplied } =
-      await selectProfiles(admin, (q) => q.select('*'));
-    if (error) return json({ error: safeError('admin-explore', error, 'Query failed.') }, 500);
+    /**
+     * ── EVERY READ STARTS AT ONCE ───────────────────────────────────────
+     * Ellie: "Admin is getting really slow. I know some of that is to be
+     * expected, but can we improve that at all?"
+     *
+     * Nine reads, none of which needs another's answer to be asked, were made
+     * one after the other, so the cube waited for the sum of nine round trips
+     * (more, since each pages a thousand rows at a time). They are asked
+     * together now and the cube waits for the slowest.
+     *
+     * Each read's failure is still handled where it always was, further down,
+     * by the code that uses it. `settle` only turns a thrown network error into
+     * the same `{ error }` shape a returned one has, so one read failing
+     * cannot take the other eight with it through Promise.all.
+     */
+    const settle = (p) => p.catch((error) => ({ data: null, error }));
+    const [profilesRead, psRead, journalRead, portalRead, postReadsRead, surveyRead, ordersRead, betaRead, demoRead] = await Promise.all([
+      /* Demo accounts are not people: see api/_lib/demo-accounts.js. */
+      settle(selectProfiles(admin, (q) => q.select('*'))),
+      settle(pageAll(() => admin.from('partner_sessions').select('invite_code, ex1_answers'), { order: ['invite_code'] })),
+      /* owner_id and created_at only: a journal body must never reach an
+         admin page, so the select is the guarantee. */
+      settle(pageAll(() => admin
+        .from('notes')
+        .select('owner_id, created_at')
+        .eq('anchor_type', JOURNAL_ANCHOR))),
+      settle(pageAll(() => admin
+        .from('page_events')
+        .select('owner_id, ms')
+        .eq('kind', 'page_time')
+        .like('key', 'app:%'))),
+      settle(pageAll(() => admin.from('post_reads').select('owner_id'), { order: ['owner_id', 'post_id'] })),
+      settle(pageAll(() => admin.from('survey_responses')
+        .select('id, respondent_id, answers, updated_at, completed_at, featured_at'))),
+      /* A demo's test order was a row in the cube, unsegmented but counted. */
+      settle(pageAll(() => admin.from('orders').select('*'))),
+      settle(pageAll(() => admin.from('beta_codes').select('*'), { order: ['code'] })),
+      /* demoOwners answers an empty set on a failed read rather than throwing,
+         which is its own documented behaviour; a thrown one gets the same. */
+      demoOwners(admin).catch(() => ({ ids: new Set(), emails: new Set(), demoFilterApplied: false })),
+    ]);
+    if (profilesRead.error) return json({ error: safeError('admin-explore', profilesRead.error, 'Query failed.') }, 500);
+    const { data: profiles = [], demoFilterApplied } = profilesRead;
     const profileById = {}; for (const p of profiles) profileById[p.id] = p;
     // Invited partners answer via partner_sessions (keyed by invite_code) and may
     // never create a full profile. Pull them so a couple isn't shown as unpaired
     // just because one half came in through an invite.
     let partnerSessions = [];
     try {
-      const _ps = await pageAll(() => admin.from('partner_sessions').select('invite_code, ex1_answers'), { order: ['invite_code'] });
-      if (_ps.error) throw _ps.error;
+      if (psRead.error) throw psRead.error;
+      const _ps = psRead;
       /* Keyed by code, so the codes the figures are about are the ones on
          these profiles. A demo's invited partner was otherwise a person. */
       const _codes = new Set(profiles.map((p) => p.invite_code).filter(Boolean));
@@ -828,11 +867,8 @@ export default async function handler(req) {
          in a shape of its own, because check-admin-read-errors reads the
          ending and a second ending is a second thing to keep teaching it. */
       try {
-        const _j = await pageAll(() => admin
-          .from('notes')
-          .select('owner_id, created_at')
-          .eq('anchor_type', JOURNAL_ANCHOR));
-        if (_j.error) throw _j.error;
+        if (journalRead.error) throw journalRead.error;
+        const _j = journalRead;
         journalByOwner = journalUseByOwner(_j.data || []);
       } catch (e) {
         console.error('[admin-explore] notes (journal):', e?.message || e);
@@ -860,12 +896,8 @@ export default async function handler(req) {
     const portalMsByOwner = new Map();
     {
       try {
-        const _pe = await pageAll(() => admin
-          .from('page_events')
-          .select('owner_id, ms')
-          .eq('kind', 'page_time')
-          .like('key', 'app:%'));
-        if (_pe.error) throw _pe.error;
+        if (portalRead.error) throw portalRead.error;
+        const _pe = portalRead;
         for (const e of _pe.data || []) {
           if (!e.owner_id) continue;
           const n = Number(e.ms);
@@ -883,8 +915,8 @@ export default async function handler(req) {
     const articleReaders = new Set();
     {
       try {
-        const _pr = await pageAll(() => admin.from('post_reads').select('owner_id'), { order: ['owner_id', 'post_id'] });
-        if (_pr.error) throw _pr.error;
+        if (postReadsRead.error) throw postReadsRead.error;
+        const _pr = postReadsRead;
         for (const r of _pr.data || []) if (r.owner_id) articleReaders.add(r.owner_id);
       } catch (e) {
         console.error('[admin-explore] post_reads:', e?.message || e);
@@ -906,13 +938,12 @@ export default async function handler(req) {
     const surveyByRespondent = {};
     const fbCatOptions = Object.fromEntries(Object.keys(FB_CAT_SRC).map((k) => [k, new Set()]));
     try {
-      const { data: svRows = [], error: svErr } = await pageAll(() => admin.from('survey_responses')
-        .select('id, respondent_id, answers, updated_at, completed_at, featured_at'));
+      if (surveyRead.error) throw surveyRead.error;
+      const { data: svRows = [] } = surveyRead;
       /* supabase-js RETURNS its error rather than throwing it, so the try
          around this read catches nothing on a failed query: the default fires
          and every respondent reads as unsegmented. Throwing is what reaches
          the catch below. */
-      if (svErr) throw svErr;
       for (const r of (svRows || [])) {
         if (!r.respondent_id) continue;
         const payload = { ...(r.answers || {}) };
@@ -1187,12 +1218,11 @@ export default async function handler(req) {
     // ── Orders, joined to purchaser demographics, fully anonymized ───────────
     let orderRows = [];
     try {
-      /* A demo's test order was a row in the cube, unsegmented but counted. */
-      const { data: _ords = [], error: oErr } = await pageAll(() => admin.from('orders').select('*'));
+      if (ordersRead.error) throw ordersRead.error;
+      const { data: _ords = [] } = ordersRead;
       /* Same as the survey read above: without this, a failed orders query and
          a shop that has sold nothing are the same empty cube. */
-      if (oErr) throw oErr;
-      const ords = withoutDemoOrders(_ords, await demoOwners(admin));
+      const ords = withoutDemoOrders(_ords, demoRead);
 
       /**
        * ── WHAT EACH PROMO CODE BUNDLES ────────────────────────────────────
@@ -1219,8 +1249,8 @@ export default async function handler(req) {
         codeMeta[String(code).toUpperCase()] = meta;
       }
       {
-        const { data: betaRows, error: bErr } = await pageAll(() => admin.from('beta_codes').select('*'), { order: ['code'] });
-        if (bErr) couldNotRead.push('the issued promo codes, so add-on attachment counts only what was bought outright');
+        const { data: betaRows } = betaRead;
+        if (betaRead.error) couldNotRead.push('the issued promo codes, so add-on attachment counts only what was bought outright');
         else for (const row of betaRows || []) {
           if (row?.code) codeMeta[String(row.code).toUpperCase()] = codeMetaFromRow(row);
         }

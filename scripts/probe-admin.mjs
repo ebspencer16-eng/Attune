@@ -125,7 +125,7 @@ const { DIM_META, DIM_SCALE_POLES: DIM_SCALE_POLES_STUB } = await import(`${ROOT
 const DIM_NAMES_STUB = Object.fromEntries(Object.entries(DIM_META).map(([k, v]) => [k, v.label]));
 const { REFLECTION_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
 const { ANNIVERSARY_QUESTIONS } = await import(`${ROOT}api/_anniversary-questions.js`);
-const { REFLECTION_CODES, tallyCodes } = await import(`${ROOT}api/_lib/reflection-codes.js`);
+const { REFLECTION_CODES, tallyCodes, reflectionTallies } = await import(`${ROOT}api/_lib/reflection-codes.js`);
 const { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } = await import(`${ROOT}api/_intimacy-questions.js`);
 const IDIM_LABEL_STUB = Object.fromEntries((INTIMACY_DIMENSIONS || []).map((d) => [d.id, d.label]));
 
@@ -775,13 +775,13 @@ const server = createServer((req, res) => {
       'Learning to apologise properly instead of going quiet',
       'More weekends away, just the two of us',
     ];
+    /* The server's own function, so the stub cannot carry a frame the
+       server does not. A different slice per question so the charts differ. */
+    const _textIds = ANNIVERSARY_QUESTIONS.filter((q) => q.type === 'text').map((q) => q.id);
     const reflectionCodes = {
-      frame: REFLECTION_CODES.map((c) => ({ id: c.id, label: c.label })),
-      questions: ANNIVERSARY_QUESTIONS.filter((q) => q.type === 'text').map((q, qi) => {
-        /* A different slice per question so the chart changes when the picker
-           does, which is the thing being looked at. */
-        const answers = SAMPLE_WRITING.slice(qi % 4).concat(SAMPLE_WRITING.slice(0, qi % 4));
-        return { id: q.id, label: q.text, category: q.category || null, ...tallyCodes(answers) };
+      questions: reflectionTallies((q) => {
+        const qi = _textIds.indexOf(q.id);
+        return SAMPLE_WRITING.slice(qi % 4).concat(SAMPLE_WRITING.slice(0, qi % 4));
       }),
     };
     /* ── THE TWO WRITTEN CONFLICT ANSWERS ──────────────────────────────
@@ -1300,6 +1300,10 @@ await page.onNewDocument(`
      screenshot from a tile with no data, and it cost a round of guessing
      before this was added. Both hooks, because a throw inside an await lands
      on unhandledrejection and one outside lands on error. */
+  /* Every request the page makes, by path, for TIMING below. */
+  window.__probeFetches = [];
+  const _f = window.fetch;
+  window.fetch = function (u) { try { window.__probeFetches.push({ url: String(u), path: String(u).split('?')[0], at: performance.now() }); } catch (x) {} return _f.apply(this, arguments); };
   window.addEventListener('unhandledrejection', (e) => {
     try { window.__probeErrors.push('UNHANDLED REJECTION: ' + ((e.reason && (e.reason.stack || e.reason.message)) || e.reason)); } catch (x) {}
   });
@@ -2499,6 +2503,35 @@ if (process.env.SCROLL) {
     console.log(`\nconsole.error while driving (${fresh.length}):`);
     for (const e of fresh.slice(0, 8)) console.log('  ' + String(e).slice(0, 160));
   }
+}
+/**
+ * ── TIMING=1: WHERE THE ADMIN SPENDS ITS TIME IN THE BROWSER ──────────────
+ * Ellie: "Admin is getting really slow." Requests per endpoint over a visit to
+ * every sidebar page, the main-thread time of each page change, and the cost
+ * of initAllSlicers alone. The stub answers instantly, so this measures the
+ * page and the number of requests, never the server.
+ */
+if (process.env.TIMING) {
+  const ids = await page.evaluate(() => [...document.querySelectorAll('.sb-item[onclick]')]
+    .map((x) => ((x.getAttribute('onclick') || '').match(/showPage\('([^']+)'\)/) || [])[1]).filter(Boolean));
+  const per = [];
+  for (const id of ids) {
+    const ms = await page.evaluate(async (id) => {
+      const el = [...document.querySelectorAll('.sb-item[onclick]')].find((x) => (x.getAttribute('onclick') || '').includes(`showPage('${id}')`));
+      const t0 = performance.now(); el.click(); const sync = performance.now() - t0;
+      await new Promise((r) => setTimeout(r, 1500));
+      return sync;
+    }, id);
+    per.push([id, Math.round(ms)]);
+  }
+  const slicers = await page.evaluate(async () => { const t0 = performance.now(); await initAllSlicers(); return Math.round(performance.now() - t0); });
+  const fetches = await page.evaluate(() => window.__probeFetches);
+  const byPath = {}; for (const f of fetches) byPath[f.path] = (byPath[f.path] || 0) + 1;
+  console.log('\nTIMING (stub answers instantly; this is the page, not the server)');
+  console.log('  page change, synchronous ms: ' + per.map(([i, m]) => i + ' ' + m).join(', '));
+  console.log('  initAllSlicers alone: ' + slicers + ' ms');
+  console.log('  requests by endpoint over the whole visit: ' + JSON.stringify(byPath));
+  console.log('  admin-data requests: ' + fetches.filter((f) => f.path === '/api/admin-data').map((f) => f.url).join('  |  '));
 }
 const shot = await page.screenshot({ fullPage: process.env.FULL_PAGE === '1' });
 writeFileSync(OUT, Buffer.from(shot, 'base64'));

@@ -90,7 +90,7 @@ import { framingQuestion } from "../api/_lib/intimacy-framing.js";
 import { PART_TWO } from "../api/_lib/part-two.js";
 import { OPENER_BODY, OPENER_FOOTER } from "../api/_lib/highlight-cards.js";
 import { asksChildhood, GROWING_UP_LABEL, futureLabel as respFutureLabel, categoryIntro as respCategoryIntro, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL } from "../api/_lib/expectations-page.js";
-import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
+import { isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
 // Default binding for the paths with no couple context: the workbook, the
 // share cards, anything outside the results tree. Components inside the
 // results tree use useContent(), which resolves the version stamped on that
@@ -100,7 +100,6 @@ import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted
 // and getDimShift moved to api/_lib/dimension-copy.js, where the app can reach
 // them too.
 // content-version: no couple context
-const { REFLECTION_ACTION_TITLES } = contentFor(null);
 
 // The copy this couple's results render from. null means current, which is
 // correct both for couples stamped before pinning existed and for demo mode.
@@ -7692,9 +7691,6 @@ const JAMES_ANNIVERSARY_DEMO = {
   a_priority: ["Communication","Long-term planning","Quality time","Financial alignment","Physical intimacy","Shared adventures"],
 };
 
-// reflectionActionTitle and deriveAnniversaryInsights moved to
-// api/_lib/reflection-insights.js so the app can render the same plan.
-// Imported at the top of this file.
 
 
 
@@ -9858,7 +9854,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section.startsWith("reflection") && hasAnniversary) {
     const mine = ex3Answers || SARAH_ANNIVERSARY_DEMO;
     const theirs = partnerEx3 || JAMES_ANNIVERSARY_DEMO;
-    const insights = deriveAnniversaryInsights(mine, theirs, userName, partnerName, coupleType);
     const scaleQs = ANNIVERSARY_QUESTIONS.filter(q => q.type === "scale");
     const textQs = [
       { id: "a1", label: "A moment that defined us", category: "Milestones" },
@@ -9869,11 +9864,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       { id: "a3", label: "What I'm most grateful for", category: "What Matters" },
       { id: "a4", label: "What I want more of together", category: "What Matters" },
     ];
-    const actionItems = insights.filter(i => i.type === "explore").map(i => i.title);
 
     // ── REFLECTION OVERVIEW ───────────────────────────────────────────────────
     if (section === "reflection-overview" || section === "reflection") {
-      const explores = insights.filter(i => i.type === "explore").length;
       // The heading and the line under it. Both were written here, where the
       // app cannot read them, so the app opened this page with the section's
       // name and no line at all. One builder now, in api/_lib.

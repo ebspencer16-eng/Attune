@@ -62,7 +62,7 @@ import { anonCoupleId } from './_lib/couple-id.js';
 import { DIM_META } from './_lib/dimensions.js';
 import { ALIGNMENT_BANDS } from './_lib/alignment.js';
 import { readInheritance } from './_lib/inherited-roles.js';
-import { REFLECTION_CODES, tallyCodes } from './_lib/reflection-codes.js';
+import { REFLECTION_CODES, tallyCodes, reflectionTallies } from './_lib/reflection-codes.js';
 import { conflictFrameFor } from './_lib/conflict-codes.js';
 import { ANNIVERSARY_QUESTIONS } from './_anniversary-questions.js';
 import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
@@ -361,21 +361,12 @@ function buildResponseAggregates(profiles, sessions) {
    * shows percentages of only the coded half is a chart about its own
    * vocabulary.
    */
-  const reflectionCodes = { questions: [], frame: REFLECTION_CODES.map((c) => ({ id: c.id, label: c.label })) };
-  {
-    const textQuestions = ANNIVERSARY_QUESTIONS.filter((q) => q.type === 'text');
-    for (const q of textQuestions) {
-      const answers = (profiles || []).map((p) => p.ex3_answers?.[q.id]).filter((v) => typeof v === 'string' && v.trim());
-      const tally = tallyCodes(answers);
-      reflectionCodes.questions.push({
-        id: q.id,
-        /* The question as asked, which is copy and not an answer. */
-        label: q.text,
-        category: q.category || null,
-        ...tally,
-      });
-    }
-  }
+  /* One chart per written question, each coded against its own frame and
+     carrying its own title: see REFLECTION_FRAMES. */
+  const reflectionCodes = {
+    questions: reflectionTallies((q) => (profiles || [])
+      .map((p) => p.ex3_answers?.[q.id]).filter((v) => typeof v === 'string' && v.trim())),
+  };
 
   /**
    * The two written conflict answers, coded, and the ranking.

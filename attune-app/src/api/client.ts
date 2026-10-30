@@ -318,14 +318,6 @@ export type CommsPlan = {
    */
 };
 
-/** One item on the Reflection action plan, with the evidence tier behind it. */
-export type ReflectionInsight = {
-  title: string;
-  body: string | null;
-  action: string | null;
-  tier: string | null;
-};
-
 /** One entry in the results spine. Both fields come from the server. */
 export type ResultsSection = { id: string; label: string };
 
@@ -780,8 +772,6 @@ export type ResultsResponse =
       }[];
       /** The words for the side-by-side key, {you} and {them} to fill. */
       commResponsesKey?: { yours: string; theirs: string; theirReadOfYou: string; yourReadOfThem: string };
-      /** The Reflection action plan. Null unless they own it and both finished. */
-      reflectionPlan?: ReflectionInsight[] | null;
       /** What the couple owns, so nothing has to be inferred from the payload. */
       owned?: string[];
       /** Null until both partners have finished Expectations. */

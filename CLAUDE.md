@@ -2536,6 +2536,15 @@ arrived yet is not a partner who has not finished. Any time a surface renders
 "we have not heard" identically to "no", a failed read becomes a product
 statement about somebody.
 
+**A cache filled when the answer arrives is no cache for the callers who
+asked before it did.** Ellie: "Admin is getting really slow." `ensureCube` set
+its cache on arrival, so every tile that asked while the first request was in
+flight found it empty and sent its own: one visit to every admin page asked
+for the heaviest payload nine times. Share the promise, not the result, and
+drop a failed one so the next ask retries. `TIMING=1 node
+scripts/probe-admin.mjs overview` counts requests per endpoint; read that
+before guessing where time goes.
+
 ---
 
 ## Verification, non-negotiable

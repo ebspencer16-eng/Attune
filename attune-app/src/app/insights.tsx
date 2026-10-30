@@ -809,7 +809,6 @@ function Results({ results, owned, onAccent, menuFooter }: {
       commResponses={results.commResponses ?? []}
       commResponsesKey={results.commResponsesKey ?? null}
       storycardStyle={results.storycardStyle ?? null}
-      reflectionPlan={results.reflectionPlan}
       expectations={results.expectations}
       intimacy={results.intimacy}
       reflection={results.reflection}

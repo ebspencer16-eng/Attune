@@ -30,7 +30,6 @@ import { COMM_DOMAINS as domainGroups } from '../api/_lib/comm-domains.js';
 const content = readFileSync(new URL('../api/_content/v1.js', import.meta.url), 'utf8');
 const DIM_ACTION_ITEMS = evalConst(content, 'DIM_ACTION_ITEMS');
 const DOMAIN_ALIGNED = evalConst(content, 'DOMAIN_ALIGNED');
-const REFLECTION_ACTION_TITLES = evalConst(content, 'REFLECTION_ACTION_TITLES');
 
 // The reassurance shift prose, pulled straight out of getDimShift's SHIFTS map.
 // Rendered with sample names so the {loName}/{hiName} slots read as real copy.
@@ -222,13 +221,6 @@ Object.entries(DIM_ACTION_ITEMS).forEach(([dim, item], i) => {
   children.push(smallSection(`7.${PROTOCOLS.length + 3}.${i + 1}`, DIM_META[dim]?.label || dim, ORANGE));
   children.push(prose(item.title, { indent: INDENT_PROSE_UNDER_SMALL, bold: true }));
   children.push(prose(fill(item.body).replace(/\{LO\}/g, 'Maya').replace(/\{HI\}/g, 'David'), { indent: INDENT_PROSE_UNDER_SMALL }));
-});
-
-// ── 8 ────────────────────────────────────────────────────────────────────────
-children.push(...bigSection('8', 'Reflection action titles', 'The Relationship Reflection headlines describe what the answers showed. On the glance page and What Comes Next they need to be something you can do. Left is what the insight says, right is what now renders.', GREEN));
-Object.entries(REFLECTION_ACTION_TITLES).forEach(([was, now], i) => {
-  children.push(midSection(`8.${i + 1}`, '', GREEN, { inline: was }));
-  children.push(prose('->  ' + now, { indent: INDENT_PROSE_UNDER_SMALL }));
 });
 
 // ── 9 ────────────────────────────────────────────────────────────────────────

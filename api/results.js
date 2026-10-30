@@ -50,7 +50,6 @@ import { commDomains, DIMENSION_DISPLAY_ORDER } from './_lib/comm-domains.js';
 import { sideBySide, SIDE_BY_SIDE_KEY } from './_lib/side-by-side.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { personalityFeedback, commsProtocols, commsActionPlan } from './_lib/comms-plan.js';
-import { deriveAnniversaryInsights, reflectionActionTitle } from './_lib/reflection-insights.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { entitlementsFor } from './_lib/entitlements.js';
@@ -904,21 +903,6 @@ export default async function handler(req) {
       };
     })();
 
-    /* Hoisted out of the response object so whatComesNext below can be given
-       it. It was read there as a bare name, which is a ReferenceError the
-       moment the line runs; check-server-undefined caught it. */
-    const reflectionPlan = (ownership.ownsReflection && bothDone('ex3') && me.ex3_answers && partner?.ex3_answers)
-        ? deriveAnniversaryInsights(
-            me.ex3_answers, partner.ex3_answers,
-            me.name || 'You', partner?.name || 'Your partner',
-            COUPLE_TYPES.find((t) => t.id === results.coupleType) || null,
-          ).map((ins) => ({
-            title: reflectionActionTitle(ins.title, contentFor(contentVersion ?? null)),
-            body: ins.body || null,
-            action: ins.action || null,
-            tier: ins.tier || null,
-          }))
-        : null;
     return json({
       ok: true, ready: true, cached, recomputed: reason,
       // Labels are applied on the way out, not baked into the stored blob.
@@ -997,15 +981,6 @@ export default async function handler(req) {
       commsPlan: { tiles: commsPlan.tiles },
 
       /**
-       * The Reflection action plan.
-       *
-       * Titles come from REFLECTION_ACTION_TITLES, the third source. Insights
-       * are derived rather than written: each carries the evidence it rests
-       * on, and one that speaks for both people needs a piece from each.
-       */
-      reflectionPlan,
-
-      /**
        * The highlight storycards, read in order before anything else.
        *
        * Words and numbers only. The website draws these as nine designed
@@ -1057,10 +1032,6 @@ export default async function handler(req) {
         expectations,
         intimacy,
         reflection,
-        /* The section's own action plan, which is what its overview page
-           draws. Without it this page made two rows out of one written answer.
-           See the note in what-comes-next.js. */
-        reflectionPlan,
         conflictReady: ownership.ownsConflict,
         /* The reader's OWN conflict answers, so their action plan can be the
            one their overview page shows them. Private from the partner, not

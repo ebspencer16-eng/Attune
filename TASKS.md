@@ -21,11 +21,10 @@ Every code block says which window it goes in, above the block.
 
 ## 2. Open
 
+**Nothing open.**
+
 | # | What I am doing |
 |--|--|
-| A180 | **Your ask: "I want each of these to be a separate chart, all of them should be vertically stacked with slicers of their own, and unique categories built as answers to the question the chart is asking. Title the chart the way we just retitled the first one."** Splitting the written-answers tile into one chart per question, each with its own slicer, its own answer categories and a title phrased like "What recent memories evoke joy". |
-| A198 | **Your ask: "Remove them."** Removing the reflection insight copy nothing draws (the old Action Plan page) from the server, the website and the app, so it stops being computed and sent. |
-| A200 | **Your ask: "Admin is getting really slow... can we improve that at all?"** Measuring what each admin page loads and how long each request takes, then cutting the slowest. |
 
 
 ## 3. For you to review
@@ -35,6 +34,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A180 | **The written answers are now eight charts, stacked, each with its own slicer and its own answer categories.** Titles follow the first: What recent memories evoke joy; What makes couples proudest of themselves; What challenges made relationships stronger; What people want to work on in themselves; What people wish they had approached differently; What matters most in the five-year picture; What people are most grateful for; What couples want to do more of together. Each has eight categories written as answers to its question, plus "No theme matched". I wrote the categories, so look at them: they are one list per question in api/_lib/reflection-codes.js and easy to change. |
+| A200 | **The admin asks for much less now.** One visit to every page asked for the big data set 9 times and the summary data up to 4 times; it is now once each. The big data set also reads its nine tables at the same time instead of one after another. Expect the first load and switching pages to be faster. The first load still has to gather everything once, so it will not be instant. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -46,6 +47,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A198 | **Removed the reflection insight copy nothing showed: no longer computed, sent or stored in the code, on the server, the website or the app.** |
 | A195 | **Migration 101 ran: Rebecca and Abram have the Physical Intimacy exercise.** |
 | A187 | **Vague-language copy review: all 543 sentences decided by you and live on the website, in the app and in the workbook.** |
 | A197 | **Workbook rows: all 121 live as drafted; the reassurance line trimmed 27 characters to fit its page.** |

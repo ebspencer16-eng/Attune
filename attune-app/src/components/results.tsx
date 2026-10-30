@@ -42,7 +42,7 @@ import { AnnotationProvider, Prose, useAnnotations } from '@/components/annotati
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
   CommsPlan, HighlightCard, IntimacyDomain, IntimacyResults, NextStepBucket, NextStepGroup,
-  ReflectionInsight, ReflectionRating, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
+  ReflectionRating, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
   Note, Tag,
 } from '@/api/client';
 import { router, useFocusEffect } from 'expo-router';
@@ -381,7 +381,7 @@ export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
   commsPlan = null, commDomains = [], commResponses = [], commResponsesKey = null, storycardStyle = null,
-  reflectionPlan = null, pageTitles = null, pageCopy: serverCopy = null,
+  pageTitles = null, pageCopy: serverCopy = null,
   onAccent, menuFooter = null,
 }: {
   /**
@@ -417,7 +417,6 @@ export default function Results({
   commResponses?: SbsRow[];
   commResponsesKey?: SbsKey | null;
   storycardStyle?: StorycardStyle | null;
-  reflectionPlan?: ReflectionInsight[] | null;
   /**
    * The heading a page prints at the top of itself, and the strings inside a
    * page both surfaces print. From the server, so a rename lands on both
@@ -1177,7 +1176,6 @@ export default function Results({
           commResponses={commResponses}
           commResponsesKey={commResponsesKey}
           storycardStyle={storycardStyle}
-          reflectionPlan={reflectionPlan}
           intimacy={intimacy}
           reflection={reflection}
           whatComesNext={whatComesNext}
@@ -1356,7 +1354,7 @@ export default function Results({
  */
 function SectionBody({
   section, step, coverTitle, coverContents, coverIcon, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
-  expectations, highlights, commsPlan, commDomains, commResponses, commResponsesKey, storycardStyle, reflectionPlan,
+  expectations, highlights, commsPlan, commDomains, commResponses, commResponsesKey, storycardStyle,
   intimacy, reflection, whatComesNext, onGoToSection, onOpenJournal, pageTitle, pageCopy,
 }: {
   section: string;
@@ -1385,7 +1383,6 @@ function SectionBody({
   commResponses: SbsRow[];
   commResponsesKey?: SbsKey | null;
   storycardStyle: StorycardStyle | null;
-  reflectionPlan: ReflectionInsight[] | null;
   intimacy: IntimacyResults | null;
   reflection: ReflectionResults | null;
   whatComesNext: { groups: NextStepGroup[]; buckets?: NextStepBucket[] } | null;
@@ -3504,12 +3501,6 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
   );
 }
 
-/*
- * ReflectionPlan drew the action plan as a page of its own. Ellie asked for
- * that page to go from both surfaces: the plan is on the at-a-glance page,
- * which is where a reader meets it without a detour. The data it drew,
- * reflectionPlan, still arrives on the payload and still feeds that page.
- */
 /**
  * The two rankings, with a line joining each item to itself.
  *

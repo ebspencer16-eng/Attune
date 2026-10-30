@@ -417,7 +417,11 @@ for (const f of apiFiles.filter((n) => COUNTS_ONLY.includes(n))) {
 /** And the explore page specifically: its journal query is who and when. */
 {
   const src = readFileSync('api/admin-explore.js', 'utf8');
-  const q = src.match(/from\('notes'\)[\s\S]{0,300}?;/)?.[0];
+  /* To the end of the statement or the start of the next read, whichever
+     comes first. The read sits in a list of nine started together now (A200,
+     "Admin is getting really slow"), so the statement runs on past the next
+     eight reads before its semicolon. */
+  const q = src.match(/from\('notes'\)[\s\S]{0,300}?(?=;|\.from\()/)?.[0];
   if (!q || !new RegExp(`\\.eq\\(\\s*'anchor_type'\\s*,\\s*JOURNAL_ANCHOR`).test(q)) {
     fails.push("api/admin-explore.js no longer reads journal rows the way this"
       + ' gate reads it. The journal slicer Ellie asked for is built on that'

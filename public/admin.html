@@ -1589,13 +1589,13 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
       <!-- Ellie: "Qualitities most admired in partner should be a column chart
            above all questions tile." It is a pick from ten fixed options, so it
            is a distribution and nothing has to be coded to draw it. -->
-      <div class="chart-card" style="margin-top:1.25rem">
-          <div class="chart-head">
-            <div><div class="chart-title">What recent memories evoke joy</div><div class="chart-subtitle" id="refcode-sub">Themes across the written answers</div></div>
-            <select class="tile-slicer" id="refcode-q" title="Which written question" aria-label="Written question"></select>
-          </div>
-          <div class="chart-body"><canvas id="chart-refcodes"></canvas></div>
-        </div>
+      <!-- Ellie: "I want each of these to be a separate chart, all of them
+           should be vertically stacked with slicers of their own, and unique
+           categories built as answers to the question the chart is asking."
+           One card per written question, drawn from the payload: the
+           questions, their titles and their frames live in
+           api/_lib/reflection-codes.js, so nothing here lists them. -->
+      <div id="refcode-tiles"></div>
       <div class="qx-section" id="qx-story" style="margin-top:1.25rem"></div>
     </div>
 
@@ -2569,10 +2569,13 @@ window.adminAuthHeaders = function(extra){
        fetching again. */
     if (loaded) { window.__resetExplore(); return; }
     try {
-      const s = adminSecret();
-      const res = await fetch('/api/admin-explore', { headers: window.adminAuthHeaders() });
-      const data = noteDemoFilter(await res.json());
-      if (data.error) throw new Error(data.error);
+      /* ── ONE CUBE FOR THE WHOLE PAGE ──────────────────────────────────
+         Ellie: "Admin is getting really slow." This fetched /api/admin-explore
+         for itself while ensureCube, below, fetched the same thing again for
+         every other tab's slicers and question explorer, so the slowest
+         request the admin makes was made twice. Nothing here or there edits
+         the cube in place, so both read the one copy. */
+      const data = await ensureCube();
       CUBE = data; FIELDS = {}; data.fields.forEach(f => FIELDS[f.key] = f); loaded = true;
       /* Before anything is drawn from it. */
       const _cnr = explorerCouldNotRead(data);
@@ -3059,10 +3062,17 @@ let __adminDataPromise = null;
 function fetchAdminData(force) {
   if (__adminDataPromise && !force) return __adminDataPromise;
   const secret = window.adminApiSecret();
-  __adminDataPromise = fetch('/api/admin-data', { headers: window.adminAuthHeaders() })
+  /* A null is not kept. renderRegrouped used to force a second fetch of the
+     whole payload on every overview, because a call made before the admin
+     token was in place cached null for good and every later tile read "no
+     data" that was really "no auth". Dropping a failed answer from the cache
+     fixes that at its cause, so one good answer is shared by every tile. */
+  const mine = fetch('/api/admin-data', { headers: window.adminAuthHeaders() })
     .then(r => r.json())
     .then(d => (d && d.ok) ? noteDemoFilter(d) : null)
-    .catch(() => null);
+    .catch(() => null)
+    .then(d => { if (!d && __adminDataPromise === mine) __adminDataPromise = null; return d; });
+  __adminDataPromise = mine;
   return __adminDataPromise;
 }
 async function adminAction(payload) {
@@ -7026,37 +7036,55 @@ async function renderConflictPage() {
 }
 
 async function renderReflectionCodes() {
-  const el = document.getElementById('chart-refcodes');
-  const sel = document.getElementById('refcode-q');
-  const sub = document.getElementById('refcode-sub');
-  if (!el || !sel) return;
+  const host = document.getElementById('refcode-tiles');
+  if (!host) return;
   const data = await fetchAdminData();
   const rc = respOf(data).reflectionCodes;
   if (!rc || !rc.questions || !rc.questions.length) {
-    if (el.parentElement) el.parentElement.innerHTML =
-      '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">No written answers have been coded yet.</div>';
+    host.innerHTML = '<div class="chart-card" style="margin-top:1.25rem"><div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">No written answers have been coded yet.</div></div>';
     return;
   }
-
-  if (!sel.dataset.filled) {
-    sel.dataset.filled = '1';
-    /* Shortened for the control, which is one line: the full question is the
-       tile's subtitle once something is chosen. */
-    sel.innerHTML = rc.questions.map((q, i) =>
-      '<option value="' + i + '">' + QX_ESC(String(q.label || q.id).replace(/:$/, '').slice(0, 54)) + '</option>').join('');
-    sel.onchange = () => renderReflectionCodes();
+  /* Built once. A redraw replaces each card's chart, never the card: the
+     slicer inside it holds the reader's cut, and rebuilding it would put
+     every tile back to Everyone. */
+  if (!host.dataset.built) {
+    host.dataset.built = '1';
+    host.innerHTML = rc.questions.map((q) =>
+      '<div class="chart-card" style="margin-top:1.25rem">'
+      + '<div class="chart-head"><div><div class="chart-title">' + QX_ESC(q.title || q.label) + '</div>'
+      + '<div class="chart-subtitle" id="refcode-' + QX_ESC(q.id) + '-sub">' + QX_ESC(String(q.label || '').replace(/:$/, '')) + '</div></div>'
+      + '<select class="tile-slicer" id="slz-refcode-' + QX_ESC(q.id) + '" title="Cut this tile by a segment" aria-label="Slz refcode ' + QX_ESC(q.id) + '"><option value="">Everyone</option></select></div>'
+      + '<div class="chart-body"><canvas id="chart-refcode-' + QX_ESC(q.id) + '"></canvas></div></div>').join('');
   }
-  const q = rc.questions[Number(sel.value) || 0];
-  if (!q) return;
+  await Promise.all(rc.questions.map((q) => drawRefCodeTile(q.id)));
+}
 
-  const byId = Object.fromEntries((rc.frame || []).map((c) => [c.id, c.label]));
-  const rows = (rc.frame || [])
-    .map((c) => ({ label: byId[c.id] || c.id, v: (q.counts || {})[c.id] || 0 }))
+/**
+ * One written question's chart, for the cut its own slicer holds.
+ *
+ * Each question carries its own frame, so the bars are answers to the
+ * question in the title. "No theme matched" is drawn rather than dropped:
+ * how much a frame fails to place is the evidence for whether it is right.
+ */
+async function drawRefCodeTile(id) {
+  const el = document.getElementById('chart-refcode-' + id);
+  const sub = document.getElementById('refcode-' + id + '-sub');
+  if (!el) return;
+  const data = await fetchAdminData();
+  const cut = await wireSummarySlicer('slz-refcode-' + id, () => drawRefCodeTile(id));
+  const rc = respSegOf(data, cut).reflectionCodes;
+  const q = rc && (rc.questions || []).find((x) => x.id === id);
+  if (!q) {
+    if (el.parentElement) el.parentElement.innerHTML =
+      '<div style="color:var(--dim);font-size:.78rem;padding:1.1rem 0">This measure was not sent.</div>';
+    return;
+  }
+  const rows = (q.frame || [])
+    .map((c) => ({ label: c.label, v: (q.counts || {})[c.id] || 0 }))
     .sort((a, b) => b.v - a.v);
   rows.push({ label: 'No theme matched', v: q.uncoded || 0, grey: true });
-
   if (sub) {
-    sub.textContent = q.label + '  ·  ' + (q.total || 0) + ' answer' + ((q.total === 1) ? '' : 's')
+    sub.textContent = String(q.label || '').replace(/:$/, '') + '  ·  ' + (q.total || 0) + ' answer' + ((q.total === 1) ? '' : 's')
       + ', ' + (q.coded || 0) + ' with a theme';
   }
   mkChart(el, {
@@ -7448,8 +7476,24 @@ function explorerCouldNotRead(data) {
 // Powered by the same anonymized respondent cube as the Explore page. Renders a
 // crosstab picker plus a distribution bar for every question in the exercise.
 let __cubeCache = null;
-async function ensureCube() {
-  if (__cubeCache) return __cubeCache;
+/* ── ONE REQUEST IN FLIGHT, NOT ONE PER TILE ──────────────────────────────
+   Ellie: "Admin is getting really slow." The cache above was filled when the
+   answer ARRIVED, so every tile that asked while the first request was still
+   on its way found it empty and sent its own. One visit to every page sent
+   /api/admin-explore nine times, and it is the heaviest thing the admin asks
+   for: every profile, every order, every page view, rebuilt each time. The
+   promise is what is shared now, so they all wait on the one request. A
+   failure clears it, so the next ask tries again rather than inheriting the
+   error for good. */
+let __cubeInFlight = null;
+function ensureCube() {
+  if (__cubeCache) return Promise.resolve(__cubeCache);
+  if (!__cubeInFlight) {
+    __cubeInFlight = loadCube().finally(() => { __cubeInFlight = null; });
+  }
+  return __cubeInFlight;
+}
+async function loadCube() {
   const res = await fetch('/api/admin-explore', { headers: window.adminAuthHeaders() });
   const j = noteDemoFilter(await res.json());
   if (j.error) throw new Error(j.error);
@@ -10103,11 +10147,10 @@ async function renderRegrouped() {
   const wrapA = document.getElementById('regroup-misaligned');
   if (!wrapA) return;
 
-  // Force a fresh fetch rather than reusing the memoised promise. If
-  // fetchAdminData ran before the admin secret was available it caches null
-  // forever, and every later caller sees "no data" that is really "no auth".
+  // fetchAdminData no longer keeps a failed answer, so the shared one is safe
+  // to reuse here; this used to force a second full fetch on every overview.
   let d = null, failure = null;
-  try { d = await fetchAdminData(true); }
+  try { d = await fetchAdminData(); }
   catch (e) { failure = String(e && e.message || e); }
   if (!d && !failure) failure = 'the admin data endpoint returned no payload';
 

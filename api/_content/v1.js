@@ -324,26 +324,3 @@ export const DOMAIN_ALIGNED = {
   },
 };
 
-// Derive insights from anniversary answers
-// ── Insight evidence contract ────────────────────────────────────────────────
-// Every insight declares what it is built from:
-//   tier 1  structured  scales, picks, rankings. Exact comparison, may claim
-//                       things about both partners.
-//   tier 2  quoted      free text surfaced verbatim. Presents, does not interpret.
-// Tier 3 (keyword inference about what free text *means*) was retired: it made
-// claims the evidence could not support. Anything whose copy says "both",
-// "each" or "you two" must be gated on BOTH partners having a real answer.
-// Relationship Reflection insight titles describe what the answers showed
-// ("You each named what you want more of"). On What Comes Next they need to be
-// something a couple can actually do, so this maps each explore title to an
-// instruction. Anything unmapped falls through unchanged rather than blank.
-// DRAFT copy, in the prose approval doc.
-export const REFLECTION_ACTION_TITLES = {
-  "You're experiencing this relationship from different vantage points": "Read your overall ratings side by side and name what each of you was measuring",
-  "You're not aligned on how much lightness and fun you're getting": "Plan one thing this month that is purely for fun, chosen by whoever is missing it",
-  "One of you finds hard conversations easier than the other does": "Agree on how a hard conversation starts, and who gets to call for a pause",
-  "You are not feeling equally connected day to day": "Pick one daily moment to protect, and hold it for two weeks",
-  "You each named what you want more of": "Read your 'what you want more of' answers side by side",
-  "Your five-year pictures, in your own words": "Read your five-year answers aloud to each other and mark where they overlap",
-};
-

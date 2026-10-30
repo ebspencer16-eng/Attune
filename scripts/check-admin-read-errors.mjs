@@ -183,6 +183,35 @@ for (const rel of files) {
      from one that is dropped. */
   const stmts = [];
   const returned = [];
+  /* ── READS STARTED TOGETHER ─────────────────────────────────────────────
+     Ellie: "Admin is getting really slow." admin-explore.js made nine reads
+     one after another, and starting them at once means one
+         const [aRead, bRead, ...] = await Promise.all([ ...nine reads... ]);
+     with each result used, and its error tested, where the read used to be,
+     a hundred lines further down. The window below cannot reach that, and
+     widening it would let any read borrow a neighbour's guard. So a read
+     inside such an array is tied to the ONE name its position binds, and that
+     name must be tested on its own, `if (aRead.error)`, somewhere in the same
+     function, with the if then leaving or recording the failure in a list the
+     reply carries. One name per read: a guard on bRead says nothing about
+     aRead, which is the hole a statement-level check would have had here,
+     since all nine reads share the one statement. */
+  const together = [];
+  traverse(ast, {
+    VariableDeclarator(path) {
+      const { id, init } = path.node;
+      if (!id || id.type !== 'ArrayPattern' || !init || init.type !== 'AwaitExpression') return;
+      const call = init.argument;
+      if (!call || call.type !== 'CallExpression' || !call.arguments[0] || call.arguments[0].type !== 'ArrayExpression') return;
+      if (src.slice(call.callee.start, call.callee.end) !== 'Promise.all') return;
+      const fn = path.getFunctionParent();
+      if (!fn) return;
+      call.arguments[0].elements.forEach((el, k) => {
+        const name = id.elements[k] && id.elements[k].type === 'Identifier' ? id.elements[k].name : null;
+        if (el) together.push({ start: el.loc.start.line, end: el.loc.end.line, name, body: src.slice(fn.node.start, fn.node.end) });
+      });
+    },
+  });
   traverse(ast, {
     ReturnStatement(path) {
       if (!path.node.argument) return;
@@ -205,6 +234,42 @@ for (const rel of files) {
     if (!READ.test(lines[i])) continue;
     const line = i + 1;
     reads++;
+
+    const member = together.find((t) => t.start <= line && t.end >= line);
+    if (member) {
+      const n = member.name;
+      /* The test has to be the error itself and nothing else, so `if (false
+         && aRead.error)` and `if (bRead.error || aRead.error)` do not count
+         for aRead. What follows has to leave, or push into a list a reply
+         carries, which is how admin-explore.js reports a measure it could not
+         read rather than drawing a zero. */
+      const guard = n && new RegExp(`if\\s*\\(\\s*${n}\\s*\\.\\s*error\\s*\\)\\s*(?:\\{\\s*)?(?:(return|throw)\\b|([A-Za-z_$][\\w$]*)\\s*\\.\\s*push\\s*\\()`, 'g');
+      let held = false;
+      for (const m of n ? member.body.matchAll(guard) : []) {
+        if (m[1]) { held = true; break; }
+        const list = m[2];
+        if (returned.some((r) => r.test === null && new RegExp(`(^|[^.\\w])${list}\\s*(,|\\}|\\)|$)|:\\s*${list}\\s*(,|\\}|\\)|$)`).test(r.text))) { held = true; break; }
+      }
+      /* Or the aggregate the other endpoints use, which names every read in
+         one array and leaves on the first error:
+             const firstErr = [ordersQ, profQ].find(q => q.error);
+             if (firstErr) return json(...);
+         This read's own name has to be in that array. */
+      if (!held && n) {
+        for (const m of member.body.matchAll(/([A-Za-z_$][\w$]*)\s*=\s*(?:\[\s*\.\.\.\s*)?\[([^\]]*)\]\s*\.\s*(?:find|some|filter|map)\s*\([^;]{0,140}?\berror\b/g)) {
+          if (!new RegExp(`\\b${n}\\b`).test(m[2])) continue;
+          const res = m[1];
+          const leaves = new RegExp(`if\\s*\\(\\s*!?\\s*${res}\\b[^)]*\\)\\s*(?:\\{\\s*)?(return|throw)\\b`).test(member.body);
+          const carried = returned.some((r) => r.test === null && new RegExp(`(^|[^.\\w])${res}\\s*(,|\\}|\\)|$)|:\\s*${res}\\s*(,|\\}|\\)|$)`).test(r.text));
+          if (leaves || carried) { held = true; break; }
+        }
+      }
+      if (held) { ok++; continue; }
+      fails.push(`${rel}:${line} is one of several reads started together, and ${n ? `\`${n}\`, the name it lands in, is never tested on its own` : 'its result is not bound to a name of its own'}.\n` +
+                 `    Write \`if (${n || 'theRead'}.error) ...\` and leave, or record it in a list the reply carries.\n` +
+                 `    ${lines[i].trim().slice(0, 96)}`);
+      continue;
+    }
 
     /* The SMALLEST statement containing this line, then the two statements
        that follow it at the same level, which is where an aggregate error

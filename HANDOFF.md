@@ -692,7 +692,6 @@ hidden by the noise:
 |---|---|
 | `build_specific_content_review.mjs` | `Can't find NEW_COUPLE_TYPES in App.jsx`. App.jsx imports it under that alias now rather than declaring it, so the generator's `evalConst` finds nothing. |
 | `build_lmft_context_doc.mjs` | A regex over App.jsx returns null. Something it parses was renamed. |
-| `build_reflection_results_review.mjs` | Same shape. |
 
 All three read `src/App.jsx` by regex, which is why they go stale whenever that
 file is refactored.

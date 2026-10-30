@@ -171,7 +171,6 @@ for (const c of CASES) {
     ['commResponses', body.commResponses],
     ['commsPlan', body.commsPlan],
     ['expectations', body.expectations || body.results?.expectations],
-    ['reflectionPlan', body.reflectionPlan],
     ['reflection', body.reflection],
     ['intimacy', body.intimacy],
     ['highlights', body.highlights],

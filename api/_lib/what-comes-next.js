@@ -68,7 +68,7 @@ export const BUCKETS = [
   },
 ];
 
-export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy, reflection, reflectionPlan, conflictReady, conflictAnswers, names, sides }) {
+export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy, reflection, conflictReady, conflictAnswers, names, sides }) {
   /**
    * ── THE PEOPLE, NAMED ───────────────────────────────────────────────────
    * Ellie: "Couple type action items should match the site - the app is
