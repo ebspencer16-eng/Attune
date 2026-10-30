@@ -97,7 +97,7 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       prompt: "Let's talk about how we each see the relationship right now. I want to understand what's shaping our different reads.",
       body: `${userName} describes the overall feel as "${myLabel}", ${partnerName} says "${theirLabel}." Neither is wrong, and the gap doesn't mean one of you isn't paying attention. But it's worth understanding what's shaping each perspective.`,
       priority: "Have this conversation gently",
-      action: `Ask each other: what would make this feel even better from where you're standing right now? Don't defend your own rating, get curious about theirs first.`,
+      action: `Ask each other what would make the relationship feel even better from where you each stand right now. Try not to defend your own rating, and get curious about your partner's rating first.`,
     });
   } else if (bothRatedOverall && overallQ) {
     const sharedLabel = overallQ.scaleLabels[Math.round(((mine.a0 ?? 2) + (theirs.a0 ?? 2)) / 2)];
@@ -107,8 +107,8 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       evidence: ["a0:mine","a0:theirs"],
       title: "You're on the same page about how the relationship feels",
       body: `Both of you independently described the relationship as something close to "${sharedLabel}." Shared perception of where you are is a meaningful starting point, it means you're reading the same room.`,
-      priority: "Build on this",
-      action: `Name it together. When you both feel good about things but don't say it out loud, that warmth stays private. Saying "I feel like things are really good between us right now" creates a shared moment instead of parallel ones.`,
+      priority: "Build on what is working",
+      action: `Tell each other out loud that the relationship feels good right now. When you both feel good but neither of you says so, that warmth stays private. Saying "I feel like things are really good between us right now" turns two private feelings into a moment you share.`,
     });
   }
 
@@ -122,7 +122,7 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       evidence: ["a_sat_fun:mine","a_sat_fun:theirs"],
       title: "You're not aligned on how much lightness and fun you're getting",
       prompt: "Let's talk about whether we're making enough room for fun. I don't want to keep saving it for vacations.",
-      body: `${wantMoreFun} feels like you could be having more fun together than you currently are. This isn't a complaint about the relationship, it's a signal about what's been deprioritized.`,
+      body: `${wantMoreFun} feels like you could be having more fun together than you currently are. This isn't a complaint about the relationship. It may mean fun has slipped down your list of priorities.`,
       priority: "Easy win to act on",
       action: `Block something deliberately fun in the next two weeks, not a big trip, just something that has no productive purpose whatsoever. Fun doesn't usually happen by accident when life gets full.`,
     });
@@ -133,8 +133,8 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       evidence: ["a_sat_fun:mine","a_sat_fun:theirs"],
       title: "You both feel like there's real lightness in what you have",
       body: `Both of you rate the fun and levity in your relationship positively. That matters more than it sounds, couples who laugh together regularly tend to weather hard periods better than those who save fun for vacations.`,
-      priority: "Keep prioritizing it",
-      action: `Don't let busyness quietly crowd out the small pleasures. Whatever's been creating lightness lately, protect it.`,
+      priority: "Keep making time for fun",
+      action: `Try not to let busyness crowd out the small pleasures. Talk together about what has been bringing you lightness lately, and try to ensure those moments keep happening.`,
     });
   }
 
@@ -149,8 +149,8 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       title: "One of you finds hard conversations easier than the other does",
       prompt: "Let's talk about how hard conversations land for each of us. I want to know if one of us is carrying more of the friction.",
       body: `${lowPerson} rates how well you handle difficult conversations more cautiously than their partner does. This asymmetry is common, usually it means one person absorbs more friction before raising something, while the other thinks things resolve smoothly.`,
-      priority: "Worth naming explicitly",
-      action: `${lowPerson}: try naming one thing that's been sitting unspoken, not a criticism, just something you've been carrying. The other person likely doesn't know it's there.`,
+      priority: "Worth saying out loud",
+      action: `${lowPerson}: try to share one thing you have been holding back. It does not need to be a criticism, just something you have been thinking. Your partner likely does not know you have been carrying it.`,
     });
   }
 
@@ -169,7 +169,7 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       title: "You each feel genuinely seen",
       body: `What each of you is most grateful for right now speaks to being known, not just liked. ${userName}: ${quoted(mine.a3)}. ${partnerName}: ${quoted(theirs.a3)}. These are descriptions of how you're actually showing up for each other.`,
       priority: "Preserve intentionally",
-      action: `The things you're each most grateful for are the things most worth protecting. Whatever you're each doing that makes the other feel known, keep doing it deliberately. These are the first things to quietly erode when life gets full.`,
+      action: `The things you're each most grateful for are the things most worth protecting. Try to name the specific things you each do that make your partner feel known, and keep doing them on purpose. Small habits like these tend to be the first to fade when life gets full.`,
     });
   } else if ((myFeelsSeen && myA3ok) || (theirFeelsSeen && theirA3ok)) {
     const who = (myFeelsSeen && myA3ok) ? userName : partnerName;
@@ -179,9 +179,9 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       tier: 2,
       evidence: ["a3:one"],
       title: `${who} named being known, not just liked`,
-      body: `${who} is most grateful for ${quoted(text)}. That is a description of being understood rather than simply appreciated, and it is worth knowing that it lands that way.`,
-      priority: "Keep doing it",
-      action: `Whatever produces that feeling, it is probably something small and repeated rather than grand. Identify it and protect it, because these are the first things to erode when life gets full.`,
+      body: `${who} is most grateful for ${quoted(text)}. That describes feeling understood rather than simply appreciated, and it is worth knowing that ${who} feels that way.`,
+      priority: "Keep doing what makes them feel known",
+      action: `What makes ${who} feel known may be something small and repeated rather than grand. Try to work out together which habit that is and keep doing it on purpose, because small habits tend to be the first to fade when life gets full.`,
     });
   }
 
@@ -193,8 +193,8 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       evidence: ["a_memory:mine", "a_memory:theirs"],
       title: "You each had something recent that made you smile",
       body: `${userName} wrote ${quoted(mine.a_memory)}. ${partnerName} wrote ${quoted(theirs.a_memory)}. Neither of you knew what the other would say.`,
-      priority: "Say these out loud",
-      action: `Read each other's answer, then say why that one. The moments people pick are rarely the obvious ones, and the reason behind the choice is usually the part the other person has never heard.`,
+      priority: "Share why you chose your moment",
+      action: `Read each other's answer, then tell your partner why you picked that moment. The moments people pick are rarely the obvious ones, and the reason behind the choice is usually the part the other person has never heard.`,
     });
   }
 
@@ -220,9 +220,9 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
         tier: 1,
         evidence: ["a_sat_conn:mine", "a_sat_conn:theirs"],
         title: "You both feel connected day to day",
-        body: `${userName} says "${qDef.scaleLabels[mine.a_sat_conn]}" and ${partnerName} says "${qDef.scaleLabels[theirs.a_sat_conn]}". Landing in the same place on day-to-day closeness, independently, is a real signal. It is also the first thing to slip when a season gets busy.`,
+        body: `${userName} says "${qDef.scaleLabels[mine.a_sat_conn]}" and ${partnerName} says "${qDef.scaleLabels[theirs.a_sat_conn]}". Landing in the same place on day-to-day closeness, independently, is a real signal. Day-to-day closeness is also often the first thing to slip when life gets busy.`,
         priority: "Protect what is working",
-        action: `Work out what is actually producing this. It is almost never the big things. Name the small repeated one, and guard it when the calendar fills up.`,
+        action: `Try to work out together what creates your day-to-day closeness. Closeness rarely comes from the big things. It usually comes from a small habit you repeat. Name that habit, and protect it when your calendar fills up.`,
       });
     }
   }
@@ -241,7 +241,7 @@ export function deriveAnniversaryInsights(mine, theirs, userName, partnerName, c
       prompt: "Let's talk about what we each want more of. I want to make sure we're doing intentional things to meet those needs.",
       body: `${userName} wants ${quoted(mine.a4)}. ${partnerName} wants ${quoted(theirs.a4)}. Read those next to each other before deciding whether they are the same wish or two different ones.`,
       priority: "Compare directly",
-      action: `Put both answers side by side and find the overlap. Most couples discover these are two routes to the same thing: more intentional time that actually feels like you. Pick one concrete version of each and try both this month.`,
+      action: `Put both answers side by side and look for the overlap. Many couples find that the two wishes point to the same thing: more intentional time together that feels like the two of you. Pick one concrete plan from each answer and try both this month.`,
     });
   }
 

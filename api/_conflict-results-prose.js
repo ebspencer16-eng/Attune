@@ -60,34 +60,34 @@ export const PATTERN_COPY = {
     label: 'Criticism',
     // What the pattern is, in plain words, said once above the four bands.
     definition: 'Going after the person rather than the problem.',
-    0: { note: 'You do not express criticism. Worth naming to {partner} as something you already do well.' },
-    1: { note: 'Rare, and you notice it. Keep naming the specific behavior instead of the trait: "when plans change last minute" instead of "you are careless."' },
-    2: { note: 'Criticism appears enough to matter. The swap is small: describe the thing that happened, not the kind of person they are. One sentence is usually the difference.' },
-    3: { note: 'This one is worth real attention. Before raising something, try writing the specific behavior down first. Character language tends to arrive when the actual complaint has not been named yet.' },
+    0: { note: 'You do not express criticism. Try to tell {partner} that this is something you feel like you do well.' },
+    1: { note: 'Criticism is rare for you, and you notice it when it happens. Try to keep naming the specific behavior rather than the trait: "when plans change last minute" instead of "you are careless."' },
+    2: { note: 'Criticism shows up enough to matter. The change is small: describe what {partner} did, rather than the kind of person {partner} is. One sentence can usually make the difference.' },
+    3: { note: 'Criticism is worth real attention. Before raising a complaint, try writing the specific behavior down first. Criticism of character tends to come up when the actual complaint has not been said yet.' },
   },
   contempt: {
     label: 'Contempt',
     definition: 'Sarcasm, dismissiveness, eye-rolling. Talking down rather than across.',
-    0: { note: 'You do not show contempt. This is the pattern that matters most, so this is genuinely worth knowing.' },
-    1: { note: 'Rare. Sarcasm under pressure is common, and a quick check-in ("was that sharper than I meant?") keeps it from settling in.' },
-    2: { note: 'Worth taking seriously, more than the others at the same rate. Contempt tends to grow quietly. Naming it out loud to {partner} once, outside an argument, does more than trying to catch it mid-conflict.' },
-    3: { note: 'This is the one to work on first. Not because you are doing something unforgivable, but because it is the pattern that does the most damage over time and the one that responds best to being named.' },
+    0: { note: 'You do not show contempt. Contempt is a conflict pattern that can have lasting effects, so this is good to know.' },
+    1: { note: 'Contempt is rare for you. Sarcasm under pressure is a common reaction for many people, and a quick check-in ("was that sharper than I meant?") can keep sarcasm from settling in.' },
+    2: { note: 'Contempt is worth taking seriously, more than the other three patterns at the same rate, because it tends to grow quietly. Telling {partner} once, outside an argument, that you have noticed contempt in how you speak does more than trying to catch it mid-conflict.' },
+    3: { note: 'Contempt is the pattern to work on first. This is not because you are doing something unforgivable, but because contempt does the most damage over time and responds best to being named out loud.' },
   },
   defensiveness: {
     label: 'Defensiveness',
     definition: 'Meeting a concern with a counter-concern rather than hearing it.',
     0: { note: 'You do not get defensive. Taking a complaint without returning one is a difficult skill.' },
-    1: { note: 'Rare. You are already handling this well. Keep noticing what lets you stay open.' },
-    2: { note: 'Defensiveness appears occasionally. Before responding, try reflecting back what you heard first. Even one sentence changes the pace, and it costs nothing to be wrong about it.' },
-    3: { note: 'Worth attention. Defensiveness usually means the complaint landed as an attack. Saying "give me a second, I want to hear that properly" buys the pause where the reflex would have gone.' },
+    1: { note: 'Defensiveness is rare for you, so you already take complaints well. Try to keep noticing what helps you stay open when {partner} raises a concern.' },
+    2: { note: 'Defensiveness shows up occasionally. Before responding to a complaint, try reflecting back what you heard first. Even one sentence changes the pace of the conversation, and it is completely fine if your reflection is not quite right.' },
+    3: { note: 'Defensiveness is worth attention. It may mean a complaint felt like an attack. Saying "give me a second, I want to hear that properly" gives you a pause before you react.' },
   },
   stonewalling: {
     label: 'Stonewalling',
     definition: 'Shutting down or checking out instead of staying in the conversation.',
     0: { note: 'You do not shut down. Staying present when things get tense is impactful in a relationship.' },
-    1: { note: 'Rare. When you feel the pull to check out, naming it ("I need five minutes") keeps it from feeling like an exit.' },
+    1: { note: 'Shutting down is rare for you. When you feel the urge to check out, try saying so ("I need five minutes"), so the pause does not feel like you are leaving the conversation.' },
     2: { note: 'Shutting down happens sometimes. A stated pause protects the relationship more than a silent one. "I need twenty minutes, I am not leaving" is the whole move.' },
-    3: { note: 'Worth attention, and usually a sign of being overwhelmed rather than uninterested. Agreeing a pause signal with {partner} in advance means shutting down does not have to be the only exit.' },
+    3: { note: 'Stonewalling is worth attention, and it may be a sign of feeling overwhelmed rather than uninterested. Try to agree on a pause signal with {partner} in advance, so shutting down is not the only way out of a hard conversation.' },
   },
 };
 
@@ -109,12 +109,12 @@ export const PATTERN_ACTIONS = {
     body: 'For the next two weeks, say the specific thing that happened out loud first. "The dishes sat for three days" rather than "you never help". If you cannot name a specific thing, your complaint is likely about something else.',
   },
   contempt: {
-    title: 'Acknowledge it once, outside an argument',
-    body: 'Pay attention to micro-aggressions and tell {partner} you noticed it, but not mid-conflict and not as an apology. Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first.',
+    title: 'Acknowledge your contempt once, outside an argument',
+    body: 'Pay attention to your own micro-aggressions, like sarcasm or eye-rolling, and tell {partner} that you noticed them. Try to do this outside of a conflict, and not as an apology. Contempt grows quietly, but loses most of its power when the person showing it names it out loud, and almost none when the other person points it out first.',
   },
   defensiveness: {
     title: 'Reflect back before you respond',
-    body: 'When {partner} raises something, say what you heard before you say anything else. You are not agreeing, only confirming that you are listening. This changes the pace of the discussion and can correct misunderstandings.',
+    body: 'When {partner} raises a concern, try to say what you heard before you say anything else. You are not agreeing, only confirming that you are listening. Reflecting back changes the pace of the discussion and can clear up misunderstandings.',
   },
   stonewalling: {
     title: 'Agree on a pause signal in advance',
@@ -137,7 +137,7 @@ export const PATTERN_NOTES = {
   },
   contempt: {
     title: 'One thing to keep in mind',
-    body: 'Contempt grows quietly, but loses most of its power when it has been named out loud by the person doing it, and almost none when the other person points it out first.',
+    body: 'Contempt grows quietly, but loses most of its power when the person showing it names it out loud, and almost none when the other person points it out first.',
   },
   defensiveness: {
     title: 'One thing to keep in mind',
@@ -145,7 +145,7 @@ export const PATTERN_NOTES = {
   },
   stonewalling: {
     title: 'One thing to keep in mind',
-    body: 'When your partner is engaging, stonewalling from you can communicate unwillingness to repair.',
+    body: 'When your partner is trying to talk a problem through, stonewalling from you can come across as not wanting to repair.',
   },
 };
 
@@ -157,8 +157,8 @@ export const BAND_COLORS = ['#2E7D5B', '#D4A017', '#E07A1F', '#C2410C'];  // gre
 
 /** Shown on the glance page when no pattern crosses the line. */
 export const NO_ACTION_NEEDED = {
-  title: 'Nothing here needs work',
-  body: 'None of the four patterns come up often for you. That is worth saying out loud to {partner}, because it is the kind of thing couples rarely tell each other.',
+  title: 'None of your conflict patterns need work right now',
+  body: 'None of the four patterns come up often for you. You can let {partner} know, so that if they notice anything in the future they can let you know.',
 };
 
 /**
@@ -197,7 +197,7 @@ export const RESET_FORMS = {
   'Listening without responding': 'Listens without responding',
   'Asking a clarifying question': 'Asks a clarifying question',
   'Suggesting a walk or change of scenery': 'Suggests a walk or a change of scenery',
-  'Writing it down': 'Writes it down',
+  'Writing it down': 'Writes down what they feel',
   'Sleeping on it': 'Sleeps on it',
 };
 
@@ -223,9 +223,9 @@ export const SNAPSHOT_ROWS = [
 
 /** Labels for the answers, shown as chips under each name. */
 export const OPENING_CHIPS = {
-  c1: { A: 'Speaks up right away', B: 'Takes time before bringing it up' },
+  c1: { A: 'Speaks up right away', B: 'Takes time before raising a frustration' },
   c2: { A: 'Wants to resolve in the moment', B: 'Needs a pause before continuing' },
-  c_topic: { A: 'Stays with what is happening now', B: 'Notices the older pattern' },
+  c_topic: { A: 'Stays with what is happening now', B: 'Connects the argument to past ones' },
 };
 
 /** Headings and framing, matching the mockup. */
@@ -267,7 +267,7 @@ export const CONFLICT_RESULTS_COPY = {
    */
   selfScoreLabel: 'Self-assigned score: ',
 
-  allClear: 'None of the four patterns come up often for you. That is worth knowing, and worth saying to {partner}.',
+  allClear: 'None of the four patterns come up often for you, which is good to know. Try to tell {partner}, so that they can let you know if they see things differently.',
 };
 
 /**

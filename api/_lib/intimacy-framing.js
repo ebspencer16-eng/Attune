@@ -23,7 +23,7 @@
 /** The question, for whichever partner gets there first. */
 export const FRAMING = {
   eyebrow: 'One question first',
-  note: 'This sets the framing for both of you. Whoever starts first decides it for the couple.',
+  note: 'Your answer decides which questions both of you are asked. Whoever starts first decides the questions for the couple.',
   options: [
     { variant: 'married', label: 'Yes', sub: 'Questions about how things are now' },
     { variant: 'premarital', label: 'No', sub: 'Questions about what you expect' },
