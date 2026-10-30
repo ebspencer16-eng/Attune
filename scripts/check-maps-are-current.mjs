@@ -39,6 +39,7 @@ const ROOT = new URL('..', import.meta.url).pathname;
 /** The maps. Not the records; see above. */
 const MAPS = [
   'CLAUDE.md',
+  'docs/lessons.md',
   'app/SCREENS.md',
   'app/ONBOARDING.md',
   'app/README.md',

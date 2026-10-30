@@ -81,6 +81,7 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | A206b | **/api/account-signup removed (A205c).** |
+| A224 | **CLAUDE.md cut from 170,505 to 25,929 characters, no rule lost.** Every rule is one numbered line; detail a session needs is in docs/lessons.md under the same number; history and repeats are gone. Skim it if you like; nothing to run. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
