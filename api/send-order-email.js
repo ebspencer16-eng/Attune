@@ -83,16 +83,30 @@ export default async function handler(req) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return new Response('Email service not configured', { status: 503 });
 
+  // What every order template reads: the body as sent, plus the two URLs
+  // derived above.
+  const ctx = { ...body, setupUrl, giftUrl: `${SITE_URL}/app?signup=1&pkg=${pkgKey}&gift=1` };
+  const { sent } = await sendOrderEmails(ctx, apiKey);
+  return new Response(JSON.stringify({ ok: true, sent }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * Build and send an order's emails from one context. Called by this
+ * endpoint for a free promo order, which has no webhook, and by
+ * api/stripe-webhook.js for every paid one, with a context from
+ * api/_lib/order-email-context.js (A204c). One sender, so a paid order gets
+ * one confirmation, Ellie's.
+ */
+export async function sendOrderEmails(ctx, apiKey) {
+  const { buyerEmail, isGift, isPhysical, recipientEmail } = ctx;
   const emails = [];
 
   // ── 1. Order confirmation to buyer ─────────────────────────────────────────
   // Pushed first; sent sequentially below so this email always arrives before
   // the setup email.
-  // What every order template reads: the body as sent, plus the two URLs
-  // derived above. One object so a template can be previewed with a sample of
-  // the same shape.
-  const ctx = { ...body, setupUrl, giftUrl: `${SITE_URL}/app?signup=1&pkg=${pkgKey}&gift=1` };
-
   emails.push({
     from: `Attune <${FROM}>`,
     to: [buyerEmail],
@@ -157,10 +171,7 @@ export default async function handler(req) {
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, sent: emails.length - failed }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return { sent: emails.length - failed, failed };
 }
 
 /**

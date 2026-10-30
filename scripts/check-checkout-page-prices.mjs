@@ -34,15 +34,24 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { DIGITAL_PRICES, PHYSICAL_PRICES, ADDON_PRICES } from '../api/_catalogue.js';
+import { DIGITAL_PRICES, PHYSICAL_PRICES, ADDON_PRICES, SHOP_NAMES } from '../api/_catalogue.js';
 
 const PAGE = 'public/checkout.html';
-const src = readFileSync(new URL(`../${PAGE}`, import.meta.url).pathname, 'utf8');
+/**
+ * The page names its add-ons through SHOP (api/_catalogue.js SHOP_NAMES, via
+ * /_pkg-rules.js) since A204d. Resolved here to the words they stand for, so a
+ * line written `label: SHOP.budget, price: 20` is still a label beside a price.
+ * Without this the count fell from 19 to 12 and nothing failed: a gate that
+ * found its prices by the literal stopped seeing the seven that moved.
+ */
+const rawSrc = readFileSync(new URL(`../${PAGE}`, import.meta.url).pathname, 'utf8');
+const src = rawSrc.replace(/SHOP\.(\w+)(\s*\+\s*(['"])(.*?)\3)?/g,
+  (m, key, _plus, _q, suffix) => (key in SHOP_NAMES ? `'${SHOP_NAMES[key]}${suffix || ''}'` : m));
 
 /** The add-on each label on the page is for. The labels are Ellie's words. */
 const BY_LABEL = [
   [/Relationship Reflection/i, 'reflection'],
-  [/Shared Budgeting/i, 'budget'],
+  [/Build a Budget|Shared Budgeting/i, 'budget'],
   [/Physical Intimacy/i, 'intimacy'],
   [/Conflict Patterns/i, 'conflict'],
   [/Merging Lives Checklist/i, 'checklist'],

@@ -28,6 +28,7 @@ import { SEND_EMAILS } from '../send-email.js';
 import { ORDER_EMAILS } from '../send-order-email.js';
 import { CHECKIN_EMAILS } from '../cron-checkin.js';
 import { NUDGE_EMAILS } from '../cron-survey-nudge.js';
+import { ARTICLE_EMAILS } from '../cron-new-articles.js';
 import { deletionConfirmationEmail, partnerDeletedEmail } from './deletion-emails.js';
 import {
   EMAIL_SAMPLES, ORDER_SAMPLE, DELETION_SAMPLES, CRON_SAMPLES, SAMPLE_USER_ID,
@@ -52,6 +53,9 @@ for (const [key, build] of Object.entries(CHECKIN_EMAILS)) {
 }
 for (const [key, build] of Object.entries(NUDGE_EMAILS)) {
   EMAIL_CATALOGUE[key] = { build, sample: CRON_SAMPLES[key], from: 'api/cron-survey-nudge.js' };
+}
+for (const [key, build] of Object.entries(ARTICLE_EMAILS)) {
+  EMAIL_CATALOGUE[key] = { build, sample: CRON_SAMPLES[key], from: 'api/cron-new-articles.js' };
 }
 EMAIL_CATALOGUE.account_deleted = {
   build: deletionConfirmationEmail,

@@ -30,6 +30,8 @@ export type ApiError =
 /** The words for the no-purchase screen: NO_PURCHASE_COPY on the server. */
 export type NoPurchaseCopy = {
   title: string; body: string; getStarted: string; invited: string; signOut: string; retry: string;
+  /** The link to /sign-in-help on the website (A204b). Optional: an older server does not send it. */
+  trouble?: string;
 };
 
 // ── Shapes returned by the server. These mirror api/_lib/results.js and

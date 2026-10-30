@@ -9,10 +9,10 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A202a | **Please run migration 102. It makes every order's email address lower case, now and from now on.** Checkout saved the address exactly as typed and sign-in saves it in lower case, and every order lookup by address compares the two exactly. So anyone who typed a capital at checkout had an order the app and site could not find by address, and the app could refuse them as not having bought. The code is fixed for new orders; this fixes the ones already stored and makes the database enforce it. It tells you how many it changed. |
-| A202b | **One yes or no: remove the "New posts, when they're ready" signup on the In Practice page?** It has never saved an address: it says "Thanks, you're on the list." and sends nothing anywhere. Nothing sends new-post emails, so collecting addresses would make a promise we cannot keep. I recommend removing it. If you would rather keep it, say so and I will save the addresses to the waitlist table, marked as from In Practice, and leave them out of the launch email. |
-| A203a | **Somebody who paid, then signs into the app with a different address, is told to buy.** Apple's "Hide my email" does this, and so does a gift recipient using their own address. The screen says "Use the same email you signed in with here". Want an "I already bought" option where they type their order number? I would build it; I need your words for the line and the button. |
-| A203b | **Every card buyer gets two order confirmation emails, both called "Attune Order Confirmation".** One is yours, from the email catalogue. The other is an older one built inside the payment handler, in a different design, that you have never seen in the email preview and that leaves Conflict Patterns off the list. I recommend keeping only yours, sent by the server when the payment lands, so it also arrives for someone who closes the tab. One thing I need from you first: the receipt names its lines differently from the shop. The receipt says "Shared Budgeting Activity", "Physical Intimacy Expectations" and "Relationship Reflection exercise"; the shop's tiles say "Build a Budget", "Physical Intimacy" and "Relationship Reflection". Which should the receipt say? |
+| A204a | **Please run migration 103, then send me your words for the new-article email.** The migration makes the two tables the In Practice list needs: the addresses, and which articles have been announced. Until it runs, the signup says it did not go through. Placeholder words of mine to replace: the email subject "New on In Practice: [title]", the line under the title "A new article is up on In Practice.", the button "Read it", the signup's failure line "That did not go through. Try again in a moment.", and the unsubscribe page's "You will not get emails about new In Practice articles any more." The article's own title and summary fill the rest. |
+| A204b | **Your words for the sign-in help page, when you have them.** It is live at attune-relationships.com/sign-in-help. Yours already: "Having trouble signing in? Click here" and "reach out to our team". Mine, to replace: the line under the heading, the box label "Order number", the button "Find my email", the answer "Your order was placed with [m•••@g•••.com]. Sign in with that email.", "We could not find that order number. It is in your order confirmation email.", and "Still stuck?". One thing to know: the page shows the email partly hidden (first letter and ending). Anyone can type an order number, and the older ones are short enough to guess, so the full address would give a stranger a customer's email. Say if you want it in full anyway. |
+| A204f | **When you refund someone in Stripe, Attune never hears about it.** They keep everything they bought, and the admin still counts the sale. Want a refund to (a) take the access away and stop counting the sale, (b) only stop counting it, or (c) stay as it is? |
+| A204h | **The marketing emails have no postal address in them, and US law (CAN-SPAM) requires one.** That covers the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box or a registered agent's address works. Send me the address you want shown and I will put it in the one footer they all share. Worth a word with your lawyer alongside R12. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
@@ -23,67 +23,59 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### One thing to run, for A202a
+### One thing to run, for A204a
 
-**Paste this into Terminal.** It copies migration 102 and prints `copied`.
+**Paste this into Terminal.** It copies migration 103 and prints `copied`.
 
 ```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/102_buyer_email_lowercase.sql | pbcopy && echo copied
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/103_article_subscribers.sql | pbcopy && echo copied
 ```
 
-**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It shows one number, `orders_lower_cased`: how many orders had capitals or spaces in the address. Tell me that number.
+**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned."
 
-<!-- SQL 102_buyer_email_lowercase.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 103_article_subscribers.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 102: every order's buyer email in lower case, now and from now on (A202).
+-- 103: the In Practice list, and which articles it has been told about (A204a).
 --
--- Checkout and the Stripe webhook stored the address exactly as the buyer
--- typed it. Sign-in addresses are stored in lower case. Everything that finds
--- a buyer's order by address compares the two exactly: the row rule that lets
--- somebody read their own order, the website's order restore, and the
--- server's purchase check, entitlements and core-ownership lookups. So a
--- buyer who typed "Jane@Example.com" had an order nothing could find by
--- address, and unless it had already been linked to their account, the app
--- could refuse them as somebody who had not bought.
+-- Ellie: "Can we build an automatic email that goes out to anyone who put
+-- their email in that list and sends a notification that there's a new
+-- article along with the article link?"
 --
--- Two parts:
---   1. A trigger lower-cases buyer_email on every insert and update, so the
---      rule holds whoever writes the row: checkout, the webhook, or the SQL
---      editor. The code lower-cases too; this is what makes it a guarantee.
---   2. One update for the rows already stored.
+-- The signup on the In Practice page has never saved an address. These are
+-- the two tables that let it:
 --
--- Safe to run again: the function and trigger are replaced, and the update
--- only touches rows that are not already lower case.
+--   article_subscribers    one row per address. `token` is the unsubscribe
+--                          link's secret; nobody on this list has an account,
+--                          so the account-based unsubscribe cannot reach them.
+--                          Unsubscribing stamps unsubscribed_at rather than
+--                          deleting, so signing up again is a fresh yes.
+--   article_announcements  one row per article already announced, so each new
+--                          article is emailed once. The first run of the job
+--                          records every article that exists then without
+--                          sending anything, so nobody gets thirteen emails.
+--
+-- Row level security on, with no policies: only the server's key reads or
+-- writes either table. An email list is not something the public key may see.
+--
+-- Safe to run again: every statement checks before it creates.
 -- ============================================================================
 
-create or replace function public.orders_buyer_email_lower()
-returns trigger
-language plpgsql
-as $$
-begin
-  if new.buyer_email is not null then
-    new.buyer_email := lower(trim(new.buyer_email));
-  end if;
-  return new;
-end
-$$;
+create table if not exists public.article_subscribers (
+  id              uuid primary key default gen_random_uuid(),
+  email           text not null unique,
+  token           uuid not null unique default gen_random_uuid(),
+  created_at      timestamptz not null default now(),
+  unsubscribed_at timestamptz
+);
+alter table public.article_subscribers enable row level security;
 
-drop trigger if exists orders_buyer_email_lower on public.orders;
-create trigger orders_buyer_email_lower
-  before insert or update of buyer_email on public.orders
-  for each row execute function public.orders_buyer_email_lower();
-
--- The count comes back as a result row: the SQL Editor shows a table, and
--- a NOTICE can go unseen.
-with changed as (
-  update public.orders
-     set buyer_email = lower(trim(buyer_email))
-   where buyer_email is not null
-     and buyer_email <> lower(trim(buyer_email))
-  returning 1
-)
-select count(*) as orders_lower_cased from changed;
+create table if not exists public.article_announcements (
+  slug         text primary key,
+  announced_at timestamptz not null default now(),
+  sent         integer not null default 0
+);
+alter table public.article_announcements enable row level security;
 ```
 <!-- /SQL -->
 
@@ -102,6 +94,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A204g | **A promo code was spent before the card was charged.** A declined card or a closed tab used up the code and bought nothing, and trying again said "This code has already been used." The per-couple workbook discounts are single-use, so that lost a couple their discount. A paid order now counts its code only once the payment has gone through. |
+| A204 | **Your four answers, built.** (1) The In Practice signup saves addresses, and a daily job emails everyone on the list when a new article goes up, with its link and a way off the list; the first run only records the articles already up, so nobody gets thirteen emails. Posts published from the admin are not included: they show only in the app and have no web page to link to. (2) "Having trouble signing in? Click here" is under "Use the same email you signed in with" on the app screen, and opens the new help page; its "Forgot your password?" goes straight to the reset. (3) One confirmation per order, yours, sent when the payment lands, so it also reaches someone who closes the tab, and Apple Pay buyers, who only ever got the old one. (4) The checkout summary, the confirmation email and the email preview all use the shop's names now: "Build a Budget", "Relationship Reflection", "Physical Intimacy Expectations". The receipt also stopped charging an add-on the package already includes. |
 | A203 | **Five sweeps, ten fixes, all the same kind: something failed and the product answered as if it had an answer.** Ran every server address with the database switched off and listed every one that still said "fine". Fixed: telling your partner you finished, and starting the workbook, could be skipped by one failed read and was never retried (now retried, on the site and in the app); signing in with Google or Apple could tell an existing customer "There is no Attune account" and sign them out when it simply could not look; the website could put an older copy of an exercise over a newer one after a failed read; the check-in and notification jobs reported "nobody due" and "not set up" during an outage, and the data-retention job reported success when it failed, so none of them showed up as failing; the beta tile and marking an alert read said things they had not checked. Also: the daily insight and word notifications moved by an hour at every clock change (Europe changed on 25 October, the US changes on Sunday); they now follow the phone's clock. Questions in A203a and A203b. |
 | A202 | **Nineteen sweeps, fourteen fixes.** The biggest: every card order was stored under a different number from the one the customer was shown, emailed and given in their setup link, so the link could not find their order, and a repeated payment signal from Stripe could have written a second order. One number now, and old numbers are found through the payment. Also: checkout saved emails with capitals and sign-in does not, so those orders could not be found by email (migration 102 in A202a); promo codes skipped every check when their record could not be read, and two people could redeem a single-use code at once; deleting an account went ahead when it failed to remove the person's orders, workbook or feedback address; a retake could replace a couple's results without keeping the old version; survey answers could be overwritten by an older save; in the app, a failed note delete, notification time change or notifications-off looked done and was not (each now puts itself back and says so, in your existing lines); two emails put typed names in unescaped; error reports were cut off before they sent; both unused addresses are removed; the waitlist shows your line. The sign-in screen's "Let us know" pointed at support@, the only place anything did; it is hello@ now. Checked and clean: scheduled jobs, the Stripe signature and retries, app retries. |
 | R10 | Privacy policy. |
@@ -118,6 +112,7 @@ section 3 explaining things, just include the context I need in section 3."
 | A201 | **Seven sweeps, six fixes: checkout's error message, exercise-done and results-ready retries, admin survey shares its request.** |
 | A201b | **Yes to removing the unused PDF builder and order-editing addresses, and yes to a waitlist failure line (yours).** |
 | A201a | **Contact form delivers (it never had); failure line approved.** |
+| A202a | **Migration 102 ran: buyer emails lower case from now on; 0 stored orders needed changing.** |
 | A180 | **Reflection written answers: eight stacked charts, each with its own slicer, title and answer categories.** |
 | A200 | **Admin speed: one request per data set instead of up to nine, and the cube reads its nine tables at once.** |
 | A198 | **Removed the reflection insight copy nothing showed: no longer computed, sent or stored in the code, on the server, the website or the app.** |
@@ -669,7 +664,6 @@ section 3 explaining things, just include the context I need in section 3."
 | B1 | Premium was taxed on a workbook it is not charged for; one cart pricer now. |
 | L1b | The Learn page could not hold the tools, the insight and the peek at once; the peek gave 42 points. |
 | B12b | A script to clear the legacy counters, dry run by default. |
-| L1b | The Learn page could not hold the tools, the insight and the peek at once; the peek gave 42 points. |
 | L1 | The In Practice sheet was painted over the end of the insight. |
 | L2d | The In Practice tiles were too big. |
 | L2b | Reading an article on the website did not count as read. |

@@ -53,6 +53,38 @@ export const ADDON_PRICES = {
  * own tables, because a static page cannot import this. check-package-prices
  * .mjs fails the build if any of them stops agreeing with this one.
  */
+/**
+ * What each add-on is called wherever it is bought and paid for: the shop's
+ * tiles, the checkout summary and the confirmation email.
+ *
+ * Ellie, A204d: "change the reciept to match the site and the email so that
+ * everything is consistent." The receipt said "Shared Budgeting Activity" and
+ * "Relationship Reflection exercise" while the shop said "Build a Budget" and
+ * "Relationship Reflection". These are the shop's names, from
+ * public/offerings.html, which is what a customer chose from. The browser
+ * reads them through public/_pkg-rules.js (scripts/build-pkg-rules.mjs), and
+ * check-shop-names holds the shop page, checkout and the email to them.
+ *
+ * Not `CATALOGUE[].label` below: that is the app's Learn tile, which says
+ * "Physical Intimacy" and "Your Workbook", and nobody buys from it.
+ */
+export const SHOP_NAMES = {
+  reflection: 'Relationship Reflection',
+  intimacy: 'Physical Intimacy Expectations',
+  conflict: 'Conflict Patterns',
+  workbook: 'Personalized Workbook',
+  budget: 'Build a Budget',
+  checklist: 'Merging Lives Checklist',
+};
+
+/** What each package is called on the shop, the checkout and the receipt. */
+export const PACKAGE_NAMES = {
+  core: 'The Attune Assessment',
+  newlywed: 'Starting Out Collection',
+  anniversary: 'Relationship Reflection',
+  premium: 'Attune Premium',
+};
+
 export const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 198 };
 export const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 233 };
 

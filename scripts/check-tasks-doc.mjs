@@ -50,7 +50,10 @@ const sections = HEADS.map((h, i) => {
   const from = doc.indexOf(h);
   const to = i + 1 < HEADS.length ? doc.indexOf(HEADS[i + 1], from) : doc.length;
   const text = doc.slice(from, to);
-  return { name: h.replace(/^## /, ''), text, ids: [...text.matchAll(/^\| ([A-Z]+\d+) \|/gm)].map((m) => m[1]) };
+  // A trailing letter is part of an id (A201a, A204b): rows split from one
+  // request keep its number. Without it, a section of only such rows read as
+  // empty.
+  return { name: h.replace(/^## /, ''), text, ids: [...text.matchAll(/^\| ([A-Z]+\d+[a-z]?) \|/gm)].map((m) => m[1]) };
 });
 
 // ── 1. an id lives in one place ───────────────────────────────────────────
@@ -104,12 +107,12 @@ for (const sec of sections) {
   const place = new Map();
   for (const sec of sections) for (const id of sec.ids) place.set(id, sec.name);
   const closed = (ref) => place.get(ref) === review.name || place.get(ref) === sections[3].name;
-  for (const m of review.text.matchAll(/^\| ([A-Z]+\d+) \|(.*)\|\s*$/gm)) {
+  for (const m of review.text.matchAll(/^\| ([A-Z]+\d+[a-z]?) \|(.*)\|\s*$/gm)) {
     const [, id, body] = m;
     const refs = new Set();
-    const tail = body.trim().match(/\b([A-Z]+\d+)\.?\s*$/);
+    const tail = body.trim().match(/\b([A-Z]+\d+[a-z]?)\.?\s*$/);
     if (tail) refs.add(tail[1]);
-    for (const b of body.matchAll(/\bbecame ([A-Z]+\d+)\b/g)) refs.add(b[1]);
+    for (const b of body.matchAll(/\bbecame ([A-Z]+\d+[a-z]?)\b/g)) refs.add(b[1]);
     for (const ref of refs) {
       if (ref === id || !closed(ref)) continue;
       fails.push(`${id} in "${review.name}" hands its work to ${ref}, which is already in "${place.get(ref)}".`
@@ -220,7 +223,7 @@ for (const sec of sections) {
       for (const line of text.split('\n')) {
         const h = /^##\s*(\d)\./.exec(line);
         if (h) { current = Number(h[1]); continue; }
-        const row = /^\|\s*([A-Z]+\d+)\s*\|/.exec(line);
+        const row = /^\|\s*([A-Z]+\d+[a-z]?)\s*\|/.exec(line);
         if (row && current) out.set(row[1], current);
       }
       return out;
@@ -266,12 +269,12 @@ for (const sec of sections) {
 {
   const at = doc.indexOf('## 4.');
   const sec = at === -1 ? '' : doc.slice(at);
-  const rows = sec.split('\n').filter((l) => /^\|\s*[A-Z]+\d+\s*\|/.test(l));
+  const rows = sec.split('\n').filter((l) => /^\|\s*[A-Z]+\d+[a-z]?\s*\|/.test(l));
   if (!rows.length) {
     fails.push('section 4 has no rows at all. Refusing to pass: a gate that has lost its'
       + ' subject must never report success.');
   }
-  const VERDICT = /^\|\s*[A-Z]+\d+\s*\|\s*(\*\*)?(approved|done|ran it|yes|fixed)[.!]?(\*\*)?\s*\|\s*$/i;
+  const VERDICT = /^\|\s*[A-Z]+\d+[a-z]?\s*\|\s*(\*\*)?(approved|done|ran it|yes|fixed)[.!]?(\*\*)?\s*\|\s*$/i;
   const bare = rows.filter((l) => VERDICT.test(l));
   if (bare.length) {
     fails.push(`${bare.length} row(s) in section 4 say only that you approved something, which is`
@@ -283,7 +286,7 @@ for (const sec of sections) {
   const LIMIT = 230;
   const long = rows.filter((l) => l.length > LIMIT);
   if (long.length) {
-    const id = /^\|\s*([A-Z]+\d+)/.exec(long[0])?.[1];
+    const id = /^\|\s*([A-Z]+\d+[a-z]?)/.exec(long[0])?.[1];
     fails.push(`${long.length} row(s) in section 4 are longer than ${LIMIT} characters, starting`
       + ` with ${id} at ${long[0].length}.\n`
       + '      Section 4 is a list you read down. The reasoning belongs in the commit that did\n'

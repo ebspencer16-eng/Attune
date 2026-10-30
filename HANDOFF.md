@@ -4790,3 +4790,18 @@ All built and in TASKS.md section 3. Points worth knowing:
   to send her catalogue emails from the webhook and drop its inline one, and
   it needs her choice of receipt line names first). After A203b, add a gate
   that every email to a customer comes from a catalogue map.
+
+## 30 October, evening: A204
+
+- Built: In Practice list and daily new-article email (cron-new-articles,
+  migration 103 waiting on Ellie, placeholder copy listed under A204a);
+  /sign-in-help with /api/order-email-hint (masked address, shares
+  api/_lib/find-order.js with claim-order); one order confirmation, sent by the
+  webhook from api/_lib/order-email-context.js; receipt names from SHOP_NAMES
+  and PACKAGE_NAMES in api/_catalogue.js; paid promo codes counted by the
+  webhook (api/_lib/promo-claim.js, metadata promoClaim).
+- New gates: check-one-confirmation, check-shop-names, check-email-senders,
+  check-article-emails; check-promo-claim and check-order-number extended.
+  check-tasks-doc and check-tasks-run-block now read ids like A204a.
+- Waiting on Ellie: A204a (migration 103 and words), A204b (words, masked or
+  full address), A204f (refunds), A204h (postal address for email footers).

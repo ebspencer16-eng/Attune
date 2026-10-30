@@ -557,11 +557,15 @@ function forceFmt(f) { return PHYSICAL_ENABLED ? (f || 'digital') : 'digital'; }
 // off any stored 'print' variant is treated (and charged) as digital.
 function forceWbVariant(v) { return PHYSICAL_ENABLED ? (v || 'digital') : 'digital'; }
 
-const ADDON_REFLECTION = { label: "Relationship Reflection exercise", price: 40 };
+/* The receipt says what the shop said: api/_catalogue.js SHOP_NAMES, through
+   /_pkg-rules.js. Ellie, A204d: "change the reciept to match the site and the
+   email so that everything is consistent." */
+const SHOP = window.ATTUNE_SHOP_NAMES;
+const ADDON_REFLECTION = { label: SHOP.reflection, price: 40 };
 
 const ADDON_WORKBOOK = {
-  digital: { label: 'Personalized Workbook (digital)', price: 19 },
-  print:   { label: 'Personalized Workbook (printed)', price: 39 },
+  digital: { label: SHOP.workbook + ' (digital)', price: 19 },
+  print:   { label: SHOP.workbook + ' (printed)', price: 39 },
 };
 
 // Workbook charge for an item. Premium includes the workbook (digital is free);
@@ -601,7 +605,7 @@ function addonCharge(it, name, price) {
 function wbLine(it) {
   const print = forceWbVariant(it.addons.workbookVariant) === 'print';
   if (it.pkg === 'premium') {
-    return { label: print ? 'Personalized Workbook (printed)' : 'Personalized Workbook (included)', price: wbCharge(it) };
+    return { label: SHOP.workbook + (print ? ' (printed)' : ' (included)'), price: wbCharge(it) };
   }
   return { label: ADDON_WORKBOOK[print ? 'print' : 'digital'].label, price: wbCharge(it) };
 }
@@ -1142,10 +1146,10 @@ function renderSummary() {
     /* Each line is charged at what this package pays for it: an add-on the
        package already includes shows as $0 rather than at list price. */
     if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: addonCharge(g.item, 'reflection', ADDON_REFLECTION.price) });
-    if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: addonCharge(g.item, 'budget', 20) });
-    if (g.item.addons.intimacy)   addonLines.push({ label: 'Physical Intimacy Expectations', price: addonCharge(g.item, 'intimacy', 20) });
-    if (g.item.addons.conflict)   addonLines.push({ label: 'Conflict Patterns', price: addonCharge(g.item, 'conflict', 40) });
-    if (g.item.addons.checklist)  addonLines.push({ label: 'Merging Lives Checklist', price: addonCharge(g.item, 'checklist', 20) });
+    if (g.item.addons.budget)     addonLines.push({ label: SHOP.budget, price: addonCharge(g.item, 'budget', 20) });
+    if (g.item.addons.intimacy)   addonLines.push({ label: SHOP.intimacy, price: addonCharge(g.item, 'intimacy', 20) });
+    if (g.item.addons.conflict)   addonLines.push({ label: SHOP.conflict, price: addonCharge(g.item, 'conflict', 40) });
+    if (g.item.addons.checklist)  addonLines.push({ label: SHOP.checklist, price: addonCharge(g.item, 'checklist', 20) });
     for (const a of addonLines) {
       rows += `
       <div class="co-card-detail" style="padding-left:.7rem;box-shadow:inset 3px 0 0 #F0E1CE">
@@ -1790,7 +1794,12 @@ async function handleSubmit(e) {
     // Fire the order email(s) — one per item so each couple gets their own.
     // Build an itemized list (package + each add-on at its real price) so the
     // confirmation email shows a correct breakdown and total.
-    for (const it of _items) {
+    //
+    // Free promo orders only. A paid order's emails are sent by the Stripe
+    // webhook when the payment lands (api/_lib/order-email-context.js), and
+    // sending them here as well is how every card buyer got two
+    // confirmations. A free order has no webhook. Ellie: "Keep only mine."
+    if (isFreePromo) for (const it of _items) {
       const itPkg = pkgFor(it.pkg);
       const isPhys = it.format === 'physical';
       const lineItems = [{ label: itPkg.name, price: isPhys ? itPkg.physicalPrice : itPkg.digitalPrice }];
@@ -1798,10 +1807,10 @@ async function handleSubmit(e) {
         lineItems.push(wbLine(it));
       }
       if (it.addons.reflection) lineItems.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
-      if (it.addons.budget)     lineItems.push({ label: 'Shared Budgeting Activity', price: 20 });
-      if (it.addons.intimacy)   lineItems.push({ label: 'Physical Intimacy Expectations', price: 20 });
-      if (it.addons.conflict)   lineItems.push({ label: 'Conflict Patterns', price: 40 });
-      if (it.addons.checklist)  lineItems.push({ label: 'Merging Lives Checklist', price: 20 });
+      if (it.addons.budget)     lineItems.push({ label: SHOP.budget, price: 20 });
+      if (it.addons.intimacy)   lineItems.push({ label: SHOP.intimacy, price: 20 });
+      if (it.addons.conflict)   lineItems.push({ label: SHOP.conflict, price: 40 });
+      if (it.addons.checklist)  lineItems.push({ label: SHOP.checklist, price: 20 });
       const itemSubtotal = lineItems.reduce((sum, l) => sum + l.price, 0);
       fetch('/api/send-order-email', {
         method: 'POST',

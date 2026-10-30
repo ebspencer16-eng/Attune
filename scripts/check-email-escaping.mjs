@@ -23,7 +23,7 @@ import { EMAIL_CATALOGUE } from '../api/_lib/email-catalogue.js';
 import { sanitizeBody } from '../api/send-email.js';
 
 const MARK = '<i>planted</i>';
-const NOT_TYPED = /url|email|userid|ordernum|type|pkgkey|code/i;
+const NOT_TYPED = /url|href|email|userid|ordernum|type|pkgkey|code/i;
 const fails = [];
 let emails = 0, fields = 0;
 for (const [key, entry] of Object.entries(EMAIL_CATALOGUE)) {

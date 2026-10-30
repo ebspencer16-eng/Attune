@@ -36,6 +36,30 @@ a{display:inline-block;padding:.65rem 1.5rem;border-radius:10px;background:${suc
     { status: 200, headers: { 'Content-Type': 'text/html' } }
   );
 
+  /**
+   * The In Practice list (A204a). Nobody on it has an account, so its link
+   * carries the row's own random token rather than an account id. The line
+   * after it is a placeholder of mine, listed for Ellie under A204a.
+   */
+  const articles = url.searchParams.get('articles');
+  if (articles) {
+    if (!/^[0-9a-f-]{36}$/i.test(articles)) {
+      return html("This unsubscribe link is invalid or has expired. Reply to any Attune email to unsubscribe manually.", false);
+    }
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+    const r = supabaseUrl && serviceKey ? await fetch(
+      `${supabaseUrl}/rest/v1/article_subscribers?token=eq.${encodeURIComponent(articles)}`,
+      {
+        method: 'PATCH',
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ unsubscribed_at: new Date().toISOString() }),
+      },
+    ).catch(() => null) : null;
+    if (!r?.ok) return html("Something went wrong. Reply to any Attune email and we'll remove you manually.", false);
+    return html("You will not get emails about new In Practice articles any more.", true);
+  }
+
   if (!token) return html("No unsubscribe token found. If you'd like to unsubscribe, reply to any Attune email and we'll remove you manually.", false);
 
   let userId;

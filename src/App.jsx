@@ -12011,7 +12011,12 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
 // ─────────────────────────────────────────────────────────────────────────────
 function AuthModal({ mode, onClose, onSuccess }) {
   const isMobile = useMobile(560);
-  const [tab, setTab] = useState(mode || "signup");
+  // ?forgot=1 opens on the password reset, for the link on /sign-in-help
+  // (A204b). Read once, on mount, like the other URL terms this panel takes.
+  const [tab, setTab] = useState(() => {
+    try { if (new URLSearchParams(window.location.search).get('forgot') === '1') return 'reset'; } catch (_) {}
+    return mode || "signup";
+  });
   // Pre-fill names from URL params (passed from checkout on purchase)
   const _authParams = new URLSearchParams(window.location.search);
   const _p1 = _authParams.get('p1') || '';

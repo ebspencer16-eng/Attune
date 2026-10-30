@@ -45,6 +45,17 @@ export default function NoPurchase({ copy, email, onRetry, onSignedOut, children
       {email ? (
         <Text style={{ ...Type.small, color: c.textStrong, marginTop: Spacing.md }}>{email}</Text>
       ) : null}
+      {/* Right under "use the same email", as Ellie placed it (A203a). The
+          page that answers it is on the website: /sign-in-help. */}
+      {copy.trouble ? (
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => { Linking.openURL(`${SITE_URL}/sign-in-help`).catch(() => {}); }}
+          hitSlop={8}
+          style={{ marginTop: Spacing.md, alignSelf: 'flex-start' }}>
+          <Text style={{ ...Type.small, color: c.accent, textDecorationLine: 'underline' }}>{copy.trouble}</Text>
+        </Pressable>
+      ) : null}
 
       <Pressable
         accessibilityRole="link"

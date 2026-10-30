@@ -23,7 +23,9 @@
  *   5. checkout prefers the server's number on both of its payment paths;
  *   6. a card order placed before this, whose customer holds the old derived
  *      number, is claimed through its payment when exactly one matches,
- *      refused when two do, and a failed read is 503 rather than not found.
+ *      refused when two do, and a failed read is 503 rather than not found;
+ *   7. the sign-in help page (/api/order-email-hint) finds orders by the same
+ *      rule, shows the address masked, and answers 503 on a failed read.
  *
  * Planted: the endpoint ignoring Stripe's metadata on return, the webhook
  * going back to a random number, and checkout's card path going back to its
@@ -149,6 +151,23 @@ const two = await claimWith(OLD, byPayment([
 if (two.status !== 404 || two.patched) fails.push(`two payments ending in WXYZ on that day, and the claim picked one (${two.status}): a guess must be refused`);
 const down = await claimWith(OLD, () => new Response('{"message":"x"}', { status: 500 }));
 if (down.status !== 503) fails.push(`a failed order read answered ${down.status}; "not found" would send a customer who paid to the no-purchase screen`);
+
+/* ── 7: the help page finds what claiming finds, and shows it masked ─────── */
+const { default: hint } = await import('../api/order-email-hint.js');
+async function hintFor(orderNum, db) {
+  globalThis.fetch = async (url) => db(decodeURIComponent(String(url)));
+  const r = await quiet(() => hint(new Request(`${SITE_URL}/api/order-email-hint`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ orderNum }),
+  })));
+  return { status: r.status, body: await r.json().catch(() => ({})) };
+}
+const h1 = await hintFor(OLD, byPayment([{ order_num: 'ATT-20261030-S27W', buyer_email: 'maya@example.com', stripe_payment_intent_id: 'pi_3Q9zLegacyWXYZ' }]));
+if (h1.body.hint !== 'm•••@e•••.com') fails.push(`the help page, given an old card number, answered ${JSON.stringify(h1.body)}; it should find the order through its payment, as claiming does, and show m•••@e•••.com`);
+if (JSON.stringify(h1.body).includes('maya@example.com')) fails.push('the help page sent the full address; anybody can type an order number');
+const h2 = await hintFor('ATT-20261030-NOSUCH', () => new Response('[]', { status: 200 }));
+if (h2.status !== 200 || h2.body.found !== false) fails.push(`an unknown order number answered ${h2.status} ${JSON.stringify(h2.body)}, not found: false`);
+const h3 = await hintFor('ATT-20261030-NOSUCH', () => new Response('{"message":"x"}', { status: 500 }));
+if (h3.status !== 503) fails.push(`a failed read on the help page answered ${h3.status}; "not found" would tell somebody their order does not exist`);
 
 /* ── 5: checkout ───────────────────────────────────────────────────────── */
 const page = readFileSync(`${ROOT}public/checkout.html`, 'utf8');

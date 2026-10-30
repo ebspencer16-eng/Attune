@@ -125,4 +125,9 @@ export const NO_PURCHASE_COPY = {
   invited: 'Were you invited by your partner? Enter the invite code they sent you.',
   signOut: 'Sign out',
   retry: 'I just bought one',
+  /* Ellie, A203a: "I like use the same email you signed up with, then a link
+     to 'having trouble signing in? Click here'". Her words; it opens
+     /sign-in-help on the website, where an order number shows which email
+     the order is under (A204b). */
+  trouble: 'Having trouble signing in? Click here',
 };

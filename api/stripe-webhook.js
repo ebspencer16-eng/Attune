@@ -28,6 +28,9 @@ import { writeEntitlements } from './_lib/entitlements.js';
 import { SITE_URL } from './_lib/site.js';
 import { recordConsent } from './_lib/consent.js';
 import { legacyOrderNumber } from './_lib/order-number.js';
+import { orderEmailContext } from './_lib/order-email-context.js';
+import { sendOrderEmails } from './send-order-email.js';
+import { claimPromoUse, readPromoRow } from './_lib/promo-claim.js';
 
 async function verifyStripeSignature(body, signature, secret) {
   // Stripe webhook signature format: t=timestamp,v1=hash
@@ -159,6 +162,30 @@ async function handleWebhook(req) {
     // a payment webhook means a 500 on a payment that already succeeded.
     let consentCountry = null;
 
+    // Try to parse items metadata. Read here, above the database block, because
+    // the order emails read them too (A204c).
+    let items = null;
+    try {
+      if (meta.items) {
+        items = JSON.parse(meta.items);
+      } else if (meta.itemsChunks) {
+        const n = parseInt(meta.itemsChunks, 10);
+        let joined = '';
+        for (let i = 0; i < n; i++) joined += meta[`items${i}`] || '';
+        items = JSON.parse(joined);
+      }
+    } catch (e) {
+      console.warn('[webhook] could not parse items metadata, falling back to single-item:', e);
+    }
+
+    // The number checkout showed the customer, from the metadata. A payment
+    // made before the number was minted server-side has none, and gets the
+    // number checkout derived for it then, from the payment itself, so a
+    // retried delivery gets the same one. This was random per delivery, so
+    // the customer's number matched no row and a retry wrote a second
+    // order (A202, api/_lib/order-number.js).
+    const baseOrderNum = meta.orderNum || legacyOrderNumber(intent);
+
     const supabaseUrl = process.env.SUPABASE_URL;
     const serviceKey  = process.env.SUPABASE_SERVICE_ROLE
                      || process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -166,28 +193,6 @@ async function handleWebhook(req) {
     if (supabaseUrl && serviceKey) {
       // Helper: unique QR token
 
-      // Try to parse items metadata
-      let items = null;
-      try {
-        if (meta.items) {
-          items = JSON.parse(meta.items);
-        } else if (meta.itemsChunks) {
-          const n = parseInt(meta.itemsChunks, 10);
-          let joined = '';
-          for (let i = 0; i < n; i++) joined += meta[`items${i}`] || '';
-          items = JSON.parse(joined);
-        }
-      } catch (e) {
-        console.warn('[webhook] could not parse items metadata, falling back to single-item:', e);
-      }
-
-      // The number checkout showed the customer, from the metadata. A payment
-      // made before the number was minted server-side has none, and gets the
-      // number checkout derived for it then, from the payment itself, so a
-      // retried delivery gets the same one. This was random per delivery, so
-      // the customer's number matched no row and a retry wrote a second
-      // order (A202, api/_lib/order-number.js).
-      const baseOrderNum = meta.orderNum || legacyOrderNumber(intent);
 
       // ── Stripe Tax: record the transaction ──────────────────────────────
       // If the checkout computed a tax_calculation_id, we need to convert
@@ -432,61 +437,62 @@ async function handleWebhook(req) {
       } catch (e) { console.warn('[webhook] entitlements recompute error:', e); }
     }
 
-    // Fire confirmation email if Resend is configured. Skip on webhook retry
-    // (orderCreated=false means either an idempotent duplicate OR a failed
-    //  insert; orderInsertFailed tells those apart
-    // delivery — and the customer was emailed on the first delivery).
-    const apiKey    = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
-    const baseUrl   = SITE_URL;
+    /**
+     * ── AND COUNT THE PROMO CODE, NOW THAT IT HAS BEEN PAID FOR ──────────
+     * A paid order's code is counted here rather than when the payment was
+     * created, so a declined card or a closed tab no longer spends it
+     * (api/_lib/promo-claim.js, A204e). Not on a retried delivery, and never
+     * a reason to fail a payment that has gone through: a code that could
+     * not be counted is reported, and at worst can be used once more.
+     */
+    const promoClaim = String(meta.promoClaim || '').trim();
+    if (promoClaim && orderCreated && supabaseUrl && serviceKey) {
+      const count = Array.isArray(items) && items.length ? items.length : 1;
+      const row = await readPromoRow({ supabaseUrl, serviceKey, code: promoClaim });
+      const counted = row !== undefined && await claimPromoUse({
+        supabaseUrl, serviceKey, code: promoClaim, row, count,
+        packageKey: meta.pkgKey || null, buyerEmail: intent.receipt_email,
+      });
+      if (!counted) {
+        await reportToSentry(new Error(`promo ${promoClaim} paid for but not counted`), { route: '/api/stripe-webhook', extra: { intent: intent.id } }).catch(() => {});
+      }
+    }
 
+    /**
+     * ── ONE CONFIRMATION, ELLIE'S ────────────────────────────────────────
+     * This built a second confirmation inline, in its own design, that never
+     * appeared in /email-preview and left Conflict Patterns off, while checkout
+     * posted the order to /api/send-order-email for hers. Every card buyer got
+     * both, under the same subject, and Apple Pay buyers only this one. Ellie:
+     * "Keep only mine." (A203b, A204c.)
+     *
+     * Hers now, from here, one set per item as checkout sent them: the
+     * webhook is the moment a payment is known whether or not the buyer kept
+     * the tab open. Skipped on a retried delivery (orderCreated is false), so
+     * nobody is emailed twice for one payment.
+     */
+    const apiKey = process.env.RESEND_API_KEY;
     if (apiKey && intent.receipt_email && orderCreated) {
-      // Order confirmation
-      const subject = `Attune Order Confirmation`;
-      // Itemize what the order actually includes (premium bundles the workbook).
-      const PKG_LABELS = { core: 'The Attune Assessment', newlywed: 'Starting Out Collection', anniversary: 'Relationship Reflection', premium: 'Attune Premium' };
-      const includedItems = [];
-      if (meta.addonWorkbook)          includedItems.push(`Personalized Workbook (${meta.addonWorkbook === 'print' ? 'printed' : 'digital'})`);
-      if (meta.addonIntimacy === '1')  includedItems.push('Physical Intimacy Expectations');
-      if (meta.addonReflection === '1') includedItems.push('Relationship Reflection');
-      if (meta.addonBudget === '1')    includedItems.push('Build a Budget tool');
-      if (meta.addonChecklist === '1') includedItems.push('Merging Lives Checklist');
-      const includedRow = includedItems.length ? `
-            <tr>
-              <td style="padding:.65rem 1rem;font-weight:700;border-top:1px solid #E8DDD0;vertical-align:top;">Included</td>
-              <td style="padding:.65rem 1rem;border-top:1px solid #E8DDD0;">${includedItems.join('<br>')}</td>
-            </tr>` : '';
-      const html = `
-        <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:2rem;color:#1E1610;">
-          <h2 style="color:#E8673A;margin-bottom:1rem;">Your order is confirmed.</h2>
-          <p style="margin-bottom:.75rem;">Hi ${meta.buyerName || 'there'},</p>
-          <p style="margin-bottom:.75rem;">Your Attune order has been received and payment confirmed.</p>
-          <table style="border-collapse:collapse;width:100%;margin:1.25rem 0;border:1px solid #E8DDD0;">
-            <tr style="background:#FBF8F3;">
-              <td style="padding:.65rem 1rem;font-weight:700;border-bottom:1px solid #E8DDD0;">Order</td>
-              <td style="padding:.65rem 1rem;border-bottom:1px solid #E8DDD0;">${meta.orderNum || intent.id}</td>
-            </tr>
-            <tr>
-              <td style="padding:.65rem 1rem;font-weight:700;">Package</td>
-              <td style="padding:.65rem 1rem;">${PKG_LABELS[meta.pkgKey] || meta.pkgKey || '—'}</td>
-            </tr>
-            ${includedRow}
-            <tr style="background:#FBF8F3;">
-              <td style="padding:.65rem 1rem;font-weight:700;">Total</td>
-              <td style="padding:.65rem 1rem;">$${(intent.amount / 100).toFixed(2)}</td>
-            </tr>
-          </table>
-          <p style="margin-bottom:.75rem;">You'll receive a separate email with your account setup link. If you don't see it within a few minutes, check your spam folder.</p>
-          ${meta.addonWorkbook ? `<p style="margin-bottom:.75rem;color:#5C4D3C;">Your personalized digital workbook will be available for download in your <a href="https://www.attune-relationships.com/app" style="color:#E8673A;font-weight:600;">Attune dashboard</a> once both partners complete their exercises. If you have any issues, contact us at hello@attune-relationships.com.</p>` : ''}
-          <p style="color:#8C7A68;font-size:.82rem;margin-top:1.5rem;">Attune Relationships · hello@attune-relationships.com</p>
-        </div>
-      `;
-
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [intent.receipt_email], subject, html }),
-      }).catch(err => console.warn('Confirmation email failed:', err));
+      const list = Array.isArray(items) && items.length ? items : [{
+        p: meta.pkgKey, p1: meta.partner1Name, p2: meta.partner2Name,
+        g: meta.isGift === '1', ph: meta.isPhysical === '1', w: meta.addonWorkbook || '',
+        r: meta.addonReflection === '1', b: meta.addonBudget === '1', i: meta.addonIntimacy === '1',
+        cf: meta.addonConflict === '1', c: meta.addonChecklist === '1', gn: meta.giftNote || '',
+      }];
+      for (let i = 0; i < list.length; i++) {
+        const ctx = orderEmailContext({
+          compact: list[i],
+          buyerName: meta.buyerName || list[i].p1 || null,
+          buyerEmail: intent.receipt_email,
+          orderNum: list.length > 1 ? `${baseOrderNum}-${i + 1}` : baseOrderNum,
+          // One item: exactly what was charged before tax. Several: each
+          // item's own lines, less its package where a promo covered it.
+          charged: list.length === 1 && meta.subtotal ? Number(meta.subtotal) / 100 : null,
+          promoCoversBase: meta.promoCoversBase === '1',
+        });
+        const r = await sendOrderEmails(ctx, apiKey).catch((err) => ({ failed: 1, err }));
+        if (r.failed) console.warn('[webhook] order email failed for item', i + 1, r.err?.message || '');
+      }
 
 
       // The QR card that shipped in a physical box is retired. Ellie: "No gift

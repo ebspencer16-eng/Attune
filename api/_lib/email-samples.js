@@ -24,6 +24,7 @@
  */
 
 import { SITE_URL as U } from './site.js';
+import { receiptLines } from './order-email-context.js';
 
 /** A recognisable id so a preview never looks like a real account. */
 export const SAMPLE_USER_ID = '00000000-0000-4000-8000-000000000000';
@@ -68,11 +69,9 @@ export const ORDER_SAMPLE = {
   recipientName: 'Sam', recipientEmail: 'sam@example.com',
   orderNum: 'ATT-20260401',
   total: 149,
-  lineItems: [
-    { label: 'The Attune Assessment', price: 89 },
-    { label: 'Relationship Reflection', price: 40 },
-    { label: 'Shared Budgeting Activity', price: 20 },
-  ],
+  // Built by the function the webhook builds a real receipt with, so the
+  // preview cannot show names or prices the email does not (A204d).
+  lineItems: receiptLines({ pkgKey: 'core', addonReflection: true, addonBudget: true }).lines,
   addonReflection: true,
   addonBudget: true,
   setupUrl: `${U}/app?signup=1&pkg=core`,
@@ -94,6 +93,7 @@ export const CRON_SAMPLES = {
   cron_checkin_12mo: { toName: 'Maya', partnerName: 'Alex', months: 12, hasReflection: true, retakeUrl: `${U}/app?signin=1`, userId: SAMPLE_USER_ID },
   survey_nudge_1:    { name: 'Maya', userId: SAMPLE_USER_ID },
   survey_nudge_2:    { name: 'Maya', userId: SAMPLE_USER_ID },
+  new_article:       { title: 'How to start a hard conversation', excerpt: 'When you already know a conversation is going to be difficult, the hardest part is almost always the first sentence.', url: `${U}/practice/how-to-start-a-hard-conversation`, unsubscribeHref: `${U}/api/unsubscribe?articles=00000000-0000-4000-8000-000000000000` },
 };
 
 /** What the preview page lists, in the order it lists them. */

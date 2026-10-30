@@ -20,7 +20,7 @@ import { SITE_URL } from './site.js';
 /** Escape HTML: names and notes are buyer-controlled and flow into these templates. */
 export const _esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
-export function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, ctaUrl, ctaColor = '#E8673A', footerNote = 'Questions? Reply to this email or reach us at hello@attune-relationships.com', userId = null }) {
+export function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, ctaUrl, ctaColor = '#E8673A', footerNote = 'Questions? Reply to this email or reach us at hello@attune-relationships.com', userId = null, unsubscribeHref = null }) {
   const cta = ctaLabel && ctaUrl
     ? `<tr><td style="padding:0 40px 28px;text-align:center">
          <a href="${ctaUrl}" style="display:inline-block;background:linear-gradient(135deg,${ctaColor},#d45a2e);color:#ffffff;padding:14px 34px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:.04em;font-family:'DM Sans',Arial,sans-serif">${_esc(ctaLabel)}</a>
@@ -29,7 +29,9 @@ export function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLab
 
   // One implementation, in api/_lib/email-footer.js. It was here alone, and
   // the two crons that email customers on a schedule had no unsubscribe at all.
-  const unsubUrl = unsubscribeUrl(userId);
+  // A list with no accounts on it (the In Practice list, A204a) brings its
+  // own link, because an account id is what the usual one is built from.
+  const unsubUrl = unsubscribeHref || unsubscribeUrl(userId);
 
   return `<!DOCTYPE html>
 <html>

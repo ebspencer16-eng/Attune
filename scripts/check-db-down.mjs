@@ -72,6 +72,8 @@ const BODIES = {
   'POST generate-workbook-promo.js': { body: { accountEmail: 'sweep@example.invalid' } },
   'POST join-waitlist.js': { body: { email: 'sweep@example.invalid' } },
   'POST notes.js': { body: { action: 'create', body: 'a note' } },
+  'POST order-email-hint.js': { body: { orderNum: 'ATT-20261030-ABCDEF' } },
+  'POST practice-subscribe.js': { body: { email: 'sweep@example.invalid' } },
   'POST notifications.js': { body: { action: 'read', id: '1' } },
   'GET partner-sync.js': { query: '?inviteCode=ABCD1234' },
   'POST partner-sync.js': { body: { action: 'link', inviteCode: 'ABCD1234', partnerBId: USER } },

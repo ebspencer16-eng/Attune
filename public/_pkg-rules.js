@@ -1,6 +1,6 @@
 /* GENERATED FILE. Do not edit.
  *
- * Source: api/_lib/entitlements.js PKG_CAPS
+ * Source: api/_lib/entitlements.js PKG_CAPS, api/_catalogue.js SHOP_NAMES
  * Regenerate: node scripts/build-pkg-rules.mjs  (runs automatically on build)
  *
  * Which add-ons each package already includes. Every static page reads this
@@ -40,6 +40,17 @@ window.ATTUNE_PKG_INCLUDED = {
     "conflict": true,
     "workbook": true
   }
+};
+
+/* What each add-on is called where it is bought: api/_catalogue.js SHOP_NAMES.
+   Checkout's summary reads these, so the receipt says what the shop said. */
+window.ATTUNE_SHOP_NAMES = {
+  "reflection": "Relationship Reflection",
+  "intimacy": "Physical Intimacy Expectations",
+  "conflict": "Conflict Patterns",
+  "workbook": "Personalized Workbook",
+  "budget": "Build a Budget",
+  "checklist": "Merging Lives Checklist"
 };
 
 /** True when this package already includes that add-on. */

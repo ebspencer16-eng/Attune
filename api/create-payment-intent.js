@@ -15,10 +15,11 @@
 
 import { jsonBody } from './_lib/http.js';
 import { mintOrderNumber } from './_lib/order-number.js';
+import { claimPromoUse } from './_lib/promo-claim.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
-import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
+import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES, PACKAGE_NAMES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
 import { isStandaloneCart, ownsCoreFor } from './_lib/owns-core.js';
 import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
@@ -445,6 +446,12 @@ export default async function handler(req) {
      other endpoint, including the same 1..12 loop. */
   const BETA_CODES = COMPILED_BETA_CODES;
 
+  /* The code a paid order should count once the card has gone through. The
+     webhook claims it from the payment's metadata (api/_lib/promo-claim.js).
+     Its own field because metadata[promoCode] is only set when the code
+     covered the package, and a workbook discount does not (A204e). */
+  let promoToClaim = null;
+
   if (promoCode) {
     const normalizedCode = promoCode.toUpperCase().trim();
     const codeEntry = BETA_CODES[normalizedCode];
@@ -553,12 +560,7 @@ export default async function handler(req) {
     if (codeUnlocks !== '*') {
       const mismatched = items.find(it => it.pkgKey !== codeUnlocks);
       if (mismatched) {
-        const unlocksName = {
-          core: 'The Attune Assessment',
-          newlywed: 'Starting Out Collection',
-          anniversary: 'Relationship Reflection',
-          premium: 'Attune Premium',
-        }[codeUnlocks] || codeUnlocks;
+        const unlocksName = PACKAGE_NAMES[codeUnlocks] || codeUnlocks;
         return new Response(JSON.stringify({
           error: `This code only unlocks ${unlocksName}. Remove other packages from your cart or use a matching code.`
         }), { status: 400, headers: { 'Content-Type': 'application/json' } });
@@ -602,61 +604,19 @@ export default async function handler(req) {
     // and "this order costs nothing" cannot disagree.
     const addonsTotal = items.reduce((sum, it) => sum + billableAddons(it), 0);
 
+    /* A free order is written below, now, so its use is claimed now. A paid
+       one is claimed by the webhook once the card has gone through
+       (api/_lib/promo-claim.js): claiming here spent a single-use code on a
+       declined card or a closed tab (A204e). */
+    const freeNow = codeMeta.mode === 'free' && addonsTotal === 0;
     if (supabaseUrl && supabaseServiceKey) {
-      /**
-       * ── CLAIM THE USE, DO NOT COUNT IT ─────────────────────────────────
-       * This read uses_count and wrote back what it read plus one, so two
-       * redemptions at the same moment both passed the single-use check
-       * above and both wrote 1: one code, two free packages. And the read
-       * was unchecked, so a failed one counted from zero and put a used
-       * code's tally back to 1 (A202).
-       *
-       * Now a compare and swap: move the count from the value the check
-       * above saw, and only if it is still that value. One row back means
-       * this redemption is the one that counted. None means somebody else
-       * got there first, or the write failed, and the reply is the page's
-       * "could not reach the server" line; a retry reads the true count and
-       * the check above answers it. A code with no row yet (a named code's
-       * first use) is inserted, and the unique code makes a second insert
-       * fail the same way. Deactivation is already refused above, from the
-       * same row.
-       */
-      const enc = encodeURIComponent(normalizedCode);
-      const H = {
-        apikey: supabaseServiceKey,
-        Authorization: `Bearer ${supabaseServiceKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=representation',
-      };
-      const stamp = {
-        last_used_at: new Date().toISOString(),
-        last_used_by: buyerEmail ? String(buyerEmail).trim().toLowerCase() : null,
-      };
-      let claimed = false;
-      try {
-        let res;
-        if (dbRow) {
-          const was = dbRow.uses_count;
-          const still = was == null ? 'uses_count=is.null' : `uses_count=eq.${Number(was)}`;
-          res = await fetch(`${supabaseUrl}/rest/v1/beta_codes?code=eq.${enc}&${still}`, {
-            method: 'PATCH', headers: H,
-            body: JSON.stringify({ uses_count: (Number(was) || 0) + items.length, ...stamp }),
-          });
-        } else {
-          res = await fetch(`${supabaseUrl}/rest/v1/beta_codes`, {
-            method: 'POST', headers: H,
-            body: JSON.stringify({ code: normalizedCode, package_key: codeUnlocks, uses_count: items.length, active: true, ...stamp }),
-          });
-        }
-        if (res.ok) {
-          const rows = await res.json().catch(() => null);
-          claimed = Array.isArray(rows) && rows.length === 1;
-        } else {
-          console.warn('[promo] claim refused:', res.status, (await res.text().catch(() => '')).slice(0, 200));
-        }
-      } catch (e) {
-        console.warn('[promo] claim failed:', e);
-      }
+      const claimed = freeNow
+        ? await claimPromoUse({
+            supabaseUrl, serviceKey: supabaseServiceKey, code: normalizedCode, row: dbRow,
+            count: items.length, packageKey: codeUnlocks, buyerEmail,
+          })
+        : true;
+      if (!freeNow && !REUSABLE_CODES.has(normalizedCode)) promoToClaim = normalizedCode;
       if (!claimed && !REUSABLE_CODES.has(normalizedCode)) {
         return new Response(JSON.stringify({ unavailable: true }), {
           status: 503, headers: { 'Content-Type': 'application/json' }
@@ -835,6 +795,7 @@ export default async function handler(req) {
     'automatic_payment_methods[enabled]': 'true',
     'metadata[itemCount]':    String(items.length),
     'metadata[orderNum]':     orderNum || '',
+    'metadata[promoClaim]':   promoToClaim || '',
     'metadata[buyerName]':    buyerName || '',
     // First-item mirror for legacy webhook parsing
     'metadata[pkgKey]':       items[0].pkgKey,

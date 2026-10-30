@@ -788,12 +788,27 @@ function filterCat(el,cat){
     else{card.style.display='none'}
   });
 }
-function handleSignup(e){
+/* This saved nothing and said "Thanks, you're on the list." to everyone, for
+   as long as the page existed (A202b). It saves now, and says so only when the
+   server has the address; new articles are emailed to the list by
+   api/cron-new-articles.js (A204a). The failure line is a placeholder of mine,
+   listed for Ellie under A204a. */
+async function handleSignup(e){
   e.preventDefault();
   const fb=document.getElementById('signup-feedback');
-  fb.textContent='Thanks, you\'re on the list.';
+  const input=document.getElementById('signup-email');
+  const btn=e.target.querySelector('button[type="submit"]');
+  if (btn) btn.disabled=true;
+  let ok=false;
+  try {
+    const res=await fetch('/api/practice-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:input.value.trim()})});
+    ok=res.ok;
+  } catch(_) {}
+  if (btn) btn.disabled=false;
   fb.style.color='var(--clay)';
-  document.getElementById('signup-email').value='';
+  if (!ok) { fb.textContent='That did not go through. Try again in a moment.'; return; }
+  fb.textContent='Thanks, you\'re on the list.';
+  input.value='';
 }
 document.addEventListener('click', function(e) {
   var menu = document.getElementById('mobile-menu');

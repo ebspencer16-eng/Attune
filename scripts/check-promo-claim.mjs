@@ -16,6 +16,10 @@
  * PostgREST answers: an array, a 409 on a duplicate insert, an empty array
  * from a PATCH whose filter no longer matches.
  *
+ * And a paid order (a code that leaves something to pay) is not claimed
+ * when its payment is created, records the code on the payment, and is
+ * counted by the webhook when the payment succeeds (A204e).
+ *
  * Planted: the lookup's refusal removed (the failed read falls through), the
  * claim's `uses_count=eq.` filter removed, and the refusal after a lost
  * claim removed. All three fail it.
@@ -72,6 +76,55 @@ for (const [what, code, db, pass] of cases) {
   const r = await run(code, db);
   if (!pass(r)) fails.push(`${what}: got ${r.status} ${JSON.stringify(r.body).slice(0, 100)}; requests ${r.calls.map((c) => c.method + ' ' + c.url.replace('https://db.test/rest/v1/', '')).join(', ')}`);
 }
+/* ── A paid order counts its code when the payment lands, not before ──────
+   A204e: claiming at creation spent a single-use code on a declined card. */
+process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+const paidRow = { code: 'FLASH2', package_key: 'core', discount_mode: 'fixed', discount_value: 1, uses_count: 0, max_uses: 1, active: true };
+let paidMeta = null;
+{
+  // run() answers Stripe with {} for anything not beta_codes, so ask again
+  // with a Stripe stub that records the metadata.
+  const calls = [];
+  globalThis.fetch = async (url, init = {}) => {
+    const u = String(url);
+    if (u.startsWith('https://db.test/rest/v1/beta_codes')) { calls.push(init.method || 'GET'); return ok([paidRow]); }
+    if (u.startsWith('https://api.stripe.com/v1/payment_intents')) {
+      paidMeta = new URLSearchParams(String(init.body || '')).get('metadata[promoClaim]');
+      return new Response(JSON.stringify({ id: 'pi_x', client_secret: 'cs', metadata: {} }), { status: 200 });
+    }
+    if (u.startsWith('https://api.stripe.com/')) return new Response(JSON.stringify({ id: 'tc', amount_total: 100, tax_amount_exclusive: 0 }), { status: 200 });
+    return new Response('[]', { status: 200 });
+  };
+  const w = console.warn, e = console.error, l = console.log; console.warn = console.error = console.log = () => {};
+  const r = await handler(req('FLASH2'));
+  console.warn = w; console.error = e; console.log = l;
+  if (r.status !== 200) fails.push(`a paid promo order did not reach Stripe in the stub (${r.status}); the rest of this case means nothing`);
+  if (calls.some((m) => m !== 'GET')) fails.push('a paid promo order claimed its code before the card was charged, so a declined card spends it');
+  if (paidMeta !== 'FLASH2') fails.push(`a paid promo order did not record its code for the webhook to count (metadata promoClaim: ${paidMeta})`);
+}
+{
+  const { default: webhook } = await import('../api/stripe-webhook.js');
+  const body = JSON.stringify({ type: 'payment_intent.succeeded', data: { object: { id: 'pi_x', created: Math.floor(Date.now() / 1000), amount: 100, currency: 'usd', receipt_email: 'buyer@example.com', metadata: { orderNum: 'ATT-20261030-PAIDXX', pkgKey: 'core', itemCount: '1', promoClaim: 'FLASH2' } } } });
+  const t = Math.floor(Date.now() / 1000);
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode('whsec_test'), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${t}.${body}`));
+  const sig = `t=${t},v1=${[...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+  const writes = [];
+  globalThis.fetch = async (url, init = {}) => {
+    const u = String(url);
+    if (u.startsWith('https://db.test/rest/v1/beta_codes')) {
+      if ((init.method || 'GET') === 'GET') return ok([paidRow]);
+      writes.push(`${init.method} ${u}`); return ok([{ ...paidRow, uses_count: 1 }]);
+    }
+    if (u.includes('/rest/v1/orders') && init.method === 'POST') return new Response(null, { status: 201 });
+    return new Response('[]', { status: 200 });
+  };
+  const w = console.warn, e = console.error, l = console.log; console.warn = console.error = console.log = () => {};
+  await webhook(new Request('https://x/api/stripe-webhook', { method: 'POST', headers: { 'stripe-signature': sig }, body }));
+  console.warn = w; console.error = e; console.log = l;
+  if (!writes.some((x) => /PATCH .*code=eq\.FLASH2&uses_count=eq\.0/.test(x))) fails.push(`the webhook did not count a paid order's code once the payment landed (writes: ${writes.join(', ') || 'none'})`);
+}
+
 if (fails.length) {
   console.error('[check-promo-claim] ' + fails.length + ' of ' + cases.length + ' outcomes wrong:');
   for (const x of fails) console.error('  ' + x);
