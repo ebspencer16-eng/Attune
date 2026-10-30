@@ -109,5 +109,6 @@ export default async function handler(req) {
     includesReflection:!!row.includes_reflection,
     includesBudget:    !!row.includes_budget,
     includesChecklist: !!row.includes_checklist,
+    includesConflict:  !!row.includes_conflict,
   });
 }

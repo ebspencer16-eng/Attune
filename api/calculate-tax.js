@@ -87,7 +87,7 @@ function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includes
        dropped both flags, so neither line had ever run. Two items with the
        same reference would also have collided in Stripe's payload. */
     if (it.addonIntimacy && !bundled.intimacy)   lines.push({ amount: ADDON_PRICES.intimacy*100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-intimacy`,  quantity: 1 });
-    if (it.addonConflict)   lines.push({ amount: ADDON_PRICES.conflict*100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-conflict`,  quantity: 1 });
+    if (it.addonConflict && !bundled.conflict)   lines.push({ amount: ADDON_PRICES.conflict*100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-conflict`,  quantity: 1 });
     if (it.addonChecklist && !bundled.checklist)  lines.push({ amount: ADDON_PRICES.checklist*100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-checklist`,  quantity: 1 });
   });
   return lines;

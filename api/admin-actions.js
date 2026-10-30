@@ -11,6 +11,7 @@
  * Actions:
  *   beta_toggle  { code, active }          → set beta code active flag
  *   beta_upsert  { row }                   → insert/update a beta code (by code)
+ *   beta_delete  { code }                  → remove a beta code from the table
  */
 
 /**
@@ -67,6 +68,21 @@ export default async function handler(req) {
   body = _parsed.body;
 
   try {
+    /* Ellie (A208f): a bin on each row that "should delete the promo code row
+       from the table, but should not revoke access from the users who used
+       that code". Nothing grants from this table: what somebody owns is read
+       from their order (api/_lib/entitlements.js), which keeps the code's name
+       in promo_code. So deleting the row stops the code being accepted and
+       takes nothing from anyone. check-promo-delete holds that. */
+    if (body.action === 'beta_delete') {
+      const code = String(body.code || '').slice(0, 64);
+      if (!code) return json({ error: 'Missing code' }, 400);
+      const { data, error } = await admin.from('beta_codes').delete().eq('code', code).select('code');
+      if (error) return json({ error: safeError('admin-actions', error, 'Action failed.') }, 500);
+      if (!data?.length) return json({ error: 'That code was not in the table.' }, 404);
+      return json({ ok: true });
+    }
+
     if (body.action === 'beta_toggle') {
       const code = String(body.code || '').slice(0, 64);
       if (!code) return json({ error: 'Missing code' }, 400);
@@ -197,15 +213,15 @@ export default async function handler(req) {
        * Found while building the admin's own create-a-code form, which is the
        * first thing that has ever written one of these rows from a page.
        *
-       * Conflict Patterns is deliberately absent, because codeMetaFromRow does
-       * not read a column for it and there is none on the table. Adding the
-       * field here without the half that honours it would be a control that
-       * looks like it works.
+       * Conflict Patterns has a column since migration 106 (A208g), and every
+       * half that honours a bundled add-on reads it: codeMetaFromRow, the
+       * price, the tax, validate-promo and the checkout page.
        */
       if ('includes_reflection' in row) clean.includes_reflection = !!row.includes_reflection;
       if ('includes_budget' in row)     clean.includes_budget = !!row.includes_budget;
       if ('includes_checklist' in row)  clean.includes_checklist = !!row.includes_checklist;
       if ('includes_intimacy' in row)   clean.includes_intimacy = !!row.includes_intimacy;
+      if ('includes_conflict' in row)   clean.includes_conflict = !!row.includes_conflict;
       if ('workbook_variant' in row)  clean.workbook_variant = row.workbook_variant == null ? null : String(row.workbook_variant).slice(0, 20);
       if ('max_uses' in row)          clean.max_uses = row.max_uses == null ? null : (Number(row.max_uses) || null);
       if ('expires_at' in row)        clean.expires_at = row.expires_at || null;

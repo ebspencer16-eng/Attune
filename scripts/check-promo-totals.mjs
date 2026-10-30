@@ -155,6 +155,7 @@ const ADDON_OF = {
   Reflection: { set: (it) => { it.addonReflection = true; }, price: ADDON_PRICES.reflection },
   Budget: { set: (it) => { it.addonBudget = true; }, price: ADDON_PRICES.budget },
   Checklist: { set: (it) => { it.addonChecklist = true; }, price: ADDON_PRICES.checklist },
+  Conflict: { set: (it) => { it.addonConflict = true; }, price: ADDON_PRICES.conflict },
 };
 const unknown = FREE_FLAGS.filter((f) => !ADDON_OF[f]);
 if (unknown.length) {
@@ -169,20 +170,23 @@ if (unknown.length) {
  * paid for, so `addonsTotal` is not zero and the order takes the charged path.
  */
 for (const free of FREE_FLAGS) {
-  for (const paid of ['Conflict', null]) {
+  /* The paid one is Conflict Patterns, unless that is the one the code gives
+     away (migration 106), in which case Reflection: one add-on cannot be both. */
+  const paidName = free === 'Conflict' ? 'Reflection' : 'Conflict';
+  for (const paid of [paidName, null]) {
     const it = { pkgKey: 'core', isPhysical: false };
     ADDON_OF[free].set(it);
     it[`_promo${free}Free`] = true;
     it._promoCoveredBase = true;
     it._promoMode = 'free';
-    if (paid) it.addonConflict = true;
+    if (paid) ADDON_OF[paid].set(it);
 
     const items = [it];
     const routing = M.addonsTotal(items);
     const quoted = M.subtotalDollars(items);
     const charged = M.itemsTotalCents(items, true) / 100;
-    const owed = paid ? ADDON_PRICES.conflict : 0;
-    const label = `${free} bundled free${paid ? ' + a paid Conflict add-on' : ' alone'}`;
+    const owed = paid ? ADDON_OF[paid].price : 0;
+    const label = `${free} bundled free${paid ? ` + a paid ${paid} add-on` : ' alone'}`;
 
     if (routing !== owed) {
       fails.push(`${label}: the free-order test makes it $${routing}, and $${owed} is owed.`);

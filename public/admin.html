@@ -614,6 +614,7 @@
 /* ── THE STATUS TOGGLE ─────────────────────────────────────────────────────
    A dot and a word rather than a switch, because a switch in a table row reads
    as a filter for that row rather than as the row's own state. */
+.promo-delete{background:none;border:none;color:var(--muted);cursor:pointer;padding:.25rem .4rem;border-radius:6px;font-size:.72rem;font-weight:600}.promo-delete:hover{color:#B4532A;background:#FBEDE6}
 .promo-toggle{display:inline-flex;align-items:center;gap:.35rem;background:transparent;border:1px solid var(--border);border-radius:999px;
   padding:.2rem .55rem;font-family:var(--bfont);font-size:.66rem;color:var(--muted);cursor:pointer;transition:border-color .15s,color .15s;}
 .promo-toggle:hover{border-color:var(--orange);color:var(--orange);}
@@ -1056,13 +1057,14 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
         <fieldset class="admin-field">
           <span>Add-ons it includes free</span>
           <div class="admin-checks">
+            <!-- Ellie's order (A208g). Conflict Patterns since migration 106. -->
+            <label><input type="checkbox" id="pn-reflection" /> Relationship Reflection</label>
+            <label><input type="checkbox" id="pn-intimacy" /> Physical Intimacy Expectations</label>
+            <label><input type="checkbox" id="pn-conflict" /> Conflict Patterns</label>
             <label><input type="checkbox" id="pn-workbook" /> Workbook</label>
-            <label><input type="checkbox" id="pn-reflection" /> Reflection</label>
-            <label><input type="checkbox" id="pn-budget" /> Budget</label>
+            <label><input type="checkbox" id="pn-budget" /> Budget Tool</label>
             <label><input type="checkbox" id="pn-checklist" /> Merging Lives Checklist</label>
-            <label><input type="checkbox" id="pn-intimacy" /> Physical Intimacy</label>
           </div>
-          <small>Conflict Patterns is not here because the checkout has no column for it, so a tick would do nothing.</small>
         </fieldset>
         <label class="admin-field">
           <span>Max uses</span>
@@ -2038,6 +2040,15 @@ details[open] > summary > span:first-child{transform:rotate(90deg);display:inlin
        logic to determine what type of chart you build for the cut you make,
        and have a dropdown so the user can change chart type." -->
   <div class="xp-viz" id="xp-viz">
+    <!-- Ellie (A208e): "a toggle above explore chart to view male, female, or
+         both. This adds another cut to the data, and should default to both."
+         The cut is the stored pronoun, named the way QX_VAL_LABELS names it
+         everywhere else on this page. -->
+    <span class="xp-unit" role="group" aria-label="Men, women or both" style="display:inline-flex;gap:0;margin-bottom:.6rem;">
+      <button type="button" class="xp-btn" data-xp-gender="both" aria-pressed="true" style="border-radius:8px 0 0 8px;">Both</button>
+      <button type="button" class="xp-btn" data-xp-gender="he/him" aria-pressed="false" style="border-radius:0;border-left:0;">Men</button>
+      <button type="button" class="xp-btn" data-xp-gender="she/her" aria-pressed="false" style="border-radius:0 8px 8px 0;border-left:0;">Women</button>
+    </span>
     <div class="xp-viz-head">
       <span class="xp-viz-label" id="xp-viz-why">Chart</span>
       <!-- Ellie: "a toggle to switch between count and percentages." The same
@@ -2090,6 +2101,8 @@ window.adminAuthHeaders = function(extra){
 <script>
 (function(){
   let CUBE = null, FIELDS = {}, loaded = false, FILTERS = [];
+  /* Men, women or both (A208e). A stored pronoun, never inferred further. */
+  let GENDER = 'both';
   /* The last cut, so the chart-type dropdown can redraw without re-querying. */
   let VIZ_CTX = null;
   const $ = (id) => document.getElementById(id);
@@ -2238,6 +2251,7 @@ window.adminAuthHeaders = function(extra){
     const v = row[key]; return (v == null || isNaN(v)) ? null : Number(v);
   }
   function passesFilters(row){
+    if (GENDER !== 'both' && row.pronouns !== GENDER) return false;
     return FILTERS.every(flt => {
       if (!flt.field) return true;
       const c = classify(row, flt.field, flt.side || 'self');
@@ -2557,6 +2571,8 @@ window.adminAuthHeaders = function(extra){
        find on the fourth: a cross-tab somebody did not ask for, sitting where
        the one they were looking at was. Empty says the page is waiting for a
        question, which is what it is doing. */
+    GENDER = 'both';
+    document.querySelectorAll('[data-xp-gender]').forEach((o) => o.setAttribute('aria-pressed', String(o.dataset.xpGender === 'both')));
     FILTERS = [];
     if ($('xp-row-field')) $('xp-row-field').value = '';
     if ($('xp-col-field')) $('xp-col-field').value = '';
@@ -2628,6 +2644,13 @@ window.adminAuthHeaders = function(extra){
         render();
       };
       $('xp-add-filter').onclick = () => { FILTERS.push({ field:'', value:'', side:'self' }); renderFilters(); };
+      document.querySelectorAll('[data-xp-gender]').forEach((b) => {
+        b.onclick = () => {
+          GENDER = b.dataset.xpGender;
+          document.querySelectorAll('[data-xp-gender]').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+          render();
+        };
+      });
       /* The toggle writes Cells and lets its own change listener redraw, so
          there is one place the mode lives. With columns, % is each column's
          share (each colour adds to 100); with none, it is the share of all. */
@@ -3812,6 +3835,9 @@ async function renderPromosPage(force) {
       active: c.active !== false,
     };
   });
+  /* Ellie (A208h): active codes first, then alphabetical. The table still
+     sorts on any column; this is only where it starts. */
+  codeRows.sort((a, b) => (b.active - a.active) || String(a.code).localeCompare(String(b.code)));
   const discountText = (r) => r.mode === 'free' ? '100% off'
     : r.mode === 'fixed' ? ('$' + r.value + ' off')
     : (r.value + '% off');
@@ -3834,7 +3860,19 @@ async function renderPromosPage(force) {
     { label: 'Orders matched', sort: (r) => r.orders, cell: (r) => String(r.orders) },
     { label: 'Revenue', sort: (r) => r.revenue, style: 'font-family:var(--mono)', cell: (r) => '$' + (Math.round(r.revenue * 100) / 100).toLocaleString('en-US') },
     { label: 'Last used', sort: (r) => r.lastUsed || null, style: 'color:var(--dim)', cell: (r) => r.lastUsed ? new Date(r.lastUsed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' },
+    /* A208f. Two presses: the first asks, the second deletes. A compiled code
+       is in the deployed source, so there is no row to delete. */
+    {
+      label: '', cell: (r) => r.compiled ? ''
+        : '<button type="button" class="promo-delete" data-code="' + QX_ESC(r.code) + '" aria-label="Delete code ' + QX_ESC(r.code) + '" title="Delete this code. Anyone who already used it keeps what they got.">'
+          + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'
+          + '</button>',
+    },
   ], codeRows, { pageSize: 8, empty: 'No promo codes yet.' });
+
+  document.querySelectorAll('.promo-delete').forEach((b) => {
+    b.onclick = () => deletePromoCode(b);
+  });
 
   document.querySelectorAll('.promo-toggle').forEach((b) => {
     b.onclick = () => togglePromoCode(b.dataset.code, b.dataset.on !== '1');
@@ -4008,6 +4046,7 @@ function wirePromoForm() {
         includes_budget: el('pn-budget').checked,
         includes_checklist: el('pn-checklist').checked,
         includes_intimacy: el('pn-intimacy').checked,
+        includes_conflict: el('pn-conflict').checked,
         max_uses: max ? Number(max) : null,
       } });
       if (!r || r.error) throw new Error(r && r.error ? r.error : 'The code could not be created.');
@@ -4020,6 +4059,28 @@ function wirePromoForm() {
       btn.disabled = false; btn.textContent = 'Create and activate';
     }
   };
+}
+
+/**
+ * Delete a code from the table (A208f). The first press turns the bin into
+ * "Delete?", the second deletes; anyone who used the code keeps what they got,
+ * because what they own is read from their order, not from this table.
+ */
+async function deletePromoCode(btn) {
+  if (btn.dataset.armed !== '1') {
+    btn.dataset.armed = '1';
+    btn.textContent = 'Delete?';
+    setTimeout(() => { if (btn.isConnected && btn.dataset.armed === '1') { btn.dataset.armed = ''; renderPromosPage(false); } }, 4000);
+    return;
+  }
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const r = await adminAction({ action: 'beta_delete', code: btn.dataset.code });
+    if (!r || r.error) throw new Error(r && r.error ? r.error : 'The code could not be deleted.');
+    await renderPromosPage(true);
+  } catch (e) {
+    btn.disabled = false; btn.dataset.armed = ''; btn.textContent = 'Could not delete'; btn.title = String(e.message || e);
+  }
 }
 
 async function togglePromoCode(code, next) {

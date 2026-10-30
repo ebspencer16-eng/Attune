@@ -68,6 +68,7 @@ export function codeMetaFromRow(row) {
     includesReflection: !!row.includes_reflection,
     includesBudget: !!row.includes_budget,
     includesChecklist: !!row.includes_checklist,
+    includesConflict: !!row.includes_conflict,
   };
 }
 
@@ -80,5 +81,6 @@ export function bundledAddons(codeMeta) {
     reflection: !!m.includesReflection,
     budget: !!m.includesBudget,
     checklist: !!m.includesChecklist,
+    conflict: !!m.includesConflict,
   };
 }

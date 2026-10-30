@@ -121,7 +121,7 @@ function buildTaxLineItems(item, itemIndex) {
   if (item.addonIntimacy && !item._promoIntimacyFree) {
     lines.push({ amount: ADDON_PRICES.intimacy * 100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-intimacy`,   quantity: 1 });
   }
-  if (item.addonConflict) {
+  if (item.addonConflict && !item._promoConflictFree) {
     lines.push({ amount: ADDON_PRICES.conflict * 100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-conflict`,   quantity: 1 });
   }
   return lines;
@@ -269,6 +269,7 @@ function billableAddons(item) {
   if (item._promoReflectionFree) a -= ADDON_PRICES.reflection;
   if (item._promoBudgetFree)     a -= ADDON_PRICES.budget;
   if (item._promoChecklistFree)  a -= ADDON_PRICES.checklist;
+  if (item._promoConflictFree)   a -= ADDON_PRICES.conflict;
   return Math.max(0, a);
 }
 
@@ -538,6 +539,7 @@ export default async function handler(req) {
       codeMeta.includesReflection = !!dbRow.includes_reflection;
       codeMeta.includesBudget     = !!dbRow.includes_budget;
       codeMeta.includesChecklist  = !!dbRow.includes_checklist;
+      codeMeta.includesConflict   = !!dbRow.includes_conflict;
       codeMeta.appliesTo        = dbRow.applies_to || 'package';
       if (dbRow.active === false) {
         return new Response(JSON.stringify({ error: 'This promo code has been deactivated.' }), {
@@ -619,6 +621,10 @@ export default async function handler(req) {
     }
     if (codeMeta.includesChecklist) {
       items.forEach(it => { it.addonChecklist = true; it._promoChecklistFree = true; });
+    }
+    // Conflict Patterns, since migration 106 gave codes a column for it (A208g).
+    if (codeMeta.includesConflict) {
+      items.forEach(it => { it.addonConflict = true; it._promoConflictFree = true; });
     }
     // Whether anything is left to pay for. billableAddons is the same function
     // the quoted subtotal and the charged total use, so "this order is free"

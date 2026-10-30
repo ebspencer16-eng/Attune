@@ -42,13 +42,16 @@ const ADDON_PRICES = {
 };
 
 // Add-on display metadata (titles/descriptions shown in the cart). Prices come from ADDON_PRICES.
+// Titles and order are Ellie's (A208a): "Relationship Reflection Exercise",
+// "Physical Intimacy Expectations Exercise", "Conflict Patterns Exercise",
+// "Personalized Workbook", "Build a Budget Tool", "Merging Lives Checklist".
 const ADDON_META = {
-  workbook:   { title: 'Personalized Workbook',     desc: 'Conversation prompts drawn from your results' },
-  conflict:   { title: 'Conflict Patterns',                    desc: 'A look at your conflict patterns, answered independently' },
-  intimacy:   { title: 'Physical Intimacy Expectations', desc: 'A private exercise on what you each expect' },
-  budget:     { title: 'Shared Budgeting Activity',  desc: 'Build a shared budget together' },
-  checklist:  { title: 'Merging Lives Checklist',     desc: 'Merging lives, finances, logistics' },
-  reflection: { title: 'Relationship Reflection',    desc: 'Exercise on experiences that shaped you' },
+  reflection: { title: 'Relationship Reflection Exercise',          desc: 'Exercise on experiences that shaped you' },
+  intimacy:   { title: 'Physical Intimacy Expectations Exercise',   desc: 'A private exercise on what you each expect' },
+  conflict:   { title: 'Conflict Patterns Exercise',                desc: 'A look at your conflict patterns, answered independently' },
+  workbook:   { title: 'Personalized Workbook',                     desc: 'Conversation prompts drawn from your results' },
+  budget:     { title: 'Build a Budget Tool',                       desc: 'Build a shared budget together' },
+  checklist:  { title: 'Merging Lives Checklist',                   desc: 'Merging lives, finances, logistics' },
 };
 // What each package already bundles, so it isn't offered again as a paid add-on.
 // Package inclusion comes from public/_pkg-rules.js, generated from PKG_CAPS.
@@ -59,7 +62,7 @@ const ADDON_META = {
 const PKG_INCLUDED = (typeof window !== 'undefined' && window.ATTUNE_PKG_INCLUDED) || {};
 // Display order: workbook first (primary upsell), then cheapest → most expensive.
 const ADDON_ORDER = (function(){
-  var order = ['workbook','intimacy','conflict','budget','checklist','reflection'];
+  var order = ['reflection','intimacy','conflict','workbook','budget','checklist'];
   // Phase 1: physical off. Physical prices stay on CART_PKGS
   // so phase 2 is a flag flip.
   if (!CART_PHYSICAL_ENABLED) Object.values(CART_PKGS).forEach(function(p){ p.supportsPhysical = false; });

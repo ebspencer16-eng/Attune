@@ -79,7 +79,7 @@ export const ORDER_EMAILS = {
     html: orderConfirmationHtml(ctx),
   }),
   order_partner_invite: (ctx) => ({
-    subject: `${ctx.buyerName || 'Your partner'} invited you to Attune`,
+    subject: `${ctx.buyerName || 'Your partner'} purchased the Attune Experience for you`,
     html: partnerPurchaseInviteHtml(ctx),
   }),
   order_gift_recipient: (ctx) => ({
@@ -118,10 +118,17 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
       ? P(`We sent an invitation to Attune to <strong style="color:#1E1610">${_esc(recipientEmail)}</strong>.`)
       : P(`We could not send the invitation to <strong style="color:#1E1610">${_esc(recipientEmail || 'the recipient')}</strong>. Reply to this email and we will make sure it reaches them.`);
   } else {
-    const app = APP_LIVE ? ` or download <a href="${APP_STORE_URL}" style="color:#C17F47">the Attune app</a>` : '';
+    /* Ellie's words (A208). "Attune app" goes to the App Store, so it is
+       linked only once APP_LIVE says there is an app there; until then it is
+       the same words unlinked rather than a link to a page that does not
+       exist. "website" is the set-up link for a new account, which ends on
+       the website signed in: a sign-in page would ask for a password the
+       account does not have yet. For an existing account it is sign in. */
+    const L = (href, text) => `<a href="${href}" style="color:#C17F47">${text}</a>`;
+    const app = APP_LIVE ? L(APP_STORE_URL, 'Attune app') : 'Attune app';
     deliveryLine = (existingAccount
-        ? P(`It is on your account now. Sign in on <a href="${setupUrl}" style="color:#C17F47">the website</a>${app} to begin.`)
-        : P(`To begin, set up your account on <a href="${setupUrl}" style="color:#C17F47">the website</a>${app}.`))
+        ? P(`You will be able to access your experience through your portal on the ${APP_LIVE ? L(APP_STORE_URL, 'app') : 'app'} or ${L(setupUrl, 'website')}.`)
+        : P(`To begin, download the ${app} or visit the ${L(setupUrl, 'website')}.`))
       + (partnerInvited
         ? P(`We sent ${them} their invitation at <strong style="color:#1E1610">${_esc(partnerEmail)}</strong>.`)
         : partnerLinked ? '' : P(`You can invite ${them} from your dashboard.`));
@@ -177,10 +184,10 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
 function partnerPurchaseInviteHtml({ buyerName, partnerName, partnerInviteUrl }) {
   const from = _esc(buyerName || 'Your partner');
   return brandedEmail({
-    preheader: `${from} invited you to Attune`,
-    title: `${from} invited you to Attune.`,
+    preheader: `${from} purchased the Attune Experience for you`,
+    title: `${from} purchased the Attune Experience for you.`,
     subtitle: `Hi ${_esc(partnerName || 'there')},`,
-    bodyHtml: P(`${from} got Attune for the two of you. You each answer on your own, and your answers stay private until you have both finished. Then your results unlock together.`)
+    bodyHtml: P('The Attune Experience involves individual exercises and personalized insights for you and your partner to explore together.')
       + P('Use the button below to create your account and begin.'),
     ctaLabel: 'Accept the invitation',
     ctaUrl: partnerInviteUrl,
