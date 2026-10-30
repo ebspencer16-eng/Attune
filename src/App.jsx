@@ -82,6 +82,7 @@ import { alignedTone } from "../attune-app/src/lib/aligned-tone.js";
 import { tabGradientCss, tabGroundTail, cardTint, INSIGHT_CARD_GROUND } from "../api/_lib/section-grounds.js";
 import { resultsNav, navPageIds, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
 import { webTargetFor } from "../api/_lib/next-action.js";
+import { INVITE_COPY, inviteLine } from "../api/_lib/invite-copy.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
    it to tell the app; the dashboard table uses it to draw the same ring. */
 import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exercise-progress.js";
@@ -12045,6 +12046,79 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   );
 }
 
+/**
+ * The invitation for somebody whose partner has not been invited yet (A206).
+ * Posts to /api/invite-partner, which sends it from the server; the
+ * dashboard's "Invite your partner" card brings people here. Placeholder
+ * words, listed under A206 in TASKS.md.
+ */
+function PartnerInviteForm({ partnerName, onSent }) {
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState('idle'); // idle | sending | failed | soon
+  const send = async () => {
+    const addr = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)) { setState('failed'); return; }
+    setState('sending');
+    try {
+      const { supabase: sb } = await import('./supabase.js');
+      const { data: { session } } = await sb.auth.getSession();
+      const r = await fetch('/api/invite-partner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+        body: JSON.stringify({ partnerEmail: addr, partnerName: partnerName || '' }),
+      });
+      if (r.ok) { onSent(addr); return; }
+      setState(r.status === 429 ? 'soon' : 'failed');
+    } catch { setState('failed'); }
+  };
+  return (
+    <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
+      <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
+        <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>{INVITE_COPY.heading}</div>
+      </div>
+      <div style={{ padding: "1.1rem 1.35rem" }}>
+        <div style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body, lineHeight: 1.5, marginBottom: "0.85rem" }}>
+          {inviteLine('line', { partner: partnerName })}
+        </div>
+        <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (state !== 'sending') setState('idle'); }}
+          placeholder={INVITE_COPY.placeholder} aria-label={INVITE_COPY.label}
+          style={{ width: "100%", boxSizing: "border-box", padding: "0.6rem 0.8rem", border: "1.5px solid #E8DDD0", borderRadius: 10, fontSize: "0.85rem", fontFamily: font.body, marginBottom: "0.7rem" }} />
+        {state === 'failed' && <div style={{ fontSize: "0.78rem", color: "#B4532A", fontFamily: font.body, marginBottom: "0.6rem" }}>{INVITE_COPY.failed}</div>}
+        {state === 'soon' && <div style={{ fontSize: "0.78rem", color: "#B4532A", fontFamily: font.body, marginBottom: "0.6rem" }}>{INVITE_COPY.soon}</div>}
+        <button onClick={send} disabled={state === 'sending'}
+          style={{ background: "#E8673A", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.25rem", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", fontFamily: font.body }}>
+          {state === 'sending' ? INVITE_COPY.sending : INVITE_COPY.button}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The set-up link in an order confirmation or gift invitation (A206):
+ * /app?setup=<token>. The account was made when the payment went through;
+ * /api/account-setup turns the token into a fresh Supabase password link,
+ * which lands on the "choose a new password" screen signed in. A used or
+ * unknown link goes to sign in; a check that could not run goes to the
+ * sign-in help page, which has the reset.
+ */
+(function followSetupLink() {
+  if (typeof window === 'undefined') return;
+  let token = null;
+  try { token = new URLSearchParams(window.location.search).get('setup'); } catch (_) { return; }
+  if (!token) return;
+  fetch('/api/account-setup', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }),
+  })
+    .then((r) => r.json().catch(() => ({})).then((b) => ({ ok: r.ok, b })))
+    .then(({ ok, b }) => {
+      if (ok && b.url) window.location.replace(b.url);
+      else if (ok && b.signin) window.location.replace('/app?signin=1');
+      else window.location.replace('/sign-in-help');
+    })
+    .catch(() => window.location.replace('/sign-in-help'));
+})();
+
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTH MODAL — Sign up / Log in
 // ─────────────────────────────────────────────────────────────────────────────
@@ -14483,7 +14557,7 @@ export default function App() {
    * still unknown falls back to home, which is where someone who followed a
    * dead link should end up.
    */
-  const VIEW_ALIASES = { practice: "resources", profile: "account" };
+  const VIEW_ALIASES = { practice: "resources", profile: "account", invite: "account" };
   const initialView = (() => {
     // The default, which demo mode has its own answer for: the dashboard needs
     // a logged-in account and demo has none, so sending a demo link to home is
@@ -18969,6 +19043,18 @@ export default function App() {
                     </button>
                   </div>
                 </div>
+
+                {/* Partner invite — the first one, for somebody who chose "later"
+                    at checkout or was given Attune (A206). Once sent, the
+                    resend block below takes over. */}
+                {isLoggedIn && !account?.joinedViaInvite && !account?.partnerEmail && !account?.partnerJoined && (
+                  <PartnerInviteForm partnerName={partnerName}
+                    onSent={(email) => setAccount((prev) => {
+                      const next = prev ? { ...prev, partnerEmail: email } : prev;
+                      try { if (next) localStorage.setItem('attune_account', JSON.stringify(next)); } catch {}
+                      return next;
+                    })} />
+                )}
 
                 {/* Partner invite — resend (purchaser only, until partner joins) */}
                 {isLoggedIn && !account?.joinedViaInvite && account?.partnerEmail && !account?.partnerJoined && (

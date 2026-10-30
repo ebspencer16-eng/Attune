@@ -56,12 +56,9 @@ const handlers = {
   'api/send-email.js': {
     body: { type: 'partner_invite', toEmail: 'someone@example.com', name: 'Sam', inviteUrl: 'https://www.attune-relationships.com/app' },
   },
-  'api/send-order-email.js': {
-    body: {
-      pkgKey: 'core', pkgName: 'Core', buyerName: 'Sam', buyerEmail: 'someone@example.com',
-      orderNum: 'A-1', total: 149, lineItems: [{ name: 'Core', price: 149 }],
-    },
-  },
+  // api/send-order-email.js was the second. It is gone (A206): a purchase's
+  // emails are sent by the server that saw the payment, and no request can
+  // ask for one.
 };
 
 /** Every way of asking, and whether it may be answered. */

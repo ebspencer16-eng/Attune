@@ -57,7 +57,7 @@ export const EMAIL_SAMPLES = {
 };
 
 /**
- * The order emails, which come from api/send-order-email.js rather than from
+ * The order emails, which come from api/_lib/order-emails.js rather than from
  * the endpoint. One context object covers all three: the request body as
  * checkout posts it, plus the two URLs that handler derives.
  */
@@ -74,8 +74,13 @@ export const ORDER_SAMPLE = {
   lineItems: receiptLines({ pkgKey: 'core', addonReflection: true, addonBudget: true }).lines,
   addonReflection: true,
   addonBudget: true,
-  setupUrl: `${U}/app?signup=1&pkg=core`,
-  giftUrl: `${U}/app?signup=1&pkg=core&gift=1`,
+  // A206: the account is made at purchase, so these are the set-up link and
+  // the partner's invitation as api/_lib/fulfil-order.js builds them.
+  setupUrl: `${U}/app?setup=00000000-0000-4000-8000-000000000000`,
+  giftUrl: `${U}/app?setup=00000000-0000-4000-8000-000000000000`,
+  partnerInviteUrl: `${U}/app?invite=ABC123&from=Maya`,
+  partner1Name: 'Maya', partner2Name: 'Alex',
+  partnerInvited: true,
 };
 
 /**

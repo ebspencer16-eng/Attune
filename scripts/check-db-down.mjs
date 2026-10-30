@@ -56,7 +56,8 @@ const ROOT = new URL('..', import.meta.url).pathname;
  */
 const ADDR = { country: 'US', postal_code: '10001', state: 'NY', city: 'NY', line1: '1 St' };
 const BODIES = {
-  'POST account-signup.js': { body: { email: 'sweep@example.invalid' } },
+  'POST account-setup.js': { body: { token: '11111111-1111-4111-8111-111111111111' } },
+  'POST invite-partner.js': { body: { partnerEmail: 'partner@example.com' } },
   'GET admin-csv.js': { query: '?type=orders' },
   'POST admin-csv.js': { query: '?type=orders' },
   'POST admin-actions.js': { body: { action: 'waiting_partners' } },

@@ -9,10 +9,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A205a | **Migration 104 ran. Left: one Stripe row, pointed at www, with four events.** Stripe had no deliveries, as expected with no card sales yet, so nothing is missing. In the row whose signing secret matches Vercel's STRIPE_WEBHOOK_SECRET: URL `https://www.attune-relationships.com/api/stripe-webhook` (the address without www redirects, and Stripe treats a redirect as a failure), events `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `charge.dispute.closed`. Delete the other row. Optional: one small real purchase and refund to test the whole path. |
-| A205b | **Gifts: the couple is never told how to get in. How should they be?** Checkout never asks for the couple's email, so the "A gift from…" email has never been sent to anyone. The buyer's confirmation then says "We've sent 's access link in a separate email", with the name missing, and their thank-you page says "We sent a link to your email. Use it to set up your account." Neither is true. The couple can only get in with the order number. Options: (a) checkout asks for the couple's email and they get the gift email with their own link; (b) the buyer's confirmation carries the couple's link, for the buyer to forward; (c) both. I recommend (c): (b) alone fails when the buyer forgets, and wedding registry guests often don't know the couple's email, which (a) alone can't handle. Your words would be needed for the new lines either way. Related, smaller: someone who buys a gift and also has their own account gets the gift's package on their own account too. Fine to leave? |
-| A205c | **Remove an unused address that lets anyone make an Attune login?** /api/account-signup creates a login for any email address and makes us send that address a confirmation email. Checkout stopped using it in 9d053ab5 and nothing calls it now. Removing it is the same as the two removals you approved in A201b. Yes or no? |
-| A205d | **Your words for the new unsubscribe question, when you have them.** Opening an unsubscribe link now asks instead of acting (why in A205, section 3). Mine, to replace: the heading "Unsubscribe?", the line "You will stop getting emails from Attune." (or "…emails about new In Practice articles."), and the button "Unsubscribe". |
+| A206a | **Please run migration 105.** It adds what the new checkout records (the partner's and the gift recipient's addresses, "invite later", the account set-up link) and the timestamp that limits dashboard invitations to one per ten minutes. Until it runs, purchases still work and accounts are still made, but the email's button goes to the reset-password page instead of straight to "choose a password", and the dashboard's Send invitation button does not work. Steps just below this table. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
@@ -24,11 +21,65 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
+### One thing to run, for A206a
+
+**Paste this into Terminal.** It copies migration 105 and prints `copied`.
+
+```bash
+cd /Users/Ellie/Projects/unison && cat supabase/migrations/105_order_recipients.sql | pbcopy && echo copied
+```
+
+**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned."
+
+<!-- SQL 105_order_recipients.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 105: who an order is for, and the link that sets up their account (A206).
+--
+-- Ellie (A205b): "If it's a purchase for you, two boxes should pop up, one
+-- for your email and one for your partner's. If you select gift, one box
+-- should pop up, for the email of one recipient." Plus a checkbox, "I will
+-- invite my partner later".
+--
+-- The account is made when the payment goes through, for the buyer or for
+-- the gift's recipient, and the confirmation email carries a link to choose a
+-- password. That link is ours, not Supabase's, because Supabase's own links
+-- expire after about an hour and an email is often opened the next day.
+--
+--   partner_email         the partner a buyer invited at checkout
+--   recipient_email       who a gift is for
+--   invite_partner_later  the buyer ticked "I will invite my partner later"
+--   setup_token           the secret in the set-up link; every order has one
+--   setup_used_at         when that link was first used. After that it
+--                         sends the person to sign in rather than to set a
+--                         password, so a forwarded email cannot reset it
+--
+-- And on profiles, partner_invited_at, for the "invite your partner" prompt
+-- the dashboard shows somebody who chose "later" (below).
+--
+-- Safe to run again: every statement checks before it adds.
+-- ============================================================================
+
+alter table public.orders add column if not exists partner_email        text;
+alter table public.orders add column if not exists recipient_email      text;
+alter table public.orders add column if not exists invite_partner_later boolean not null default false;
+alter table public.orders add column if not exists setup_token          uuid not null default gen_random_uuid();
+alter table public.orders add column if not exists setup_used_at        timestamptz;
+
+create unique index if not exists orders_setup_token_idx on public.orders (setup_token);
+
+-- When this person last had us email their partner an invitation, from the
+-- dashboard or the app (api/invite-partner.js). Ten minutes apart at most, so
+-- the button cannot be used to send mail to anyone as often as it is pressed.
+alter table public.profiles add column if not exists partner_invited_at timestamptz;
+```
+<!-- /SQL -->
+
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
-| A206 | **More sweeps.** |
+| A207 | **More sweeps.** |
 
 
 ## 3. For you to review
@@ -38,8 +89,8 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A204f | **A full refund in Stripe now takes the access away and stops the sale counting (your answer: a).** The order moves out of the orders list into a separate refunds list, so the admin stops counting it and nothing grants from it. Both partners lose what only that order gave them; anything another order or a hand grant gives stays. A browser that already showed it drops it on the next visit. A chargeback the customer wins is treated the same way, since the money went back either way. A partial refund changes nothing, because that is usually a goodwill credit; say if you want otherwise. Live once you do A205a. |
-| A205 | **Sweeps of every link in every email, and of every server address any page calls.** Found and fixed: (1) opening an unsubscribe link unsubscribed the person, and mail security scanners (Outlook's among them) open every link automatically, so people behind one could stop getting check-ins without ever choosing to; opening it now asks, and the button does it. (2) None of the scheduled emails carried the one-click unsubscribe header Gmail and Yahoo have required of bulk senders since 2024, which pushes mail towards spam; the check-ins, survey nudges and new-article emails carry it now. (3) The sign-in help page I built in A204b showed the buyer's address for every order. For a gift that is the wrong person, and for anyone who signed up under a different address it is the wrong address. It now shows the address of the account the order belongs to, and says when an order is a gift nobody has set up yet. (4) The workbook discount email went to whatever partner address the browser sent, so any signed-in person could have us mail a discount code to any address, as often as they liked; it now goes only to the partner the account is linked to, or the one they invited. The same typed address could also be shaped to make the server hand back another couple's code, and a + in an address made the duplicate check miss; both closed. Questions in A205b, A205c, A205d. |
+| A206 | **Checkout asks who it is for, and everyone gets the right email (your A205b).** Built: for yourself, the partner's email or "I will invite my partner later" (the box goes away when ticked); a gift, the recipient's email with your line about inviting their partner. When the payment goes through, the account is made for the buyer, or for a gift's recipient, and the order is theirs. Then: the partner gets an invitation; the recipient gets the gift invitation with their own set-up link; the buyer's confirmation says the order went through, links the website to set up (the App Store too once the app is live), and says the partner was invited, or that they can invite them from the dashboard, or that the invitation went to the recipient. It only says an invitation was sent if it was. People who chose "later" or got a gift see an "Invite [partner]" card on their dashboard, on the site and in the app. How sign-in works now: the email's button opens a page to choose a password, one step, no second confirmation email, and it works for 30 days and once; after that they sign in with that password, or with Google or Apple on the same email. Found on the way: the app's own profile setup saved the partner's email and never sent them anything; it does now. **Placeholder words of mine, for you to replace:** checkout: "Your partner's email", "We will send them their invitation.", "I will invite my partner later", "Recipient's email", "We will send them their invitation. They will be able to invite their partner when they set up their account."; thank-you page: "We sent a link to [email]. Use it to set up your account.", "We sent [partner] their invitation at [email].", "You can invite your partner from your dashboard.", "Your confirmation is on its way to [email].", "We sent an invitation to [email]."; confirmation: "To begin, set up your account on the website (or download the Attune app).", "It is on your account now. Sign in on the website to begin.", "We sent [partner] their invitation at [email].", "You can invite [partner] from your dashboard.", "We sent an invitation to Attune to [email].", "We could not send the invitation to [email]. Reply to this email and we will make sure it reaches them.", button "Set up your account" / "Sign in"; partner invitation: subject "[Buyer] invited you to Attune", "[Buyer] got Attune for the two of you. You each answer on your own, and your answers stay private until you have both finished. Then your results unlock together.", "Use the button below to create your account and begin.", button "Accept the invitation"; gift invitation: "You'll set up your account and choose a password, then invite your partner from your dashboard."; dashboard card "Invite [partner]" / "Send them their invitation so you can each start your exercises"; invite form: "Invite your partner", "Send [partner] their invitation so you can each start your exercises.", "Send invitation", "Invitation sent to [email].", "That did not go through. Check the address and try again.", "An invitation was just sent. Try again in a few minutes."; checkout error "Enter the email address of the person you're giving this to." |
+| A206b | **/api/account-signup removed (A205c).** |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -51,6 +102,11 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A205a | **Migration 104 ran; the live Stripe destination points at www with four events, and Vercel holds its live signing secret.** |
+| A205d | **Unsubscribe asks before acting: approved.** |
+| A205c | **Yes to removing /api/account-signup, the unused address that could make a login for anyone.** |
+| A204f | **A full refund or lost chargeback takes the access back and stops the sale counting.** |
+| A205 | **Unsubscribe asks before acting, one-click unsubscribe headers, workbook promo only mails the couple, sign-in help names the right account.** |
 | A204a | **Migration 103 ran; your approval of my words for the new-article email, the signup's failure line and the unsubscribe page.** |
 | A204b | **Sign-in help page: my words approved, and the email stays partly hidden.** |
 | A204g | **A paid order uses up its promo code only once the payment goes through.** |

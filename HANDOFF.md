@@ -4823,3 +4823,24 @@ All built and in TASKS.md section 3. Points worth knowing:
   order is an unclaimed gift.
 - Questions: A205b (gifts never reach the couple), A205c (remove
   /api/account-signup).
+
+## 30 October, late: A206, checkout asks who it is for
+
+- Checkout: for yourself, a partner email or "invite later"; a gift, the
+  recipient's email. Carried as `pe`, `re`, `il` in the compact items
+  (`compactItem` in api/_lib/cart-pricing.js).
+- api/_lib/fulfil-order.js runs once an order exists, from the webhook and
+  from create-payment-intent's free path: makes or finds the account
+  (api/_lib/purchase-accounts.js), links the order, invites the partner on
+  the buyer's invite code, sends the emails from api/_lib/order-emails.js
+  (was api/send-order-email.js, now deleted; checkout no longer posts).
+- The email's button is /app?setup=<orders.setup_token>; api/account-setup.js
+  makes a fresh Supabase recovery link once, then answers "sign in".
+- Dashboard: `invite-partner` card in next-action.js; api/invite-partner.js
+  sends from the server (one per ten minutes, partner_invited_at); website
+  PartnerInviteForm on Account, app PartnerInvite in Settings. The app's
+  profile setup now sends the invite it used to only save.
+- /api/account-signup deleted (A205c). Migration 105 waiting on Ellie (A206a).
+  check-purchase-fulfilment.
+- Not yet driven end to end against real Supabase: a test purchase after
+  migration 105 is the way to see the set-password screen.

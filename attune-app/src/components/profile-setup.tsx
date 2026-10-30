@@ -25,7 +25,7 @@ import { ScrollView, Text, TextInput, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
 
 import {
-  createProfile, fetchProfileSetupCopy, joinInvite, lookUpInvite,
+  createProfile, fetchProfileSetupCopy, invitePartner, joinInvite, lookUpInvite,
   type AboutYou, type ApiError, type NoPurchaseCopy, type ProfileSetupCopy,
 } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
@@ -147,6 +147,10 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
           return;
         }
       }
+      /* The invitation, which this screen used to save and never send (A206).
+         Not a reason to hold up setup: the dashboard keeps offering to send
+         it while nobody has been invited. */
+      if (!invite && partnerEmail.trim()) await invitePartner(partnerEmail, partnerName);
       setSaving(false);
       onDone();
       return;

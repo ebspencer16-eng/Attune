@@ -29,8 +29,7 @@ import { writeEntitlements } from './_lib/entitlements.js';
 import { SITE_URL } from './_lib/site.js';
 import { recordConsent } from './_lib/consent.js';
 import { legacyOrderNumber } from './_lib/order-number.js';
-import { orderEmailContext } from './_lib/order-email-context.js';
-import { sendOrderEmails } from './send-order-email.js';
+import { fulfilOrder } from './_lib/fulfil-order.js';
 import { claimPromoUse, readPromoRow } from './_lib/promo-claim.js';
 import { refundOrders } from './_lib/refund-order.js';
 
@@ -473,35 +472,26 @@ async function handleWebhook(req) {
      * the tab open. Skipped on a retried delivery (orderCreated is false), so
      * nobody is emailed twice for one payment.
      */
-    const apiKey = process.env.RESEND_API_KEY;
-    if (apiKey && intent.receipt_email && orderCreated) {
+    if (intent.receipt_email && orderCreated) {
       const list = Array.isArray(items) && items.length ? items : [{
         p: meta.pkgKey, p1: meta.partner1Name, p2: meta.partner2Name,
         g: meta.isGift === '1', ph: meta.isPhysical === '1', w: meta.addonWorkbook || '',
         r: meta.addonReflection === '1', b: meta.addonBudget === '1', i: meta.addonIntimacy === '1',
         cf: meta.addonConflict === '1', c: meta.addonChecklist === '1', gn: meta.giftNote || '',
       }];
-      for (let i = 0; i < list.length; i++) {
-        const ctx = orderEmailContext({
-          compact: list[i],
-          buyerName: meta.buyerName || list[i].p1 || null,
-          buyerEmail: intent.receipt_email,
-          orderNum: list.length > 1 ? `${baseOrderNum}-${i + 1}` : baseOrderNum,
-          // One item: exactly what was charged before tax. Several: each
-          // item's own lines, less its package where a promo covered it.
-          charged: list.length === 1 && meta.subtotal ? Number(meta.subtotal) / 100 : null,
-          promoCoversBase: meta.promoCoversBase === '1',
-        });
-        const r = await sendOrderEmails(ctx, apiKey).catch((err) => ({ failed: 1, err }));
-        if (r.failed) console.warn('[webhook] order email failed for item', i + 1, r.err?.message || '');
-      }
-
-
-      // The QR card that shipped in a physical box is retired. Ellie: "No gift
-      // cards were printed, and all should be retired from the code, we
-      // abandoned that workstream." The block here built a card URL and stored
-      // it on the order for the admin to print.
-
+      // The account, the invitation and the email (A206). Never fails the
+      // payment; see the file.
+      const done = await fulfilOrder({
+        supabaseUrl: process.env.SUPABASE_URL,
+        serviceKey: process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY,
+        resendKey: process.env.RESEND_API_KEY,
+        buyerEmail: intent.receipt_email, buyerName: meta.buyerName || null,
+        baseOrderNum, items: list,
+        // One item: exactly what was charged before tax.
+        charged: meta.subtotal ? Number(meta.subtotal) / 100 : null,
+        promoCoversBase: meta.promoCoversBase === '1',
+      }).catch((e) => { console.warn('[webhook] fulfil failed:', e?.message || e); return []; });
+      for (const d of done) if (d.failed) console.warn('[webhook] order emails failed for', d.orderNum);
     }
   }
 

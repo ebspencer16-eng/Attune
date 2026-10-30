@@ -31,6 +31,7 @@ import { clearToken } from '@/api/session';
 import { pushState, registerForPush, turnPushOff, type PushState } from '@/api/push';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 import ProfileEditor from '@/components/profile-editor';
+import PartnerInvite from '@/components/partner-invite';
 import { WAITING_SETTINGS } from '@/constants/waiting';
 
 const c = Colors.light;
@@ -417,8 +418,8 @@ function ExerciseStatus() {
 }
 
 export default function Settings({
-  onClose, onSignedOut,
-}: { onClose: () => void; onSignedOut: () => void }) {
+  onClose, onSignedOut, invite = false,
+}: { onClose: () => void; onSignedOut: () => void; invite?: boolean }) {
   const [confirming, setConfirming] = useState(false);
   const [typed, setTyped] = useState('');
   // Empty for a Google or Apple account, which has no password. The server
@@ -482,6 +483,14 @@ export default function Settings({
   return (
     <Sheet onClose={onClose} closeLabel="Close">
       <Text style={{ ...Type.hero, color: c.textStrong }}>Settings</Text>
+
+      {/* The invitation, when the home card "Invite your partner" opened
+          this (A206). Above the profile, because it is what they came for. */}
+      {invite ? (
+        <View style={{ ...card(), marginTop: Spacing.xl }}>
+          <PartnerInvite />
+        </View>
+      ) : null}
 
       {/* Your profile, first, because it is the only thing on this screen
           somebody opens it to change. It used to open the website. */}

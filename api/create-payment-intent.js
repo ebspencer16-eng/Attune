@@ -20,8 +20,9 @@ import { reportToSentry } from './_lib/sentry-edge.js';
 import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES, PACKAGE_NAMES } from './_catalogue.js';
-import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
-import { isStandaloneCart, ownsCoreFor } from './_lib/owns-core.js';
+import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, compactItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
+import { isStandaloneCart, ownsCoreFor, emailOrNull } from './_lib/owns-core.js';
+import { fulfilOrder } from './_lib/fulfil-order.js';
 import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
 /* What each package already includes, so this file does not say it again. */
 
@@ -397,6 +398,26 @@ export default async function handler(req) {
     });
   }
 
+  /* ── WHO EACH ITEM IS FOR (A206) ──────────────────────────────────────
+     A gift needs its recipient's address, because the recipient's account is
+     made from it. For yourself, a partner's address or "invite later"; a
+     request with neither, which only a checkout page from before this change
+     can send, is read as later rather than refused, so an open old tab can
+     still pay. Addresses are stored as sign-in stores them, lower case. */
+  for (const it of items) {
+    if (standalone || it.isPhysical) continue;
+    if (it.isGift) {
+      it.recipientEmail = emailOrNull(it.recipientEmail);
+      if (!it.recipientEmail) {
+        return new Response(JSON.stringify({ error: "Enter the email address of the person you're giving this to." }), {
+          status: 400, headers: { 'Content-Type': 'application/json' } });
+      }
+    } else {
+      it.partnerEmail = it.invitePartnerLater ? null : emailOrNull(it.partnerEmail);
+      if (!it.partnerEmail) it.invitePartnerLater = true;
+    }
+  }
+
   const buyerEmail = body.buyerEmail || body.email || null;
   const buyerName  = body.buyerName  || items[0]?.partner1Name || null;
   const promoCode  = body.promoCode || null;
@@ -681,6 +702,16 @@ export default async function handler(req) {
           // We can't return out of the for-loop scope cleanly so we attach
           // it to the items[0] object as a side channel.
           if (items[0]) items[0]._generatedOrderNums = generatedOrderNums;
+
+          /* The account, the invitation and the email, as the webhook does
+             for a paid order (A206). Checkout used to post these to
+             /api/send-order-email itself; a browser cannot be the one that
+             makes accounts. */
+          await fulfilOrder({
+            supabaseUrl, serviceKey: supabaseServiceKey, resendKey: process.env.RESEND_API_KEY,
+            buyerEmail, buyerName, baseOrderNum: orderNum, items: items.map(compactItem),
+            charged: 0, promoCoversBase: true,
+          }).catch((e) => console.warn('[promo] fulfil failed:', e?.message || e));
         } catch (e) {
           console.warn('[promo] order writes failed (non-blocking):', e);
         }
@@ -771,21 +802,7 @@ export default async function handler(req) {
   // Compact items metadata for the webhook. Each item is serialized as a
   // short object. Stripe caps metadata values at 500 chars per key, so we
   // chunk long payloads across numbered keys (items0, items1, ...).
-  const compactItems = items.map(it => ({
-    p:   it.pkgKey,
-    ph:  it.isPhysical ? 1 : 0,
-    g:   it.isGift ? 1 : 0,
-    p1:  (it.partner1Name || '').slice(0, 40),
-    p2:  (it.partner2Name || '').slice(0, 40),
-    gn:  (it.giftNote || '').slice(0, 200),
-    w:   it.addonWorkbook || '',
-    r:   it.addonReflection ? 1 : 0,
-    b:   it.addonBudget ? 1 : 0,
-    i:   it.addonIntimacy ? 1 : 0,
-    cf:  it.addonConflict ? 1 : 0,
-    c:   it.addonChecklist ? 1 : 0,
-    s:   it.shipping ? [it.shipping.name, it.shipping.address, it.shipping.city, it.shipping.state].join('|').slice(0, 200) : '',
-  }));
+  const compactItems = items.map(compactItem);
 
   const itemsJson = JSON.stringify(compactItems);
 

@@ -637,6 +637,9 @@ export default async function handler(req) {
       },
       inPractice,
       partnerNudgedAt: me.partner_nudged_at || null,
+      /* Nobody to wait for yet (A206): no partner linked, none invited, and
+         this person is not the one who was invited. */
+      needsPartnerInvite: !me.partner_profile_id && !me.joined_via_invite && !(me.partner_email || '').trim(),
       opens30d: 0,
       feedbackGivenAt: me.feedback_given_at || null,
       betaTester,

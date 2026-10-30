@@ -125,6 +125,10 @@ export function normalizeItem(item) {
     partner1Name:    item.partner1Name || null,
     partner2Name:    item.partner2Name || null,
     giftNote:        item.giftNote || null,
+    // Who it is for (A206). Checked as addresses where they are used.
+    partnerEmail:    item.isGift || item.invitePartnerLater ? null : (item.partnerEmail || null),
+    recipientEmail:  item.isGift ? (item.recipientEmail || null) : null,
+    invitePartnerLater: !item.isGift && !!item.invitePartnerLater,
     addonWorkbook:   item.addonWorkbook || null,     // 'digital' | 'print' | null
     // Phase-1: digital-only. Never bill for physical even if
     // the request asks for it.
@@ -134,5 +138,31 @@ export function normalizeItem(item) {
     addonIntimacy:   addon(caps.hasIntimacy, item.addonIntimacy),
     addonConflict:   addon(caps.hasConflict, item.addonConflict),
     shipping:        item.shipping || null,
+  };
+}
+
+/**
+ * One item in the short shape the payment's metadata carries to the webhook,
+ * which Stripe caps at 500 characters a value (create-payment-intent chunks
+ * the list). Also what api/_lib/fulfil-order.js reads, for a free order too.
+ */
+export function compactItem(it) {
+  return {
+    p:   it.pkgKey,
+    ph:  it.isPhysical ? 1 : 0,
+    g:   it.isGift ? 1 : 0,
+    p1:  (it.partner1Name || '').slice(0, 40),
+    p2:  (it.partner2Name || '').slice(0, 40),
+    gn:  (it.giftNote || '').slice(0, 200),
+    w:   it.addonWorkbook || '',
+    r:   it.addonReflection ? 1 : 0,
+    b:   it.addonBudget ? 1 : 0,
+    i:   it.addonIntimacy ? 1 : 0,
+    cf:  it.addonConflict ? 1 : 0,
+    c:   it.addonChecklist ? 1 : 0,
+    s:   it.shipping ? [it.shipping.name, it.shipping.address, it.shipping.city, it.shipping.state].join('|').slice(0, 200) : '',
+    pe:  it.partnerEmail || '',
+    re:  it.recipientEmail || '',
+    il:  it.invitePartnerLater ? 1 : 0,
   };
 }

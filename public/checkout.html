@@ -1014,6 +1014,26 @@ function renderItemsStep() {
         </div>
       </div>
 
+      <!-- Who it is for (A206). Placeholder words, listed under A206 in TASKS.md. -->
+      ${it.intent === 'gift' ? `
+        <div class="form-group" style="margin-top:.65rem">
+          <label class="form-label" for="remail-${idx}">Recipient's email</label>
+          <input class="form-input item-input" type="email" data-idx="${idx}" data-field="recipientEmail" id="remail-${idx}" value="${(it.recipientEmail||'').replace(/"/g,'&quot;')}" placeholder="them@example.com" autocomplete="off" oninput="onItemInput(this)">
+          <div class="form-hint">We will send them their invitation. They will be able to invite their partner when they set up their account.</div>
+        </div>
+      ` : `
+        ${it.invitePartnerLater ? '' : `
+        <div class="form-group" style="margin-top:.65rem">
+          <label class="form-label" for="pemail-${idx}">Your partner's email</label>
+          <input class="form-input item-input" type="email" data-idx="${idx}" data-field="partnerEmail" id="pemail-${idx}" value="${(it.partnerEmail||'').replace(/"/g,'&quot;')}" placeholder="partner@example.com" autocomplete="off" oninput="onItemInput(this)">
+          <div class="form-hint">We will send them their invitation.</div>
+        </div>`}
+        <label style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;font-size:.8rem;color:#5C4A38;cursor:pointer">
+          <input type="checkbox" class="item-input" data-idx="${idx}" data-field="invitePartnerLater" ${it.invitePartnerLater ? 'checked' : ''} onchange="onItemInput(this)">
+          I will invite my partner later
+        </label>
+      `}
+
       ${it.intent === 'gift' ? `
         <div class="form-group" style="margin-top:.65rem">
           <label class="form-label">Personal note (optional)</label>
@@ -1071,10 +1091,25 @@ function onItemInput(el) {
   if (field.startsWith('shipping.')) {
     const k = field.split('.')[1];
     _items[idx].shipping[k] = el.value;
+  } else if (el.type === 'checkbox') {
+    _items[idx][field] = el.checked;
+    // The partner box comes and goes with "invite later".
+    renderItemsStep();
+    return;
   } else {
     _items[idx][field] = el.value;
   }
   validateForm();
+}
+
+/* Who an item is for, as the server reads it (api/_lib/cart-pricing.js
+   normalizeItem). A gift names its recipient; for yourself, a partner or
+   "later". */
+const EMAIL_OK = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v || '').trim());
+function whoFor(it) {
+  if (it.intent === 'gift') return { recipientEmail: String(it.recipientEmail || '').trim().toLowerCase() };
+  if (it.invitePartnerLater) return { invitePartnerLater: true };
+  return { partnerEmail: String(it.partnerEmail || '').trim().toLowerCase() };
 }
 
 // ── Format toggle (core package only) ────────────────────────────────────────
@@ -1296,6 +1331,10 @@ function validateForm() {
   for (const it of _items) {
     if (!it.partner1Name || it.partner1Name.trim().length < 2) { itemsValid = false; break; }
     if (!it.partner2Name || it.partner2Name.trim().length < 2) { itemsValid = false; break; }
+    if (it.format !== 'physical') {
+      if (it.intent === 'gift' && !EMAIL_OK(it.recipientEmail)) { itemsValid = false; break; }
+      if (it.intent !== 'gift' && !it.invitePartnerLater && !EMAIL_OK(it.partnerEmail)) { itemsValid = false; break; }
+    }
     if (it.format === 'physical') {
       const s = it.shipping || {};
       if (!s.name || !s.address || !s.city || !s.state) { itemsValid = false; break; }
@@ -1512,6 +1551,7 @@ function validateForm() {
                   isGift: it.intent === 'gift', isPhysical: it.format === 'physical',
                   partner1Name: it.partner1Name, partner2Name: it.partner2Name,
                   giftNote: it.giftNote || null,
+                  ...whoFor(it),
                   addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
                   addonReflection: !!it.addons.reflection,
                   addonBudget: !!it.addons.budget, addonIntimacy: !!it.addons.intimacy, addonConflict: !!it.addons.conflict, addonChecklist: !!it.addons.checklist,
@@ -1688,6 +1728,7 @@ async function handleSubmit(e) {
           partner1Name:     it.partner1Name,
           partner2Name:     it.partner2Name,
           giftNote:         it.giftNote || null,
+          ...whoFor(it),
           addonWorkbook:    it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
           addonReflection:  !!it.addons.reflection,
           addonBudget:      !!it.addons.budget,
@@ -1791,51 +1832,9 @@ async function handleSubmit(e) {
       if (wbNote) wbNote.style.display = 'block';
     }
 
-    // Fire the order email(s) — one per item so each couple gets their own.
-    // Build an itemized list (package + each add-on at its real price) so the
-    // confirmation email shows a correct breakdown and total.
-    //
-    // Free promo orders only. A paid order's emails are sent by the Stripe
-    // webhook when the payment lands (api/_lib/order-email-context.js), and
-    // sending them here as well is how every card buyer got two
-    // confirmations. A free order has no webhook. Ellie: "Keep only mine."
-    if (isFreePromo) for (const it of _items) {
-      const itPkg = pkgFor(it.pkg);
-      const isPhys = it.format === 'physical';
-      const lineItems = [{ label: itPkg.name, price: isPhys ? itPkg.physicalPrice : itPkg.digitalPrice }];
-      if (it.addons.workbook) {
-        lineItems.push(wbLine(it));
-      }
-      if (it.addons.reflection) lineItems.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
-      if (it.addons.budget)     lineItems.push({ label: SHOP.budget, price: 20 });
-      if (it.addons.intimacy)   lineItems.push({ label: SHOP.intimacy, price: 20 });
-      if (it.addons.conflict)   lineItems.push({ label: SHOP.conflict, price: 40 });
-      if (it.addons.checklist)  lineItems.push({ label: SHOP.checklist, price: 20 });
-      const itemSubtotal = lineItems.reduce((sum, l) => sum + l.price, 0);
-      fetch('/api/send-order-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pkgKey:        it.pkg,
-          pkgName:       itPkg.name,
-          isGift:        it.intent === 'gift',
-          isPhysical:    isPhys,
-          buyerName:     it.partner1Name,
-          buyerEmail:    email,
-          partnerName:   it.partner2Name,
-          orderNum:      realOrderNum,
-          lineItems:     lineItems,
-          total:         isFreePromo ? 0 : itemSubtotal,
-          addonWorkbook: it.addons.workbook ? (it.addons.workbookVariant || 'digital') : null,
-          addonReflection: !!it.addons.reflection,
-          addonBudget:     !!it.addons.budget,
-          addonIntimacy:   !!it.addons.intimacy,
-          addonConflict:   !!it.addons.conflict,
-          giftNote:      it.giftNote || null,
-          setupPath:     '/app?' + params.toString(),
-        }),
-      }).catch(e => console.warn('send-order-email failed (non-blocking):', e));
-    }
+    // The order's emails, its account and its invitation are sent by the
+    // server that saw the payment, for a free order too (api/_lib/fulfil-order.js,
+    // A206). This page used to post them itself.
 
     // Clear the cart now that checkout is complete
     try { localStorage.removeItem('attune_cart'); } catch {}
@@ -1860,13 +1859,31 @@ async function handleSubmit(e) {
 
     try { document.getElementById('coSuccess').dataset.email = email; } catch(e) {}
     try { if (email) document.getElementById('coEmailDisp').textContent = email; } catch(e) {}
+    /* What happens next, by who the order is for (A206). Placeholder words,
+       listed under A206 in TASKS.md. */
+    try {
+      var _esc = function (v) { return String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;'); };
+      var _gifts = _items.filter(function (it) { return it.intent === 'gift'; });
+      var _self = _items.find(function (it) { return it.intent !== 'gift'; });
+      var _parts = [];
+      if (_self) {
+        _parts.push('We sent a link to <strong id="coEmailDisp">' + _esc(email) + '</strong>. Use it to set up your account.');
+        _parts.push(_self.invitePartnerLater
+          ? 'You can invite your partner from your dashboard.'
+          : 'We sent ' + _esc(_self.partner2Name || 'your partner') + ' their invitation at <strong>' + _esc(_self.partnerEmail) + '</strong>.');
+      } else {
+        _parts.push('Your confirmation is on its way to <strong id="coEmailDisp">' + _esc(email) + '</strong>.');
+      }
+      for (var _g of _gifts) _parts.push('We sent an invitation to <strong>' + _esc(_g.recipientEmail) + '</strong>.');
+      var _ic = document.getElementById('coInboxCopy');
+      if (_ic) _ic.innerHTML = _parts.join(' ');
+    } catch(e) {}
     /* The app half of D27, which only becomes true the day it is in the store. */
     try {
       if (window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.APP_BANNER_ENABLED) {
         var _c = document.getElementById('coInboxCopy');
         if (_c) _c.innerHTML = 'Download Attune Relationships from the App Store, then sign in with the'
-          + ' link we sent to <strong id="coEmailDisp">' + String(email || 'your email').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</strong>.'
-          + ' Your partner gets their invite as soon as you add their email.';
+          + ' link we sent to <strong id="coEmailDisp">' + String(email || 'your email').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</strong>.';
       }
     } catch(e) {}
     document.getElementById('coWrap').style.display = 'none';

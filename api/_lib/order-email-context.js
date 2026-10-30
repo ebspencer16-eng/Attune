@@ -11,7 +11,8 @@
  *
  * So the webhook sends hers, from this context, when the payment lands, which
  * is also the one moment that happens whether or not the buyer keeps the tab
- * open. Checkout still posts for a free promo order, which has no webhook.
+ * open. A free promo order, which has no webhook, is sent the same way by
+ * api/create-payment-intent.js (A206: api/_lib/fulfil-order.js for both).
  *
  * ── THE LINES ─────────────────────────────────────────────────────────────
  * Priced by api/_lib/cart-pricing.js, the module that sets the charge, from
@@ -48,7 +49,7 @@ export function receiptLines(raw) {
  * (create-payment-intent's compact shape), into the context ORDER_EMAILS
  * reads: the same fields checkout used to post, plus the two links.
  */
-export function orderEmailContext({ compact, buyerName, buyerEmail, orderNum, charged = null, promoCoversBase = false }) {
+export function orderEmailContext({ compact, buyerName, buyerEmail, orderNum, charged = null, promoCoversBase = false, links = {} }) {
   const raw = {
     pkgKey: compact.p, isPhysical: !!compact.ph, isGift: !!compact.g,
     partner1Name: compact.p1 || null, partner2Name: compact.p2 || null,
@@ -75,6 +76,8 @@ export function orderEmailContext({ compact, buyerName, buyerEmail, orderNum, ch
     buyerName: buyerName || raw.partner1Name || null,
     buyerEmail,
     partnerName: raw.partner2Name,
+    partner1Name: raw.partner1Name,
+    partner2Name: raw.partner2Name,
     orderNum,
     lineItems: lines,
     /* What was charged for this item, before tax. The template draws "Promo
@@ -89,7 +92,22 @@ export function orderEmailContext({ compact, buyerName, buyerEmail, orderNum, ch
     addonConflict: item.addonConflict,
     addonChecklist: item.addonChecklist,
     giftNote: raw.giftNote,
-    setupUrl: `${SITE_URL}/app?${q.toString()}`,
-    giftUrl: `${SITE_URL}/app?signup=1&pkg=${encodeURIComponent(item.pkgKey)}&gift=1`,
+    /* Who it is for (A206), as checkout asked: the partner a buyer invited,
+       or "later"; a gift's recipient. */
+    partnerEmail: compact.il ? null : (compact.pe || null),
+    inviteLater: !!compact.il,
+    recipientEmail: compact.re || null,
+    /* The links, from api/_lib/fulfil-order.js once the account exists. The
+       defaults are the sign-up links that work without one, so an account
+       that could not be made still leaves a way in: sign up, then claim the
+       order by its number. */
+    setupUrl: links.setupUrl || `${SITE_URL}/app?${q.toString()}`,
+    giftUrl: links.giftUrl || `${SITE_URL}/app?signup=1&pkg=${encodeURIComponent(item.pkgKey)}&gift=1${orderNum ? `&orderNum=${encodeURIComponent(orderNum)}` : ''}`,
+    partnerInviteUrl: links.partnerInviteUrl || null,
+    /* What actually went out, so the confirmation says only what is true. */
+    partnerInvited: !!links.partnerInvited,
+    recipientInvited: !!links.recipientInvited,
+    existingAccount: !!links.existing,
+    partnerLinked: !!links.partnerLinked,
   };
 }

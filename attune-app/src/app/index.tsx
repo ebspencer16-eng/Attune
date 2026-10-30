@@ -101,6 +101,8 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(() => !recall<HomeResponse>('home'));
   const [refreshing, setRefreshing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Opened by the "Invite your partner" card, which shows the invite on top (A206).
+  const [settingsInvite, setSettingsInvite] = useState(false);
   /** Whether the insight of the day is open as a full card. */
   const [insightOpen, setInsightOpen] = useState(false);
   const [surveyOpen, setSurveyOpen] = useState(false);
@@ -251,7 +253,7 @@ export default function HomeScreen() {
         // Some cards land on a tab and open something on it. "Finish setting
         // up your profile" is home plus Settings, because the editor lives
         // there rather than on a route of its own.
-        if (target.settings) { setSettingsOpen(true); return; }
+        if (target.settings) { setSettingsInvite(!!target.invite); setSettingsOpen(true); return; }
         /* One instrument. The card used to open the "How was your experience?"
            questionnaire, which Ellie retired: the survey asks the same things
            of everybody and is the only place answers are read. */
@@ -571,7 +573,7 @@ export default function HomeScreen() {
           tone="ink"
           right={(
             <Pressable
-              onPress={() => setSettingsOpen(true)}
+              onPress={() => { setSettingsInvite(false); setSettingsOpen(true); }}
               hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel="Your profile and settings"
@@ -938,6 +940,7 @@ export default function HomeScreen() {
 
       {settingsOpen ? (
         <Settings
+          invite={settingsInvite}
           onClose={() => setSettingsOpen(false)}
           onSignedOut={() => {
             forgetLastSection();

@@ -3,7 +3,7 @@
  *
  * ── WHY ───────────────────────────────────────────────────────────────────
  * The emails are built in five modules: the endpoint at api/send-email.js, the
- * order emails in api/send-order-email.js, the deletion notices in
+ * order emails in api/_lib/order-emails.js, the deletion notices in
  * api/_lib/deletion-emails.js, and the two crons. Nothing joined them up, so
  * the only page that showed Ellie what an email looks like held six
  * hand-written mock-ups of its own, and she writes every word a customer
@@ -25,7 +25,7 @@
  */
 
 import { SEND_EMAILS } from '../send-email.js';
-import { ORDER_EMAILS } from '../send-order-email.js';
+import { ORDER_EMAILS } from './order-emails.js';
 import { CHECKIN_EMAILS } from '../cron-checkin.js';
 import { NUDGE_EMAILS } from '../cron-survey-nudge.js';
 import { ARTICLE_EMAILS } from '../cron-new-articles.js';
@@ -46,7 +46,7 @@ for (const [key, build] of Object.entries(SEND_EMAILS)) {
   };
 }
 for (const [key, build] of Object.entries(ORDER_EMAILS)) {
-  EMAIL_CATALOGUE[key] = { build, sample: ORDER_SAMPLE, from: 'api/send-order-email.js' };
+  EMAIL_CATALOGUE[key] = { build, sample: ORDER_SAMPLE, from: 'api/_lib/order-emails.js' };
 }
 for (const [key, build] of Object.entries(CHECKIN_EMAILS)) {
   EMAIL_CATALOGUE[key] = { build, sample: CRON_SAMPLES[key], from: 'api/cron-checkin.js' };

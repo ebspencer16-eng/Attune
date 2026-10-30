@@ -830,7 +830,7 @@ export type HomeCard = {
   // editor lives there rather than on a route of its own.
   app?: {
     route?: string; exercise?: string; external?: string;
-    settings?: boolean; feedback?: boolean;
+    settings?: boolean; invite?: boolean; feedback?: boolean;
     /* Which tool a card opens on the Learn tab, the same way `exercise` says
        which exercise. The budget and the checklist run in the app; without
        this they fell through to opening Safari. */
@@ -1768,6 +1768,28 @@ export function lookUpInvite(code: string) {
  * either a token whose user is this account or a match on the address the
  * invite was sent to, and the app always has the token.
  */
+/** The words on the invite form (api/_lib/invite-copy.js). */
+export type InviteCopy = {
+  heading: string; line: string; placeholder: string; label: string;
+  button: string; sending: string; sent: string; failed: string; soon: string;
+};
+
+export function fetchInviteCopy() {
+  return request<{ ok: true; copy: InviteCopy }>('/api/invite-partner', { method: 'GET' });
+}
+
+/**
+ * Email the partner their invitation, from the server (A206). The app had no
+ * way to send one: profile setup saved the address and nothing went out.
+ */
+export function invitePartner(partnerEmail: string, partnerName?: string) {
+  return request<{ ok: true; sentTo: string }>('/api/invite-partner', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ partnerEmail: partnerEmail.trim(), partnerName: partnerName?.trim() || '' }),
+  });
+}
+
 export function joinInvite(code: string, myUserId: string) {
   return request<{ ok: true }>('/api/partner-sync', {
     method: 'POST',

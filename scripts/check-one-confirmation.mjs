@@ -16,7 +16,8 @@
  *      catalogue's (it carries the order number and the setup link);
  *   2. its lines use SHOP_NAMES, and an add-on the package includes is not
  *      charged on it;
- *   3. checkout posts to /api/send-order-email only behind isFreePromo.
+ *   3. checkout never posts for an email; a free order is fulfilled by
+ *      create-payment-intent (A206).
  *
  * Planted: the old inline email restored beside the new one (two
  * confirmations), checkout's guard removed, and a line named "Shared
@@ -81,14 +82,17 @@ if (sent.some((m) => /Shared Budgeting Activity|Relationship Reflection exercise
 }
 
 const page = readFileSync(`${ROOT}public/checkout.html`, 'utf8');
-const call = page.indexOf("fetch('/api/send-order-email'");
-const guard = page.lastIndexOf('if (isFreePromo) for (const it of _items) {', call);
-if (call < 0) fails.push('checkout no longer posts to /api/send-order-email at all, so a free promo order gets no confirmation');
-else if (guard < 0 || call - guard > 2500) fails.push('checkout posts to /api/send-order-email for every order; the webhook already sends a paid order\'s, so card buyers get two');
+// A206: no page asks for an order email. A free order is fulfilled by
+// create-payment-intent, a paid one by the webhook, both through
+// api/_lib/fulfil-order.js, so a request to send one is a confirmation for
+// an order nobody can check was placed.
+if (page.includes('/api/send-order-email')) fails.push('checkout still posts to /api/send-order-email; order emails come from the server that saw the payment');
+const cpi = readFileSync(`${ROOT}api/create-payment-intent.js`, 'utf8');
+if (!/await fulfilOrder\(/.test(cpi)) fails.push('a free promo order is not fulfilled by create-payment-intent, so it gets no confirmation');
 
 if (fails.length) {
   console.error('[check-one-confirmation] ' + fails.length + ' problem(s):');
   for (const x of fails) console.error('  ' + x);
   process.exit(1);
 }
-console.log(`[check-one-confirmation] a two-item payment through the webhook sent ${sent.length} emails, one catalogue confirmation per item with the shop's names, and checkout posts only for a free order.`);
+console.log(`[check-one-confirmation] a two-item payment through the webhook sent ${sent.length} emails, one catalogue confirmation per item with the shop's names; checkout never posts for one, and a free order is fulfilled on the server.`);

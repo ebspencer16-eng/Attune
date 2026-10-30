@@ -174,6 +174,8 @@ export function webTargetFor(deepLink, renderable) {
   /* Profile setup is the account page on the website: it carries the name, the
      pronouns and the partner's name, and the control that edits them. */
   if (view === 'profile') return { view: 'account' };
+  /* So is the partner invitation, which is drawn there too (A206). */
+  if (view === 'invite') return { view: 'account' };
 
   /* In Practice is a set of static pages here rather than a view. The post id
      rides along so the card opens the article it is about. */
@@ -250,6 +252,8 @@ export function appTargetFor(deepLink) {
   // the five questions, through api/update-profile.js. The card used to open
   // the website, which was the honest answer while the app could not do it.
   if (view === 'profile') return { route: '/', settings: true };
+  // The invitation is sent from the same editor (A206).
+  if (view === 'invite') return { route: '/', settings: true, invite: true };
 
   // An exercise. Routed to Insights, carrying which one, so the app can open it
   // directly when it can ask it and show its row when it cannot.
@@ -328,6 +332,19 @@ export function nextActions(state = {}) {
       title: 'Finish setting up your profile',
       body: 'We need your profile details to set up your exercises',
       deepLink: '/?view=profile' });
+  }
+
+  // 1b. Invite your partner, for somebody who chose "I will invite my partner
+  //     later" at checkout or was given Attune as a gift (A206). Ellie: "those
+  //     users need to be prompted in their dashboard to invite their partner."
+  //     Just below the profile: results need two people, and nothing else on
+  //     this list can happen for the couple until there are two.
+  //     Placeholder words, listed under A206 in TASKS.md.
+  if (state.needsPartnerInvite) {
+    add({ id: 'invite-partner', kind: 'invite_partner', priority: 11,
+      title: `Invite ${state.partnerName || 'your partner'}`,
+      body: 'Send them their invitation so you can each start your exercises',
+      deepLink: '/?view=invite' });
   }
 
   // 2. Your own unfinished exercise. Above nudging the partner on purpose:

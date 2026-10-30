@@ -2622,6 +2622,15 @@ api/_lib/filter-value.js. And a value the request supplies about somebody
 else, like a partner's email, is a question to ask the database rather than
 the request.
 
+**An order email can only say what was sent if it is sent last.** The gift
+confirmation said "We've sent 's access link in a separate email" for as long
+as gifts existed: the name was blank because nothing collected it, and the
+email was never sent because nothing had an address to send it to. The
+sentence was written from the plan. The order emails now send the invitation
+first and the confirmation after, built from what Resend accepted
+(api/_lib/order-emails.js), and check-purchase-fulfilment makes Resend refuse
+an invitation to prove the confirmation stops claiming it.
+
 ---
 
 ## Verification, non-negotiable

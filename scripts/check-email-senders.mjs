@@ -23,7 +23,8 @@ import { join } from 'node:path';
 const ROOT = new URL('..', import.meta.url).pathname;
 const SENDERS = {
   'api/send-email.js': /SEND_EMAILS\[/,
-  'api/send-order-email.js': /ORDER_EMAILS\./,
+  'api/_lib/order-emails.js': /ORDER_EMAILS\./,
+  'api/invite-partner.js': /ORDER_EMAILS\.order_partner_invite\(/,
   'api/cron-checkin.js': /CHECKIN_EMAILS\[|CHECKIN_EMAILS\./,
   'api/cron-survey-nudge.js': /NUDGE_EMAILS\[|NUDGE_EMAILS\./,
   'api/delete-account.js': /deletionConfirmationEmail\(|partnerDeletedEmail\(/,

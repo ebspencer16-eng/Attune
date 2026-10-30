@@ -42,8 +42,12 @@
       "destination": "/api/stripe-config.js"
     },
     {
-      "source": "/api/send-order-email",
-      "destination": "/api/send-order-email.js"
+      "source": "/api/account-setup",
+      "destination": "/api/account-setup.js"
+    },
+    {
+      "source": "/api/invite-partner",
+      "destination": "/api/invite-partner.js"
     },
     {
       "source": "/api/email-preview",

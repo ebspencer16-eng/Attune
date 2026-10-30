@@ -165,5 +165,5 @@ if (problems.length) {
 
 console.log(`[check-checkout-page-prices] ${checked} prices in ${PAGE} all match api/_catalogue.js:`
   + ` ${Object.keys(DIGITAL_PRICES).length} packages in two formats and ${Object.keys(ADDON_PRICES).length} add-ons.`
-  + ` The two that reach a customer are the order summary and the line items posted to`
-  + ` /api/send-order-email, which becomes the breakdown in their confirmation email.`);
+  + ` These draw the order summary. The confirmation email's lines are priced on the server`
+  + ` (api/_lib/order-email-context.js) since A206, so the page no longer sends any.`);
