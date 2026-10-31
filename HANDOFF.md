@@ -4898,3 +4898,9 @@ invite tile from the account page. Then TASKS rows, the full check, push.
   times on orders/slz-pdisc with identical figures (panelBottom 1158 in a 1100
   viewport), and passed alone both times. Identical numbers say it is not load:
   an earlier gate likely leaves state behind. Worth chasing under A222.
+- Resolved: check-slicer-panel-reach failed inside the chain because the probe
+  measured a panel that opened below the window without scrolling the page.
+  probe-admin.mjs now scrolls the window (not the card) first. Planted: the
+  :has(...){overflow:visible} rule removed fails 20 of 54. Full check passes
+  in one run.
+- A226 published (EAS update "A226: the Physical Intimacy cover fits...").

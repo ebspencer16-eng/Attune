@@ -2365,6 +2365,15 @@ if (process.env.SDREACH) {
       await new Promise((ok) => setTimeout(ok, 30));
       const rows = p.querySelectorAll('.sd-row');
       const last = rows[rows.length - 1];
+      /* A panel that opens below the fold is one a person scrolls the PAGE to
+         reach, so the page is scrolled before asking. Only the window moves:
+         Element.scrollIntoView would also scroll an overflow:hidden card,
+         which is the very clipping this measures. Without this, a page still
+         settling under load (the full check, in swap) put orders/slz-pdisc
+         58 points below an 1100 point window, inside its own card, and the
+         gate failed twice on a dropdown nothing clipped (A222). */
+      const below = p.getBoundingClientRect().bottom - innerHeight;
+      if (below > 0) { window.scrollBy(0, below + 8); await new Promise((ok) => setTimeout(ok, 30)); }
       const lr = last.getBoundingClientRect();
       const hit = document.elementFromPoint(Math.round(lr.left + lr.width / 2), Math.round(lr.top + lr.height / 2));
       const pr = p.getBoundingClientRect();

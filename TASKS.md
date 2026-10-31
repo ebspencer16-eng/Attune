@@ -25,7 +25,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** Last round's found code comments drawn on the sign-up forms (A225). This round: why one admin check fails only inside the full run (orders page, discount slicer, identical figures twice), since a check that fails for the wrong reason gets ignored. **Status:** Next, after A226. |
+| A222 | **More sweeps.** Done this round: the admin slicer check failed only inside the full check because it never scrolled the page to a dropdown that opened below the window; it does now, and still fails when a tile clips its dropdown (20 of 54, planted). The full check now passes in one run. **Status:** Next sweep not yet chosen; nothing waiting on you. |
 
 
 ## 3. For you to review
