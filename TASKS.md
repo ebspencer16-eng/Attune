@@ -25,7 +25,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** This round: four found and fixed (A228, live); reruns of the id, class and page-error sweeps found nothing new. **Status:** Ongoing; next round picks new shapes. |
+| A222 | **More sweeps.** This round, three new shapes: (1) the website treating a failed request as a "no" (earlier rounds swept only the server); (2) lookup tables whose fallback prints the raw key, like "reassurance" lower case; (3) pop-ups that Escape does not close. **Status:** In progress. |
 
 
 ## 3. For you to review
