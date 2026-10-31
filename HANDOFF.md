@@ -4904,3 +4904,15 @@ invite tile from the account page. Then TASKS rows, the full check, push.
   :has(...){overflow:visible} rule removed fails 20 of 54. Full check passes
   in one run.
 - A226 published (EAS update "A226: the Physical Intimacy cover fits...").
+
+## 30 October, late night: A222 sweeps, A228
+
+- sweep-load-order (new) found checkout's EMAIL_OK const read at load through
+  validateForm -> itemReady, latent until a name is pre-filled; now a function
+  declaration. Promoted to check-load-order; planted with last round's
+  `let _showMissing`.
+- sweep-discarded-writes rerun: the workbook discount and results-ready emails
+  set a device flag before asking and never gave it back on failure. Given back
+  now (results-ready only on a server-side failure, not a 4xx).
+- ProfileDetailsModal stays open with INVITE_COPY.failed/soon when the
+  invitation does not go through. Not driven: needs a signed-in session.

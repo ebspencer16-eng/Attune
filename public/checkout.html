@@ -1119,7 +1119,11 @@ function onItemInput(el) {
 /* Who an item is for, as the server reads it (api/_lib/cart-pricing.js
    normalizeItem). A gift names its recipient; for yourself, a partner or
    "later". */
-const EMAIL_OK = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v || '').trim());
+/* A function declaration, not a const: validateForm runs while the page loads,
+   above this line, and reaches this through itemReady once an item has names
+   in it. A const there is a ReferenceError that stops the whole script, which
+   is what `let _showMissing` did in the A211 branch (sweep-load-order). */
+function EMAIL_OK(v) { return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v || '').trim()); }
 /* Whether an item's account details are filled in (A208b). For yourself:
    both first names, and a partner's email or "later". A gift: the
    recipient's first name and email. */

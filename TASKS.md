@@ -25,7 +25,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** This round: (1) a page script that uses a name before the line that creates it, the shape that broke checkout in the branch last round; (2) a write whose failure is swallowed while the screen carries on as if it worked; (3) whatever those turn up. **Status:** In progress. |
+| A222 | **More sweeps.** This round found four, all fixed, in section 3 as A228. **Status:** Checks running; next sweep after. |
 
 
 ## 3. For you to review
@@ -35,6 +35,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A228 | **Four fixes from this round's sweeps.** Checkout had a second line waiting to stop its script the day a name is filled in ahead of time; fixed, and a new check fails the build on that shape. The workbook discount email and the results-ready email: if the request failed, that device never asked again; it asks again now. Profile details: if the partner invitation does not go through, the pop-up stays open and says so instead of closing; it uses the invite form's existing words. Nothing for you to do. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 

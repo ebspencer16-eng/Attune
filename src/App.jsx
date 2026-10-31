@@ -8782,7 +8782,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         try { localStorage.setItem('attune_wb_promo_fired', '1'); } catch {}
         const { supabase: _sbp } = await import('./supabase.js');
         const { data: { session: _sp } } = await _sbp.auth.getSession();
-        await fetch('/api/generate-workbook-promo', {
+        const _r = await fetch('/api/generate-workbook-promo', {
           method: 'POST', headers: { 'Content-Type': 'application/json', ...(_sp?.access_token ? { Authorization: `Bearer ${_sp.access_token}` } : {}) },
           body: JSON.stringify({
             accountEmail: _acct.email,
@@ -8790,7 +8790,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             partnerName:  _acct.partnerName || '',
           }),
         });
-      } catch (e) { console.warn('[Attune] workbook promo trigger failed:', e); }
+        if (!_r.ok) throw new Error(`answered ${_r.status}`);
+      } catch (e) {
+        /* The mark is set before asking, and was never given back, so one
+           failed request meant this device never asked again (A222). The
+           server dedupes, so asking again next time is safe. Only reached
+           once the mark is ours: an existing mark returns above. */
+        try { localStorage.removeItem('attune_wb_promo_fired'); } catch {}
+        console.warn('[Attune] workbook promo trigger failed:', e);
+      }
     })();
 
     // ── Flag a print order for fulfilment ───────────────────────────────────
@@ -12074,7 +12082,7 @@ function ProfileDetailsModal({ account, onClose, onSaved }) {
     ...Object.fromEntries(ABOUT_YOU.fields.map((q) => [q.key, ''])),
   }));
   const [partnerEmail, setPartnerEmail] = useState('');
-  const [state, setState] = useState('loading'); // loading | ready | saving | failed
+  const [state, setState] = useState('loading'); // loading | ready | saving | failed | inviteFailed
   const askEmail = !account?.partnerEmail && !account?.joinedViaInvite && !account?.partnerJoined;
   const upd = (k, v) => setF((p) => ({ ...p, [k]: v }));
 
@@ -12130,11 +12138,16 @@ function ProfileDetailsModal({ account, onClose, onSaved }) {
       if (!r.ok) { setState('failed'); return; }
       let invited = null;
       const addr = partnerEmail.trim().toLowerCase();
-      if (askEmail && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)) {
-        const ir = await fetch('/api/invite-partner', {
+      if (askEmail && addr) {
+        /* A typed address that does not go out keeps the pop-up open and says
+           so (A222): it closed as if it had, and the person found out only
+           by the card still asking. The profile is saved by then, and saving
+           it again is harmless, so Save simply tries both again. */
+        const ir = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr) ? await fetch('/api/invite-partner', {
           method: 'POST', headers: auth, body: JSON.stringify({ partnerEmail: addr, partnerName: f.partnerName.trim() }),
-        }).catch(() => null);
-        if (ir?.ok) invited = addr;
+        }).catch(() => null) : null;
+        if (!ir?.ok) { setState(ir?.status === 429 ? 'inviteSoon' : 'inviteFailed'); return; }
+        invited = addr;
       }
       onSaved({ name: f.name.trim(), pronouns: f.pronouns, partnerName: f.partnerName.trim(),
         partnerPronouns: f.partnerPronouns, ...(invited ? { partnerEmail: invited } : {}) });
@@ -12172,9 +12185,12 @@ function ProfileDetailsModal({ account, onClose, onSaved }) {
         {person('name', 'pronouns', PROFILE_SETUP_COPY.yourName, PROFILE_SETUP_COPY.yourNamePlaceholder, 'Your pronouns', "#E8673A", "#FFF0EB")}
         {person('partnerName', 'partnerPronouns', PROFILE_SETUP_COPY.partnerName, PROFILE_SETUP_COPY.partnerNamePlaceholder, "Partner's pronouns", "#1B5FE8", "#EEF0FF")}
         {askEmail && (
-          <input type="email" value={partnerEmail} onChange={(e) => setPartnerEmail(e.target.value)}
+          <input type="email" value={partnerEmail} onChange={(e) => { setPartnerEmail(e.target.value); if (state === 'inviteFailed' || state === 'inviteSoon') setState('ready'); }}
             placeholder={PROFILE_SETUP_COPY.partnerEmailPlaceholder} aria-label={INVITE_COPY.label}
-            style={{ ...box, width: "100%", marginBottom: "0.9rem" }} />
+            style={{ ...box, width: "100%", marginBottom: (state === 'inviteFailed' || state === 'inviteSoon') ? "0.35rem" : "0.9rem" }} />
+        )}
+        {askEmail && (state === 'inviteFailed' || state === 'inviteSoon') && (
+          <div style={{ fontSize: "0.78rem", color: "#B4532A", fontFamily: font.body, marginBottom: "0.9rem" }}>{state === 'inviteSoon' ? INVITE_COPY.soon : INVITE_COPY.failed}</div>
         )}
         <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.4rem 0 0.9rem" }} />
         {ABOUT_YOU.fields.map(({ key: k, label: l, options }) => (
@@ -14036,7 +14052,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
         /* Through the retry helper. The flag above is set before this runs,
            so a send that failed once was never tried again: the partner was
            simply not told their results were ready (A201). */
-        await sendEmailWithRetry({
+        const _sent = await sendEmailWithRetry({
             type: 'results_viewed',
             userId: acct.id || null,
             toEmail: acct.email,
@@ -14052,6 +14068,12 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
             hasIntimacy: !!(ord?.addon_intimacy),
             hasChecklist: !!(ord?.addon_checklist || acct?.pkg === 'newlywed'),
         });
+        /* Every retry failed on the server's side: give the mark back so the
+           next visit asks again (A222). A refusal (4xx) keeps it, because
+           asking again would be refused again on every load. */
+        if (!_sent.ok && !(_sent.status >= 400 && _sent.status < 500)) {
+          try { localStorage.removeItem('attune_results_email_sent'); } catch {}
+        }
 
         // Also fire the workbook flash promo (idempotent on the server).
         try {
@@ -14059,7 +14081,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
             localStorage.setItem('attune_wb_promo_fired', '1');
             const { supabase: _sbp2 } = await import('./supabase.js');
             const { data: { session: _sp2 } } = await _sbp2.auth.getSession();
-            await fetch('/api/generate-workbook-promo', {
+            const _r2 = await fetch('/api/generate-workbook-promo', {
               method: 'POST', headers: { 'Content-Type': 'application/json', ...(_sp2?.access_token ? { Authorization: `Bearer ${_sp2.access_token}` } : {}) },
               body: JSON.stringify({
                 accountEmail: acct.email,
@@ -14067,8 +14089,13 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
                 partnerName:  acct.partnerName || '',
               }),
             });
+            // Given back on failure, as above (A222); the server dedupes.
+            if (!_r2.ok) { try { localStorage.removeItem('attune_wb_promo_fired'); } catch {} }
           }
-        } catch (e) { console.warn('[Attune] workbook promo (partner B) failed:', e); }
+        } catch (e) {
+          try { localStorage.removeItem('attune_wb_promo_fired'); } catch {}
+          console.warn('[Attune] workbook promo (partner B) failed:', e);
+        }
       } catch (e) {
         console.warn('[Attune] partner-B results email failed:', e);
       }
@@ -16377,6 +16404,12 @@ export default function App() {
         hasWorkbook: !!(order?.addonWorkbook),
         hasIntimacy: pkg.hasIntimacy,
         hasChecklist: pkg.hasChecklist,
+    }).then((r) => {
+      // As on the partner's screen (A222): a server-side failure gives the
+      // mark back so the next visit asks again; a refusal keeps it.
+      if (!r.ok && !(r.status >= 400 && r.status < 500)) {
+        try { localStorage.removeItem('attune_results_email_sent'); } catch {}
+      }
     }).catch(() => {});
   }, [highlightsSeen]);
 
