@@ -25,6 +25,12 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
+| A236 | **Shop tiles stay live when you are signed in; owned items come out only at checkout.** Your words: "I don't want those tiles to grey out, I just want it to remove rows if I say the purchase is for my existing account but I'm trying to buy things I already own." Signed in, you may be building it for someone else. **Status:** Starting. |
+| A243 | **Signed in, the top bar on the static pages shows your profile circle, linking to your dashboard, instead of "Sign in".** **Status:** Starting. |
+| A244 | **Account page: Session tile removed; a red bold "Sign out" link above "Delete account".** App Settings the same, since it mirrors the Account page. **Status:** Starting. |
+| A245 | **Your real account shows one action tile on the dashboard.** Finding what the others should be and why they are missing. **Status:** Starting. |
+| A246 | **Insights nav menu: no scroll bar; the tiles shrink to fit one screen at any window size.** **Status:** Starting. |
+| A247 | **A different word of the day today, and good, positive ones for the next few days while Mya tests.** **Status:** Starting. |
 | A222 | **More sweeps.** Round seven, live: the results survey's progress bar drew no fill and a chosen star or option took no colour, because three colours it used were never defined; the A and B tiles in the intimacy exercise had no background for the same reason. Fixed, and a new check fails the build on an undefined colour. A sweep for lookups used without checking (the cart crash) found nothing else live. Nothing for you to do. **Status:** Next round picks new shapes. |
 
 
@@ -35,7 +41,6 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A236 | **Yes, from the app.** The app opens Build a custom experience in the phone's browser, which is not signed in to the website, so nothing shows "Already purchased" and the first add-on brings the core exercises with the cart note. At checkout they choose "Adding to an existing account" and enter their email; checkout finds the account, shows its package, and takes out the core exercises and anything it already owns before payment. Someone signed in on the website gets the shorter version: owned items marked on the page, and checkout asks them to confirm their account. Approve, or tell me to change it. |
 | A232 | **"Test" was never linked to your account: your query shows no partner on the server.** The completions came from a partner this browser kept from an earlier sign-in. Since yesterday's update the dashboard checks with the server and drops a partner your account is not linked to. Reload the dashboard on that browser: Test's exercises should read Pending. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
