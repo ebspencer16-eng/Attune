@@ -34,7 +34,30 @@
  * expected to say "could not check" rather than "no".
  */
 
-import { ORDER_SELECT, computeEntitlements, entitlementsFor } from './entitlements.js';
+import { ORDER_SELECT, computeEntitlements, entitlementsFor, mergeEntitlementsGrantOnly } from './entitlements.js';
+import { packageContents } from '../_catalogue.js';
+
+/* Which cart keys an account already has, from its entitlements: what the
+   custom build marks "Already purchased" and what checkout takes out of an
+   order for an existing account (A236, A240). The keys are the cart's, so
+   the page can drop them without a second lookup. */
+export const OWNED_KEYS = {
+  reflection: (e) => !!e.addonReflection,
+  intimacy: (e) => !!e.addonIntimacy,
+  conflict: (e) => !!e.addonConflict,
+  workbook: (e) => !!e.addonWorkbook,
+  budget: (e) => !!e.addonBudget,
+  checklist: (e) => !!e.addonChecklist,
+};
+export function ownedKeys(e) {
+  return Object.keys(OWNED_KEYS).filter((k) => e && OWNED_KEYS[k](e));
+}
+/* The account's package and what it has, in the shop's words, for the tile
+   checkout draws once the account is found. */
+export function accountSummary(e) {
+  const owned = ownedKeys(e);
+  return { pkg: e.pkg || 'core', owned, ...packageContents(e.pkg, owned) };
+}
 
 /* What somebody who already owns a package is told when they try to buy
    another for themselves (A215). One sentence, sent by both callers: the
@@ -77,7 +100,7 @@ export function emailOrNull(value) {
  * This counted as a fourteenth builder against a catalogue of thirteen and
  * failed the build, which is the scan doing its job on a name that lied to it.
  *
- * @returns {Promise<{ok: true, ownsCore: boolean} | {ok: false, error: string}>}
+ * @returns {Promise<{ok: true, ownsCore: boolean, entitlements: object} | {ok: false, error: string}>}
  */
 export async function ownsCoreFor({ supabaseUrl, serviceKey, email }) {
   const addr = emailOrNull(email);
@@ -92,21 +115,25 @@ export async function ownsCoreFor({ supabaseUrl, serviceKey, email }) {
     `orders?buyer_email=eq.${encodeURIComponent(addr)}&select=${ORDER_SELECT}`,
   );
   if (direct.error) return { ok: false, error: `orders read failed: ${direct.error}` };
-  if (computeEntitlements(direct.data || [], null).hasGrant) return { ok: true, ownsCore: true };
+  const fromOrders = computeEntitlements(direct.data || [], null);
+  const answer = (e) => ({ ok: true, ownsCore: !!e.hasGrant, entitlements: e });
 
   /* Then the account, which is what catches a comp and an invited partner
-     whose own address never appears on an order. */
+     whose own address never appears on an order, and the add-ons granted to
+     the account rather than bought under this address. The two are merged so
+     what is owned is the whole of it (A240). When the orders already say yes,
+     a failed account read still answers yes: it can only add. */
   const prof = await restGet(
     supabaseUrl, serviceKey,
     `profiles?email=eq.${encodeURIComponent(addr)}&select=id&limit=1`,
   );
-  if (prof.error) return { ok: false, error: `profile read failed: ${prof.error}` };
+  if (prof.error) return fromOrders.hasGrant ? answer(fromOrders) : { ok: false, error: `profile read failed: ${prof.error}` };
   const id = Array.isArray(prof.data) && prof.data[0]?.id;
-  if (!id) return { ok: true, ownsCore: false };
+  if (!id) return answer(fromOrders);
 
   const read = await entitlementsFor({ supabaseUrl, serviceKey, userId: id, email: addr });
-  if (!read.ok) return { ok: false, error: read.error };
-  return { ok: true, ownsCore: !!read.entitlements.hasGrant };
+  if (!read.ok) return fromOrders.hasGrant ? answer(fromOrders) : { ok: false, error: read.error };
+  return answer(mergeEntitlementsGrantOnly(fromOrders, read.entitlements));
 }
 
 /**

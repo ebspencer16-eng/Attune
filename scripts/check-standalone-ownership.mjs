@@ -224,6 +224,12 @@ async function runA215(handler, body, orders) {
     return { status: r.status, body: await r.json().catch(() => ({})) };
   } finally { [console.warn, console.error, console.log] = saved; }
 }
+const BUDGET_OWNER = [{ order_num: 'ATT-2', pkg_key: 'newlywed' }];
+const addons = (flags) => ({
+  items: [{ pkgKey: null, ...flags }],
+  buyerEmail: 'buyer@example.com', buyerName: 'Al',
+  customerAddress: { country: 'US', postal_code: '10001', state: 'NY', city: 'NY', line1: '1 St' },
+});
 const order = (isGift) => ({
   items: [{ pkgKey: 'core', isGift, partner1Name: 'A', partner2Name: 'B', ...(isGift ? { recipientEmail: 'r@example.com' } : { invitePartnerLater: true }) }],
   buyerEmail: 'buyer@example.com', buyerName: 'Al',
@@ -239,6 +245,17 @@ const a215 = [
     (r) => r.status === 200 && r.body.ownsCore === true && r.body.alreadyOwns === ALREADY_OWNS],
   ['verify-core sends no sentence to a non-owner', verifyHandler, { email: 'buyer@example.com' }, [],
     (r) => r.status === 200 && r.body.ownsCore === false && !('alreadyOwns' in r.body)],
+  /* A240: adding to an existing account. The lookup sends the package and
+     what it owns, never a name; and the payment refuses an add-on the
+     account already has, while one it lacks goes through. */
+  ['verify-core sends an owner their package and what it owns, and no names', verifyHandler, { email: 'buyer@example.com' }, BUDGET_OWNER,
+    (r) => r.status === 200 && r.body.account?.pkgName === 'Starting Out Collection'
+      && JSON.stringify(r.body.account?.owned) === JSON.stringify(['budget', 'checklist'])
+      && r.body.account?.includes?.includes('Build a Budget') && !('name' in r.body) && !('partnerName' in r.body)],
+  ['an add-on the account already owns is refused', payHandler, addons({ addonBudget: true }), BUDGET_OWNER,
+    (r) => r.status === 409 && /Build a Budget/.test(r.body.error || '')],
+  ['an add-on the account does not own goes through', payHandler, addons({ addonConflict: true }), BUDGET_OWNER,
+    (r) => r.status !== 409 && r.status !== 403],
 ];
 for (const [name, handler, body, orders, pass] of a215) {
   const r = await runA215(handler, body, orders);

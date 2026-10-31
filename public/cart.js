@@ -53,6 +53,8 @@ const ADDON_META = {
   budget:     { title: 'Build a Budget Tool',                       desc: 'Build a shared budget together' },
   checklist:  { title: 'Merging Lives Checklist',                   desc: 'Merging lives, finances, logistics' },
 };
+/* Under the core exercises in a custom build (A241). Ellie's words. */
+const CUSTOM_CORE_NOTE = 'Automatically included for new accounts, will be removed on checkout screen prior to payment if you have an existing account.';
 // What each package already bundles, so it isn't offered again as a paid add-on.
 // Package inclusion comes from public/_pkg-rules.js, generated from PKG_CAPS.
 // This was a hand-kept copy; when Premium switched from intimacy to conflict,
@@ -73,6 +75,8 @@ const TRASH_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
 
 function _packageBase(item) {
   const p = CART_PKGS[item.pkg];
+  /* No package: add-ons for an account that already has one (A236). */
+  if (!p) return 0;
   return item.format === 'physical' ? p.physicalPrice : p.digitalPrice;
 }
 function _addonUnitPrice(key, item) {
@@ -106,8 +110,7 @@ function wbVariant(item) {
 }
 
 function _itemPrice(item) {
-  const p = CART_PKGS[item.pkg];
-  const base = item.format === 'physical' ? p.physicalPrice : p.digitalPrice;
+  const base = _packageBase(item);
   let add = 0;
   if (item.addons.workbook)   add += wbVariant(item) === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
   if (item.addons.reflection) add += ADDON_PRICES.reflection;
@@ -118,8 +121,14 @@ function _itemPrice(item) {
   return base + add;
 }
 
+/* Every line in the cart: a package and each add-on on it count one each,
+   so a custom build's first add-on reads 2, the core exercises and the add-on
+   (A237). */
 function _cartItemCount() {
-  return _cartItems.reduce((sum, i) => sum + i.qty, 0);
+  return _cartItems.reduce((sum, i) => {
+    const addons = ADDON_ORDER.filter((k) => i.addons && i.addons[k]).length;
+    return sum + i.qty * ((CART_PKGS[i.pkg] ? 1 : 0) + addons);
+  }, 0);
 }
 
 function addToCart(pkg) {
@@ -140,14 +149,21 @@ function addToCart(pkg) {
   renderCart();
   updateCartBadge();
   _persistCart();
-  // Show the "added to cart" confirmation modal
+  _showAdded(cfg.name, true);
+}
+
+/* The "added to cart" pop-up, for a package and for an add-on (A237). The
+   line under the title talks about a package, so an add-on leaves it out. */
+function _showAdded(name, isPackage) {
   const modal = document.getElementById('added-modal');
   const nameEl = document.getElementById('added-modal-name');
+  const subEl = document.getElementById('added-modal-sub');
+  if (subEl) subEl.style.display = isPackage ? '' : 'none';
   if (nameEl) {
     const count = _cartItemCount();
     nameEl.textContent = count > 1
-      ? `${cfg.name} added (${count} items in cart)`
-      : `${cfg.name} added to cart`;
+      ? `${name} added (${count} items in cart)`
+      : `${name} added to cart`;
   }
   if (modal) {
     modal.style.display = 'flex';
@@ -203,7 +219,10 @@ function toggleItemAddon(id, addon) {
   item.addons[addon] = !item.addons[addon];
   // If turning off workbook, reset variant to digital
   if (addon === 'workbook' && !item.addons.workbook) item.addons.workbookVariant = 'digital';
+  /* A line with no package is only its add-ons; with none left it goes. */
+  if (!item.pkg && !ADDON_ORDER.some((k) => item.addons[k])) _cartItems = _cartItems.filter((i) => i !== item);
   renderCart();
+  updateCartBadge();
   _persistCart();
 }
 
@@ -238,6 +257,7 @@ function renderCart() {
   const itemHtml = (item) => {
     const cfg = CART_PKGS[item.pkg];
     const qty = item.qty;
+    if (!cfg) return addonRows(item);
     const pkgBase = _packageBase(item);
     const pkgLine = pkgBase * qty;
     const formatLabel = cfg.supportsPhysical
@@ -252,6 +272,7 @@ function renderCart() {
           <span class="cart-pkg-badge" style="background:${cfg.badgeColor};color:${cfg.badgeText}">${cfg.badge}</span>
           <div class="cart-item-name">${cfg.name}</div>
           <div class="cart-item-sub">${formatLabel}</div>
+          ${item.custom ? `<div class="cart-item-sub cart-custom-note">${CUSTOM_CORE_NOTE}</div>` : ''}
           ${cfg.supportsPhysical ? `
             <div class="cart-item-fmt-row">
               <button class="cart-fmt-btn ${item.format==='physical'?'active':''}" onclick="setItemFormat('${item.id}','physical')">Physical</button>
@@ -273,6 +294,13 @@ function renderCart() {
       </div>
     </div>`;
 
+    return pkgCard + addonRows(item);
+  };
+
+  /* The add-on lines and the picker, shared by a package line and a line
+     with no package (A236). */
+  const addonRows = (item) => {
+    const qty = item.qty;
     // ── Active add-ons, each as its own line item (like the package) ────
     const activeKeys = ADDON_ORDER.filter(k => item.addons[k]);
     const addonCards = activeKeys.map(k => {
@@ -309,7 +337,9 @@ function renderCart() {
 
     // ── Available add-ons, shown by default so they're easy to add ──────
     const incl = PKG_INCLUDED[item.pkg] || {};
-    const available = ADDON_ORDER.filter(k => !item.addons[k] && !incl[k]);
+    /* And never what the signed-in account already has (A236). */
+    const mine = (window._attuneOwner && window._attuneOwner.owned) || [];
+    const available = ADDON_ORDER.filter(k => !item.addons[k] && !incl[k] && (item.pkg || mine.indexOf(k) < 0));
     const picker = available.length ? `
     <div class="cart-item cart-addon-picker">
       <div class="cart-addon-picker-label">Add to your order</div>
@@ -323,7 +353,7 @@ function renderCart() {
       }).join('')}
     </div>` : '';
 
-    return pkgCard + addonCards + picker;
+    return addonCards + picker;
   };
 
   container.innerHTML = _cartItems.map(itemHtml).join('');
@@ -334,7 +364,7 @@ function setItemFormat(id, format) {
   const item = _cartItems.find(i => i.id === id);
   if (!item) return;
   const cfg = CART_PKGS[item.pkg];
-  if (!cfg.supportsPhysical) return;
+  if (!cfg || !cfg.supportsPhysical) return;
   item.format = format;
   renderCart();
 }
@@ -402,30 +432,53 @@ function addAddonToCart(key, ev) {
      /api/verify-core answers, and create-payment-intent asks the same question
      again server side and refuses the order. This file only has to stop
      getting in the way. */
-  if (!_cartItems.length) {
-    _cartItems.push({ id: _newItemId(), pkg: null, format: 'digital', qty: 1, addons: { [key]: true } });
-    renderCart();
-    updateCartBadge();
-    _persistCart();
-    _addonBtnFlash(btn, 'Added ✓', true);
+  /* ── THE FIRST ADD-ON OF A CUSTOM BUILD BRINGS THE CORE EXERCISES ─────
+     Ellie (A237): "if someone adds something from the custom experience,
+     the first addition to cart should register as 2 things and should also
+     add a line to cart for comms and expectations exercise."
+
+     So it is the core package with the add-on on it, marked custom so the
+     cart can say the core line goes if the buyer already has an account,
+     and checkout can ask (A240, A241). Somebody signed in who already owns
+     the core exercises gets a line with no package instead: they are adding
+     to their account (A236). This used to push that no-package line for
+     everybody, and the cart could not draw it: every render threw, so the
+     count never moved, the button needed several presses, and the cart
+     would not open (A237, A239). */
+  var owner = window._attuneOwner;
+  if (owner && owner.owned && owner.owned.indexOf(key) >= 0) {
+    _addonBtnFlash(btn, 'Already purchased', true);
     return;
   }
-
-  var open = _cartItems.filter(function (it) {
-    return !_addonIncludedInPkg(it.pkg, key) && !it.addons[key];
-  });
-
-  if (!open.length) {
-    var bundled = _cartItems.some(function (it) { return _addonIncludedInPkg(it.pkg, key); });
-    _addonBtnFlash(btn, bundled ? 'Already included' : 'Already in cart', true);
+  var target = _cartItems.find(function (it) { return it.custom || (!it.pkg && owner); });
+  if (!target && !_cartItems.length) {
+    target = owner && owner.ownsCore
+      ? { id: _newItemId(), pkg: null, format: 'digital', qty: 1, addons: _defaultAddons() }
+      : { id: _newItemId(), pkg: 'core', custom: true, format: 'digital', qty: 1, addons: _defaultAddons() };
+    _cartItems.push(target);
+  }
+  if (target && (target.addons[key] || _addonIncludedInPkg(target.pkg, key))) {
+    _addonBtnFlash(btn, 'Already in cart', true);
     return;
   }
+  if (!target) {
+    var open = _cartItems.filter(function (it) {
+      return !_addonIncludedInPkg(it.pkg, key) && !it.addons[key];
+    });
+    if (!open.length) {
+      var bundled = _cartItems.some(function (it) { return _addonIncludedInPkg(it.pkg, key); });
+      _addonBtnFlash(btn, bundled ? 'Already included' : 'Already in cart', true);
+      return;
+    }
+    target = open[0];
+  }
 
-  open[0].addons[key] = true;
+  target.addons[key] = true;
   renderCart();
   updateCartBadge();
   _persistCart();
   _addonBtnFlash(btn, 'Added ✓', true);
+  _showAdded(ADDON_META[key] ? ADDON_META[key].title : '', false);
 }
 
 // ── Checkout handoff ─────────────────────────────────────────────────────
@@ -442,7 +495,7 @@ function goCheckout() {
   // Preserve a simple URL param for the first item as fallback (so checkout
   // still works if sessionStorage is blocked, e.g. private browsing edge case)
   const first = _cartItems[0];
-  const params = new URLSearchParams({ pkg: first.pkg });
+  const params = new URLSearchParams(first.pkg ? { pkg: first.pkg } : {});
   if (first.format === 'physical') params.set('format', 'physical');
   if (first.addons.workbook) params.set('addon_workbook', wbVariant(first));
   if (first.addons.reflection) params.set('addon_reflection', '1');
@@ -508,7 +561,7 @@ var CART_MARKUP = `<div class="cart-toast" id="cart-toast">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <h3 id="added-modal-name" style="font-family:'Playfair Display',Georgia,serif;font-size:1.2rem;font-weight:700;color:#0E0B07;margin-bottom:.4rem;line-height:1.2;">Added to cart</h3>
-    <p style="font-size:.82rem;color:#7A6753;line-height:1.6;margin-bottom:1.5rem;">Your package is in your cart. Ready to continue?</p>
+    <p id="added-modal-sub" style="font-size:.82rem;color:#7A6753;line-height:1.6;margin-bottom:1.5rem;">Your package is in your cart. Ready to continue?</p>
     <div style="display:flex;flex-direction:column;gap:.65rem;">
       <button onclick="openCart();closeAddedModal();" style="background:linear-gradient(135deg,#E8673A,#d45a2e);color:white;border:none;padding:.85rem 1.5rem;border-radius:12px;font-size:.82rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;">View cart →</button>
       <button onclick="closeAddedModal();" style="background:none;border:1.5px solid #E8DDD0;color:#7A6753;padding:.75rem 1.5rem;border-radius:12px;font-size:.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Continue browsing</button>

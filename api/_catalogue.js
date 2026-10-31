@@ -77,6 +77,15 @@ export const SHOP_NAMES = {
   checklist: 'Merging Lives Checklist',
 };
 
+/**
+ * The pop-up a locked resource opens (A235). Ellie, for the app: "If they
+ * click it, have a pop up that says 'You don't own this' then a button to
+ * 'See more details' that takes you to the site add ons." The website draws
+ * the same pop-up from here; the app's copy is NOT_YOURS and SEE_MORE in
+ * attune-app/src/app/resources.tsx.
+ */
+export const LOCKED_TOOL = { title: "You don't own this", cta: 'See more details' };
+
 /** What each package is called on the shop, the checkout and the receipt. */
 export const PACKAGE_NAMES = {
   core: 'The Attune Assessment',
@@ -84,6 +93,23 @@ export const PACKAGE_NAMES = {
   anniversary: 'Relationship Reflection',
   premium: 'Attune Premium',
 };
+
+/**
+ * What an account has, in the shop's words: its package's name, the two core
+ * exercises every package has, then each add-on it owns. The website's
+ * Account page, the app's Settings (through /api/home) and checkout's
+ * existing-account tile all draw this (A231, A240). It replaced a hand-typed
+ * list on the Account page that said Premium had Physical Intimacy and
+ * Starting Out had "partner comparison deep-dives".
+ */
+export const CORE_INCLUDES = ['Communication exercise', 'Expectations exercise'];
+export function packageContents(pkgKey, owned) {
+  const has = new Set(Array.isArray(owned) ? owned : []);
+  return {
+    pkgName: PACKAGE_NAMES[pkgKey] || PACKAGE_NAMES.core,
+    includes: [...CORE_INCLUDES, ...Object.keys(SHOP_NAMES).filter((k) => has.has(k)).map((k) => SHOP_NAMES[k])],
+  };
+}
 
 export const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 198 };
 export const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 233 };

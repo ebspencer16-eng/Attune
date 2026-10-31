@@ -159,7 +159,7 @@ import { sarahEx1, sarahEx2, jamesEx1, jamesEx2 } from "../api/_lib/demo-couple.
    from. See that file: Sarah and James supply the names and the other
    exercises, and these supply Exercise 1. */
 import { ARCHETYPE_EX1, demoWithPartnerView, DEMO_COUPLE_TYPES, normaliseDemoType } from "../api/_lib/demo-archetypes.js";
-import { CATALOGUE } from "../api/_catalogue.js";
+import { CATALOGUE, LOCKED_TOOL, packageContents } from "../api/_catalogue.js";
 // The Merging lives checklist, moved out so the app can read it too.
 import { CHECKLIST_AREAS, CHECKLIST_COPY } from "../api/_checklist.js";
 // The budget tool, moved out so the app can read it too.
@@ -4213,6 +4213,41 @@ export function AdditionalExercises({ pkg }) {
             </span>
           </a>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/** The padlock a resource or exercise shows when it is not theirs. */
+function LockGlyph({ color, size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="10.5" width="16" height="10.5" rx="2" />
+      <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
+    </svg>
+  );
+}
+
+/**
+ * A resource they do not own, opened from Learn (A235).
+ *
+ * Ellie: "There should be a pop up with a description of the resource and
+ * link to explore add-ons that takes you to the browse packages add-on page."
+ * The app's sheet has her two lines, LOCKED_TOOL in api/_catalogue.js; the
+ * description is the catalogue's blurb, which the app's Learn reads too.
+ */
+function LockedToolModal({ tool, onClose }) {
+  useEscapeToClose(onClose);
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div role="dialog" aria-modal="true" aria-label={LOCKED_TOOL.title}
+        style={{ background: "#FFFDF9", borderRadius: 22, padding: "2rem 1.6rem 1.6rem", width: "100%", maxWidth: 360, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative", textAlign: "center", fontFamily: BFONT }}>
+        <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "0.8rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#7A6753" }}>✕</button>
+        <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>{LOCKED_TOOL.title}</div>
+        <div style={{ fontSize: "0.92rem", fontWeight: 600, color: C.ink }}>{tool.label}</div>
+        <div style={{ fontSize: "0.85rem", color: C.muted, lineHeight: 1.55, margin: "0.35rem 0 1.4rem" }}>{tool.blurb}</div>
+        <a href="/offerings#add-ons" style={{ display: "inline-block", background: "#E8673A", color: "white", borderRadius: 999, padding: "0.7rem 1.6rem", fontSize: "0.85rem", fontWeight: 700, textDecoration: "none" }}>{LOCKED_TOOL.cta}</a>
       </div>
     </div>
   );
@@ -15074,6 +15109,8 @@ export default function App() {
    */
   const [learnToolsH, setLearnToolsH] = useState(0);
   const learnToolsRef = useRef(null);
+  // A resource this couple does not own, opened from Learn (A235).
+  const [lockedTool, setLockedTool] = useState(null);
   /**
    * And the block they sit in, so the subtraction has both halves.
    *
@@ -17001,6 +17038,35 @@ export default function App() {
   //
   // Fall-back: if partner_profile_id isn't set yet (Partner B hasn't signed
   // up), nothing to poll — we just exit and wait for the next re-run.
+  /* ── A PARTNER THIS ACCOUNT IS NOT LINKED TO (A232) ──────────────────
+     Ellie: her test account, with no partner ever invited, showed "Test"
+     with both exercises complete, on Account and on the status table.
+
+     The partner's answers are kept in this browser under one key for
+     whoever signs in, and the poll below stops asking the server as soon as
+     it holds a complete partner. So a partner left by an earlier sign-in on
+     this browser was never checked against the account now signed in. Asked
+     once per account here: when the profile read succeeds and names no
+     partner, or a different one, the stored partner goes. A failed read
+     changes nothing (unknown is not no). */
+  useEffect(() => {
+    if (!account?.id || !partnerSession?.partnerProfileId) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data, error } = await sb.from('profiles').select('partner_profile_id').eq('id', account.id).maybeSingle();
+        if (cancelled || error || !data) return;
+        if (data.partner_profile_id !== partnerSession.partnerProfileId) {
+          try { localStorage.removeItem('attune_partner_session'); } catch {}
+          setPartnerSession(null);
+        }
+      } catch { /* unknown: keep */ }
+    })();
+    return () => { cancelled = true; };
+  }, [account?.id, partnerSession?.partnerProfileId]);
+
   useEffect(() => {
     // Poll for the linked partner's answers. Runs for BOTH partners now:
     // the buyer fetches the invitee's data and vice versa, so either side can
@@ -17191,6 +17257,11 @@ export default function App() {
   const _basePkg = pkgConfig[_effectivePkgKey] || pkgConfig.core;
   const pkg = {
     ..._basePkg,
+    /* Which package, once it is known: the order's key, or the demo's. Null
+       while the order has not loaded. AdditionalExercises waits on it so its
+       locked tiles do not flash, and nothing set it, so the tiles never drew
+       on the website at all (A234). */
+    key:            _demoParam ? demoPkg : (order?.pkgKey || order?.pkg || null),
     hasChecklist:   _basePkg.hasChecklist   || !!(order?.addonChecklist),
     hasAnniversary: _basePkg.hasAnniversary || !!(order?.addonReflection),
     hasBudget:      _basePkg.hasBudget      || !!(order?.addonBudget),
@@ -18068,7 +18139,13 @@ export default function App() {
                       const hCell = { padding: isMobile ? "0.55rem 0.5rem" : "0.6rem 0.8rem", fontSize: isMobile ? "0.74rem" : "0.8rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 700, borderLeft: "1px solid #F0E9E0", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
                       const stCell = { padding: isMobile ? "0.8rem 0.4rem" : "0.85rem 0.7rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.35rem", borderLeft: "1px solid #F0E9E0" };
                       return (
-                        <>
+                        /* ── ON A TILE ─────────────────────────────────────
+                           Ellie (A233): "Insight status table on web... doesn't
+                           have a tile behind it so it's just orange and hard to
+                           see." The panel went transparent for the results
+                           menu, whose rows are tiles of their own; this
+                           table's rows are not, so the table gets one. */
+                        <div data-block="insights/status-table" style={{ background: "#FFFDF9", borderRadius: 18, overflow: "hidden", boxShadow: "0 1px 3px rgba(14,11,7,0.08)" }}>
                           {/* Header row: blank | Ellie | Preston */}
                           <div style={{ display: "grid", gridTemplateColumns: COLS, alignItems: "center", background: "#FAF7F2", borderBottom: "1px solid #F0E9E0" }}>
                             <div />
@@ -18109,7 +18186,7 @@ export default function App() {
                               </div>
                             );
                           })}
-                        </>
+                        </div>
                       );
                     })()}
                     {/* The same section on this stage of the page. Ellie:
@@ -18287,22 +18364,26 @@ export default function App() {
                         : tool.key === "budget" ? GrowIcons.budget : GrowIcons.checklist;
                       const tint = tool.key === "budget" ? "#1B5FE8" : "#E8673A";
                       const live = Boolean(owned && go);
+                      /* Not theirs: a grey padlock in the icon's place, and a
+                         press opens what it is and where to get it (A235). It
+                         used to be a disabled button, so a press did nothing. */
                       return (
-                        <button key={tool.key} onClick={live ? go : undefined} disabled={!live}
+                        <button key={tool.key} onClick={live ? go : !owned ? () => setLockedTool(tool) : undefined} disabled={owned && !live}
+                          aria-label={owned ? undefined : `${tool.short}, not yours yet`}
                           style={{
                             background: "white", border: "none", borderRadius: 18,
                             padding: isMobile ? "0.8rem 0.75rem 0.9rem" : "1rem 0.95rem 1.1rem",
-                            textAlign: "left", cursor: live ? "pointer" : "default",
+                            textAlign: "left", cursor: live || !owned ? "pointer" : "default",
                             fontFamily: BFONT, display: "flex", flexDirection: "column",
                             gap: isMobile ? "1.1rem" : "1.5rem", opacity: owned ? 1 : 0.55,
                             boxShadow: "0 1px 3px rgba(14,11,7,0.07)",
                           }}>
                           <span style={{
                             width: 34, height: 34, borderRadius: 10,
-                            background: tint + "1A", display: "flex",
+                            background: owned ? tint + "1A" : C.stone, display: "flex",
                             alignItems: "center", justifyContent: "center",
                           }}>
-                            {icon(tint)}
+                            {owned ? icon(tint) : <LockGlyph color={C.muted} />}
                           </span>
                           <span style={{
                             fontSize: isMobile ? "0.82rem" : "0.9rem", fontWeight: 600,
@@ -19197,14 +19278,15 @@ export default function App() {
 
 
         {view === "account" && (() => {
-          const pkgInfo = pkgConfig[demoPkg] || pkgConfig.core;
-          const PACKAGE_FEATURES = {
-            core:        { name: "The Attune Assessment", color: "#E8673A", features: ["Communication exercise", "Expectations exercise", "Full joint results", "Couple type profile"] },
-            newlywed:    { name: "Starting Out Collection", color: "#E8673A", features: ["Everything in Assessment", "Merging lives checklist", "Partner comparison deep-dives"] },
-            anniversary: { name: "Relationship Reflection", color: "#1B5FE8", features: ["Everything in Assessment", "Relationship reflection exercise", "Anniversary-specific prompts"] },
-            premium:     { name: "Attune Premium", color: "#3B5BDB", features: ["Everything in Assessment", "Relationship Reflection", "Shared budget", "Physical intimacy", "Personalized workbook"] },
-          };
-          const pkg2 = PACKAGE_FEATURES[demoPkg] || PACKAGE_FEATURES.core;
+          /* What the account has, from api/_catalogue.js packageContents,
+             which the app's Settings draws too (A231). This was a list typed
+             here that said Premium had Physical Intimacy. */
+          const _ownedKeys = [
+            pkg.hasAnniversary && "reflection", pkg.hasIntimacy && "intimacy", pkg.hasConflict && "conflict",
+            pkg.hasWorkbook && "workbook", pkg.hasBudget && "budget", pkg.hasChecklist && "checklist",
+          ].filter(Boolean);
+          const _contents = packageContents(pkg.key || _effectivePkgKey, _ownedKeys);
+          const pkg2 = { name: _contents.pkgName, color: pkg.color, features: _contents.includes };
           return (
             <div style={{ flex: 1, overflowY: "auto", background: "#FBF8F3" }}>
               <div style={{ maxWidth: 620, margin: "0 auto", padding: isMobile ? "0 0 2rem" : "0 0 3rem" }}>
@@ -19298,25 +19380,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Exercise status */}
-                <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
-                  <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>Progress</div>
-                  </div>
-                  {[
-                    { label: "Communication exercise", done: !!ex1Answers, who: `${userName || "You"}` },
-                    { label: "Expectations exercise", done: !!ex2Answers, who: `${userName || "You"}` },
-                    { label: `${partnerName || "Partner"}'s communication`, done: partnerEx1Done, who: partnerName || "Partner", partner: true },
-                    { label: `${partnerName || "Partner"}'s expectations`, done: partnerEx2Done, who: partnerName || "Partner", partner: true },
-                  ].map((row, i, arr) => (
-                    <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 1.35rem", borderBottom: i < arr.length - 1 ? "1px solid #F9F6F1" : "none", gap: "1rem" }}>
-                      <span style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body }}>{row.label}</span>
-                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: row.done ? "#065f46" : "#A36333", fontFamily: font.body, background: row.done ? "rgba(16,185,129,0.1)" : "#FDF8F3", padding: "2px 10px", borderRadius: 99 }}>
-                        {row.done ? "Complete" : (row.partner && partnerSyncing) ? PARTNER_NOT_LOADED : "Pending"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                {/* The Progress tile was here; Ellie had it taken out (A231). */}
 
                 {/* Sign out */}
                 {isLoggedIn && (
@@ -19992,6 +20056,7 @@ export default function App() {
           setHomeTick((n) => n + 1);
         }} />
     )}
+    {lockedTool && <LockedToolModal tool={lockedTool} onClose={() => setLockedTool(null)} />}
     {showInvite && (
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
         onClick={(e) => e.target === e.currentTarget && setShowInvite(false)}>

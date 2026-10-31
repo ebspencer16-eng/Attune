@@ -4,6 +4,7 @@
   <script src="/_flags.js"></script>
   <script src="/_track.js"></script>
   <script src="/_pkg-rules.js"></script>
+  <script src="/_session.js"></script>
 <meta charset="UTF-8">
 <meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -182,6 +183,11 @@
     border-color:#E8673A;background:#FFF0EB;color:#E8673A;
   }
   .item-intent-ico{display:inline-flex;align-items:center;line-height:0}
+  /* The existing account, once found (A240). */
+  .acct-tile{border:1.5px solid #E8DDD0;border-radius:12px;padding:.85rem 1rem;background:#FBF8F3;margin-top:.7rem}
+  .acct-tile .acct-pkg{font-family:'Playfair Display',Georgia,serif;font-size:.95rem;font-weight:700;color:#0E0B07}
+  .acct-tile ul{margin:.45rem 0 0;padding-left:1.1rem;font-size:.78rem;color:#5C4A38;line-height:1.6}
+  .acct-note{font-size:.76rem;color:#7A6753;margin-top:.6rem;line-height:1.5}
 </style>
 <!-- attune:press-feedback -->
 <style>
@@ -644,6 +650,13 @@ let addonChecklist = false;
 const _checkoutToken = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('co-' + Date.now() + '-' + Math.random().toString(36).slice(2));
 function _idemKey() { return _checkoutToken + '-' + Math.round((getPkgTotal() || 0) * 100); }
 let _items = [];
+/* Section 1's account for an order added to an existing account (A240).
+   Up here because the page draws section 1 while it loads, above where the
+   functions that use them are written. */
+var _me = null;
+var _acct = { email: '', status: 'idle', account: null };
+var _acctTimer = null;
+var SHOP_CORE = 'Communication + Expectations';
 
 // ── Tax quote state ──────────────────────────────────────────────────────────
 // Populated by /api/calculate-tax on address change. When taxQuote is null,
@@ -824,7 +837,10 @@ function persistOrderComplete(orderNum) {
           pkg:    ci.pkg,
           format: forceFmt(ci.format),
           addons: { ...ci.addons },
-          intent: fromRegistry ? 'gift' : null,   // asked first (A208b)
+          // A custom build, and a line of add-ons with no package (A240).
+          custom: !!ci.custom,
+          acct:   ci.pkg ? null : 'existing',
+          intent: ci.pkg ? (fromRegistry ? 'gift' : null) : 'self',   // asked first (A208b)
           partner1Name: '',
           partner2Name: '',
           giftNote: '',
@@ -983,6 +999,11 @@ function renderItemsStep() {
          </div>`
       : '';
 
+    /* Add-ons with no package go to an account that has one: no "who is it
+       for", only which account (A236, A240). */
+    if (it.acct === 'existing' && !it.custom) {
+      return `<div class="item-block" data-idx="${idx}">${header}${existingBlock(it, idx)}</div>`;
+    }
     return `
     <div class="item-block" data-idx="${idx}">
       ${header}
@@ -1001,7 +1022,17 @@ function renderItemsStep() {
         </button>
       </div>
 
-      ${it.intent === 'self' ? `
+      ${it.intent === 'self' && it.custom ? `
+        <!-- A240, Ellie's question. -->
+        <div class="form-label" style="margin:.2rem 0 .55rem">Are you setting up a new account or adding to an existing account?</div>
+        <div class="item-intent" id="acct-${idx}">
+          <button type="button" class="item-intent-btn ${it.acct==='new'?'active':''}" onclick="setItemAcct(${idx},'new')">Setting up a new account</button>
+          <button type="button" class="item-intent-btn ${it.acct==='existing'?'active':''}" onclick="setItemAcct(${idx},'existing')">Adding to an existing account</button>
+        </div>
+        ${it.acct === 'existing' ? existingBlock(it, idx) : ''}
+      ` : ''}
+
+      ${it.intent === 'self' && (!it.custom || it.acct === 'new') ? `
         <div class="form-row" style="margin-top:.9rem">
           <div>
             <div class="form-group">
@@ -1090,8 +1121,133 @@ function renderItemsStep() {
   validateForm();
 }
 
+/* ── ADDING TO AN ACCOUNT THAT ALREADY EXISTS (A236, A240) ──────────────
+   Ellie: "if adding to an existing, it should ask for the user's email
+   address, then should show the tile of their package and inclusions... the
+   core exercises should be removed from the cart, along with any others that
+   the user already owns."
+
+   Signed in, the account is the session's and the question is whether to
+   use it ("confirm whether [email] with [their name] and [partner's name] is
+   the account"). Otherwise, or on "no", an email, looked up by
+   /api/verify-core: it must have the core exercises, and what it already has
+   comes out of the order. create-payment-intent asks both again. */
+function inExisting(it) { return it.acct === 'existing' && (it.custom ? it.intent === 'self' : true); }
+function esc(v) { return String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+function existingBlock(it, idx) {
+  const useMe = _me && !it.otherEmail;
+  let html = '';
+  if (useMe) {
+    const who = [_me.name, _me.partnerName].filter(Boolean).map(esc).join(' and ');
+    html += `<div style="margin:.2rem 0 .55rem;font-size:.85rem;color:#3C3C43;line-height:1.5">Add this to the account for <strong>${esc(_me.email)}</strong>${who ? ` (${who})` : ''}?</div>
+      <div class="item-intent" id="acctme-${idx}">
+        <button type="button" class="item-intent-btn ${it.confirmed?'active':''}" onclick="useMyAccount(${idx})">Yes, this account</button>
+        <button type="button" class="item-intent-btn" onclick="useOtherAccount(${idx})">No, a different email</button>
+      </div>`;
+  } else {
+    html += `<div class="form-group" style="margin-top:.6rem">
+        <label class="form-label" for="acctEmail-${idx}">Your account email</label>
+        <input class="form-input" type="email" id="acctEmail-${idx}" value="${esc(_acct.email)}" autocomplete="email" oninput="onAcctEmail(this)">
+      </div>`;
+  }
+  if ((useMe ? it.confirmed : true) && _acct.status === 'found') html += acctTile(it);
+  else if (!useMe && _acct.status === 'none') html += `<div class="field-missing">We could not find an Attune account with the core exercises for that email.</div>`;
+  else if (!useMe && _acct.status === 'failed') html += `<div class="field-missing">We could not check that just now. Try again in a moment.</div>`;
+  else if (!useMe && _acct.status === 'checking') html += `<div class="acct-note">Checking…</div>`;
+  return html;
+}
+function acctTile(it) {
+  const a = _acct.account || {};
+  const removed = (it._removed || []).map(esc);
+  const left = Object.keys(it.addons || {}).some((k) => k !== 'workbookVariant' && it.addons[k]);
+  return `<div class="acct-tile">
+      <div class="acct-pkg">${esc(a.pkgName)}</div>
+      <ul>${(a.includes || []).map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
+    </div>
+    ${removed.length ? `<div class="acct-note">Taken out of this order, because the account already has them: ${removed.join(', ')}.</div>` : ''}
+    ${left ? '' : `<div class="field-missing">This account already has everything in this order.</div>`}`;
+}
+/* Take out what the account already has; put it back if the answer changes. */
+function applyAccount(it) {
+  if (!it._orig) it._orig = { pkg: it.pkg, addons: { ...it.addons } };
+  it.pkg = it._orig.pkg; it.addons = { ...it._orig.addons }; it._removed = [];
+  if (_acct.status !== 'found') return;
+  if (it.pkg) { it._removed.push(SHOP_CORE); it.pkg = null; }
+  const owned = (_acct.account && _acct.account.owned) || [];
+  for (const k of owned) {
+    if (it.addons[k]) { it.addons[k] = false; it._removed.push(window.ATTUNE_SHOP_NAMES[k] || k); }
+  }
+}
+function restoreItem(it) {
+  if (it._orig) { it.pkg = it._orig.pkg; it.addons = { ...it._orig.addons }; }
+  it._removed = []; it.confirmed = false;
+}
+function setAcctResult(email, status, account) {
+  _acct = { email, status, account: account || null };
+  const main = document.getElementById('email');
+  if (main && status === 'found') main.value = email;
+  _items.forEach((it) => { if (inExisting(it)) applyAccount(it); });
+  renderItemsStep(); renderSummary();
+}
+function setItemAcct(idx, v) {
+  const it = _items[idx]; if (!it) return;
+  it.acct = v;
+  if (v === 'existing') {
+    if (_me && !it.otherEmail && it.confirmed) applyAccount(it);
+    else if (_acct.status === 'found') applyAccount(it);
+  } else restoreItem(it);
+  renderItemsStep(); renderSummary();
+}
+function useMyAccount(idx) {
+  const it = _items[idx]; if (!it || !_me) return;
+  it.confirmed = true;
+  setAcctResult(_me.email, 'found', _me.account);
+}
+function useOtherAccount(idx) {
+  const it = _items[idx]; if (!it) return;
+  it.otherEmail = true; restoreItem(it);
+  _acct = { email: '', status: 'idle', account: null };
+  renderItemsStep(); renderSummary();
+}
+function onAcctEmail(el) {
+  const email = el.value.trim().toLowerCase();
+  clearTimeout(_acctTimer);
+  _acct.email = email;
+  if (_acct.status !== 'idle') {
+    _acct.status = 'idle'; _acct.account = null;
+    _items.forEach((it) => { if (inExisting(it)) applyAccount(it); });
+    renderSummary(); validateForm();
+  }
+  if (!EMAIL_OK(email)) return;
+  _acctTimer = setTimeout(async () => {
+    let status = 'failed', account = null;
+    try {
+      const r = await fetch('/api/verify-core', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) { status = j.ownsCore ? 'found' : 'none'; account = j.account || null; }
+    } catch {}
+    if (_acct.email !== email) return;
+    setAcctResult(email, status, account);
+    const box = document.getElementById(el.id);
+    if (box) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
+  }, 500);
+}
+/* Who is signed in, asked once. A failure leaves the email question. */
+(function whoAmI() {
+  if (!window.attuneToken || !window.attuneToken()) return;
+  fetch('/api/verify-core', { method: 'POST', headers: window.attuneHeaders(), body: JSON.stringify({ self: true }) })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j) => {
+      if (!j || !j.ownsCore || !j.email) return;
+      _me = { email: j.email, name: j.name, partnerName: j.partnerName, account: j.account };
+      renderItemsStep(); renderSummary();
+    })
+    .catch(() => {});
+})();
+
 function setItemIntent(idx, v) {
   if (!_items[idx]) return;
+  if (v !== 'self' && _items[idx].acct === 'existing') restoreItem(_items[idx]);
   _items[idx].intent = v;
   if (idx === 0) intent = v;
   renderItemsStep();
@@ -1129,6 +1285,12 @@ function EMAIL_OK(v) { return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v || '').
    recipient's first name and email. */
 function itemReady(it) {
   const name = (v) => String(v || '').trim().length >= 2;
+  if (inExisting(it)) {
+    const has = Object.keys(it.addons || {}).some((k) => k !== 'workbookVariant' && it.addons[k]);
+    const sure = (_me && !it.otherEmail) ? it.confirmed : true;
+    return sure && _acct.status === 'found' && has;
+  }
+  if (it.intent === 'self' && it.custom && it.acct !== 'new') return false;
   if (it.intent === 'self') {
     if (!name(it.partner1Name) || !name(it.partner2Name)) return false;
     return it.format === 'physical' || it.invitePartnerLater || EMAIL_OK(it.partnerEmail);
@@ -1136,7 +1298,7 @@ function itemReady(it) {
   if (it.intent === 'gift') return name(it.partner1Name) && (it.format === 'physical' || EMAIL_OK(it.recipientEmail));
   return false;
 }
-function firstSelfIdx() { return _items.findIndex((it) => it.intent === 'self'); }
+function firstSelfIdx() { return _items.findIndex((it) => it.intent === 'self' && !inExisting(it) && (!it.custom || it.acct === 'new')); }
 /* "Your email" in section 1 is the contact email, so it writes there. */
 function onSelfEmail(el) {
   const main = document.getElementById('email');
@@ -1155,7 +1317,7 @@ function buyerNameFor() {
 /* The contact email field shows only when section 1 has not asked for it,
    and the buyer's name beside it only for a gift. */
 function syncContactFields() {
-  const anySelf = firstSelfIdx() >= 0;
+  const anySelf = firstSelfIdx() >= 0 || _items.some((it) => inExisting(it));
   const g = document.getElementById('emailGroup');
   if (g) g.style.display = anySelf ? 'none' : '';
   checkOwns();
@@ -1220,7 +1382,8 @@ function renderSummary() {
     total += g.subtotal;
     const qtyLabel = g.qty > 1 ? ` <span style="color:#7A6753;font-size:.7rem">× ${g.qty}</span>` : '';
     const pkgBase = (isPhys ? p.physicalPrice : p.digitalPrice) * g.qty;
-    rows += `
+    /* Add-ons for an existing account have no package line (A240). */
+    if (g.item.pkg) rows += `
       <div class="co-card-detail">
         <div>
           <div class="name">${p.name}${qtyLabel} <span class="badge">${p.badge}</span></div>
@@ -1416,6 +1579,12 @@ function missingReasons() {
   const at = (id, text) => out.push({ id, text });
   _items.forEach((it, idx) => {
     if (!it.intent) return at(`intent-${idx}`, 'Choose who this purchase is for');
+    if (it.intent === 'self' && it.custom && !it.acct) return at(`acct-${idx}`, 'Choose a new account or an existing one');
+    if (inExisting(it)) {
+      if (_me && !it.otherEmail) { if (!it.confirmed) at(`acctme-${idx}`, 'Choose which account this is for'); }
+      else if (_acct.status !== 'found') at(`acctEmail-${idx}`, 'Fill in the email of your Attune account');
+      return;
+    }
     if (it.intent === 'self') {
       if (!name(it.partner1Name)) at(`p1name-${idx}`, 'Fill in your first name');
       if (idx === firstSelfIdx() && !EMAIL_OK(document.getElementById('email')?.value)) at('selfEmail', 'Fill in your email');
@@ -1439,7 +1608,7 @@ function missingReasons() {
    that could not run says nothing, as the server lets that order through. */
 var _owns = { email: '', msg: '' };
 var _ownsTimer = null;
-function selfPackageInCart() { return _items.some((it) => it.intent === 'self' && it.pkg); }
+function selfPackageInCart() { return _items.some((it) => it.intent === 'self' && it.pkg && !inExisting(it)); }
 function ownsBlocks() {
   const email = (document.getElementById('email')?.value || '').trim().toLowerCase();
   // Undefined while the page is still loading: validateForm runs above this.

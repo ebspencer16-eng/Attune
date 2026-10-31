@@ -4927,3 +4927,29 @@ invite tile from the account page. Then TASKS rows, the full check, push.
 - useEscapeToClose in src/App.jsx on every pop-up and both nav menus; the
   journal dialog in notes-web.jsx has its own listener. Not gated.
 - New sweeps: sweep-web-unread-status (nothing real), sweep-key-fallbacks.
+
+## 31 October: A230–A242 (Ellie's list)
+
+- Cart: an add-on line with no package crashed renderCart, so the badge,
+  the pop-up and openCart never ran (A237, A239). A custom build's first
+  add-on is now `{pkg:'core', custom:true}`; a signed-in owner
+  (`window._attuneOwner`, from verify-core `{self:true}`) gets a no-package
+  line. check-custom-build runs cart.js in a sandbox; two plants.
+- verify-core: `{self:true}` with a bearer answers the session's account
+  (names included); an email lookup answers package and owned add-ons, no
+  names. ownsCoreFor now merges orders and the account and returns
+  entitlements; create-payment-intent refuses an owned add-on (409).
+  check-standalone-ownership has three new cases; two plants.
+- Checkout section 1: custom build asks new/existing; existing looks the
+  email up and strips the core and owned add-ons; signed in, it asks to
+  confirm the session's account. State `_me`, `_acct` declared at the top.
+- packageContents in api/_catalogue.js: website Account tile, /api/home
+  `account` (app Settings), checkout's tile.
+- Website: AdditionalExercises never drew (pkg.key was never set); status
+  table on a tile; Learn locked tools get a padlock and LockedToolModal;
+  Progress tile removed; a stored partner the account is not linked to is
+  dropped (A232, waiting on Ellie's query to confirm the cause).
+- App: Settings rebuilt to the Account page's order, with Sign out; probe
+  host has `?probe=settings`. Locked sheet links to #add-ons.
+- Not driven: the Learn pop-up and the signed-in checkout on the live site
+  (both need a signed-in session).

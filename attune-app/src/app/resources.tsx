@@ -1658,12 +1658,20 @@ export default function ResourcesScreen() {
               <Text style={{ ...Type.title, color: c.textStrong, textAlign: 'center' }}>
                 {NOT_YOURS}
               </Text>
-              <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center' }}>
-                {locked.short || locked.label}
-              </Text>
+              <View style={{ alignItems: 'center', gap: Spacing.xs }}>
+                <Text style={{ ...Type.small, fontWeight: '700', color: c.textStrong, textAlign: 'center' }}>
+                  {locked.label || locked.short}
+                </Text>
+                {/* What it is, as the website's pop-up says it (A235). */}
+                {locked.blurb ? (
+                  <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center' }}>{locked.blurb}</Text>
+                ) : null}
+              </View>
               <Pressable
                 accessibilityRole="link"
-                onPress={() => { const key = locked.key; setLocked(null); openExternal(`${SITE}/offerings?add=${key}`); }}
+                /* The custom build. `?add=` was read by nothing on the shop
+                   page, so this landed at the top of it (A235). */
+                onPress={() => { setLocked(null); openExternal(`${SITE}/offerings#add-ons`); }}
                 style={{
                   backgroundColor: c.accent, borderRadius: Radius.pill,
                   paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,

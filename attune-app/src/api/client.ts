@@ -964,6 +964,16 @@ export type HomeResponse = {
   research?: { id: string; title: string; body: string; source: string; label?: string; url?: string };
   /** Flat list of add-on keys this person owns, derived server-side. */
   owned?: string[];
+  /** The account as the website's Account page lays it out (A231). */
+  account?: {
+    email: string | null;
+    name: string | null;
+    partnerName: string | null;
+    partnerEmail: string | null;
+    partnerJoined: boolean;
+    pkgName: string;
+    includes: string[];
+  };
   /** Everything purchasable. Keys match `owned`, so the two intersect directly. */
   catalogue?: CatalogueItem[];
   /** Per-exercise progress for both partners, keyed by exercise key. */

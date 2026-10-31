@@ -9,6 +9,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A232 | **Run this to tell me where "Test" comes from**, then paste me the result. Most likely this browser still held a partner from an earlier sign-in, and the dashboard never asked the server whether you have one. It asks now, and drops a partner your account is not linked to. The query confirms it from your side.<br><br>Supabase SQL editor:<br>`select o.order_num, o.pkg_key, p.name, p.partner_name, coalesce(p.partner_email,'') <> '' as has_partner_email, p.partner_profile_id, p.partner_joined, q.name as linked_partner, q.ex1_answers is not null as linked_ex1, q.ex2_answers is not null as linked_ex2 from orders o join profiles p on lower(p.email) = lower(o.buyer_email) left join profiles q on q.id = p.partner_profile_id where o.promo_code = 'TESTEMAILS' order by o.created_at desc;` |
 | A210 | **When the app is live, the order email's "Attune app" and "app" become App Store links.** Nothing to do now: they switch on with the same setting as the rest of the app links (O1). This row is the reminder to check one real confirmation email that day. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
@@ -25,20 +26,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A230 | **Tapping outside a pop-up closes it, on the app and the site.** Your words: "all pop ups on app and site also close if you tap the screen outside of them." **Status:** Starting. |
-| A231 | **App Settings laid out like the website's Account page, with a Notifications tile above the Session tile; Progress tile removed from both.** Today the app shows its own longer layout. **Status:** Starting. |
-| A232 | **Your TESTEMAILS account (Ellie, Test) shows "Test" with two exercises complete, though you never invited anyone.** Same in the insight status table. Finding where "Test" and those completions come from. **Status:** Starting. |
-| A233 | **Insight status table on the website has no tile behind it, so it is orange on cream and hard to read.** Checking app and site both. **Status:** Starting. |
-| A234 | **Below the insight status table, show the exercises and add-ons you do not own.** Your Starting Out account shows none of them today. **Status:** Starting. |
-| A235 | **A locked resource (your workbook) shows a grey padlock, and tapping it opens a pop-up describing it with a link to the add-ons.** Today the website does nothing on click. **Status:** Starting. |
-| A236 | **"Explore add-ons" from your account lands on Build a custom experience, with what you own marked "Already purchased", and checkout knows it is you.** Section 1 asks to confirm the account (email, your name, partner's name); "no" asks for another email, checks it has an account and does not own those items. **Status:** Starting. |
-| A237 | **Build a custom experience: Add to cart needs several clicks, no count appears on the cart icon, and no "see cart / keep browsing" prompt.** First addition should also put the core exercises (Communication + Expectations) in the cart, counting as two. **Status:** Starting. |
-| A238 | **Copy: "Build your experience or add to your existing account."** replaces "Start with the core exercises, then add what you want. Everything here can also be added later." **Status:** Starting. |
-| A239 | **The cart icon does not open the cart.** **Status:** Starting. |
-| A240 | **Checkout for a custom build, section 1: for you or someone else; if you, "are you setting up a new account or adding to an existing account?"** Existing: ask the email, show their package and what it includes (as admin shows it), and remove the core exercises and anything else they own. **Status:** Starting. |
-| A241 | **Cart note beside Communication + Expectations for a custom build:** "Automatically included for new accounts, will be removed on checkout screen prior to payment if you have an existing account." The server checks the email really has an account. **Status:** Starting. |
-| A242 | **Copy: "Not seeing a package that has what you're looking for? Build a custom experience instead"**, linked to that tile, replacing "* Anything not included in a package can be added to it at checkout, or purchased later from your dashboard." **Status:** Starting. |
-| A222 | **More sweeps.** Six rounds so far; the last one's findings are A229, live. **Status:** Paused while A230–A242 are built. |
+| A222 | **More sweeps.** Six rounds so far; the last one's findings are A229, live. **Status:** Next round after A230–A242. |
 
 
 ## 3. For you to review
@@ -49,6 +37,18 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | A228 | **Four fixes from this round's sweeps, live.** Checkout had a second line waiting to stop its script the day a name is filled in ahead of time; fixed, and a new check fails the build on that shape. The workbook discount email and the results-ready email: if the request failed, that device never asked again; it asks again now. Profile details: if the partner invitation does not go through, the pop-up stays open and says so instead of closing; it uses the invite form's existing words. Nothing for you to do. |
+| A230 | **Tapping outside a pop-up closes it, app and site.** Every website pop-up and every app pop-up over the page already did; the one that did not was the admin's "new promo code" box, fixed. The app's full-screen sheets (Settings, the journal) close by swiping down, which is how iPhone sheets work. **Status:** Live. |
+| A231 | **App Settings now follows the website's Account page:** your names, Personal info (Edit details opens the editor), the partner invite while it is pending, Your package, a new Notifications tile, Session (with a Sign out the app did not have), then Delete account. "What the server sees" is gone; the privacy links and the app version are small lines at the foot. Progress tile removed from the website. Your package on both now lists what you really own: the old website list said Premium included Physical Intimacy. **Status:** Live on the site; app update published. |
+| A233 | **Insight status table on the website sits on a cream tile now.** The app's was already on one. **Status:** Live. |
+| A234 | **The "More Attune Exercises" tiles show on the website again.** They waited for the package to load and were never told it had, so they never drew for anyone. Add-ons you do not own (workbook, budget, checklist) are on Learn as padlocked tiles (A235) rather than in this section; say if you want them here too. **Status:** Live. |
+| A235 | **A resource you do not own shows a grey padlock, and a press opens a pop-up:** your app words "You don't own this", its name and description, and "See more details" to the custom build. The app's pop-up shows the description now too, and its button lands on the custom build (it went to the top of the page). **Status:** Live; app update published. |
+| A236 | **Signed in, the custom build marks what you own "Already purchased"** (the core exercises included), and your add-ons go in the cart on their own. Checkout section 1 asks "Add this to the account for [email] ([you] and [partner])?" with "Yes, this account" or "No, a different email". My words in quotes; change freely. From the app there is no website sign-in, so checkout asks for the email instead. **Status:** Live. |
+| A237 | **Add to cart works first time, the cart icon counts, and a "View cart / Continue browsing" pop-up appears.** The first custom add-on also adds the core exercises, so it counts 2. Cause: the cart could not draw an add-on with no package and failed silently on every action. A new check fails the build if it comes back. **Status:** Live. |
+| A239 | **The cart opens.** Same cause as A237. **Status:** Live. |
+| A240 | **Checkout for a custom build:** for you or a gift; for you, your question "Are you setting up a new account or adding to an existing account?" Existing asks "Your account email", checks it has the core exercises, shows its package and what it includes, and takes the core exercises and anything it owns out of the order, saying so. Not found: "We could not find an Attune account with the core exercises for that email." My words except your question. The server refuses an add-on the account already has. An email lookup shows the package, never names. **Status:** Live. |
+| A238 | **Your custom build line is live:** "Build your experience or add to your existing account." |
+| A241 | **Your cart note is live** under the core exercises of a custom build: "Automatically included for new accounts, will be removed on checkout screen prior to payment if you have an existing account." Checkout checks the email really has an account before removing anything. |
+| A242 | **Your line under the package table is live,** with "Build a custom experience instead" linked up to the tile. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 

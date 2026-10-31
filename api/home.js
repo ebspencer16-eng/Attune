@@ -44,7 +44,7 @@ import { progressFor } from './_lib/exercise-progress.js';
 import { isAdminAddress } from './_lib/admins.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { resultsGate } from './_lib/results-gate.js';
-import { CATALOGUE } from './_catalogue.js';
+import { CATALOGUE, packageContents } from './_catalogue.js';
 /**
  * The insight of the day comes from api/_insights.js, which is fifty of them.
  *
@@ -167,7 +167,7 @@ export default async function handler(req) {
          answered" for everybody, which is the comment three lines above this
          one describing the bug it was written about. */
       ...DEMOGRAPHIC_COLUMNS,
-      'email',
+      'email', 'partner_email', 'partner_joined',
       'budget_data', 'checklist_data',
       'results_last_opened_at', 'partner_nudged_at', 'feedback_given_at',
     ].join(',');
@@ -682,6 +682,17 @@ export default async function handler(req) {
       // Unread alerts, newest first. Empty is the normal case.
       alerts,
       owned,
+      /* The account, as the website's Account page lays it out, for the
+         app's Settings (A231): both names and addresses, whether the partner
+         has joined, and the package with what it includes. */
+      account: {
+        email: me.email || null,
+        name: me.name || null,
+        partnerName: partner?.name || me.partner_name || null,
+        partnerEmail: me.partner_email || null,
+        partnerJoined: !!partner || !!me.partner_joined,
+        ...packageContents(pkg, owned),
+      },
       // Both names, which the app needs to label a two-column status table.
       // client.ts already declared partnerName and the response has never
       // carried it, so every app screen naming the partner said "your partner"

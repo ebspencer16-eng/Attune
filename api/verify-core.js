@@ -59,7 +59,9 @@
 export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { safeError } from './_lib/http.js';
-import { emailOrNull, ownsCoreFor, ALREADY_OWNS } from './_lib/owns-core.js';
+import { emailOrNull, ownsCoreFor, ALREADY_OWNS, accountSummary } from './_lib/owns-core.js';
+import { entitlementsFor } from './_lib/entitlements.js';
+import { userForRequest } from './_lib/verify-token.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -73,6 +75,34 @@ export default async function handler(req) {
 
   let body;
   try { body = await req.json(); } catch { return json({ error: 'bad request' }, 400); }
+
+  /* ── THE SIGNED-IN ACCOUNT (A236) ────────────────────────────────────
+     The custom build and checkout, opened from a dashboard, ask about the
+     person signed in: their address, both first names, their package and
+     what they own, so the shop can mark it "Already purchased" and checkout
+     can ask whether this is the account to add to. From the token and only
+     the token. Names go only to the account's own session; an address typed
+     into checkout gets the package and add-ons, never names. */
+  if (body?.self === true) {
+    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    const token = (req.headers.get('authorization') || req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
+    if (!token || !anonKey) return json({ error: 'not signed in' }, 401);
+    const user = await userForRequest({ token, supabaseUrl, anonKey });
+    if (!user?.id) return json({ error: 'not signed in' }, 401);
+    const read = await entitlementsFor({ supabaseUrl, serviceKey, userId: user.id, email: user.email });
+    if (!read.ok) {
+      console.error('[verify-core] self', read.error);
+      return json({ error: 'could not check that right now' }, 503);
+    }
+    const p = read.profile || {};
+    return json({
+      ownsCore: !!read.entitlements.hasGrant,
+      email: String(p.email || user.email || '').toLowerCase(),
+      name: p.name || '',
+      partnerName: p.partner_name || '',
+      account: accountSummary(read.entitlements),
+    });
+  }
 
   /* Shape only. A real check is the lookup, and rejecting an address here for
      looking unusual would turn a typo into "you do not own this". */
@@ -90,7 +120,10 @@ export default async function handler(req) {
     }
     /* The sentence travels with the answer so the checkout page does not
        keep its own copy of it (A215). */
-    return json({ ownsCore: read.ownsCore, ...(read.ownsCore ? { alreadyOwns: ALREADY_OWNS } : {}) });
+    return json({
+      ownsCore: read.ownsCore,
+      ...(read.ownsCore ? { alreadyOwns: ALREADY_OWNS, account: accountSummary(read.entitlements) } : {}),
+    });
   } catch (e) {
     return json({ error: safeError('verify-core', e, 'could not check that right now') }, 500);
   }

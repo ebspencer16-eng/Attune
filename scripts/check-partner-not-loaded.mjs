@@ -64,7 +64,9 @@ lines.forEach((l, i) => {
   if (/partnerSyncing\)?\s*\?\s*PARTNER_NOT_LOADED/.test(l)) { guarded += 1; return; }
   fail.push(`src/App.jsx:${i + 1} renders "Pending" with no partnerSyncing guard.`);
 });
-if (guarded < 3) fail.push(`only ${guarded} guarded partner rows found where there are three. The matcher has lost them.`);
+/* Two since A231: the Account page's Progress tile, the third, was removed at
+   Ellie's request. The status table's two partner cells remain. */
+if (guarded < 2) fail.push(`only ${guarded} guarded partner rows found where there are two. The matcher has lost them.`);
 
 if (fail.length) {
   console.error('check-partner-not-loaded FAILED');

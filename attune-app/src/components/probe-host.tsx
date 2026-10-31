@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 import { SafeAreaFrameContext, SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import { ExerciseOpening, ExerciseShell } from '@/components/exercise-chrome';
 import NoPurchase from '@/components/no-purchase';
+import Settings from '@/components/settings';
+import { setToken } from '@/api/session';
 import type { NoPurchaseCopy } from '@/api/client';
 
 /**
@@ -52,6 +55,8 @@ export default function ProbeHost() {
     const np = (globalThis as { __PROBE__?: { copy: NoPurchaseCopy; email: string } }).__PROBE__;
     return np ? <NoPurchase copy={np.copy} email={np.email} onRetry={() => {}} onSignedOut={() => {}} /> : null;
   }
+  /* Settings (A231), with /api/home answered by the page's stubbed fetch. */
+  if (name === 'settings') return <SettingsProbe />;
   const data = (globalThis as { __PROBE__?: CoverProbe }).__PROBE__;
   if (name !== 'cover' || !data) return null;
 
@@ -82,4 +87,11 @@ export default function ProbeHost() {
       </SafeAreaInsetsContext.Provider>
     </SafeAreaFrameContext.Provider>
   );
+}
+
+/** Settings needs a token before it asks /api/home for anything. */
+function SettingsProbe() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => { setToken('probe').then(() => setReady(true)); }, []);
+  return ready ? <Settings onClose={() => {}} onSignedOut={() => {}} /> : null;
 }

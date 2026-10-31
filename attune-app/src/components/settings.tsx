@@ -24,7 +24,8 @@ import { Pressable } from '@/components/pressable';
 import { openExternal } from '@/api/open-external';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { deleteAccount, fetchHome, setDailyPush, SITE_URL } from '@/api/client';
+import { deleteAccount, fetchHome, invitePartner, setDailyPush, SITE_URL } from '@/api/client';
+import { signOut } from '@/api/auth';
 import Admin from '@/components/admin';
 import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
@@ -37,28 +38,6 @@ import { WAITING_SETTINGS } from '@/constants/waiting';
 const c = Colors.light;
 const SITE = SITE_URL;
 
-/**
- * What the server says about each exercise.
- *
- * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
- * "Rel Relf - still no data on these pages." "Physical Intimacy is still
- * missing from the top nav. Am I viewing an old version of the simulator?"
- *
- * Both of those are one question: what does the server think we own, and what
- * does it think we have finished. The answer decides what the app draws, and
- * until now there was no way to see it. So a missing section could be an app
- * bug, a stale bundle, an ownership problem, or a partner who has not finished,
- * and telling them apart meant me reading code and guessing.
- *
- * Physical Intimacy turned out to be ownership: the website was granting it
- * from a localStorage key and the app was asking the server, so the two
- * disagreed and the app was right. That took a long time to establish and this
- * panel would have answered it immediately.
- *
- * It reads /api/home, which every screen already calls, and shows exactly what
- * that says. No interpretation: if this panel and a screen disagree, the screen
- * is wrong, and that is worth being able to see.
- */
 /**
  * The way into the admin, for the two people who have one.
  *
@@ -193,8 +172,7 @@ function NotificationsRow() {
   };
 
   return (
-    <View style={{ ...card(), marginTop: Spacing.xl }}>
-      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Notifications</Text>
+    <View>
       <Pressable
         accessibilityRole="button"
         onPress={act}
@@ -347,72 +325,10 @@ function DailyPushRows() {
   };
 
   return (
-    <View style={{ ...card(), marginTop: Spacing.lg }}>
-      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>{DAILY_HEADING}</Text>
+    <View style={{ marginTop: Spacing.md, borderTopWidth: 1, borderTopColor: c.border, paddingTop: Spacing.md }}>
+      <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>{DAILY_HEADING}</Text>
       <DailyRow label={DAILY_INSIGHT_LABEL} kind="insight" at={state.insight} onPick={pick} />
       <DailyRow label={DAILY_WORD_LABEL} kind="word" at={state.word} onPick={pick} />
-    </View>
-  );
-}
-
-function ExerciseStatus() {
-  const [home, setHome] = useState<HomeResponse | null>(null);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await fetchHome();
-      if (cancelled) return;
-      if (res.ok) setHome(res.data); else setFailed(true);
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  const exercises = Object.values(home?.exercises ?? {})
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-
-  return (
-    <View style={{ ...card(), marginTop: Spacing.lg }}>
-      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>
-        What the server sees
-      </Text>
-
-      {failed ? (
-        <Text style={{ ...Type.small, color: c.textMuted }}>
-          Could not reach the server just now.
-        </Text>
-      ) : !home ? (
-        <ActivityIndicator color={c.accentQuiet} />
-      ) : (
-        <View>
-          {exercises.map((ex) => (
-            <View
-              key={ex.key}
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-                paddingVertical: Spacing.xs,
-              }}>
-              <Text style={{ ...Type.small, color: c.text, flex: 1 }} numberOfLines={1}>
-                {ex.label}
-              </Text>
-              {/* Owned first, because nothing else matters if the answer is no.
-                  Then each person, because "waiting on my partner" and "waiting
-                  on me" are different problems with different fixes. */}
-              <Text style={{ ...Type.small, fontSize: 11, color: ex.owned ? c.text : c.textMuted }}>
-                {ex.owned
-                  ? `${ex.mine ? 'you' : '—'} / ${ex.theirs ? 'partner' : '—'}`
-                  : 'not owned'}
-              </Text>
-            </View>
-          ))}
-          <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginTop: Spacing.sm }}>
-            {home.resultsReady
-              ? 'Results are open.'
-              : WAITING_SETTINGS}
-          </Text>
-        </View>
-      )}
     </View>
   );
 }
@@ -429,6 +345,19 @@ export default function Settings({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [acct, setAcct] = useState<HomeResponse['account'] | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [resent, setResent] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const load = () => {
+    fetchHome().then((res) => { if (res.ok) setAcct(res.data.account ?? null); });
+  };
+  useEffect(load, []);
+  const resend = async () => {
+    if (!acct?.partnerEmail || resent === 'sending') return;
+    setResent('sending');
+    const r = await invitePartner(acct.partnerEmail, acct.partnerName || undefined);
+    setResent(r.ok ? 'sent' : 'failed');
+  };
 
   const armed = typed.trim().toUpperCase() === 'DELETE' && !busy;
 
@@ -482,7 +411,17 @@ export default function Settings({
 
   return (
     <Sheet onClose={onClose} closeLabel="Close">
-      <Text style={{ ...Type.hero, color: c.textStrong }}>Settings</Text>
+      {/* ── THE WEBSITE'S ACCOUNT PAGE, IN THE SAME ORDER (A231) ──────────
+          Ellie: "make sure the settings page on app matches the account page
+          on the web... and just add a notifications tile above the session
+          tile." Personal info, the invitation while it is pending, the
+          package, notifications, the session, then delete. The panel of
+          what the server sees went with it, and the privacy links are quiet
+          lines at the foot: App Review wants them reachable, not a tile. */}
+      <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Account</Text>
+      <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.xs }}>
+        {`${acct?.name || 'Your'} & ${acct?.partnerName || 'Partner'}`}
+      </Text>
 
       {/* The invitation, when the home card "Invite your partner" opened
           this (A206). Above the profile, because it is what they came for. */}
@@ -492,39 +431,96 @@ export default function Settings({
         </View>
       ) : null}
 
-      {/* Your profile, first, because it is the only thing on this screen
-          somebody opens it to change. It used to open the website. */}
       <View style={{ ...card(), marginTop: Spacing.xl }}>
-        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Your profile</Text>
-        <ProfileEditor />
+        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Personal info</Text>
+        {editing ? (
+          <ProfileEditor />
+        ) : (
+          <>
+            <InfoRow label="Your name" value={acct?.name} />
+            <InfoRow label="Your email" value={acct?.email} />
+            <InfoRow label="Partner's name" value={acct?.partnerName} />
+            <InfoRow label="Partner's email" value={acct?.partnerEmail} last />
+          </>
+        )}
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => { if (editing) load(); setEditing(!editing); }}
+          style={{ paddingTop: Spacing.md }}>
+          <Text style={{ ...Type.small, fontWeight: '700', color: c.accent }}>
+            {editing ? 'Done' : 'Edit details \u2192'}
+          </Text>
+        </Pressable>
       </View>
 
-      <NotificationsRow />
-      <DailyPushRows />
+      {acct?.partnerEmail && !acct.partnerJoined ? (
+        <View style={{ ...card(), marginTop: Spacing.lg }}>
+          <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Partner invite</Text>
+          <Text style={{ ...Type.small, color: c.text, lineHeight: 20 }}>
+            {`We sent an invite to ${acct.partnerEmail}. ${acct.partnerName || 'Your partner'} hasn't joined yet. You can send it again.`}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={resend}
+            disabled={resent === 'sending'}
+            style={{
+              marginTop: Spacing.md, alignSelf: 'flex-start', borderRadius: Radius.md,
+              paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+              backgroundColor: resent === 'sent' ? '#059669' : c.accent,
+            }}>
+            <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>
+              {resent === 'sent' ? 'Invite sent \u2713' : 'Resend invite'}
+            </Text>
+          </Pressable>
+          {resent === 'failed' ? (
+            <Text style={{ ...Type.small, color: '#B4463A', marginTop: Spacing.sm }}>{SAVE_FAILED}</Text>
+          ) : null}
+        </View>
+      ) : null}
 
-      <View style={{ ...card(), marginTop: Spacing.xl }}>
-        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Privacy</Text>
-        <Row label="Privacy policy and terms" onPress={() => openExternal(`${SITE}/legal`)} />
-        <Row label="Your privacy choices" onPress={() => openExternal(`${SITE}/privacy-choices`)} last />
+      {acct ? (
+        <View style={{ ...card(), marginTop: Spacing.lg }}>
+          <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Your package</Text>
+          <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.sm }}>{acct.pkgName}</Text>
+          {acct.includes.map((f) => (
+            <View key={f} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: 3 }}>
+              <Text style={{ color: c.accent, fontSize: 13, fontWeight: '700' }}>{'\u2713'}</Text>
+              <Text style={{ ...Type.small, color: c.text }}>{f}</Text>
+            </View>
+          ))}
+          {/* The website's shop, as every "add" in the app is: the app does
+              not sell (check-app-does-not-sell). */}
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => openExternal(`${SITE}/offerings#add-ons`)}
+            style={{ paddingTop: Spacing.md, marginTop: Spacing.sm, borderTopWidth: 1, borderTopColor: c.border }}>
+            <Text style={{ ...Type.small, fontWeight: '700', color: c.accent }}>Explore other packages and add-ons {'\u2192'}</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
+      <View style={{ ...card(), marginTop: Spacing.lg }}>
+        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Notifications</Text>
+        <NotificationsRow />
+        <DailyPushRows />
       </View>
 
-      <ExerciseStatus />
+      <View style={{ ...card(), marginTop: Spacing.lg }}>
+        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Session</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md }}>
+          <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }} numberOfLines={1}>
+            {`Signed in as ${acct?.email || acct?.name || ''}`}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={async () => { await signOut(); onSignedOut(); }}
+            hitSlop={8}>
+            <Text style={{ ...Type.small, fontWeight: '700', color: '#ef4444' }}>Sign out</Text>
+          </Pressable>
+        </View>
+      </View>
 
-      {/* ── WHICH VERSION IS THIS ───────────────────────────────────────────
-          Ellie, with the app on her phone: "Not seeing the changes in my app on
-          my phone, what do I need to do for that?"
-
-          A fair question with no answer on the screen. The app checks for new
-          code when it opens, downloads it in the background, and runs it the
-          next time it opens, so a change is one launch behind and there was
-          nothing anywhere saying which code was running. This line says it: the
-          version, the build, and when the running update was published.
-
-          It reads "development" in Expo Go, where updates are switched off, so
-          it never claims something the simulator cannot know. */}
       <AdminRow />
-
-      <AppVersion />
 
       {/* ── Delete account ──────────────────────────────────────────────────
           Quiet, and last on the screen. The first version was a bordered card
@@ -620,7 +616,29 @@ export default function Settings({
           </View>
         )}
       </View>
+      <View style={{ marginTop: Spacing.xl, alignItems: 'center', gap: Spacing.xs }}>
+        <Text style={{ ...Type.small, fontSize: 12, color: c.textMuted, textDecorationLine: 'underline' }}
+          onPress={() => openExternal(`${SITE}/legal`)}>Privacy policy and terms</Text>
+        <Text style={{ ...Type.small, fontSize: 12, color: c.textMuted, textDecorationLine: 'underline' }}
+          onPress={() => openExternal(`${SITE}/privacy-choices`)}>Your privacy choices</Text>
+      </View>
+
+      <AppVersion />
     </Sheet>
+  );
+}
+
+function InfoRow({ label, value, last }: { label: string; value?: string | null; last?: boolean }) {
+  return (
+    <View style={{
+      flexDirection: 'row', justifyContent: 'space-between', gap: Spacing.md,
+      paddingVertical: Spacing.sm, borderBottomWidth: last ? 0 : 1, borderBottomColor: c.border,
+    }}>
+      <Text style={{ ...Type.small, color: c.textMuted }}>{label}</Text>
+      <Text style={{ ...Type.small, color: c.textStrong, fontWeight: '500', flexShrink: 1, textAlign: 'right' }} numberOfLines={1}>
+        {value || '\u2014'}
+      </Text>
+    </View>
   );
 }
 
@@ -651,22 +669,6 @@ function Sheet({
         </ScrollView>
       </SafeAreaView>
     </Modal>
-  );
-}
-
-function Row({ label, onPress, last }: { label: string; onPress: () => void; last?: boolean }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={{
-        paddingVertical: Spacing.md,
-        borderBottomWidth: last ? 0 : 1, borderBottomColor: c.border,
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-      <Text style={{ ...Type.body, color: c.text }}>{label}</Text>
-      <Text style={{ ...Type.body, color: c.textMuted }}>{'›'}</Text>
-    </Pressable>
   );
 }
 

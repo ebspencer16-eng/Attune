@@ -19,9 +19,9 @@ import { claimPromoUse } from './_lib/promo-claim.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
-import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES, PACKAGE_NAMES } from './_catalogue.js';
+import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES, PACKAGE_NAMES, SHOP_NAMES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, compactItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
-import { isStandaloneCart, ownsCoreFor, emailOrNull, ALREADY_OWNS } from './_lib/owns-core.js';
+import { isStandaloneCart, ownsCoreFor, emailOrNull, ALREADY_OWNS, ownedKeys } from './_lib/owns-core.js';
 import { fulfilOrder } from './_lib/fulfil-order.js';
 import { COMPILED_BETA_CODES, codeMetaFromRow } from './_lib/beta-codes.js';
 /* What each package already includes, so this file does not say it again. */
@@ -472,6 +472,16 @@ export default async function handler(req) {
       return new Response(JSON.stringify({
         error: 'A single exercise can only be added to an existing Attune assessment. That email does not have one yet.',
       }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+    }
+    /* And nothing it already has (A240). Checkout takes owned items out
+       before payment; this is the rule for a request that did not. */
+    const ASKED = { reflection: 'addonReflection', intimacy: 'addonIntimacy', conflict: 'addonConflict', workbook: 'addonWorkbook', budget: 'addonBudget', checklist: 'addonChecklist' };
+    const again = ownedKeys(read.entitlements).filter((k) => items.some((it) => it[ASKED[k]]));
+    if (again.length) {
+      return new Response(JSON.stringify({
+        alreadyOwns: true,
+        error: `That account already has ${again.map((k) => SHOP_NAMES[k]).join(', ')}.`,
+      }), { status: 409, headers: { 'Content-Type': 'application/json' } });
     }
   }
 

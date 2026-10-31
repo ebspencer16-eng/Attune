@@ -4012,6 +4012,13 @@ function wirePromoForm() {
 
   open.onclick = () => { err.textContent = ''; dlg.showModal(); el('pn-code').focus(); };
   el('pn-cancel').onclick = () => dlg.close();
+  /* A press on the backdrop lands on the <dialog> itself, outside its box:
+     close, as every pop-up does (A230). */
+  dlg.addEventListener('click', (e) => {
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
 
   el('pn-save').onclick = async () => {
     err.textContent = '';
