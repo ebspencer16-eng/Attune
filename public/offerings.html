@@ -1135,29 +1135,15 @@ document.addEventListener('click', function(e) {
     { key:'checklist', name:'Merging Lives Checklist', desc:'The practical list for couples setting up a life together.', price:'$20' }
   ];
 
-  /* ── WHAT THE SIGNED-IN ACCOUNT ALREADY HAS (A236) ─────────────────────
-     Ellie: "that tile and anything else that user already owns should be
-     greyed out and say 'already purchased'". Asked of the server with the
-     session's token; signed out, or a check that fails, draws the page as
-     before. The cart reads window._attuneOwner too, so a signed-in owner's
-     add-ons go on a line of their own with no core exercises. */
-  function owns(it) {
-    var o = window._attuneOwner;
-    if (!o || !o.ownsCore) return false;
-    return it.core || (o.owned || []).indexOf(it.key) >= 0;
-  }
   function tile(it) {
     var d = document.createElement('div');
-    var had = owns(it);
-    d.className = 'byo-tile' + (it.core || had ? ' core' : '');
+    d.className = 'byo-tile' + (it.core ? ' core' : '');
     d.innerHTML =
       '<h4>' + it.name + '</h4>' +
       '<p>' + it.desc + '</p>' +
       '<div class="byo-foot">' +
         '<span class="byo-price">' + it.price + '</span>' +
-        (had
-          ? '<span class="byo-core-note">Already purchased</span>'
-          : it.core
+        (it.core
           ? '<span class="byo-core-note">Automatically included</span>'
           : '<button class="byo-add addon-tile-btn" data-key="' + it.key + '">Add to cart</button>') +
       '</div>';
@@ -1173,17 +1159,9 @@ document.addEventListener('click', function(e) {
     if (rs) { rs.innerHTML = ''; RESOURCES.forEach(function (it) { rs.appendChild(tile(it)); }); }
   }
   drawTiles();
-  if (window.attuneToken && window.attuneToken()) {
-    fetch('/api/verify-core', { method: 'POST', headers: window.attuneHeaders(), body: JSON.stringify({ self: true }) })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) {
-        if (!j || !j.ownsCore) return;
-        window._attuneOwner = { ownsCore: true, owned: (j.account && j.account.owned) || [] };
-        drawTiles();
-        try { renderCart(); } catch (e) {}
-      })
-      .catch(function () {});
-  }
+  /* Signed in or not, the tiles are the same: Ellie (A236), "I don't want
+     those tiles to grey out". What the account owns comes out at checkout,
+     once the buyer says the order is for their existing account. */
   /* Arriving at #add-ons from a dashboard lands on the custom build (A236).
      The browser's own jump happens before the tiles and fonts settle, so it
      is made again once they have. */

@@ -9,6 +9,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
+| A245 | **Your real account shows one action tile because there is one thing to do.** The tiles only appear for something waiting: set up your profile, invite your partner, finish an exercise, nudge your partner, open your results, use a tool you own but have not used, a new In Practice article, revisit results after 30 days, feedback. A couple who has done everything gets one. Do you want it always showing three? If so, tell me which to keep there, for example "Explore add-ons", the newest article, or a results section to revisit, and the words for each. |
 | A210 | **When the app is live, the order email's "Attune app" and "app" become App Store links.** Nothing to do now: they switch on with the same setting as the rest of the app links (O1). This row is the reminder to check one real confirmation email that day. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
@@ -25,12 +26,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A236 | **Shop tiles stay live when you are signed in; owned items come out only at checkout.** Your words: "I don't want those tiles to grey out, I just want it to remove rows if I say the purchase is for my existing account but I'm trying to buy things I already own." Signed in, you may be building it for someone else. **Status:** Starting. |
-| A243 | **Signed in, the top bar on the static pages shows your profile circle, linking to your dashboard, instead of "Sign in".** **Status:** Starting. |
-| A244 | **Account page: Session tile removed; a red bold "Sign out" link above "Delete account".** App Settings the same, since it mirrors the Account page. **Status:** Starting. |
-| A245 | **Your real account shows one action tile on the dashboard.** Finding what the others should be and why they are missing. **Status:** Starting. |
-| A246 | **Insights nav menu: no scroll bar; the tiles shrink to fit one screen at any window size.** **Status:** Starting. |
-| A247 | **A different word of the day today, and good, positive ones for the next few days while Mya tests.** **Status:** Starting. |
 | A222 | **More sweeps.** Round seven, live: the results survey's progress bar drew no fill and a chosen star or option took no colour, because three colours it used were never defined; the A and B tiles in the intimacy exercise had no background for the same reason. Fixed, and a new check fails the build on an undefined colour. A sweep for lookups used without checking (the cart crash) found nothing else live. Nothing for you to do. **Status:** Next round picks new shapes. |
 
 
@@ -42,6 +37,11 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | A232 | **"Test" was never linked to your account: your query shows no partner on the server.** The completions came from a partner this browser kept from an earlier sign-in. Since yesterday's update the dashboard checks with the server and drops a partner your account is not linked to. Reload the dashboard on that browser: Test's exercises should read Pending. |
+| A236 | **The shop is the same signed in or not; owned items come out only at checkout.** Your words: "I don't want those tiles to grey out, I just want it to remove rows if I say the purchase is for my existing account". Signed in, the first add-on still brings the core exercises, so you can build one for someone else. At checkout, "Adding to an existing account" asks you to confirm your account and removes what it already owns. Live. |
+| A243 | **Signed in, the top bar shows your initial in the dashboard's circle instead of "Sign in", and it opens your dashboard.** On a phone the menu's "Sign in" reads "Your dashboard" (my words; change freely). Every page with that link, the In Practice articles included. Live. |
+| A244 | **"Sign out", red and bold, above "Delete account"; the Session tile is gone.** Website Account page and app Settings. Live; app update published. |
+| A246 | **Insights nav menu: no scroll bar.** The menu measures the window and shrinks its type and spacing to fit, down to half size; a taller window or a group closing lets it grow back. Checked in a 380-point-tall box. Live on the website. |
+| A247 | **Word of the day, chosen for the next week:** Appreciation today, then Gratitude, Friendship, Encouragement, Admiration, Belonging, Humor (to 6 November), all your own words from the list. The site, the app and the daily notification all read it. The normal rotation resumes 7 November. Live. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 

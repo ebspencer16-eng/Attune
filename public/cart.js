@@ -337,9 +337,7 @@ function renderCart() {
 
     // ── Available add-ons, shown by default so they're easy to add ──────
     const incl = PKG_INCLUDED[item.pkg] || {};
-    /* And never what the signed-in account already has (A236). */
-    const mine = (window._attuneOwner && window._attuneOwner.owned) || [];
-    const available = ADDON_ORDER.filter(k => !item.addons[k] && !incl[k] && (item.pkg || mine.indexOf(k) < 0));
+    const available = ADDON_ORDER.filter(k => !item.addons[k] && !incl[k]);
     const picker = available.length ? `
     <div class="cart-item cart-addon-picker">
       <div class="cart-addon-picker-label">Add to your order</div>
@@ -439,22 +437,19 @@ function addAddonToCart(key, ev) {
 
      So it is the core package with the add-on on it, marked custom so the
      cart can say the core line goes if the buyer already has an account,
-     and checkout can ask (A240, A241). Somebody signed in who already owns
-     the core exercises gets a line with no package instead: they are adding
-     to their account (A236). This used to push that no-package line for
-     everybody, and the cart could not draw it: every render threw, so the
+     and checkout can ask (A240, A241). This used to push a line with no
+     package, and the cart could not draw it: every render threw, so the
      count never moved, the button needed several presses, and the cart
-     would not open (A237, A239). */
-  var owner = window._attuneOwner;
-  if (owner && owner.owned && owner.owned.indexOf(key) >= 0) {
-    _addonBtnFlash(btn, 'Already purchased', true);
-    return;
-  }
-  var target = _cartItems.find(function (it) { return it.custom || (!it.pkg && owner); });
+     would not open (A237, A239).
+
+     The same for somebody signed in. A236 first marked what they own
+     "Already purchased" and kept it out of the cart; Ellie reversed it: "if
+     I own this I can't go build an experience for someone else. I don't
+     want those tiles to grey out, I just want it to remove rows if I say the
+     purchase is for my existing account." Checkout does that removal. */
+  var target = _cartItems.find(function (it) { return it.custom || !it.pkg; });
   if (!target && !_cartItems.length) {
-    target = owner && owner.ownsCore
-      ? { id: _newItemId(), pkg: null, format: 'digital', qty: 1, addons: _defaultAddons() }
-      : { id: _newItemId(), pkg: 'core', custom: true, format: 'digital', qty: 1, addons: _defaultAddons() };
+    target = { id: _newItemId(), pkg: 'core', custom: true, format: 'digital', qty: 1, addons: _defaultAddons() };
     _cartItems.push(target);
   }
   if (target && (target.addons[key] || _addonIncludedInPkg(target.pkg, key))) {

@@ -37,7 +37,7 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const SRC = readFileSync(`${ROOT}public/cart.js`, 'utf8');
 const fails = [];
 
-function page(owner) {
+function page(owner, saved) {
   const els = new Map();
   const el = (id) => {
     if (!els.has(id)) {
@@ -52,7 +52,7 @@ function page(owner) {
     }
     return els.get(id);
   };
-  const store = new Map();
+  const store = new Map(saved ? [['attune_cart', JSON.stringify(saved)]] : []);
   const ctx = {
     console,
     setTimeout: () => 0,
@@ -115,24 +115,35 @@ for (const name of ['addAddonToCart', 'renderCart', 'openCart', 'updateCartBadge
 }
 
 // ── Signed in, owning the core exercises and Build a Budget ───────────────
+/* Ellie, A236 first: owned tiles "should be greyed out and say 'already
+   purchased'". Then reversed: "if I own this I can't go build an experience
+   for someone else. I don't want those tiles to grey out, I just want it to
+   remove rows if I say the purchase is for my existing account". So being
+   signed in changes nothing in the cart: the same custom line, owned add-ons
+   included, and checkout takes them out. A flag a page might still set must
+   not bring the old behaviour back. */
 {
   const p = page({ ownsCore: true, owned: ['budget'] });
-  press(p, 'conflict');
+  press(p, 'budget');
   const c = p.cart();
-  if (c.length !== 1 || c[0].pkg !== null || !c[0].addons?.conflict) {
-    fails.push(`an account that owns the core exercises should get its add-on on a line with no package; the cart holds ${JSON.stringify(c)}.`);
+  if (c.length !== 1 || c[0].pkg !== 'core' || !c[0].custom || !c[0].addons?.budget) {
+    fails.push(`signed in, an add-on the account owns should still go in the cart on the custom line (it may be for someone else); the cart holds ${JSON.stringify(c)}.`);
   }
-  try { p.ctx.openCart(); } catch (e) { fails.push(`the cart does not open with a no-package line in it: ${e.message}`); }
+  try { p.ctx.openCart(); } catch (e) { fails.push(`the cart does not open: ${e.message}`); }
   if (!p.el('cart-overlay').classList.contains('open')) fails.push('openCart did not open the cart.');
+}
+
+// ── A saved line with no package still draws ──────────────────────────────
+/* Carts saved before the custom build, and checkout's own existing-account
+   lines, have no package. The A237 crash was this line. */
+{
+  const p = page(null, [{ id: 'x', pkg: null, format: 'digital', qty: 1, addons: { conflict: true } }]);
+  try { p.ctx.openCart(); } catch (e) { fails.push(`the cart does not open with a no-package line in it: ${e.message}`); }
   if (p.el('cart-total').textContent !== '$40') fails.push(`a lone Conflict Patterns should total $40; the cart says ${p.el('cart-total').textContent}.`);
-  if (p.el('cart-badge').textContent !== '1') fails.push(`one add-on and no package should read 1; it reads "${p.el('cart-badge').textContent}".`);
-  const b = press(p, 'budget');
-  if (p.cart()[0]?.addons?.budget) fails.push('an add-on the signed-in account already owns went into the cart.');
-  if (b.textContent !== 'Already purchased') fails.push(`pressing an owned add-on should say "Already purchased"; it said "${b.textContent}".`);
 }
 
 if (fails.length) {
   console.error('[check-custom-build] FAILED:\n  ' + fails.join('\n  '));
   process.exit(1);
 }
-console.log('[check-custom-build] the custom build adds the core exercises and counts two; a signed-in owner\'s add-ons go on their own line, which draws, opens and totals; an owned add-on is refused.');
+console.log('[check-custom-build] the custom build adds the core exercises and counts two; signed in changes nothing; a saved line with no package draws, opens and totals.');

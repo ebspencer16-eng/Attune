@@ -4275,6 +4275,35 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
    * pushes the rest off the panel.
    */
   const [openGroup, setOpenGroup] = useState(null);
+  /* ── IT FITS, AT ANY WINDOW SIZE (A246) ───────────────────────────────
+     Ellie: "I don't want a scroll bar on the nav menu, I just want the tiles
+     to resize if needed so that they fit on one screen no matter the size of
+     my window."
+
+     Every size in this menu is in em, from one base font size. The menu
+     measures what it needs against what it has and scales that base, down to
+     half, when it does not fit; a taller window, or a group closing, lets it
+     grow back to full size. */
+  const fitRef = useRef(null);
+  const [fitScale, setFitScale] = useState(1);
+  useLayoutEffect(() => {
+    const el = fitRef.current;
+    if (!el) return undefined;
+    const fit = () => {
+      const need = el.scrollHeight, have = el.clientHeight;
+      if (!have || !need) return;
+      setFitScale((k) => {
+        let next = k;
+        if (need > have + 1) next = Math.max(0.5, k * (have / need) * 0.98);
+        else if (k < 1 && need < have * 0.92) next = Math.min(1, k * (have / need) * 0.98);
+        return Math.abs(next - k) < 0.01 ? k : next;
+      });
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [openGroup, fitScale, groups.length]);
   /* Shared out over whatever height the panel has. See the panel's own note. */
   /* Ellie: "the words don't have any buffer on the left side of the tile."
      They were flush to it: this was zero. */
@@ -4313,11 +4342,11 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
             {firstExercise ? (
               <div style={{
                 display: "flex", alignItems: "center", gap: NAV_GAP,
-                paddingTop: isMobile ? "1rem" : "1.25rem", paddingBottom: "0.35rem",
+                paddingTop: isMobile ? "1em" : "1.25em", paddingBottom: "0.35em",
                 paddingLeft: LABEL_LEFT,
               }}>
                 <span style={{
-                  fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase",
+                  fontSize: "0.58em", letterSpacing: "0.22em", textTransform: "uppercase",
                   color: "#A36333", fontWeight: 700, fontFamily: BFONT,
                 }}>
                   {eyebrow}
@@ -4346,8 +4375,8 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
                 display: "flex", alignItems: "center", gap: NAV_GAP, flex: 1, minWidth: 0,
                 background: "transparent", border: "none", cursor: "pointer",
                 textAlign: "left", fontFamily: HFONT, color: C.ink,
-                paddingTop: isExercise ? "0.45rem" : "0.5rem",
-                paddingBottom: isExercise ? "0.45rem" : "0.5rem",
+                paddingTop: isExercise ? "0.45em" : "0.5em",
+                paddingBottom: isExercise ? "0.45em" : "0.5em",
                 minHeight: 0, flexShrink: 1,
                 paddingLeft: isExercise ? EXERCISE_LEFT : LABEL_LEFT,
                 paddingRight: 0,
@@ -4363,8 +4392,8 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
               <span style={{
                 flex: 1,
                 fontSize: isExercise
-                  ? (isMobile ? "1rem" : "1.1rem")
-                  : (isMobile ? "1.2rem" : "1.35rem"),
+                  ? (isMobile ? "1em" : "1.1em")
+                  : (isMobile ? "1.2em" : "1.35em"),
                 fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em",
               }}>
                 {g.label}
@@ -4382,7 +4411,7 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
                   width: NAV_CARET_COL, flexShrink: 0,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   background: "transparent", border: "none", cursor: "pointer",
-                  color: "#A8997F", fontSize: "0.68rem", lineHeight: 1, padding: 0,
+                  color: "#A8997F", fontSize: "0.68em", lineHeight: 1, padding: 0,
                   transform: openGroup === g.id ? "rotate(180deg)" : "none",
                   transformOrigin: "center",
                 }}>
@@ -4396,7 +4425,7 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
             {openGroup === g.id ? (
               /* The pages under this section, each opening its own. The cover
                  is left out: it is what the row itself opens. */
-              <div style={{ paddingLeft: (isExercise ? EXERCISE_LEFT : LABEL_LEFT) + NAV_ICON_COL + NAV_GAP, paddingBottom: "0.35rem" }}>
+              <div style={{ paddingLeft: (isExercise ? EXERCISE_LEFT : LABEL_LEFT) + NAV_ICON_COL + NAV_GAP, paddingBottom: "0.35em" }}>
                 {kids.filter((ch) => !ch.cover).map((ch) => (
                   <button
                     key={ch.id}
@@ -4405,8 +4434,8 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
                     style={{
                       display: "block", width: "100%", textAlign: "left",
                       background: "transparent", border: "none", cursor: "pointer",
-                      fontFamily: BFONT, color: C.muted, fontSize: isMobile ? "0.82rem" : "0.88rem",
-                      padding: "0.3rem 0", lineHeight: 1.3,
+                      fontFamily: BFONT, color: C.muted, fontSize: isMobile ? "0.82em" : "0.88em",
+                      padding: "0.3em 0", lineHeight: 1.3,
                     }}>
                     {ch.label}
                   </button>
@@ -4431,7 +4460,8 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
   ].filter((t) => t.groups.length);
 
   return (
-    <div style={{
+    <div ref={fitRef} data-block="insights/menu-fit" style={{
+      fontSize: `${16 * fitScale}px`,
       flex: 1, minHeight: 0, display: "flex", flexDirection: "column",
       /* ── STACKED, NOT SPREAD ──────────────────────────────────────────
          This was `space-between`, which was right for a column of plain rows
@@ -4441,7 +4471,7 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
          any room you carve out. They stack from the top now and the tile's own
          margin is the gap. */
       justifyContent: "flex-start",
-      overflowY: "auto",
+      overflow: "hidden",
     }}>
       {TILES.map((tile) => (
         /* ── FOUR TILES, STACKED ──────────────────────────────────────────
@@ -4461,8 +4491,8 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
             border: `1px solid ${C.stone}`,
             borderRadius: 14,
             background: "rgba(255,255,255,0.55)",
-            padding: "0.35rem 0",
-            marginBottom: "0.5rem",
+            padding: "0.35em 0",
+            marginBottom: "0.5em",
           }}>
           {tile.groups.map((g) => renderGroup(g, groups.indexOf(g)))}
         </div>
@@ -19387,23 +19417,6 @@ export default function App() {
 
                 {/* The Progress tile was here; Ellie had it taken out (A231). */}
 
-                {/* Sign out */}
-                {isLoggedIn && (
-                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, overflow: "hidden" }}>
-                    <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
-                      <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>Session</div>
-                    </div>
-                    <div style={{ padding: "0.85rem 1.35rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: "0.82rem", color: "#7A6753", fontFamily: font.body }}>Signed in as {account?.email || userName}</span>
-                      <button
-                        onClick={() => signOutEverywhere({ setAccount })}
-                        style={{ fontSize: "0.75rem", fontWeight: 600, color: "#ef4444", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                        Sign out
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 {/* Delete account.
 
                     Deliberately quiet, and deliberately last. It sat directly
@@ -19417,6 +19430,17 @@ export default function App() {
                     you came to do. */}
                 {isLoggedIn && (
                   <div style={{ marginTop: "3.5rem", paddingTop: "1.25rem", borderTop: "1px solid #EFE7DD", textAlign: "center" }}>
+                    {/* Sign out, red and bold, above Delete account. Ellie
+                        (A244): "Remove session tile from account page and just
+                        add a sign out (red bold) link above the delete account
+                        link". */}
+                    <div style={{ marginBottom: "0.9rem" }}>
+                      <button
+                        onClick={() => signOutEverywhere({ setAccount })}
+                        style={{ fontSize: "0.82rem", fontWeight: 700, color: "#ef4444", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: "0.35rem" }}>
+                        Sign out
+                      </button>
+                    </div>
                     {!deleteOpen ? (
                       <button
                         onClick={() => { setDeleteOpen(true); setDeleteErr(""); setDeleteConfirm(""); setDeletePassword(""); }}

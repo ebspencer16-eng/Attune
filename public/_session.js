@@ -42,4 +42,38 @@
 
   w.attuneToken = attuneToken;
   w.attuneHeaders = attuneHeaders;
+
+  /* ── SIGNED IN, THE NAV SAYS SO (A243) ──────────────────────────────────
+     Ellie: "it's misleading because I see sign in on the top toolbar. Maybe,
+     if the user is signed in, they should instead see the profile icon in the
+     circle up there and that should take them to their dashboard?"
+
+     Every static page's nav has `a.nav-signin` and a mobile menu link to
+     /app?signin=1. With a session, the first becomes the dashboard's circle
+     (their initial, the same colours) and the second goes to the dashboard.
+     The name is the one the dashboard keeps in attune_account; with none, a
+     plain circle. */
+  function signedInNav() {
+    if (!attuneToken()) return;
+    var name = '';
+    try { name = (JSON.parse(localStorage.getItem('attune_account') || 'null') || {}).name || ''; } catch (e) {}
+    var initial = String(name).trim().charAt(0).toUpperCase();
+    var links = document.querySelectorAll('a[href="/app?signin=1"]');
+    for (var i = 0; i < links.length; i++) {
+      var a = links[i];
+      a.href = '/app';
+      if (a.classList.contains('nav-signin')) {
+        a.textContent = initial || '';
+        a.setAttribute('aria-label', 'Your dashboard');
+        a.setAttribute('data-signed-in', '1');
+        a.style.cssText = 'width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;'
+          + 'background:linear-gradient(135deg,#E8673A22,#1B5FE822);border:1.5px solid rgba(232,103,58,.3);'
+          + 'color:#E8673A;font-weight:700;font-size:.78rem;text-decoration:none';
+      } else {
+        a.textContent = 'Your dashboard';
+      }
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', signedInNav);
+  else signedInNav();
 })(window);

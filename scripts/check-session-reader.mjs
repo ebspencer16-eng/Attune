@@ -112,9 +112,12 @@ for (const { path, shown } of all) {
   /* The other direction: a page that loads the reader and never uses it, or
      uses it without loading it. Both look fine in a diff. */
   const loads = /src=["']\/_session\.js["']/.test(raw);
+  /* Or a nav sign-in link, which /_session.js itself turns into the
+     signed-in circle (A243). That use is in the script, not the page. */
   const uses = /attuneToken\s*\(|attuneHeaders\s*\(|window\.attuneToken|window\.attuneHeaders/.test(src);
+  const navUse = /class=["']nav-signin["']/.test(raw);
   if (loads) loaders++;
-  if (loads && !uses) {
+  if (loads && !uses && !navUse) {
     problems.push(`${shown} loads /_session.js and never calls it. Either it needs the token or the`
       + ' script tag is left over from a move that did not finish.');
   }

@@ -505,21 +505,6 @@ export default function Settings({
         <DailyPushRows />
       </View>
 
-      <View style={{ ...card(), marginTop: Spacing.lg }}>
-        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Session</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md }}>
-          <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }} numberOfLines={1}>
-            {`Signed in as ${acct?.email || acct?.name || ''}`}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={async () => { await signOut(); onSignedOut(); }}
-            hitSlop={8}>
-            <Text style={{ ...Type.small, fontWeight: '700', color: '#ef4444' }}>Sign out</Text>
-          </Pressable>
-        </View>
-      </View>
-
       <AdminRow />
 
       {/* ── Delete account ──────────────────────────────────────────────────
@@ -529,6 +514,15 @@ export default function Settings({
           is on /legal; a wall of text beside the button is something to scroll
           past, not informed consent. */}
       <View style={{ marginTop: Spacing.xxxl, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: c.border, alignItems: 'center' }}>
+        {/* Sign out above Delete account, as the website's Account page has
+            it (A244). */}
+        <Pressable
+          accessibilityRole="button"
+          onPress={async () => { await signOut(); onSignedOut(); }}
+          hitSlop={8}
+          style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md, marginBottom: Spacing.xs }}>
+          <Text style={{ ...Type.body, fontWeight: '700', color: '#ef4444' }}>Sign out</Text>
+        </Pressable>
         {!confirming ? (
           <Pressable
       accessibilityRole="button"

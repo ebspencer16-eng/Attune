@@ -689,8 +689,34 @@ export const WORDS = [
  */
 export const WORD_EYEBROW = 'Word of the day';
 
+/**
+ * Words chosen for particular days, ahead of the rotation (A247).
+ *
+ * Ellie, 31 October: "Change to a different word of the day for today, mya
+ * will be testing either today or tomorrow and I want good, positive ones for
+ * the next few days." Rotation resumes on its own after the last date. Keys
+ * are the reader's calendar day; values are ids from WORDS, checked below so
+ * a typo fails at load rather than showing nothing.
+ */
+export const DATED_WORDS = {
+  '2026-10-31': 'appreciation',
+  '2026-11-01': 'gratitude',
+  '2026-11-02': 'friendship',
+  '2026-11-03': 'encouragement',
+  '2026-11-04': 'admiration',
+  '2026-11-05': 'belonging',
+  '2026-11-06': 'humor',
+};
+const DATED_BY_DAY = new Map(Object.entries(DATED_WORDS).map(([date, id]) => {
+  const w = WORDS.find((x) => x.id === id);
+  if (!w) throw new Error(`DATED_WORDS["${date}"] is "${id}", which is not a word in WORDS.`);
+  return [dayNumber(date), w];
+}));
+
 export function wordOfTheDay(now = new Date()) {
   const day = typeof now === 'number' ? now : dayNumber(now);
+  const dated = DATED_BY_DAY.get(day);
+  if (dated) return { ...dated, label: WORD_EYEBROW };
   /* Wrapped both ways. A day number can be negative once the day is read from
      the reader's own calendar rather than from the epoch: a Date at the very
      start of 1970 is 1969 for anyone west of Greenwich, and `-1 % n` is -1 in
