@@ -4953,3 +4953,13 @@ invite tile from the account page. Then TASKS rows, the full check, push.
   host has `?probe=settings`. Locked sheet links to #add-ons.
 - Not driven: the Learn pop-up and the signed-in checkout on the live site
   (both need a signed-in session).
+
+## 31 October, later: A222 round seven
+
+- sweep-unguarded-lookups: 23 leads, none live.
+- sweep-unset-fields (checked on the pre-fix App.jsx, finds pkg.key): C had
+  no white/orange/indigo; the results survey and the intimacy A/B tiles read
+  them. Defined; check-palette-keys (planted).
+- The previous push carried a check-tasks-doc failure hidden by `| tail`
+  (A232's query was inline in the row). The query is now a ```sql block
+  under section 1. Never pipe a gate before reading its exit code.

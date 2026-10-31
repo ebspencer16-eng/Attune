@@ -9,7 +9,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A232 | **Run this to tell me where "Test" comes from**, then paste me the result. Most likely this browser still held a partner from an earlier sign-in, and the dashboard never asked the server whether you have one. It asks now, and drops a partner your account is not linked to. The query confirms it from your side.<br><br>Supabase SQL editor:<br>`select o.order_num, o.pkg_key, p.name, p.partner_name, coalesce(p.partner_email,'') <> '' as has_partner_email, p.partner_profile_id, p.partner_joined, q.name as linked_partner, q.ex1_answers is not null as linked_ex1, q.ex2_answers is not null as linked_ex2 from orders o join profiles p on lower(p.email) = lower(o.buyer_email) left join profiles q on q.id = p.partner_profile_id where o.promo_code = 'TESTEMAILS' order by o.created_at desc;` |
+| A232 | **Run the A232 query below and paste me the result**, so I can tell where "Test" came from. Most likely this browser still held a partner from an earlier sign-in, and the dashboard never asked the server whether you have one. It asks now, and drops a partner your account is not linked to. The query confirms it from your side. |
 | A210 | **When the app is live, the order email's "Attune app" and "app" become App Store links.** Nothing to do now: they switch on with the same setting as the rest of the app links (O1). This row is the reminder to check one real confirmation email that day. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
@@ -22,11 +22,22 @@ Every code block says which window it goes in, above the block.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
+A232, in the Supabase SQL editor:
+
+```sql
+select o.order_num, o.pkg_key, p.name, p.partner_name, coalesce(p.partner_email,'') <> '' as has_partner_email, p.partner_profile_id, p.partner_joined, q.name as linked_partner, q.ex1_answers is not null as linked_ex1, q.ex2_answers is not null as linked_ex2
+from orders o
+join profiles p on lower(p.email) = lower(o.buyer_email)
+left join profiles q on q.id = p.partner_profile_id
+where o.promo_code = 'TESTEMAILS'
+order by o.created_at desc;
+```
+
 ## 2. Open
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** Seventh round, from this week's bugs: a lookup in a list whose answer is used without checking it exists (the cart crash), and a field read that nothing ever sets (the missing exercise tiles). **Status:** Running. |
+| A222 | **More sweeps.** Round seven, live: the results survey's progress bar drew no fill and a chosen star or option took no colour, because three colours it used were never defined; the A and B tiles in the intimacy exercise had no background for the same reason. Fixed, and a new check fails the build on an undefined colour. A sweep for lookups used without checking (the cart crash) found nothing else live. Nothing for you to do. **Status:** Next round picks new shapes. |
 
 
 ## 3. For you to review

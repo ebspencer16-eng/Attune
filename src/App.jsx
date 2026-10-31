@@ -280,6 +280,11 @@ function useEscapeToClose(onClose, active = true) {
 
 
 const C = {
+  /* white, orange and indigo were read in three places and defined nowhere,
+     so the results survey's progress bar drew no fill, a chosen star or
+     option took no colour, and the intimacy exercise's A and B tiles had no
+     ground (sweep-unset-fields, A222). */
+  white: "#FFFFFF", orange: "#E8673A", indigo: "#5B6DF8",
   cream: "#FFFDF9", warm: "#FBF8F3", stone: "#E8DDD0",
   clay: "#A36333", bark: "#7C4D28", deep: "#14100A",
   text: "#1E1610", muted: "#7A6753", accent: "#A36333",
