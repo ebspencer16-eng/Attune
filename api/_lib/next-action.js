@@ -44,6 +44,7 @@ const DAY = 24 * 60 * 60 * 1000;
  * }
  * @returns { primary, secondary[] } cards, each { id, kind, title, body, deepLink }
  */
+import { IN_PRACTICE } from '../_in-practice.js';
 import { EXERCISES } from '../_exercises.js';
 
 
@@ -181,8 +182,13 @@ export function webTargetFor(deepLink, renderable) {
   /* In Practice is a set of static pages here rather than a view. The post id
      rides along so the card opens the article it is about. */
   if (view === 'practice') {
-    const post = /[?&]post=([^&]+)/.exec(link)?.[1];
-    return { href: post ? `/practice?post=${encodeURIComponent(post)}` : '/practice' };
+    /* The article's own page, from `path` in api/_in-practice.js. This was
+       /practice?post=<id>, and nothing on /practice reads `post`, so the
+       new-article card opened the list rather than the article
+       (sweep-dead-link-params, A222). A post with no page opens the list. */
+    const post = decodeURIComponent(/[?&]post=([^&]+)/.exec(link)?.[1] || '');
+    const page = post && IN_PRACTICE.find((p) => p.slug === post);
+    return { href: page ? page.path : '/practice' };
   }
 
   /* Everything else is a view if this surface can draw it. The caller passes
@@ -227,6 +233,13 @@ export function appTargetFor(deepLink) {
    * rather than in the view list below.
    */
   if (deepLink === '/feedback') return { route: '/', feedback: true };
+
+  /* In Practice by path. `/practice` is the Learn tab's list; an article is a
+     static page, which opens in the browser. Neither carries a view, so both
+     used to fall through to "home" and the "Read something from In Practice"
+     tile did nothing in the app (A245). */
+  if (/^\/practice\/?$/.test(deepLink || '')) return { route: '/resources' };
+  if (/^\/practice\/[^?#]+/.test(deepLink || '')) return { external: websiteUrl(deepLink) };
 
   const view = /[?&]view=([^&]+)/.exec(deepLink || '')?.[1] || '';
 
@@ -450,17 +463,14 @@ export function nextActions(state = {}) {
   }
 
   // 7. Revisit, anchored to something specific. Never "it has been a while".
-  if (state.resultsReady && ago(state.resultsLastOpenedAt) > 30) {
-    const anchor = state.unresolvedConversationTitle || state.topGapDimensionLabel;
-    if (anchor) {
-      add({ id: 'revisit', kind: 'revisit_results', priority: 4,
-        title: `Revisit ${anchor}`,
-        body: state.unresolvedConversationTitle
-          ? 'You flagged this and have not come back to it.'
-          : `You differ most on this dimension. Try to reread these results together.`,
-        deepLink: '/?view=results' });
-    }
-  }
+  const revisitAnchor = state.unresolvedConversationTitle || state.topGapDimensionLabel;
+  const revisitCard = () => ({ id: 'revisit', kind: 'revisit_results', priority: 4,
+    title: `Revisit ${revisitAnchor}`,
+    body: state.unresolvedConversationTitle
+      ? 'You flagged this and have not come back to it.'
+      : `You differ most on this dimension. Try to reread these results together.`,
+    deepLink: '/?view=results' });
+  if (state.resultsReady && ago(state.resultsLastOpenedAt) > 30 && revisitAnchor) add(revisitCard());
 
   /**
    * ── BETA FEEDBACK IS A PROMPT, NOT A BANNER ─────────────────────────────
@@ -516,7 +526,26 @@ export function nextActions(state = {}) {
    *
    * Ellie's words, edited by her on 2026-09-12.
    */
-  if (!cards.length) {
+  /* ── ALWAYS TWO (A245) ──────────────────────────────────────────────────
+     Ellie: "I want it always showing 2. If I've done everything, it can
+     prompt me to revisit something, it could suggest an article based on
+     what I've left notes about, or something helpful."
+
+     So when fewer than two things are waiting, the gap is filled in this
+     order: an In Practice article chosen from where their notes are
+     (api/_lib/note-article.js), the results section to revisit (without the
+     thirty days, which is for raising it unprompted), then the idle
+     rotation below. The article card's words are placeholders of mine. */
+  if (cards.length < 2 && state.noteArticle) {
+    add({ id: 'note-article', kind: 'suggested_article', priority: 1,
+      title: state.noteArticle.title,
+      body: 'Picked for you from the parts of your results you left notes on.',
+      deepLink: state.noteArticle.path });
+  }
+  if (cards.length < 2 && state.resultsReady && revisitAnchor && !cards.some((c) => c.id === 'revisit')) {
+    add({ ...revisitCard(), priority: 1 });
+  }
+  if (cards.length < 2) {
     // state.now is an ISO string, not a number: api/home.js sends
     // new Date().toISOString(). Dividing a string gives NaN, and
     // IDLE_PROMPTS[NaN] is undefined, which would have spread into a card with
@@ -528,8 +557,11 @@ export function nextActions(state = {}) {
     // the rotation constant while looking like it worked.
     const ms = new Date(state.now).getTime();
     const day = Number.isFinite(ms) ? Math.floor(ms / 86400000) : 0;
-    const idle = IDLE_PROMPTS[day % IDLE_PROMPTS.length];
-    add({ id: 'all-clear', kind: 'idle', priority: 0, ...idle });
+    /* As many as it takes to make two, each a different prompt. */
+    for (let i = 0; cards.length < 2 && i < IDLE_PROMPTS.length; i++) {
+      const idle = IDLE_PROMPTS[(day + i) % IDLE_PROMPTS.length];
+      add({ id: i ? `all-clear-${i}` : 'all-clear', kind: 'idle', priority: 0, ...idle });
+    }
   }
 
   cards.sort((a, b) => b.priority - a.priority);

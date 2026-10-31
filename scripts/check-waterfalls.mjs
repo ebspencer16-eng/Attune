@@ -72,7 +72,7 @@ const BUDGETS = [
     file: '../api/home.js',
     path: '/api/home?tzOffset=420',
     deep: 3,
-    calls: 7,
+    calls: 8,   // A245: note anchors for the suggested article, in parallel with the rest
     /* Auth, both profiles in one read, then the beta lookup. Everything else
        is asked for beside the profiles. Three here rather than two because
        the auth call is still in the chain in this harness: there is no key
@@ -100,7 +100,7 @@ const BUDGETS = [
        table and a const cannot be read before it exists. */
     profile: 'finished',
     deep: 3,
-    calls: 8,
+    calls: 9,   // A245: note anchors, as above
     chain: 'auth, both profiles in one read, then the results and the beta lookup together',
   },
   {
@@ -146,7 +146,7 @@ const BUDGETS = [
     file: '../api/notes.js',
     path: '/api/notes?limit=3',
     deep: 4,
-    calls: 8,
+    calls: 9,   // A245: note anchors, as above
     chain: 'auth, profile, then the rows and the three figures at once, then their tags',
   },
   {

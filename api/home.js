@@ -58,6 +58,7 @@ import { insightOfTheDay } from './_insights.js';
 import { wordOfTheDay } from './_words.js';
 import { DAILY_DEFAULT_AT } from './daily-push.js';
 import { dayNumberForOffset } from './_lib/day-number.js';
+import { articleForNotes } from './_lib/note-article.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { pickUp } from './_lib/pick-up.js';
 import { JOURNAL_ANCHOR } from './_lib/tags.js';
@@ -228,6 +229,12 @@ export default async function handler(req) {
         `${supabaseUrl}/rest/v1/notes?owner_id=eq.${user.id}`
         + `&or=(anchor_type.is.null,anchor_type.neq.${JOURNAL_ANCHOR})`
         + '&select=title,body,anchor_context&order=updated_at.desc&limit=1',
+        { headers: svc }).catch(() => null),
+      /* Where their notes are, for the article the dashboard suggests when
+         nothing else is waiting (A245). Anchors only, never a note's words. */
+      noteAnchors: fetch(
+        `${supabaseUrl}/rest/v1/notes?owner_id=eq.${user.id}&anchor_type=not.is.null`
+        + `&anchor_type=neq.${JOURNAL_ANCHOR}&select=anchor_type,anchor_key&order=updated_at.desc&limit=200`,
         { headers: svc }).catch(() => null),
       alerts: fetch(
         `${supabaseUrl}/rest/v1/notifications?owner_id=eq.${user.id}&read_at=is.null`
@@ -532,6 +539,13 @@ export default async function handler(req) {
       lastNote = (await nRes?.json().catch(() => []))?.[0] || null;
     } catch { /* no notes table yet, or a read failure: the row falls back to a post */ }
 
+    /* A failed read suggests nothing; the next card down fills the slot. */
+    let noteArticle = null;
+    try {
+      const aRes = await t.mark('note-anchors', () => early.noteAnchors);
+      if (aRes?.ok) noteArticle = articleForNotes(await aRes.json().catch(() => []), readerDay);
+    } catch { /* no article */ }
+
     /**
      * Unread alerts, which is the whole of the app's notification surface.
      *
@@ -644,6 +658,7 @@ export default async function handler(req) {
       feedbackGivenAt: me.feedback_given_at || null,
       betaTester,
       topGapDimensionLabel,
+      noteArticle,
     };
 
     const { primary, secondary } = nextActions(state);

@@ -1246,6 +1246,26 @@ function toggleMenu() {
   <script src="/_flags.js"></script>
   <script src="/_track.js"></script>
 <script src="/cart.js"></script>
+<script>
+/* After deleting an account the website signs out and lands here with
+   ?deleted=1, and nothing on this page read it: the account was gone with no
+   word that it was (sweep-dead-link-params, A222). The app's own heading for
+   the same moment, "Your account is deleted", in a bar that leaves the page
+   as it was. */
+(function () {
+  try {
+    if (new URLSearchParams(location.search).get('deleted') !== '1') return;
+    var bar = document.createElement('div');
+    bar.setAttribute('role', 'status');
+    bar.style.cssText = 'position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:60;background:#0E0B07;color:#fff;'
+      + 'padding:.6rem 1.2rem;border-radius:999px;font:500 .82rem DM Sans,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.18)';
+    bar.textContent = 'Your account is deleted.';
+    document.body.appendChild(bar);
+    setTimeout(function () { bar.remove(); }, 6000);
+    history.replaceState(null, '', location.pathname);
+  } catch (e) {}
+})();
+</script>
 <script src="/_session.js"></script>
 </body>
 </html>

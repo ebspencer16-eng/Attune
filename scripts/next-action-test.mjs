@@ -7,7 +7,7 @@
 //
 //   node scripts/next-action-test.mjs
 
-import { nextActions, greeting } from '../api/_lib/next-action.js';
+import { nextActions, greeting, appTargetFor, webTargetFor } from '../api/_lib/next-action.js';
 import { EXERCISES } from '../api/_exercises.js';
 
 let pass = 0, fail = 0;
@@ -126,8 +126,35 @@ ok('a flagged conversation outranks the widest gap as the anchor',
   primary({ resultsLastOpenedAt: '2026-06-01T10:00:00.000Z', topGapDimensionLabel: 'Conflict Style',
     unresolvedConversationTitle: 'Planning visits with family' }).title.includes('Planning visits'));
 
-ok('recently opened results do not prompt a revisit',
-  primary({ resultsLastOpenedAt: '2026-08-25T10:00:00.000Z', topGapDimensionLabel: 'Conflict Style' }).kind !== 'revisit_results');
+/* Recently opened results do not RAISE a revisit: with something else
+   waiting, it is not on the screen. Since A245 it may fill the second of the
+   two slots, which is the next block. */
+ok('recently opened results do not prompt a revisit over something waiting', (() => {
+  const r = nextActions(base({ resultsLastOpenedAt: '2026-08-25T10:00:00.000Z', topGapDimensionLabel: 'Conflict Style', opens30d: 9 }));
+  return r.primary.kind === 'feedback' && r.secondary[0]?.kind === 'revisit_results';
+})());
+
+// ── In Practice links land somewhere (A245, A222) ─────────────────────────
+ok('the app opens the In Practice list for /practice', appTargetFor('/practice').route === '/resources');
+ok('the app opens an article in the browser', /\/practice\/conflict-vs-repair$/.test(appTargetFor('/practice/conflict-vs-repair').external || ''));
+ok('the new-article card opens the article on the website', webTargetFor('/?view=practice&post=conflict-vs-repair').href === '/practice/conflict-vs-repair');
+
+// ── Always two (A245) ─────────────────────────────────────────────────────
+/* Ellie: "I want it always showing 2. If I've done everything, it can prompt
+   me to revisit something, it could suggest an article based on what I've
+   left notes about, or something helpful." */
+{
+  const two = (over) => { const r = nextActions(base(over)); return [r.primary, ...r.secondary]; };
+  const art = { title: 'The difference between conflict and repair', path: '/practice/conflict-vs-repair' };
+  ok('nothing waiting still gives two cards', two({}).length === 2);
+  ok('nothing waiting gives two different idle prompts', new Set(two({}).map((c) => c.title)).size === 2);
+  ok('one thing waiting gets a second card', two({ opens30d: 9 }).length === 2);
+  ok('the article from their notes fills a slot first', two({ opens30d: 9, noteArticle: art })[1]?.kind === 'suggested_article');
+  ok('the article opens its page', two({ noteArticle: art }).find((c) => c.kind === 'suggested_article')?.deepLink === art.path);
+  ok('then the results section to revisit', two({ noteArticle: art, resultsLastOpenedAt: NOW, topGapDimensionLabel: 'Conflict Style' }).map((c) => c.kind).join() === 'suggested_article,revisit_results');
+  ok('a revisit already raised is not added twice', two({ resultsLastOpenedAt: '2026-01-01T00:00:00.000Z', topGapDimensionLabel: 'Conflict Style' }).filter((c) => c.kind === 'revisit_results').length === 1);
+  ok('two things waiting add nothing', two({ opens30d: 9, resultsLastOpenedAt: '2026-01-01T00:00:00.000Z', topGapDimensionLabel: 'Conflict Style', noteArticle: art }).every((c) => c.kind !== 'suggested_article'));
+}
 
 // ── Feedback, only from regulars ────────────────────────────────────────────
 ok('no feedback ask from an occasional user',

@@ -4963,3 +4963,14 @@ invite tile from the account page. Then TASKS rows, the full check, push.
 - The previous push carried a check-tasks-doc failure hidden by `| tail`
   (A232's query was inline in the row). The query is now a ```sql block
   under section 1. Never pipe a gate before reading its exit code.
+
+## 31 October, evening: A245, A222 round eight
+
+- A245: nextActions fills to two (note-article, then revisit without the 30
+  days, then distinct idle prompts). api/_lib/note-article.js maps note
+  anchors to a shelf; /api/home reads note anchors in parallel
+  (check-waterfalls raised to 8/9 with the reason). next-action-test has the
+  rules; planted.
+- Round eight: sweep-dead-link-params (check-link-params runs it) and
+  sweep-app-dead-ends. Fixed: new-article card -> article page; /practice in
+  the app -> Learn; ?deleted=1 confirmation on home.html.

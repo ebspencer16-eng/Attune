@@ -25,8 +25,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A245 | **The dashboard always shows two action tiles.** Your words: "If I've done everything, it can prompt me to revisit something, it could suggest an article based on what I've left notes about, or something helpful." When fewer than two things are waiting, the second is a results section to revisit or an In Practice article matched to your notes. **Status:** Building. |
-| A222 | **More sweeps.** Round seven, live: the results survey's progress bar drew no fill and a chosen star or option took no colour, because three colours it used were never defined; the A and B tiles in the intimacy exercise had no background for the same reason. Fixed, and a new check fails the build on an undefined colour. A sweep for lookups used without checking (the cart crash) found nothing else live. Nothing for you to do. **Status:** Round eight after A245. |
+| A222 | **More sweeps.** Round eight, live: the "New publication to explore" tile opened the In Practice list, not the article; deleting an account on the website landed on the home page with no word it had gone (now "Your account is deleted.", the app's words); and in the app, "Read something from In Practice" did nothing (now opens Learn). A new check fails the build on a link a page ignores. Nothing for you to do. **Status:** Next round picks new shapes. |
 
 
 ## 3. For you to review
@@ -42,6 +41,7 @@ section 3 explaining things, just include the context I need in section 3."
 | A244 | **"Sign out", red and bold, above "Delete account"; the Session tile is gone.** Website Account page and app Settings. Live; app update published. |
 | A246 | **Insights nav menu: no scroll bar.** The menu measures the window and shrinks its type and spacing to fit, down to half size; a taller window or a group closing lets it grow back. Checked in a 380-point-tall box. Live on the website. |
 | A247 | **Word of the day, chosen for the next week:** Appreciation today, then Gratitude, Friendship, Encouragement, Admiration, Belonging, Humor (to 6 November), all your own words from the list. The site, the app and the daily notification all read it. The normal rotation resumes 7 November. Live. |
+| A245 | **The dashboard always shows two action tiles, website and app.** When fewer than two things are waiting, the second is, in order: an In Practice article picked from the parts of your results you left notes on; then the results section where you differ most, to revisit; then a different one of your idle prompts. Article tile words are mine: the article's title, then "Picked for you from the parts of your results you left notes on." Notes on Conflict Patterns suggest the conflict articles, notes on Relationship Reflection the experience articles, anything else the understanding articles; say if you want those paired differently. Live. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
