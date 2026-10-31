@@ -9,7 +9,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A245 | **Your real account shows one action tile because there is one thing to do.** The tiles only appear for something waiting: set up your profile, invite your partner, finish an exercise, nudge your partner, open your results, use a tool you own but have not used, a new In Practice article, revisit results after 30 days, feedback. A couple who has done everything gets one. Do you want it always showing three? If so, tell me which to keep there, for example "Explore add-ons", the newest article, or a results section to revisit, and the words for each. |
 | A210 | **When the app is live, the order email's "Attune app" and "app" become App Store links.** Nothing to do now: they switch on with the same setting as the rest of the app links (O1). This row is the reminder to check one real confirmation email that day. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
@@ -26,7 +25,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** Round seven, live: the results survey's progress bar drew no fill and a chosen star or option took no colour, because three colours it used were never defined; the A and B tiles in the intimacy exercise had no background for the same reason. Fixed, and a new check fails the build on an undefined colour. A sweep for lookups used without checking (the cart crash) found nothing else live. Nothing for you to do. **Status:** Next round picks new shapes. |
+| A245 | **The dashboard always shows two action tiles.** Your words: "If I've done everything, it can prompt me to revisit something, it could suggest an article based on what I've left notes about, or something helpful." When fewer than two things are waiting, the second is a results section to revisit or an In Practice article matched to your notes. **Status:** Building. |
+| A222 | **More sweeps.** Round seven, live: the results survey's progress bar drew no fill and a chosen star or option took no colour, because three colours it used were never defined; the A and B tiles in the intimacy exercise had no background for the same reason. Fixed, and a new check fails the build on an undefined colour. A sweep for lookups used without checking (the cart crash) found nothing else live. Nothing for you to do. **Status:** Round eight after A245. |
 
 
 ## 3. For you to review
