@@ -153,6 +153,14 @@ export const notesApi = {
  */
 export function SaveInsightToJournal({ quote, onClose }) {
   const [note, setNote] = useState('');
+  // Escape closes it, as every pop-up on the website does (A222).
+  const latestClose = useRef(onClose);
+  latestClose.current = onClose;
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') latestClose.current?.(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 

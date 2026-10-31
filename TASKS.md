@@ -25,7 +25,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** This round, three new shapes: (1) the website treating a failed request as a "no" (earlier rounds swept only the server); (2) lookup tables whose fallback prints the raw key, like "reassurance" lower case; (3) pop-ups that Escape does not close. **Status:** In progress. |
+| A222 | **More sweeps.** This round's three shapes are done; findings in section 3 as A229. **Status:** Checks running; then live. |
 
 
 ## 3. For you to review
@@ -36,6 +36,7 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | A228 | **Four fixes from this round's sweeps, live.** Checkout had a second line waiting to stop its script the day a name is filled in ahead of time; fixed, and a new check fails the build on that shape. The workbook discount email and the results-ready email: if the request failed, that device never asked again; it asks again now. Profile details: if the partner invitation does not go through, the pop-up stays open and says so instead of closing; it uses the invite form's existing words. Nothing for you to do. |
+| A229 | **This round's sweeps.** Someone buying only an exercise got a confirmation email whose first line was blank at $0; it now lists the exercise, and the inbox preview names it ("Order confirmed: Conflict Patterns"). The email builder kept a second, unused copy of every add-on price; removed, so prices live in one place. Every pop-up on the website now closes with Escape. The website's reads were checked for treating a failure as a "no": none do. Nothing for you to do. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 

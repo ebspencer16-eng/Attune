@@ -35,7 +35,10 @@ function workbookLine(item) {
 /** The receipt's lines for one item: the package, then each add-on bought. */
 export function receiptLines(raw) {
   const item = normalizeItem(raw);
-  const lines = [{ label: PACKAGE_NAMES[item.pkgKey] || item.pkgKey, price: itemBasePrice(item) }];
+  /* A cart with only an exercise in it has no package, and its first line
+     was `{ price: 0 }` with no label: a blank $0 row at the top of the
+     receipt (A222). No package, no package line. */
+  const lines = item.pkgKey ? [{ label: PACKAGE_NAMES[item.pkgKey] || item.pkgKey, price: itemBasePrice(item) }] : [];
   if (item.addonWorkbook) lines.push(workbookLine(item));
   for (const key of ['reflection', 'budget', 'intimacy', 'conflict', 'checklist']) {
     const flag = `addon${key[0].toUpperCase()}${key.slice(1)}`;
@@ -70,7 +73,9 @@ export function orderEmailContext({ compact, buyerName, buyerEmail, orderNum, ch
 
   return {
     pkgKey: item.pkgKey,
-    pkgName: PACKAGE_NAMES[item.pkgKey] || item.pkgKey,
+    /* What was bought, for the inbox preview ("Order confirmed: ..."): the
+       package, or for a standalone order the exercises themselves. */
+    pkgName: PACKAGE_NAMES[item.pkgKey] || lines.map((l) => l.label).join(', '),
     isGift: item.isGift,
     isPhysical: item.isPhysical,
     buyerName: buyerName || raw.partner1Name || null,

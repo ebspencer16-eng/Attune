@@ -260,6 +260,24 @@ function useMobile(breakpoint = 640) {
   return isMobile;
 }
 
+/**
+ * Escape closes the pop-up that calls this. None of the website's pop-ups
+ * listened for it (A222); the home page's waitlist was the only thing that
+ * did. `onClose` is read through a ref so a new function each render does not
+ * re-add the listener, and `active` lets a component that is always mounted
+ * (App, for its own pop-ups and menus) listen only while one is open.
+ */
+function useEscapeToClose(onClose, active = true) {
+  const latest = useRef(onClose);
+  latest.current = onClose;
+  useEffect(() => {
+    if (!active) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') latest.current?.(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [active]);
+}
+
 
 const C = {
   cream: "#FFFDF9", warm: "#FBF8F3", stone: "#E8DDD0",
@@ -3409,6 +3427,7 @@ function InlineSpinner({ light = true }) {
 // ── PORTRAIT SETUP MODAL ─────────────────────────────────────────────────────
 // Minimal modal for setting up couple portrait (avatars + initials).
 function PortraitSetup({ userName, partnerName, existing, onSave, onClose }) {
+  useEscapeToClose(onClose);
   const [p1Init, setP1Init] = useState(existing?.p1?.initial || (userName?.[0] || "A"));
   const [p2Init, setP2Init] = useState(existing?.p2?.initial || (partnerName?.[0] || "B"));
   const COLORS = ["#E8673A","#9B5DE5","#1B5FE8","#10b981","#F59E0B","#EC4899"];
@@ -3777,6 +3796,7 @@ export async function signOutEverywhere({ setAccount, to = '/app?signin=1' } = {
  * the two surfaces cannot drift apart on the colour.
  */
 function InsightCardOverlay({ insight, onClose }) {
+  useEscapeToClose(onClose, !!insight);
   if (!insight) return null;
   const g = INSIGHT_CARD_GROUND;
   return (
@@ -8049,6 +8069,7 @@ function RankInOrder({ options = [], value, onChange, accent, optionBtn, hint })
  * what was written. The old one threw away everything before the last screen.
  */
 function ResultsSurvey({ onClose, onDone }) {
+  useEscapeToClose(onClose);
   const [form, setForm] = useState(null);
   const [answers, setAnswers] = useState({});
   const [step, setStep] = useState(0);
@@ -12076,6 +12097,7 @@ function ProfileDetailsModal({ account, onClose, onSaved }) {
   // Half a phone is too narrow for three pronoun buttons, so there the row
   // stacks: the name box, then the choices under it.
   const narrow = useMobile(440);
+  useEscapeToClose(onClose);
   const [f, setF] = useState(() => ({
     name: account?.name || '', pronouns: account?.pronouns || '',
     partnerName: account?.partnerName || '', partnerPronouns: account?.partnerPronouns || '',
@@ -14282,6 +14304,7 @@ const UPSELL_PRODUCTS = {
 };
 
 function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
+  useEscapeToClose(onClose);
   const p = UPSELL_PRODUCTS[product];
   const [variant, setVariant] = useState(p?.variants?.[0]?.id || null);
   if (!p) return null;
@@ -14374,6 +14397,7 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
 
 // Packages modal — reused styling from UpsellModal
 function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
+  useEscapeToClose(onClose);
   const packages = [
     {
       id: "core",
@@ -16687,8 +16711,11 @@ export default function App() {
   const [showAccountGate, setShowAccountGate] = useState(isLoggedIn && (_urlSignup || _urlSignin));
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  useEscapeToClose(() => setShowInvite(false), showInvite);
   const [showNavDropdown, setShowNavDropdown] = useState(false); // Profile nav dropdown
   const [mobileNavOpen, setMobileNavOpen] = useState(false); // Mobile hamburger nav
+  useEscapeToClose(() => setShowNavDropdown(false), showNavDropdown);
+  useEscapeToClose(() => setMobileNavOpen(false), mobileNavOpen);
   const [inviteResent, setInviteResent] = useState(false);
   const [upsellModal, setUpsellModal] = useState(null); // { product: 'workbook'|'reflection'|'checklist', cartAdded: false }
   const [showPackagesModal, setShowPackagesModal] = useState(false); // "Explore other packages" modal

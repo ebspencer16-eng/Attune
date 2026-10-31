@@ -109,7 +109,7 @@ export const ORDER_EMAILS = {
  */
 const P = (text, extra = '') => `<p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:0 0 12px${extra}">${text}</p>`;
 
-function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, partnerName, partnerEmail, recipientEmail, partnerInvited, recipientInvited, existingAccount, partnerLinked, setupUrl, addonWorkbook, addonReflection, addonBudget, addonChecklist, addonIntimacy, addonConflict }) {
+function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, partnerName, partnerEmail, recipientEmail, partnerInvited, recipientInvited, existingAccount, partnerLinked, setupUrl }) {
   const them = _esc(partnerName || 'your partner');
   let deliveryLine;
   if (isPhysical) {
@@ -135,20 +135,12 @@ function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems,
         : partnerLinked ? '' : P(`You can invite ${them} from your dashboard.`));
   }
 
-  // Prefer the explicit itemized list; fall back to package + add-on flags.
-  let items = Array.isArray(lineItems) && lineItems.length ? lineItems.slice() : null;
-  if (!items) {
-    items = [{ label: pkgName, price: Number(total) || 0 }];
-    if (addonWorkbook)   items.push({ label: 'Personalized Workbook (' + (addonWorkbook === 'print' ? 'printed' : 'digital') + ')', price: addonWorkbook === 'print' ? 39 : 19 });
-    if (addonReflection) items.push({ label: 'Relationship Reflection', price: 40 });
-    if (addonBudget)     items.push({ label: 'Budget Priorities Exercise', price: 20 });
-    // Checklist, intimacy and conflict were missing. A receipt that omits a
-    // paid add-on shows a total that does not match its own line items, which
-    // is the kind of thing that generates a support email on the first order.
-    if (addonChecklist)  items.push({ label: 'Newlywed Checklist', price: 20 });
-    if (addonIntimacy)   items.push({ label: 'Physical Intimacy Expectations', price: 20 });
-    if (addonConflict)   items.push({ label: 'Conflict Patterns', price: 40 });
-  }
+  /* The lines are receiptLines' (api/_lib/order-email-context.js), priced
+     from the catalogue. A fallback here built them again from add-on flags
+     with the names and prices typed out, and nothing could reach it: the one
+     caller always passes lines. A second price list that agrees today is the
+     198/295 bug waiting, so it went (A222). */
+  const items = Array.isArray(lineItems) ? lineItems.slice() : [];
   const sub = items.reduce((acc, l) => acc + (Number(l.price) || 0), 0);
   const grandTotal = (total != null && total !== '') ? Number(total) : sub;
   const discount = sub - grandTotal;

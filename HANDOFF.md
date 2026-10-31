@@ -4916,3 +4916,14 @@ invite tile from the account page. Then TASKS rows, the full check, push.
   now (results-ready only on a server-side failure, not a 4xx).
 - ProfileDetailsModal stays open with INVITE_COPY.failed/soon when the
   invitation does not go through. Not driven: needs a signed-in session.
+
+## 30 October, later still: A229
+
+- Standalone exercise orders: receiptLines no longer emits a label-less
+  package line; pkgName falls back to the line labels for the preheader.
+  order-emails.js lost its unreachable fallback receipt with typed prices.
+  check-shop-names runs every cart shape (named lines, sum = subtotal) and
+  forbids a price literal in order-emails.js.
+- useEscapeToClose in src/App.jsx on every pop-up and both nav menus; the
+  journal dialog in notes-web.jsx has its own listener. Not gated.
+- New sweeps: sweep-web-unread-status (nothing real), sweep-key-fallbacks.

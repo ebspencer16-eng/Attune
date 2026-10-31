@@ -32,6 +32,32 @@ for (const [key, want] of Object.entries(PACKAGE_NAMES)) {
   if (!m) fails.push(`checkout has no package '${key}', so its name cannot be compared`);
   else if (m[1] !== want) fails.push(`checkout calls ${key} "${m[1]}"; PACKAGE_NAMES says "${want}"`);
 }
+/* The receipt, run for every cart shape: a package with nothing, and every
+   add-on bought alone. Each line has a name, and the lines add up to what
+   the cart costs. A standalone exercise's receipt opened with a blank $0
+   line (A222), which a check of the names alone could not see. */
+{
+  const { receiptLines } = await import('../api/_lib/order-email-context.js');
+  const { itemSubtotal, normalizeItem } = await import('../api/_lib/cart-pricing.js');
+  const carts = [
+    ...Object.keys(PACKAGE_NAMES).map((k) => ({ pkgKey: k })),
+    { pkgKey: null, addonReflection: true }, { pkgKey: null, addonBudget: true },
+    { pkgKey: null, addonChecklist: true }, { pkgKey: null, addonIntimacy: true },
+    { pkgKey: null, addonConflict: true }, { pkgKey: null, addonWorkbook: 'digital' },
+  ];
+  for (const cart of carts) {
+    const { lines } = receiptLines(cart);
+    if (!lines.length) fails.push(`the receipt for ${JSON.stringify(cart)} has no lines`);
+    for (const l of lines) if (!String(l.label || '').trim()) fails.push(`the receipt for ${JSON.stringify(cart)} has a line with no name: ${JSON.stringify(l)}`);
+    const sum = lines.reduce((t, l) => t + (Number(l.price) || 0), 0);
+    const want = itemSubtotal(normalizeItem(cart));
+    if (sum !== want) fails.push(`the receipt for ${JSON.stringify(cart)} adds up to ${sum}; the cart costs ${want}`);
+  }
+  /* And the email keeps no price of its own: its lines are receiptLines'. */
+  const mail = readFileSync(`${ROOT}api/_lib/order-emails.js`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  if (/price:\s*\d/.test(mail)) fails.push('api/_lib/order-emails.js types out a price; the receipt lines come from receiptLines and the catalogue');
+}
+
 if (fails.length) {
   console.error('[check-shop-names] ' + fails.length + ' problem(s):');
   for (const x of fails) console.error('  ' + x);
