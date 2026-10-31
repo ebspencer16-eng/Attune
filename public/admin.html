@@ -4029,7 +4029,12 @@ function wirePromoForm() {
        live code's terms, which is the one mistake in this form that cannot be
        undone by looking at it. */
     const existing = (window.__codeByName || {})[code];
-    if (existing) { err.textContent = 'That code already exists. Pick another name, or switch the existing one off in the table.'; return; }
+    /* A deleted code keeps its row so it stays off (A213), and is not in the
+       table. Ellie deleted CONGRATSMYA and could not add it back: this read
+       the hidden row as a live one. Re-adding a deleted name revives that row
+       with the terms on this form and a use count of nought. */
+    const revive = !!(existing && existing.deleted_at);
+    if (existing && !revive) { err.textContent = 'That code already exists. Pick another name, or switch the existing one off in the table.'; return; }
 
     const btn = el('pn-save');
     btn.disabled = true; btn.textContent = 'Creating…';
@@ -4047,6 +4052,7 @@ function wirePromoForm() {
         includes_intimacy: el('pn-intimacy').checked,
         includes_conflict: el('pn-conflict').checked,
         max_uses: max ? Number(max) : null,
+        ...(revive ? { revive: true } : {}),
       } });
       if (!r || r.error) throw new Error(r && r.error ? r.error : 'The code could not be created.');
       dlg.close();

@@ -241,6 +241,11 @@ export default async function handler(req) {
       if ('max_uses' in row)          clean.max_uses = row.max_uses == null ? null : (Number(row.max_uses) || null);
       if ('expires_at' in row)        clean.expires_at = row.expires_at || null;
       if ('note' in row)              clean.note = String(row.note || '').slice(0, 300);
+      /* Re-adding a code that was deleted (A213 keeps its row, switched off).
+         The form asks for it only when the name belongs to a deleted row; the
+         code comes back as new, so its count starts again. Nothing else can
+         clear deleted_at or the count through this action. */
+      if (row.revive === true) { clean.deleted_at = null; clean.uses_count = 0; }
       const { error } = await admin.from('beta_codes').upsert(clean, { onConflict: 'code' });
       if (error) return json({ error: safeError('admin-actions', error, 'Action failed.') }, 500);
       return json({ ok: true });

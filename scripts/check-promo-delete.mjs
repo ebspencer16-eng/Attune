@@ -38,5 +38,18 @@ const vp = strip(readFileSync(ROOT + 'api/validate-promo.js', 'utf8'));
 if (!/row\?\.deleted_at\) return json\(\{ valid: false/.test(vp)) fails.push('checkout\'s code check accepts a deleted code');
 const cpi = strip(readFileSync(ROOT + 'api/create-payment-intent.js', 'utf8'));
 if (!/\|\| dbRow\?\.deleted_at\)/.test(cpi)) fails.push('payment accepts a deleted code');
+/* 4. A deleted code can be added again (Ellie deleted CONGRATSMYA and the
+   form said it already existed). The form refuses a name only when its row is
+   live, and asks the server to revive a deleted one; the server clears the
+   mark and the count only when asked. The page is read by what it compares,
+   not by whether the words appear. */
+{
+  const page = readFileSync(ROOT + 'public/admin.html', 'utf8');
+  if (!/const revive = !!\(existing && existing\.deleted_at\);\s*\n\s*if \(existing && !revive\) \{ err\.textContent/.test(page)) fails.push('the add-code form refuses a name whose row was deleted, so a deleted code can never be added back');
+  if (!/\.\.\.\(revive \? \{ revive: true \} : \{\}\)/.test(page)) fails.push('the add-code form does not ask the server to revive a deleted code');
+  const up = (src.match(/if \(body\.action === 'beta_upsert'\) \{([\s\S]*?)\n    \}/) || [])[1] || '';
+  if (!/if \(row\.revive === true\) \{ clean\.deleted_at = null; clean\.uses_count = 0; \}/.test(up)) fails.push('beta_upsert does not clear a deleted code\'s mark and count when reviving it, so a re-added code stays deleted');
+  if ((up.match(/deleted_at/g) || []).length !== 1) fails.push('beta_upsert touches deleted_at somewhere other than the revive line');
+}
 if (fails.length) { console.error('[check-promo-delete] ' + fails.length + ' problem(s):'); for (const f of fails) console.error('  ' + f); process.exit(1); }
-console.log(`[check-promo-delete] deleting a code touches beta_codes alone, and none of the ${GRANTERS.length} modules that decide access reads that table.`);
+console.log(`[check-promo-delete] deleting a code touches beta_codes alone, none of the ${GRANTERS.length} modules that decide access reads that table, and a deleted code can be added back.`);
