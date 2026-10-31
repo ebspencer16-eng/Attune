@@ -25,7 +25,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** Done this round: the admin slicer check failed only inside the full check because it never scrolled the page to a dropdown that opened below the window; it does now, and still fails when a tile clips its dropdown (20 of 54, planted). The full check now passes in one run. **Status:** Next sweep not yet chosen; nothing waiting on you. |
+| A222 | **More sweeps.** This round: (1) a page script that uses a name before the line that creates it, the shape that broke checkout in the branch last round; (2) a write whose failure is swallowed while the screen carries on as if it worked; (3) whatever those turn up. **Status:** In progress. |
 
 
 ## 3. For you to review
@@ -35,7 +35,6 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A226 | **The Physical Intimacy cover fits an iPhone SE again.** Your longer second paragraph from the copy review added a line there. Your words are unchanged: on the smallest phones only, the gaps between the paragraphs and above Start are a little tighter. All five covers checked on six iPhones. In the app after two launches. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -47,6 +46,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A226 | **The Physical Intimacy cover fits an iPhone SE again; your words unchanged.** |
 | A227 | **A deleted promo code can be added back with new settings.** |
 | A223 | **Migration 107 ran: a deleted promo code stays deleted.** |
 | A211 | **Gift checkout: "Your first name" above a gift message box; the message goes into the invitation.** |
