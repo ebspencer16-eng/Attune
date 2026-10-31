@@ -26,7 +26,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** Six rounds so far; the last one's findings are A229, live. **Status:** Next round after A230–A242. |
+| A222 | **More sweeps.** Seventh round, from this week's bugs: a lookup in a list whose answer is used without checking it exists (the cart crash), and a field read that nothing ever sets (the missing exercise tiles). **Status:** Running. |
 
 
 ## 3. For you to review
