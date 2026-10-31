@@ -9,7 +9,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| A223 | **Please run migration 107.** It lets a deleted promo code stay deleted: some codes are also built into the site, and deleting their row let the built-in copy come back as "Always active" (A213). Safe to run now; the fix that uses it goes live with A213. Steps just below this table. |
 | A210 | **When the app is live, the order email's "Attune app" and "app" become App Store links.** Nothing to do now: they switch on with the same setting as the rest of the app links (O1). This row is the reminder to check one real confirmation email that day. |
 | A204h | **A postal address for the marketing email footer, when you get to it.** CAN-SPAM wants one in the new-article email, the workbook discount, the check-ins and the survey nudges. A PO box works. Nothing else is waiting on it; send the address and it goes in the one shared footer. |
 | W147 | **Before launch: freeze the Physical Intimacy figures.** Your words: "once we launch I want to make sure results #s don't change for users who already completed." Fine in beta because we are all beta users. Needs a stored row and a migration, the same shape the couple type already has. Nothing to do until a launch date exists; this row is the reminder. |
@@ -21,39 +20,6 @@ Every code block says which window it goes in, above the block.
 | O16 | Download numbers need an App Store Connect key. After launch. |
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
-
-### One thing to run, for A223
-
-**Paste this into Terminal.** It copies migration 107 and prints `copied`.
-
-```bash
-cd /Users/Ellie/Projects/unison && cat supabase/migrations/107_promo_deleted_at.sql | pbcopy && echo copied
-```
-
-**Then paste that into the Supabase SQL Editor**, not Terminal, and run it. It should say "Success. No rows returned."
-
-<!-- SQL 107_promo_deleted_at.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 107: deleting a promo code (A213).
---
--- Ellie: "I started deleting and only some would delete, others switched to
--- always active and the bin icon went away."
---
--- Some codes exist twice: built into the site (ATTUNE-BETA-01 to 12,
--- BETA-CORE and the rest, api/_lib/beta-codes.js) and as a row here. The bin
--- removed the row, the built-in copy showed through as "Always active", and
--- the code went on working. So a deleted code keeps its row, marked deleted
--- and switched off. The row is what outranks the built-in copy, it is hidden
--- from the admin's table, and past orders on the code still read their
--- discount from it. Nobody loses anything: access is read from orders.
---
--- Safe to run again.
--- ============================================================================
-
-alter table public.beta_codes add column if not exists deleted_at timestamptz;
-```
-<!-- /SQL -->
 
 ## 2. Open
 
@@ -70,20 +36,6 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A206b | **/api/account-signup removed (A205c).** |
-| A211 | **Gift checkout: "Your first name" sits above a gift message box, and the message goes into the recipient's invitation.** Try a gift at checkout on your phone. |
-| A212 | **Explore: Men / Women / Both sits in line with the other controls, chosen one shaded, Both to start.** |
-| A213 | **Promo codes delete properly now.** Run migration 107 first (A223); until then the bin says "Action failed" and changes nothing. |
-| A214 | **Checkout: pressing Complete order with something missing puts red text under each box.** My words, yours to change: "Choose who this purchase is for", "Fill in your first name", "Fill in your email", "Fill in the recipient's first name", "Fill in the recipient's email", "Fill in your partner's email, or tick 'I will invite my partner later'", "Fill in your card details". "Fill in your partner's first name" is yours. |
-| A215 | **Checkout: an email that already owns a package is told so under the email box, as it is typed, and the order cannot go.** My words: "This email already has an Attune account. You can add exercises or tools to it instead.", with "add exercises or tools" linking to the add-ons. A gift from that email still goes through. |
-| A216 | **Thank-you page: cream check mark.** |
-| A217 | **Thank-you page: "Order Number:" before the number.** |
-| A218 | **"Finish setting up your profile" opens "Profile details" on the dashboard.** Your layout; on a phone the pronoun choices sit under the name box, because half a phone cannot hold three buttons. Save stays grey until everything is answered. My words for a failed save: "That did not save. Try again in a moment." The email opt-in tick box from the old pop-up is not on this one; say if you want it back. |
-| A219 | **Account page: your name, your email, partner's name, partner's email; "Edit details" opens Profile details.** |
-| A220 | **"Invite your partner" card opens a pop-up with the email box and Send invitation.** |
-| A221 | **Account page: the "Invite your partner" tile is gone.** Once an invitation is out, the "Partner invite" block with the resend button still shows there. |
-| A225 | **Both sign-up forms were showing a line of code comment on the page, under each demographic question, since the accessibility pass.** Fixed. The invited partner's form also had its own copy of the five questions, where "Prefer not to say" saved as blank; it asks the shared five now. |
-| A224 | **CLAUDE.md cut from 170,505 to 25,929 characters, no rule lost.** Every rule is one numbered line; detail a session needs is in docs/lessons.md under the same number; history and repeats are gone. Skim it if you like; nothing to run. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -95,6 +47,21 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A223 | **Migration 107 ran: a deleted promo code stays deleted.** |
+| A211 | **Gift checkout: "Your first name" above a gift message box; the message goes into the invitation.** |
+| A212 | **Explore: Men / Women / Both in line with the other controls, chosen one shaded.** |
+| A213 | **Promo codes delete properly instead of turning into "Always active".** |
+| A214 | **Checkout: red text under each box that still needs filling; my words approved.** |
+| A215 | **Checkout: an email that already owns a package is told so and pointed at add-ons; my words approved.** |
+| A216 | **Thank-you page: cream check mark.** |
+| A217 | **Thank-you page: "Order Number:" before the number.** |
+| A218 | **"Profile details" pop-up from the dashboard card; failed-save line approved.** |
+| A219 | **Account page: names and emails only; "Edit details" opens Profile details.** |
+| A220 | **"Invite your partner" card opens a pop-up with the email box and send.** |
+| A221 | **Account page: "Invite your partner" tile removed.** |
+| A225 | **Code comment no longer shows on the sign-up forms; invited partners answer the shared five questions.** |
+| A224 | **CLAUDE.md cut to under 26,000 characters, every rule kept, detail in docs/lessons.md.** |
+| A206b | **/api/account-signup removed.** |
 | A208i | **Migration 106 ran: promo codes can include Conflict Patterns.** |
 | A208d | **Apple Pay: the Stripe domain was missing www; fixed by you.** |
 | A208 | **Email wording, cart suggestions, account details layout, TESTEMAILS, promo code changes, partner invitation wording: approved.** |
