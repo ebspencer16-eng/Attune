@@ -25,7 +25,20 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A222 | **More sweeps.** Six rounds so far; the last one's findings are A229, live. **Status:** Ongoing; next round picks new shapes. |
+| A230 | **Tapping outside a pop-up closes it, on the app and the site.** Your words: "all pop ups on app and site also close if you tap the screen outside of them." **Status:** Starting. |
+| A231 | **App Settings laid out like the website's Account page, with a Notifications tile above the Session tile; Progress tile removed from both.** Today the app shows its own longer layout. **Status:** Starting. |
+| A232 | **Your TESTEMAILS account (Ellie, Test) shows "Test" with two exercises complete, though you never invited anyone.** Same in the insight status table. Finding where "Test" and those completions come from. **Status:** Starting. |
+| A233 | **Insight status table on the website has no tile behind it, so it is orange on cream and hard to read.** Checking app and site both. **Status:** Starting. |
+| A234 | **Below the insight status table, show the exercises and add-ons you do not own.** Your Starting Out account shows none of them today. **Status:** Starting. |
+| A235 | **A locked resource (your workbook) shows a grey padlock, and tapping it opens a pop-up describing it with a link to the add-ons.** Today the website does nothing on click. **Status:** Starting. |
+| A236 | **"Explore add-ons" from your account lands on Build a custom experience, with what you own marked "Already purchased", and checkout knows it is you.** Section 1 asks to confirm the account (email, your name, partner's name); "no" asks for another email, checks it has an account and does not own those items. **Status:** Starting. |
+| A237 | **Build a custom experience: Add to cart needs several clicks, no count appears on the cart icon, and no "see cart / keep browsing" prompt.** First addition should also put the core exercises (Communication + Expectations) in the cart, counting as two. **Status:** Starting. |
+| A238 | **Copy: "Build your experience or add to your existing account."** replaces "Start with the core exercises, then add what you want. Everything here can also be added later." **Status:** Starting. |
+| A239 | **The cart icon does not open the cart.** **Status:** Starting. |
+| A240 | **Checkout for a custom build, section 1: for you or someone else; if you, "are you setting up a new account or adding to an existing account?"** Existing: ask the email, show their package and what it includes (as admin shows it), and remove the core exercises and anything else they own. **Status:** Starting. |
+| A241 | **Cart note beside Communication + Expectations for a custom build:** "Automatically included for new accounts, will be removed on checkout screen prior to payment if you have an existing account." The server checks the email really has an account. **Status:** Starting. |
+| A242 | **Copy: "Not seeing a package that has what you're looking for? Build a custom experience instead"**, linked to that tile, replacing "* Anything not included in a package can be added to it at checkout, or purchased later from your dashboard." **Status:** Starting. |
+| A222 | **More sweeps.** Six rounds so far; the last one's findings are A229, live. **Status:** Paused while A230–A242 are built. |
 
 
 ## 3. For you to review
@@ -36,7 +49,6 @@ section 3 explaining things, just include the context I need in section 3."
 | # | Built, needs your eye |
 |--|--|
 | A228 | **Four fixes from this round's sweeps, live.** Checkout had a second line waiting to stop its script the day a name is filled in ahead of time; fixed, and a new check fails the build on that shape. The workbook discount email and the results-ready email: if the request failed, that device never asked again; it asks again now. Profile details: if the partner invitation does not go through, the pop-up stays open and says so instead of closing; it uses the invite form's existing words. Nothing for you to do. |
-| A229 | **This round's sweeps, live.** Someone buying only an exercise got a confirmation email whose first line was blank at $0; it now lists the exercise, and the inbox preview names it ("Order confirmed: Conflict Patterns"). The email builder kept a second, unused copy of every add-on price; removed, so prices live in one place. Every pop-up on the website now closes with Escape. The website's reads were checked for treating a failure as a "no": none do. Nothing for you to do. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -48,6 +60,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A229 | **Exercise-only receipts name the exercise; one add-on price list; Escape closes website pop-ups.** |
 | A226 | **The Physical Intimacy cover fits an iPhone SE again; your words unchanged.** |
 | A227 | **A deleted promo code can be added back with new settings.** |
 | A223 | **Migration 107 ran: a deleted promo code stays deleted.** |
