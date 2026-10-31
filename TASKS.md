@@ -25,7 +25,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A226 | **The app's Physical Intimacy exercise cover is 15 points too tall on an iPhone SE, so it scrolls.** Already true before the last round. Steps: find what grew since 28 October, when it fit; fix it in the app; check every cover on every phone size; publish the app update. **Status:** In progress. |
 | A222 | **More sweeps.** Last round's found code comments drawn on the sign-up forms (A225). This round: why one admin check fails only inside the full run (orders page, discount slicer, identical figures twice), since a check that fails for the wrong reason gets ignored. **Status:** Next, after A226. |
 
 
@@ -36,6 +35,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A226 | **The Physical Intimacy cover fits an iPhone SE again.** Your longer second paragraph from the copy review added a line there. Your words are unchanged: on the smallest phones only, the gaps between the paragraphs and above Start are a little tighter. All five covers checked on six iPhones. In the app after two launches. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 

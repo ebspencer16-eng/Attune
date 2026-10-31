@@ -225,13 +225,16 @@ function OpeningContents({
   intro: ExerciseIntro;
   onBegin: () => void;
 }) {
+  /* Tight is the last step before scrolling. Each gap gives up a step more
+     (A226): Ellie's longer second paragraph on the Physical Intimacy cover
+     (A197) left an iPhone SE 15 points short with the old tight gaps. */
   const tight = useCoverCompact();
   return (
     <>
-      <Text style={{ ...Type.eyebrow, color: tint, marginTop: tight ? Spacing.sm : Spacing.lg, textAlign: 'center' }}>{label}</Text>
+      <Text style={{ ...Type.eyebrow, color: tint, marginTop: tight ? Spacing.xs : Spacing.lg, textAlign: 'center' }}>{label}</Text>
       <Text style={{ ...Type.hero, color: c.textStrong, marginTop: tight ? Spacing.xs : Spacing.md, textAlign: 'center' }}>{intro.title}</Text>
       {intro.body.map((para) => (
-        <Text key={para.slice(0, 24)} style={{ ...Type.body, color: c.textMuted, marginTop: tight ? Spacing.md : Spacing.lg, lineHeight: 24, textAlign: 'center' }}>
+        <Text key={para.slice(0, 24)} style={{ ...Type.body, color: c.textMuted, marginTop: tight ? Spacing.sm : Spacing.lg, lineHeight: 24, textAlign: 'center' }}>
           {para}
         </Text>
       ))}
@@ -268,7 +271,7 @@ function OpeningContents({
         testID="exercise-start"
         onPress={onBegin}
         style={{
-          marginTop: tight ? Spacing.xl : Spacing.xxl, borderRadius: Radius.pill,
+          marginTop: tight ? Spacing.lg : Spacing.xxl, borderRadius: Radius.pill,
           paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
           alignItems: 'center', backgroundColor: tint,
         }}>
