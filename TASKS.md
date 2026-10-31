@@ -25,8 +25,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A226 | **The app's Physical Intimacy exercise cover is 15 points too tall on an iPhone SE, so it scrolls.** Found by the smoke test; already true on main before this round, nothing in it caused it. Finding what grew since 28 October, when it fit. **Status:** Not started. |
-| A222 | **More sweeps.** This round's: code comments drawn on a page as text. Found two, on both sign-up forms (A225), and a gate now fails the build on any more. **Status:** Next sweep not yet chosen. |
+| A226 | **The app's Physical Intimacy exercise cover is 15 points too tall on an iPhone SE, so it scrolls.** Already true before the last round. Steps: find what grew since 28 October, when it fit; fix it in the app; check every cover on every phone size; publish the app update. **Status:** In progress. |
+| A222 | **More sweeps.** Last round's found code comments drawn on the sign-up forms (A225). This round: why one admin check fails only inside the full run (orders page, discount slicer, identical figures twice), since a check that fails for the wrong reason gets ignored. **Status:** Next, after A226. |
 
 
 ## 3. For you to review
@@ -36,7 +36,6 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
-| A227 | **A deleted promo code can be added back: live.** In the admin, add CONGRATSMYA again with the settings you want; it comes back switched on with a use count of nought. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -48,6 +47,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | Verified by you | What it was |
 |--|--|
+| A227 | **A deleted promo code can be added back with new settings.** |
 | A223 | **Migration 107 ran: a deleted promo code stays deleted.** |
 | A211 | **Gift checkout: "Your first name" above a gift message box; the message goes into the invitation.** |
 | A212 | **Explore: Men / Women / Both in line with the other controls, chosen one shaded.** |
