@@ -4889,3 +4889,12 @@ invite tile from the account page. Then TASKS rows, the full check, push.
 - Not driven: the invite pop-up (A220) needs a signed-in dashboard to appear.
 - check-slicer-panel-reach failed once inside the full chain while the machine
   was in swap and passed alone. check-app-cover-fits fails on main as well (A226).
+
+## 30 October, night: A227
+
+- A227 live: a deleted promo code can be re-added (revive clears deleted_at
+  and uses_count; check-promo-delete, four plants).
+- check-slicer-panel-reach has now failed twice inside `npm run check`, both
+  times on orders/slz-pdisc with identical figures (panelBottom 1158 in a 1100
+  viewport), and passed alone both times. Identical numbers say it is not load:
+  an earlier gate likely leaves state behind. Worth chasing under A222.

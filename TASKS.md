@@ -25,7 +25,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| A227 | **A deleted promo code could not be added back: the form said it already existed.** Fixed: re-adding a deleted name brings it back with the new settings and a use count of nought. **Status:** Checks running; then it goes live and you can add CONGRATSMYA again from the admin. |
 | A226 | **The app's Physical Intimacy exercise cover is 15 points too tall on an iPhone SE, so it scrolls.** Found by the smoke test; already true on main before this round, nothing in it caused it. Finding what grew since 28 October, when it fit. **Status:** Not started. |
 | A222 | **More sweeps.** This round's: code comments drawn on a page as text. Found two, on both sign-up forms (A225), and a gate now fails the build on any more. **Status:** Next sweep not yet chosen. |
 
@@ -37,6 +36,7 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| A227 | **A deleted promo code can be added back: live.** In the admin, add CONGRATSMYA again with the settings you want; it comes back switched on with a use count of nought. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
